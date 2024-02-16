@@ -7,9 +7,9 @@
 ## The Experiment Protocol
 
 - Embed reactants, reagents, solvents, auxiliaries, comments, products, images and files in the sequence of your workflow.
-- Protocol materials automatically perform stoichiometric context and yield calculations.
-- Reference reactant and product draw their molecular weights directly from the reaction sketch.
-- A self learning materials database (see below) allows for the fluent entry of reagents, solvents and auxiliaries. There's need no to look up properties like molecular weights once you have entered a material for the first time.
+- Protocol materials are supplied with stoichiometric data (equivalents & mmols) when added to the protocol.
+- Reference reactant and product obtain their molecular weights directly from the reaction sketch.
+- A self learning materials database (see below) allows for the fluent entry of reagents, solvents and auxiliaries. There's need no to look up properties like molecular weights and/or densities once you have entered a material for the first time.
 - Rearrange all protocol elements via drag & drop.
 - Insert or append elements.
 - Switch between lab view (weights/volumes first) and design view (equivalents first).
