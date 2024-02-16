@@ -285,25 +285,25 @@ project Flags=0x20 {
 			str Value: Default="Phoenix ELN-0.9.1-Setup";
 		}
 		var BuildDate: Flags=0x5, Type=0, Description="Build date as YYYYMMDD" {
-			str Value: Default=20240215;
+			str Value: Default=20240216;
 		}
 		var BuildDayNo: Flags=0x5, Type=0, Description="Build day number, starting from 1 January 2000" {
-			str Value: Default=8812;
+			str Value: Default=8813;
 		}
 		var BuildFolder: Flags=0x5, Type=1, Description="Folder containing the build target" {
-			str Value: Default="F:\\Benutzer\\Stefan\\Documents\\WPF_Projekte\\Phoenix ELN\\Deployment\\Phoenix ELN\\Phoenix ELN";
+			str Value: Default="F:\\Benutzer\\Stefan\\Documents\\WPF_Projekte\\Phoenix ELN\\Deployment\\Phoenix ELN\\Phoenix-ELN";
 		}
 		var BuildName: Flags=0x5, Type=0, Description="Build configuration name" {
-			str Value: Default="Phoenix ELN";
+			str Value: Default="Phoenix-ELN";
 		}
 		var BuildSerial: Flags=0x2005, Type=0, Description="Builder\'s registration code" {
 			str Value: Default="Serial# C9E5D07AFA20E6D5-04010108";
 		}
 		var BuildTarget: Flags=0x5, Type=1, Description="Build target file path" {
-			str Value: Default="F:\\Benutzer\\Stefan\\Documents\\WPF_Projekte\\Phoenix ELN\\Deployment\\Phoenix ELN\\Phoenix ELN\\Phoenix ELN-0.9.1-Setup.exe";
+			str Value: Default="F:\\Benutzer\\Stefan\\Documents\\WPF_Projekte\\Phoenix ELN\\Deployment\\Phoenix ELN\\Phoenix-ELN\\Phoenix ELN-0.9.1-Setup.exe";
 		}
 		var BuildTime: Flags=0x5, Type=0, Description="Build time as HHMMSS" {
-			str Value: Default=170916;
+			str Value: Default=061429;
 		}
 		var BuildType: Flags=0x5, Type=0, Description="Build type: always TSU" {
 			str Value: Default=TSU;
@@ -599,7 +599,7 @@ project Flags=0x20 {
 			str Value: Default="<MSOfficeDir14=MSOfficeDir12=MSOfficeDir11=MSOfficeDir10=MSOfficeDir9=MSOfficeDir8=!<ProgramFilesFolder>\\Microsoft Office\\Office>";
 		}
 		var PackageCode: Flags=0x205, Type=0, Description="Distribution package GUID" {
-			str Value: Default="{5D073FDA-8660-4F7D-6564-5965D82825EC}";
+			str Value: Default="{B55FAF0B-A8C6-42FA-68E3-77C33070B53D}";
 		}
 		var PersonalFolder: Flags=0x244, Type=1, Description="Current User Documents folder" {
 			str Value: Default="<$shpath(5)=@<ShellFoldersCU>\\Personal=_LocPersonalFolder>";
@@ -633,7 +633,7 @@ project Flags=0x20 {
 			str Value: Default="<UILangID>";
 		}
 		var ProductName: Flags=0x204, Type=0, Description="Product name" {
-			str Value: Default="Phoenix ELN";
+			str Value: Default="Phoenix-ELN";
 		}
 		var ProductVersion: Flags=0x204, Type=0, Description="Product version" {
 			str Value: Default="0.9.1";
@@ -770,7 +770,7 @@ project Flags=0x20 {
 			str Value: Default="<$sysval(4)>";
 		}
 		var SessionID: Flags=0x204, Type=0, Description="Pseudo-random 8-character session identifier" {
-			str Value: Default="313010DB";
+			str Value: Default=DF26891F;
 		}
 		var ShellFoldersCU: Flags=0x20C, Type=2, Description="Current User Shell folders registry key" {
 			str Value: Default="<HKCU>\\<WinCurVer>\\Explorer\\Shell Folders";
