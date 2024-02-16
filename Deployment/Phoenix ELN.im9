@@ -10,7 +10,7 @@ project Flags=0x20 {
 		language __label="Englisch (Vereinigte Staaten)", ID=1033;
 	}
 	configs {
-		config __label="Phoenix ELN", Flags=0x453, LangMode=2, Languages="0=", InstallName="<ProductName>-<ProductVersion>-Setup.exe", BuildFolder="<ProjectFolder>\\<ProjectName>\\<BuildName>", PasswordFlags=0x0, IconPath=blankcd.ico, ManifestType=1, ManifestPath="<ProjectFolder>\\<ProjectName>\\<BuildName>(<ProductVersion>)-Manifest.xml", PackListPath="<ProjectFolder>\\<ProjectName>\\<BuildName>(<ProductVersion>)-PackList.txt", ReportType=0, ReportPath="<ProjectFolder>\\<ProjectName>\\<BuildName>(<ProductVersion>)-Contents.rtf", TsuType=0, Compressor=0, CompressLevel=5, Packaging=0, DiskSpan=0, FileVersion=0, SpanSize=1073741824, FirstSpanReserve=0 {
+		config __label="Phoenix-ELN", Flags=0x453, LangMode=2, Languages="0=", InstallName="<ProductName>-<ProductVersion>-Setup.exe", BuildFolder="<ProjectFolder>\\<ProjectName>\\<BuildName>", PasswordFlags=0x0, IconPath=blankcd.ico, ManifestType=1, ManifestPath="<ProjectFolder>\\<ProjectName>\\<BuildName>(<ProductVersion>)-Manifest.xml", PackListPath="<ProjectFolder>\\<ProjectName>\\<BuildName>(<ProductVersion>)-PackList.txt", ReportType=0, ReportPath="<ProjectFolder>\\<ProjectName>\\<BuildName>(<ProductVersion>)-Contents.rtf", TsuType=0, Compressor=0, CompressLevel=5, Packaging=0, DiskSpan=0, FileVersion=0, SpanSize=1073741824, FirstSpanReserve=0 {
 			LogFilter MinLevel=4, Flags=0x100FC, LogAlways="BLD:Q0085", LogNever="BLD:I0027,BLD:Q0076,BLD:Q0081,BLD:Q0091";
 			SignCode2 SignSHA1=1, SignSHA2=0, Verbose=1, Debug=1, ShowConsole=1, Timestamp=1, Timestamp3161=1, CertType=0, TimestampURL="http://timestamp.digicert.com", Timestamp3161URL="http://timestamp.digicert.com";
 		}
@@ -5520,6 +5520,10 @@ project Flags=0x20 {
 				str DisplayName: Flags=0x40000, Default=Dropped_20240215170855;
 				str Description: Flags=0x40000;
 			}
+			component Watch_20240216075527: Flags=0x0, Platforms=0x7FFFFFFF, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
+				str DisplayName: Flags=0x40000, Default=Watch_20240216075527;
+				str Description: Flags=0x40000;
+			}
 		}
 		component Folder1_A8A264769C3704B4: Flags=0x0, Platforms=0x7FFFFFFF, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
 			str DisplayName: Flags=0x40000, Default=Folder1_Files;
@@ -5832,22 +5836,22 @@ project Flags=0x20 {
 			folder INSTALLDIR: Flags=0x0, Traits=0x80000000, InstallAction=0, RemoveAction=1 {
 				str Name: Default="<ProductName>";
 				wlist Watchlist_FF5B2057B5E221F6: Flags=0xE000003F, Path="..\\ELN-Main\\bin\\Release\\Publish", Filter="*.*", Exclude="*.bak;*.tmp;*.lnk;*.log;*.acl;*.gid;*.fts;*.pnf;*.oca;*.scc;*.$*;*.~*;.svn";
-				file CustomControls.dll.config_00444E05208FE4BB: Flags=0x0, Component=Dropped_20240215170855, Path="..\\ELN-Main\\bin\\Release\\Publish\\CustomControls.dll.config", Attributes=0x0, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
+				file CustomControls.dll.config_00444E05208FE4BB: Flags=0x0, Component=Watch_20240216075527, Path="..\\ELN-Main\\bin\\Release\\Publish\\CustomControls.dll.config", Attributes=0x0, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
 					str Name: Default=CustomControls.dll.config;
 				}
-				file CustomControls.pdb_FFB8ABFCA880C1B6: Flags=0x0, Component=Dropped_20240215170855, Path="..\\ELN-Main\\bin\\Release\\Publish\\CustomControls.pdb", Attributes=0x0, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
+				file CustomControls.pdb_FFB8ABFCA880C1B6: Flags=0x0, Component=Watch_20240216075527, Path="..\\ELN-Main\\bin\\Release\\Publish\\CustomControls.pdb", Attributes=0x0, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
 					str Name: Default=CustomControls.pdb;
 				}
-				file D3DCompiler_47_cor3.dll_E52B9B636C2272F1: Flags=0x0, Component=Dropped_20240215170855, Path="..\\ELN-Main\\bin\\Release\\Publish\\D3DCompiler_47_cor3.dll", Attributes=0x0, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
+				file D3DCompiler_47_cor3.dll_E52B9B636C2272F1: Flags=0x0, Component=Watch_20240216075527, Path="..\\ELN-Main\\bin\\Release\\Publish\\D3DCompiler_47_cor3.dll", Attributes=0x0, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
 					str Name: Default=D3DCompiler_47_cor3.dll;
 				}
-				file e_sqlite3.dll_C5C0B5D547CAA173: Flags=0x0, Component=Dropped_20240215170855, Path="..\\ELN-Main\\bin\\Release\\Publish\\e_sqlite3.dll", Attributes=0x0, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+				file e_sqlite3.dll_C5C0B5D547CAA173: Flags=0x0, Component=Watch_20240216075527, Path="..\\ELN-Main\\bin\\Release\\Publish\\e_sqlite3.dll", Attributes=0x0, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
 					str Name: Default=e_sqlite3.dll;
 				}
-				file ElnBase.pdb_39F2C8A9119685D1: Flags=0x0, Component=Dropped_20240215170855, Path="..\\ELN-Main\\bin\\Release\\Publish\\ElnBase.pdb", Attributes=0x0, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
+				file ElnBase.pdb_39F2C8A9119685D1: Flags=0x0, Component=Watch_20240216075527, Path="..\\ELN-Main\\bin\\Release\\Publish\\ElnBase.pdb", Attributes=0x0, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
 					str Name: Default=ElnBase.pdb;
 				}
-				file ElnCoreModel.pdb_825DE769278299F4: Flags=0x0, Component=Dropped_20240215170855, Path="..\\ELN-Main\\bin\\Release\\Publish\\ElnCoreModel.pdb", Attributes=0x0, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
+				file ElnCoreModel.pdb_825DE769278299F4: Flags=0x0, Component=Watch_20240216075527, Path="..\\ELN-Main\\bin\\Release\\Publish\\ElnCoreModel.pdb", Attributes=0x0, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
 					str Name: Default=ElnCoreModel.pdb;
 				}
 				folder Folder1_40053762E24C7C21: Flags=0x0, Component="Phoenix ELN Install Files", Traits=0x80000000, InstallAction=0, RemoveAction=1 {
@@ -5874,25 +5878,25 @@ project Flags=0x20 {
 						str Name: Default=Readme.txt;
 					}
 				}
-				file PenImc_cor3.dll_633D865A844398FD: Flags=0x0, Component=Dropped_20240215170855, Path="..\\ELN-Main\\bin\\Release\\Publish\\PenImc_cor3.dll", Attributes=0x0, InstallAction=4, RemoveAction=2, Registration=1, RegOrder=1000, Packaging=0 {
+				file PenImc_cor3.dll_633D865A844398FD: Flags=0x0, Component=Watch_20240216075527, Path="..\\ELN-Main\\bin\\Release\\Publish\\PenImc_cor3.dll", Attributes=0x0, InstallAction=4, RemoveAction=2, Registration=1, RegOrder=1000, Packaging=0 {
 					str Name: Default=PenImc_cor3.dll;
 				}
-				file PhoenixELN.dll.config_A24DEB8BD158AF79: Flags=0x0, Component=Dropped_20240215170855, Path="..\\ELN-Main\\bin\\Release\\Publish\\PhoenixELN.dll.config", Attributes=0x0, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
+				file PhoenixELN.dll.config_A24DEB8BD158AF79: Flags=0x0, Component=Watch_20240216075527, Path="..\\ELN-Main\\bin\\Release\\Publish\\PhoenixELN.dll.config", Attributes=0x0, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
 					str Name: Default=PhoenixELN.dll.config;
 				}
-				file PhoenixELN.exe_03B5412C1540DD20: Flags=0x0, Component=Dropped_20240215170855, Path="..\\ELN-Main\\bin\\Release\\Publish\\PhoenixELN.exe", Attributes=0x0, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=2000, Packaging=0 {
+				file PhoenixELN.exe_03B5412C1540DD20: Flags=0x0, Component=Watch_20240216075527, Path="..\\ELN-Main\\bin\\Release\\Publish\\PhoenixELN.exe", Attributes=0x0, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=2000, Packaging=0 {
 					str Name: Default=PhoenixELN.exe;
 				}
-				file PhoenixELN.pdb_D6E580F012F75184: Flags=0x0, Component=Dropped_20240215170855, Path="..\\ELN-Main\\bin\\Release\\Publish\\PhoenixELN.pdb", Attributes=0x0, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
+				file PhoenixELN.pdb_D6E580F012F75184: Flags=0x0, Component=Watch_20240216075527, Path="..\\ELN-Main\\bin\\Release\\Publish\\PhoenixELN.pdb", Attributes=0x0, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
 					str Name: Default=PhoenixELN.pdb;
 				}
-				file PresentationNative_cor3.dll_D88C1C42A2CCA390: Flags=0x0, Component=Dropped_20240215170855, Path="..\\ELN-Main\\bin\\Release\\Publish\\PresentationNative_cor3.dll", Attributes=0x0, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+				file PresentationNative_cor3.dll_D88C1C42A2CCA390: Flags=0x0, Component=Watch_20240216075527, Path="..\\ELN-Main\\bin\\Release\\Publish\\PresentationNative_cor3.dll", Attributes=0x0, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
 					str Name: Default=PresentationNative_cor3.dll;
 				}
-				file vcruntime140_cor3.dll_0D7E982A9183EE66: Flags=0x0, Component=Dropped_20240215170855, Path="..\\ELN-Main\\bin\\Release\\Publish\\vcruntime140_cor3.dll", Attributes=0x0, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
+				file vcruntime140_cor3.dll_0D7E982A9183EE66: Flags=0x0, Component=Watch_20240216075527, Path="..\\ELN-Main\\bin\\Release\\Publish\\vcruntime140_cor3.dll", Attributes=0x0, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
 					str Name: Default=vcruntime140_cor3.dll;
 				}
-				file wpfgfx_cor3.dll_56B33718D73573B6: Flags=0x0, Component=Dropped_20240215170855, Path="..\\ELN-Main\\bin\\Release\\Publish\\wpfgfx_cor3.dll", Attributes=0x0, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+				file wpfgfx_cor3.dll_56B33718D73573B6: Flags=0x0, Component=Watch_20240216075527, Path="..\\ELN-Main\\bin\\Release\\Publish\\wpfgfx_cor3.dll", Attributes=0x0, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
 					str Name: Default=wpfgfx_cor3.dll;
 				}
 			}
@@ -6395,7 +6399,7 @@ project Flags=0x20 {
 					xlat ID=1033 {"Click Finish to close <UIWizardName>."}
 				}
 			}
-			frame BottomLine: Flags=0xB, ControlID=Automatic, Position="0,144,331,144", IconSize=0, TextColor=0, BackColor=0, CustomTextColor=0x0, CustomBackColor=0x0, FrameType=7, BackEndColor=0, CustomBackEndColor=0x0;
+			frame BottomLine: Flags=0xB, ControlID=Automatic, Position="0,144,331,145", IconSize=0, TextColor=0, BackColor=0, CustomTextColor=0x0, CustomBackColor=0x0, FrameType=7, BackEndColor=0, CustomBackEndColor=0x0;
 			button BackBtn: Flags=0x5, ControlID=IDBACK, Position="158,150,208,164", IconSize=0, TextColor=0, BackColor=0, CustomTextColor=0x0, CustomBackColor=0x0, ContentType=0, HAlign=0, VAlign=0 {
 				str Caption: Flags=0x50000, PhraseID=Button.Back, Default="< &Back" {
 					xlat ID=1033 {"< &Back"}
