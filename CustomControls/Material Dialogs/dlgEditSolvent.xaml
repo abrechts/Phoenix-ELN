@@ -1,0 +1,130 @@
+﻿<Window x:Class="dlgEditSolvent"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:custom="clr-namespace:CustomControls"
+        mc:Ignorable="d"       
+        Title="" Width="360" WindowStartupLocation="CenterOwner" ShowInTaskbar="False" Foreground="White" 
+        Background="dimgray" SizeToContent="Height" ResizeMode="NoResize" WindowStyle="None" Margin="0,0,0,1">
+
+    <Window.Resources>
+
+        <Style x:Key="numBoxStyle" TargetType="custom:NumericTextBox">
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="MinWidth" Value="40"/>
+            <Setter Property="MaxLength" Value="5"/>
+            <Setter Property="Padding" Value="2"/>
+        </Style>
+
+        <Style TargetType="ComboBoxItem">
+            <Setter Property="Padding" Value="10,2"/>
+            <Setter Property="Margin" Value="2,1"/>
+            <Setter Property="MinWidth" Value="50"/>
+        </Style>
+        
+        <custom:MatPropertyValConverter x:Key="MatPropertyValConv"/>
+        <custom:IntegerToVisibilityConverter x:Key="IntToVisConv"/>
+
+        <Style x:Key="ComboBoxVisMolar" TargetType="ComboBoxItem">
+            <Setter Property="Margin" Value="2,2"/>
+            <Setter Property="MinWidth" Value="50"/>
+            <Setter Property="Visibility" 
+               Value="{Binding ElementName=cboMwMolarity, Path=SelectedIndex,Converter={StaticResource IntToVisConv}}"/>
+        </Style>
+
+        <Style x:Key="ComboBoxVisMW" TargetType="ComboBoxItem">
+            <Setter Property="Margin" Value="2,2"/>
+            <Setter Property="MinWidth" Value="50"/>
+            <Setter Property="Visibility" 
+                Value="{Binding ElementName=cboMwMolarity, Path=SelectedIndex,Converter={StaticResource IntToVisConv},
+                  ConverterParameter=invert}"/>
+        </Style>
+
+    </Window.Resources>
+
+    <Grid>
+
+        <StackPanel Margin="25,10,25,16">
+
+            <DockPanel>
+
+                <TextBlock x:Name="blkTitle" Text="Solvent:" FontWeight="DemiBold" FontSize="13"/>
+
+                <Border x:Name="pnlValidated" HorizontalAlignment="Right" CornerRadius="4" BorderBrush="#FFC8C4C4" BorderThickness="1"
+                    ToolTip="Predefined material with confirmed density." Background="#FF8B8B8B"
+                    d:Visibility="Visible" Visibility="Hidden" ToolTipService.InitialShowDelay="500">
+                    <TextBlock x:Name="blkValidatedTitle" d:Text="Preset" Margin="4,0,6,1" FontStyle="Italic"/>
+                </Border>
+
+            </DockPanel>
+
+            <Rectangle HorizontalAlignment="Stretch" Fill="White" Height="1" Margin="0,4,0,12"/>
+
+            <StackPanel Orientation="Horizontal">
+
+                <custom:NumericTextBox x:Name="numMatAmount" Style="{StaticResource numBoxStyle}" HorizontalContentAlignment="Center" 
+                      PositiveNumbersOnly="true" d:Text="3.5" Margin="0,0,1,0" Padding="2" TabIndex="0"/>
+
+                <custom:ComboPlus x:Name="cboMatUnit" VerticalContentAlignment="Center" Padding="6,0,2,1" d:SelectedIndex="0"
+                      CboBackground="whitesmoke" CornerRadius="0" TabIndex="1" IsTabStop="False" Margin="0,0,1,0" 
+                       MinWidth="44" >
+
+                    <ComboBoxItem Content="vq" Tag="volume equivalents/[ml solvent per g reactant]"/>
+                    <ComboBoxItem Content="mv" Tag="molar vol. equivalents/[ml solvent per mmol reactant]"/>
+
+                    <Separator/>
+
+                    <ComboBoxItem Content="L"/>
+                    <ComboBoxItem Content="mL"/>
+                    <ComboBoxItem Content="µL"/>
+
+                </custom:ComboPlus>
+
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock x:Name="blkUnitInfo" d:Text="volume equivalents" Margin="6,0,6,2" VerticalAlignment="Center"/>
+                    <ContentControl x:Name="icoInfo" Content="{StaticResource icoInfoDark}" Height="12" Opacity="0.9"
+                       ToolTipService.InitialShowDelay="400"/>
+                </StackPanel>
+
+            </StackPanel>
+
+            <custom:SearchCombo x:Name="cboSearch" SearchPropertyName="MatName" FontFamily="Comic Sans MS" Foreground="blue"
+                IsTabStop="true" TabIndex="2" Margin="0,4,0,0" d:Text="Methanol" />
+
+            <CheckBox x:Name="chkConvertVolWeight" Content="Display as Weight" Foreground="white" Margin="0,8,0,0" 
+                       HorizontalAlignment="Left" VerticalAlignment="center" TabIndex="5"/>
+
+            <Rectangle HorizontalAlignment="Stretch" Fill="White" Height="1" Margin="0,12,0,6"/>
+
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,8" HorizontalAlignment="Center">
+
+                <StackPanel Margin="0,6,0,3" >
+                    <TextBlock Text="Density" Margin="0,0,0,3" />
+                    <custom:NumericTextBox x:Name="numDensity" Style="{StaticResource numBoxStyle}" PositiveNumbersOnly="true" 
+                        Margin="0,0,4,0" d:Text="1.25" TabIndex="3"/>
+                </StackPanel>
+
+                <StackPanel Margin="10,6,0,6" >
+                    <TextBlock Text="Supplier ID:" Margin="0,0,0,2"/>
+                    <TextBox x:Name="txtSupplier" Foreground="#FF1C1C1C" MaxLength="40" Width="200" Padding="1,2,0,2" 
+                            FontFamily="Comic Sans MS" d:Text="Merck 234'5643" HorizontalAlignment="Left" TabIndex="4" />
+                </StackPanel>
+
+            </StackPanel>
+
+            <Rectangle HorizontalAlignment="Stretch" Fill="White" Height="1" Margin="0,6,0,18"/>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button x:Name="btnOk" Content="OK" HorizontalAlignment="Left" VerticalAlignment="Top" Width="70" 
+                                Padding="0,3" Margin="0,0,16,0"/>
+                <Button x:Name="btnCancel" Content="Cancel" HorizontalAlignment="Left" VerticalAlignment="Top" 
+                                Width="70" Padding="0,3" />
+            </StackPanel>
+
+        </StackPanel>
+
+    </Grid>
+
+</Window>

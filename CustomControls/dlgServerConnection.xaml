@@ -1,0 +1,71 @@
+﻿<Window x:Class="dlgServerConnection"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    mc:Ignorable="d" 
+    Title="ELN Server Login" Width="426"  ShowInTaskbar="False" 
+    ResizeMode="NoResize" TextOptions.TextFormattingMode="Display" FontSize="12" WindowStartupLocation="CenterOwner" SizeToContent="Height">
+
+    <Grid >
+
+        <Separator VerticalAlignment="Top"/>
+
+        <ContentControl Content="{StaticResource icoDatabaseRunning}" Height="36" HorizontalAlignment="Left" Margin="16,22,0,0" VerticalAlignment="Top"/>
+
+        <StackPanel Margin="76,16,0,20" Orientation="Vertical">
+            
+            <TextBlock HorizontalAlignment="Left" Text="Phoenix ELN Server Login" VerticalAlignment="Top" FontWeight="Bold" 
+               FontSize="14" Foreground="#FF3C3C3C" FontStyle="Italic" />
+            <TextBlock x:Name="blkInfo" HorizontalAlignment="Left" Margin="0,7,0,6" LineStackingStrategy="BlockLineHeight" LineHeight="14" 
+                VerticalAlignment="Top" Width="287" TextWrapping="Wrap" 
+                Text="The connection to the Phoenix ELN server allows the synchronization of your experiment data with the server database, for backup and sharing. "/>
+
+            <TextBlock Text="No server installed so far?"/>
+
+            <TextBlock x:Name="lnkDownload" Margin="0,-2,22,18" HorizontalAlignment="Left"  Text="Download ELN server package" Foreground="blue" 
+                Cursor="Hand" TextDecorations="Underline" VerticalAlignment="Center" FontSize="12.5" />
+            
+            <StackPanel Orientation="Horizontal">
+                <TextBlock HorizontalAlignment="Left" Margin="0" Text="Server Name:" Width="80" FontWeight="Normal" FontStyle="Italic" />
+                <TextBox x:Name="txtServerPath" Width="190" HorizontalAlignment="Left"  BorderThickness="1" ClipToBounds="True" BorderBrush="Gray" Height="21" VerticalAlignment="Top" TabIndex="0" />
+            </StackPanel>
+            
+            <StackPanel Orientation="Horizontal" Margin="-1,6,0,0">
+                <TextBlock HorizontalAlignment="Left" Text="Port:" Width="82" FontStyle="Italic" />
+                <StackPanel Orientation="Horizontal">
+                    <RadioButton x:Name="rdoDefaultPort" Margin="0,0,16,0" IsChecked="true" VerticalContentAlignment="Center" IsTabStop="False"/>
+                    <RadioButton x:Name="rdoCustomPort" Content="Custom" Margin="0,0,4,0" VerticalContentAlignment="Center" IsTabStop="false"/>
+                    <TextBox x:Name="txtCustomPort" Width="50" Text="3306"/>
+                </StackPanel>
+            </StackPanel>
+            
+            <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                <TextBlock HorizontalAlignment="Left" Text="User-ID:" Width="80" FontStyle="Italic" />
+                <TextBox x:Name="txtUserID" Width="190" HorizontalAlignment="Left" VerticalAlignment="Top"  BorderBrush="Gray" Padding="0,1" TabIndex="1" />
+            </StackPanel>
+            
+            <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                <TextBlock HorizontalAlignment="Left" Margin="0" Name="TextBlock3" Text="Password:" VerticalAlignment="Top" Width="80" FontStyle="Italic" />
+                <PasswordBox x:Name="txtPassword" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top" Width="190" 
+                    BorderBrush="Gray" Padding="0,1" TabIndex="2" />
+            </StackPanel>
+
+            <Separator Margin="0,16,12,14" />
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="center" Margin="-16,0,0,0">
+
+                <Button x:Name="btnOK" Content="Connect" Padding="2" VerticalAlignment="Center" Width="74" IsDefault="True" IsTabStop="False"/>
+
+                <Button x:Name="btnCancel" Content="Cancel" Padding="2" HorizontalAlignment="Left" IsDefault="False" Margin="30,0,0,0"
+                     VerticalAlignment="Center" Width="72" IsCancel="True" IsTabStop="False"/>
+
+                <Button x:Name="btnDisconnect" Content="Disconnect" Margin="30,0,0,0" VerticalAlignment="Center" Background="White" HorizontalAlignment="Left"
+                   ToolTip="Remove server connection" Width="88" Padding="2,2,2,3" VerticalContentAlignment="Center" IsTabStop="false"/>
+
+            </StackPanel>
+
+        </StackPanel>
+
+    </Grid>
+</Window>

@@ -1,0 +1,412 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="Sqlite" id="Project-1621" database="Sqlite" >
+	<schema name="Default" >
+		<table name="sync_Tombstone" >
+			<comment><![CDATA[Contains a list of deleted items, to be removed during next sync.]]></comment>
+			<column name="GUID" type="VARCHAR" length="36" jt="12" mandatory="y" />
+			<column name="DatabaseInfoID" prior="DatabaseID" type="VARCHAR" length="36" jt="12" mandatory="y" />
+			<column name="TableName" type="VARCHAR" length="50" jt="12" mandatory="y" />
+			<column name="PrimaryKeyVal" type="VARCHAR" length="50" jt="12" mandatory="y" />
+			<column name="SyncState" type="TINYINT" jt="-6" >
+				<defo><![CDATA[0]]></defo>
+			</column>
+			<index name="pk_sync_Tombstone" unique="PRIMARY_KEY" >
+				<column name="GUID" />
+			</index>
+			<fk name="fk_sync_tombstone" to_schema="Default" to_table="tblDatabaseInfo" delete_action="cascade" >
+				<fk_column name="DatabaseInfoID" pk="GUID" />
+			</fk>
+		</table>
+		<table name="tblAuxiliaries" spec="" >
+			<column name="GUID" type="VARCHAR" length="36" jt="12" mandatory="y" />
+			<column name="ProtocolItemID" type="VARCHAR" length="36" jt="12" mandatory="y" />
+			<column name="SpecifiedUnitType" type="INTEGER" jt="4" mandatory="y" />
+			<column name="IsDisplayAsVolume" type="TINYINT" jt="-6" mandatory="y" >
+				<defo><![CDATA[0]]></defo>
+			</column>
+			<column name="Name" type="VARCHAR" length="50" jt="12" mandatory="y" />
+			<column name="Source" type="VARCHAR" length="40" jt="12" />
+			<column name="Grams" type="REAL" jt="8" mandatory="y" />
+			<column name="Equivalents" type="REAL" jt="8" mandatory="y" />
+			<column name="Density" type="REAL" jt="8" />
+			<column name="SyncState" type="TINYINT" jt="-6" >
+				<defo><![CDATA[0]]></defo>
+			</column>
+			<index name="pk_tblAuxiliaries" unique="PRIMARY_KEY" >
+				<column name="GUID" />
+			</index>
+			<index name="unq_tblAuxiliaries" unique="UNIQUE_INDEX" >
+				<column name="ProtocolItemID" />
+			</index>
+			<fk name="Fk" to_schema="Default" to_table="tblProtocolItems" delete_action="cascade" >
+				<fk_column name="ProtocolItemID" pk="GUID" />
+			</fk>
+		</table>
+		<table name="tblComments" spec="" >
+			<column name="GUID" type="VARCHAR" length="36" jt="12" mandatory="y" />
+			<column name="ProtocolItemID" type="VARCHAR" length="36" jt="12" mandatory="y" />
+			<column name="CommentFlowDoc" type="MEDIUMTEXT" jt="-1" />
+			<column name="SyncState" type="TINYINT" jt="-6" >
+				<defo><![CDATA[0]]></defo>
+			</column>
+			<index name="pk_tblComments" unique="PRIMARY_KEY" >
+				<column name="GUID" />
+			</index>
+			<index name="unq_tblComments" unique="UNIQUE_INDEX" >
+				<column name="ProtocolItemID" />
+			</index>
+			<fk name="FK_tblComments tblProtocolItems" to_schema="Default" to_table="tblProtocolItems" delete_action="cascade" >
+				<fk_column name="ProtocolItemID" pk="GUID" />
+			</fk>
+		</table>
+		<table name="tblDatabaseInfo" spec="" >
+			<column name="GUID" type="VARCHAR" length="36" jt="12" mandatory="y" />
+			<column name="CurrAppVersion" type="VARCHAR" length="16" jt="12" />
+			<column name="CompanyLogo" type="BLOB" jt="2004" />
+			<column name="LastSyncID" type="VARCHAR" length="36" jt="12" />
+			<column name="LastSyncTime" type="VARCHAR" length="30" jt="12" />
+			<column name="SyncState" type="TINYINT" jt="-6" >
+				<defo><![CDATA[0]]></defo>
+			</column>
+			<index name="pk_tblDatabaseInfo" unique="PRIMARY_KEY" >
+				<column name="GUID" />
+			</index>
+		</table>
+		<table name="tblEmbeddedFiles" >
+			<column name="GUID" type="VARCHAR" length="36" jt="12" mandatory="y" />
+			<column name="ProtocolItemID" type="VARCHAR" length="36" jt="12" mandatory="y" />
+			<column name="FileType" type="INTEGER" jt="4" mandatory="y" >
+				<comment><![CDATA[0: Document
+1: Image]]></comment>
+			</column>
+			<column name="FileName" type="VARCHAR" length="50" jt="12" mandatory="y" />
+			<column name="FileBytes" type="BLOB" jt="2004" mandatory="y" />
+			<column name="FileSizeMB" type="REAL" jt="8" />
+			<column name="FileComment" prior="FileTitle" type="TEXT" jt="-1" mandatory="y" />
+			<column name="SHA256Hash" type="VARCHAR" length="64" jt="12" />
+			<column name="IconImage" type="BLOB" jt="2004" />
+			<column name="IsPortraitMode" prior="IsImageVertical" type="TINYINT" jt="-6" >
+				<defo><![CDATA[0]]></defo>
+			</column>
+			<column name="IsRotated" type="TINYINT" jt="-6" >
+				<defo><![CDATA[0]]></defo>
+			</column>
+			<column name="SyncState" type="TINYINT" jt="-6" >
+				<defo><![CDATA[0]]></defo>
+			</column>
+			<index name="pk_tblEmbeddedFiles" unique="PRIMARY_KEY" >
+				<column name="GUID" />
+			</index>
+			<index name="idx_tblEmbeddedFiles" unique="UNIQUE_INDEX" >
+				<column name="ProtocolItemID" />
+			</index>
+			<index name="pk_tblEmbeddedFiles" unique="PRIMARY_KEY" >
+				<column name="GUID" />
+			</index>
+			<fk name="fk_tblembeddedfiles" to_schema="Default" to_table="tblProtocolItems" delete_action="cascade" >
+				<fk_column name="ProtocolItemID" pk="GUID" />
+			</fk>
+		</table>
+		<table name="tblExperiments" spec="" >
+			<column name="ExperimentID" type="VARCHAR" length="25" jt="12" mandatory="y" />
+			<column name="UserID" type="VARCHAR" length="25" jt="12" mandatory="y" />
+			<column name="ProjectID" type="VARCHAR" length="36" jt="12" mandatory="y" />
+			<column name="IsDesignView" type="TINYINT" jt="-6" mandatory="y" >
+				<defo><![CDATA[0]]></defo>
+			</column>
+			<column name="IsCurrent" type="TINYINT" jt="-6" mandatory="y" >
+				<defo><![CDATA[0]]></defo>
+			</column>
+			<column name="RxnSketch" type="LONGTEXT" jt="-1" />
+			<column name="MDLRxnFileString" type="LONGTEXT" jt="-1" />
+			<column name="ReactantInChIKey" type="VARCHAR" length="27" jt="12" />
+			<column name="ProductInChIKey" type="VARCHAR" length="27" jt="12" />
+			<column name="WorkflowState" type="SMALLINT" jt="5" >
+				<defo><![CDATA[0]]></defo>
+			</column>
+			<column name="UserTag" type="SMALLINT" jt="5" >
+				<defo><![CDATA[0]]></defo>
+			</column>
+			<column name="Yield" type="REAL" jt="8" />
+			<column name="Purity" type="REAL" jt="8" />
+			<column name="RefReactantGrams" type="REAL" jt="8" />
+			<column name="RefReactantMMols" type="REAL" jt="8" />
+			<column name="RefYieldFactor" type="REAL" jt="8" mandatory="y" >
+				<defo><![CDATA[1]]></defo>
+				<comment><![CDATA[Defines the yield correction factor by stoichiometry. Default=1. For e.g. a dimerization the value is 0.5, for the monomerization of e.g. a trimer the value is 3.]]></comment>
+			</column>
+			<column name="CreationDate" type="VARCHAR" length="20" jt="12" />
+			<column name="FinalizeDate" type="VARCHAR" length="20" jt="12" />
+			<column name="DisplayIndex" type="SMALLINT" jt="5" />
+			<column name="IsNodeExpanded" type="TINYINT" jt="-6" >
+				<defo><![CDATA[0]]></defo>
+				<comment><![CDATA[Dummy field for preventing XAML binding errors.]]></comment>
+			</column>
+			<column name="SyncState" type="TINYINT" jt="-6" >
+				<defo><![CDATA[0]]></defo>
+			</column>
+			<index name="pk_tblExperiments" unique="PRIMARY_KEY" >
+				<column name="ExperimentID" />
+			</index>
+			<fk name="Fk_0" to_schema="Default" to_table="tblUsers" >
+				<fk_column name="UserID" pk="UserID" />
+			</fk>
+			<fk name="Fk_1" to_schema="Default" to_table="tblProjects" delete_action="cascade" >
+				<fk_column name="ProjectID" pk="GUID" />
+			</fk>
+		</table>
+		<table name="tblMaterials" spec="" >
+			<column name="GUID" type="VARCHAR" length="36" jt="12" mandatory="y" />
+			<column name="DatabaseID" type="VARCHAR" length="36" jt="12" mandatory="y" />
+			<column name="MatName" type="VARCHAR" length="150" jt="12" mandatory="y" />
+			<column name="MatSource" type="VARCHAR" length="100" jt="12" />
+			<column name="MatType" type="SMALLINT" jt="5" mandatory="y" />
+			<column name="Molweight" type="REAL" jt="8" >
+				<defo><![CDATA[(NULL)]]></defo>
+			</column>
+			<column name="Density" type="REAL" jt="8" >
+				<defo><![CDATA[(NULL)]]></defo>
+			</column>
+			<column name="Purity" type="REAL" jt="8" >
+				<defo><![CDATA[(NULL)]]></defo>
+			</column>
+			<column name="Molarity" type="REAL" jt="8" >
+				<defo><![CDATA[(NULL)]]></defo>
+			</column>
+			<column name="InChIKey" prior="InchiKey" type="VARCHAR" length="30" jt="12" />
+			<column name="IsValidated" type="TINYINT" jt="-6" >
+				<defo><![CDATA[0]]></defo>
+			</column>
+			<column name="SyncState" type="TINYINT" jt="-6" >
+				<defo><![CDATA[0]]></defo>
+			</column>
+			<index name="pk_tblMaterials" unique="PRIMARY_KEY" >
+				<column name="GUID" />
+			</index>
+			<index name="pk_tblMaterials" unique="PRIMARY_KEY" >
+				<column name="GUID" />
+			</index>
+			<index name="pk_tblMaterials" unique="PRIMARY_KEY" >
+				<column name="GUID" />
+			</index>
+			<index name="pk_tblMaterials" unique="PRIMARY_KEY" >
+				<column name="GUID" />
+			</index>
+			<fk name="FK_tblMaterials tblDatabaseInfo" to_schema="Default" to_table="tblDatabaseInfo" delete_action="cascade" options="" >
+				<fk_column name="DatabaseID" pk="GUID" />
+			</fk>
+		</table>
+		<table name="tblProducts" spec="" >
+			<column name="GUID" type="VARCHAR" length="36" jt="12" mandatory="y" />
+			<column name="ProtocolItemID" type="VARCHAR" length="36" jt="12" mandatory="y" />
+			<column name="ProductIndex" type="SMALLINT" jt="5" mandatory="y" >
+				<defo><![CDATA[0]]></defo>
+			</column>
+			<column name="Name" type="VARCHAR" length="50" jt="12" mandatory="y" />
+			<column name="Grams" type="REAL" jt="8" mandatory="y" />
+			<column name="MolecularWeight" type="REAL" jt="8" mandatory="y" />
+			<column name="Yield" type="REAL" jt="8" mandatory="y" />
+			<column name="ExactMass" type="REAL" jt="8" />
+			<column name="ElementalFormula" type="VARCHAR" length="50" jt="12" />
+			<column name="Purity" type="REAL" jt="8" />
+			<column name="ResinLoad" type="REAL" jt="8" />
+			<column name="BatchID" type="VARCHAR" length="40" jt="12" />
+			<column name="InChIKey" type="VARCHAR" length="27" jt="12" />
+			<column name="SyncState" type="TINYINT" jt="-6" >
+				<defo><![CDATA[0]]></defo>
+			</column>
+			<index name="pk_tblProducts" unique="PRIMARY_KEY" >
+				<column name="GUID" />
+			</index>
+			<index name="unq_tblProducts_ProtocolItemID" unique="UNIQUE_INDEX" >
+				<column name="ProtocolItemID" />
+			</index>
+			<fk name="Fk_2" to_schema="Default" to_table="tblProtocolItems" delete_action="cascade" >
+				<fk_column name="ProtocolItemID" pk="GUID" />
+			</fk>
+		</table>
+		<table name="tblProjects" spec="" >
+			<column name="GUID" type="VARCHAR" length="36" jt="12" mandatory="y" />
+			<column name="UserID" type="VARCHAR" length="25" jt="12" mandatory="y" />
+			<column name="Title" type="VARCHAR" length="100" jt="12" />
+			<column name="SequenceNr" type="INTEGER" jt="4" />
+			<column name="IsNodeExpanded" type="TINYINT" jt="-6" mandatory="y" >
+				<defo><![CDATA[0]]></defo>
+			</column>
+			<column name="SyncState" type="TINYINT" jt="-6" >
+				<defo><![CDATA[0]]></defo>
+			</column>
+			<index name="pk_tblProjects" unique="PRIMARY_KEY" >
+				<column name="GUID" />
+			</index>
+			<index name="pk_tblProjects_2" unique="UNIQUE_INDEX" >
+				<column name="GUID" />
+			</index>
+			<fk name="FK_tblProjects tblUsers" to_schema="Default" to_table="tblUsers" delete_action="cascade" >
+				<fk_column name="UserID" pk="UserID" />
+			</fk>
+		</table>
+		<table name="tblProtocolItems" spec="" >
+			<column name="GUID" type="VARCHAR" length="36" jt="12" mandatory="y" />
+			<column name="ExperimentID" type="VARCHAR" length="25" jt="12" mandatory="y" />
+			<column name="ElementType" type="SMALLINT" jt="5" mandatory="y" />
+			<column name="SequenceNr" type="SMALLINT" jt="5" />
+			<column name="TempInfo" type="TEXT" jt="-1" />
+			<column name="IsSelected" type="TINYINT" jt="-6" mandatory="y" >
+				<defo><![CDATA[0]]></defo>
+			</column>
+			<column name="SyncState" type="TINYINT" jt="-6" >
+				<defo><![CDATA[0]]></defo>
+			</column>
+			<index name="pk_tblProtocolItems" unique="PRIMARY_KEY" >
+				<column name="GUID" />
+			</index>
+			<index name="idx_tblProtocolItems" unique="NORMAL" >
+				<column name="ExperimentID" />
+			</index>
+			<fk name="FK_tblProtocolItems tblExperiments" to_schema="Default" to_table="tblExperiments" delete_action="cascade" >
+				<fk_column name="ExperimentID" pk="ExperimentID" />
+			</fk>
+		</table>
+		<table name="tblReagents" spec="" >
+			<column name="GUID" type="VARCHAR" length="36" jt="12" mandatory="y" />
+			<column name="ProtocolItemID" type="VARCHAR" length="36" jt="12" mandatory="y" />
+			<column name="SpecifiedUnitType" type="INTEGER" jt="4" mandatory="y" >
+				<defo><![CDATA[0]]></defo>
+			</column>
+			<column name="IsDisplayAsVolume" type="TINYINT" jt="-6" mandatory="y" >
+				<defo><![CDATA[0]]></defo>
+			</column>
+			<column name="MolecularWeight" type="REAL" jt="8" />
+			<column name="Name" type="VARCHAR" length="50" jt="12" mandatory="y" />
+			<column name="Source" type="VARCHAR" length="50" jt="12" />
+			<column name="Grams" type="REAL" jt="8" mandatory="y" />
+			<column name="MMols" type="REAL" jt="8" mandatory="y" />
+			<column name="Equivalents" type="REAL" jt="8" mandatory="y" />
+			<column name="Density" type="REAL" jt="8" />
+			<column name="Purity" type="REAL" jt="8" />
+			<column name="Molarity" type="REAL" jt="8" />
+			<column name="IsMolarity" type="TINYINT" jt="-6" mandatory="y" >
+				<defo><![CDATA[0]]></defo>
+			</column>
+			<column name="ResinLoad" type="REAL" jt="8" />
+			<column name="SyncState" type="TINYINT" jt="-6" >
+				<defo><![CDATA[0]]></defo>
+			</column>
+			<index name="pk_tblReagents" unique="PRIMARY_KEY" >
+				<column name="GUID" />
+			</index>
+			<index name="unq_tblReagents_ProtocolItemID" unique="UNIQUE_INDEX" >
+				<column name="ProtocolItemID" />
+			</index>
+			<fk name="FK_tblReagents tblProtocolItems" to_schema="Default" to_table="tblProtocolItems" delete_action="cascade" >
+				<fk_column name="ProtocolItemID" pk="GUID" />
+			</fk>
+		</table>
+		<table name="tblRefReactants" spec="" >
+			<column name="GUID" type="VARCHAR" length="36" jt="12" mandatory="y" />
+			<column name="ProtocolItemID" type="VARCHAR" length="36" jt="12" mandatory="y" />
+			<column name="SpecifiedUnitType" type="INTEGER" jt="4" mandatory="y" >
+				<defo><![CDATA[0]]></defo>
+			</column>
+			<column name="IsDisplayAsVolume" type="TINYINT" jt="-6" mandatory="y" >
+				<defo><![CDATA[0]]></defo>
+			</column>
+			<column name="Name" type="VARCHAR" length="50" jt="12" mandatory="y" />
+			<column name="Source" type="VARCHAR" length="40" jt="12" />
+			<column name="MolecularWeight" type="REAL" jt="8" mandatory="y" />
+			<column name="Grams" type="REAL" jt="8" mandatory="y" />
+			<column name="MMols" type="REAL" jt="8" mandatory="y" />
+			<column name="Equivalents" type="REAL" jt="8" mandatory="y" />
+			<column name="Density" type="REAL" jt="8" />
+			<column name="Purity" type="REAL" jt="8" />
+			<column name="ResinLoad" type="REAL" jt="8" />
+			<column name="InChIKey" type="VARCHAR" length="27" jt="12" />
+			<column name="SyncState" type="TINYINT" jt="-6" >
+				<defo><![CDATA[0]]></defo>
+			</column>
+			<index name="pk_tblRefReactants" unique="PRIMARY_KEY" >
+				<column name="GUID" />
+			</index>
+			<index name="unq_tblRefReactants" unique="UNIQUE_INDEX" >
+				<column name="ProtocolItemID" />
+			</index>
+			<fk name="Fk_3" to_schema="Default" to_table="tblProtocolItems" delete_action="cascade" >
+				<fk_column name="ProtocolItemID" pk="GUID" />
+			</fk>
+		</table>
+		<table name="tblSolvents" spec="" >
+			<column name="GUID" type="VARCHAR" length="36" jt="12" mandatory="y" />
+			<column name="ProtocolItemID" type="VARCHAR" length="36" jt="12" mandatory="y" />
+			<column name="SpecifiedUnitType" type="INTEGER" jt="4" mandatory="y" >
+				<defo><![CDATA[1]]></defo>
+			</column>
+			<column name="IsDisplayAsWeight" type="TINYINT" jt="-6" mandatory="y" >
+				<defo><![CDATA[0]]></defo>
+			</column>
+			<column name="Name" type="VARCHAR" length="50" jt="12" mandatory="y" />
+			<column name="Source" type="VARCHAR" length="40" jt="12" />
+			<column name="Milliliters" type="REAL" jt="8" mandatory="y" />
+			<column name="Density" type="REAL" jt="8" />
+			<column name="IsMolEquivalents" type="TINYINT" jt="-6" mandatory="y" >
+				<defo><![CDATA[0]]></defo>
+			</column>
+			<column name="Equivalents" type="REAL" jt="8" mandatory="y" />
+			<column name="SyncState" type="TINYINT" jt="-6" >
+				<defo><![CDATA[0]]></defo>
+			</column>
+			<index name="pk_tblSolvents" unique="PRIMARY_KEY" >
+				<column name="GUID" />
+			</index>
+			<index name="idx_tblSolvents" unique="UNIQUE_INDEX" >
+				<column name="ProtocolItemID" />
+			</index>
+			<fk name="Fk_4" to_schema="Default" to_table="tblProtocolItems" delete_action="cascade" >
+				<fk_column name="ProtocolItemID" pk="GUID" />
+			</fk>
+		</table>
+		<table name="tblUsers" spec="" >
+			<column name="UserID" type="VARCHAR" length="25" jt="12" mandatory="y" />
+			<column name="DatabaseID" type="VARCHAR" length="36" jt="12" mandatory="y" />
+			<column name="FirstName" type="VARCHAR" length="50" jt="12" />
+			<column name="LastName" type="VARCHAR" length="50" jt="12" />
+			<column name="CompanyName" type="VARCHAR" length="100" jt="12" />
+			<column name="DepartmentName" type="VARCHAR" length="100" jt="12" />
+			<column name="City" type="VARCHAR" length="50" jt="12" />
+			<column name="PWHash" type="VARCHAR" length="64" jt="12" />
+			<column name="PWHint" type="VARCHAR" length="80" jt="12" />
+			<column name="IsSpellCheckEnabled" type="TINYINT" jt="-6" mandatory="y" >
+				<defo><![CDATA[0]]></defo>
+			</column>
+			<column name="SyncState" type="TINYINT" jt="-6" >
+				<defo><![CDATA[0]]></defo>
+			</column>
+			<index name="pk_tblUsers" unique="PRIMARY_KEY" >
+				<column name="UserID" />
+			</index>
+			<fk name="FK_tblUsers tblDatabaseInfo_001" to_schema="Default" to_table="tblDatabaseInfo" delete_action="cascade" options="" >
+				<fk_column name="DatabaseID" pk="GUID" />
+			</fk>
+		</table>
+	</schema>
+	<layout name="Infrastructure" id="Layout-4c1" show_column_type="y" show_relation="cascade" >
+		<entity schema="Default" name="sync_Tombstone" color="3986C1" x="400" y="400" />
+		<entity schema="Default" name="tblDatabaseInfo" color="3986C1" x="48" y="48" />
+		<entity schema="Default" name="tblExperiments" color="3986C1" x="960" y="48" />
+		<entity schema="Default" name="tblMaterials" color="3986C1" x="80" y="336" />
+		<entity schema="Default" name="tblProjects" color="3986C1" x="672" y="48" />
+		<entity schema="Default" name="tblProtocolItems" color="3986C1" x="1008" y="464" />
+		<entity schema="Default" name="tblUsers" color="3986C1" x="368" y="48" />
+	</layout>
+	<layout name="Protocol Elements" id="Layout-16d" show_column_type="y" show_relation="cascade" >
+		<entity schema="Default" name="tblAuxiliaries" color="3986C1" x="592" y="368" />
+		<entity schema="Default" name="tblComments" color="3986C1" x="320" y="368" />
+		<entity schema="Default" name="tblEmbeddedFiles" color="C1D8EE" x="336" y="576" />
+		<entity schema="Default" name="tblProducts" color="3986C1" x="848" y="320" />
+		<entity schema="Default" name="tblProtocolItems" color="3986C1" x="48" y="256" />
+		<entity schema="Default" name="tblReagents" color="3986C1" x="592" y="48" />
+		<entity schema="Default" name="tblRefReactants" color="3986C1" x="320" y="64" />
+		<entity schema="Default" name="tblSolvents" color="3986C1" x="848" y="64" />
+	</layout>
+	<layout name="Sqlite" id="Layout-1015" show_relation="cascade" />
+</project>

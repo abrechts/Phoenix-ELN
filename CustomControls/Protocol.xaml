@@ -1,0 +1,135 @@
+﻿<UserControl x:Class="Protocol"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:CustomControls"
+             xmlns:base="clr-namespace:ElnCoreModel;assembly=ElnCoreModel"
+             xmlns:dd="clr-namespace:GongSolutions.Wpf.DragDrop;assembly=GongSolutions.Wpf.DragDrop"
+             xmlns:scm ="clr-namespace:System.ComponentModel;assembly=WindowsBase"
+             d:DataContext="{d:DesignInstance Type=base:tblExperiments}"
+             mc:Ignorable="d" 
+             FontSize="13.5" FontFamily="Calibri" TextOptions.TextFormattingMode="Display"
+             d:DesignHeight="250" d:DesignWidth="800">
+
+    <UserControl.Resources>
+
+        <local:ProtocolDropHandler x:Key="protDropHandler"/>
+        <local:IntegerToVisibilityConverter x:Key="intToVisConv"/>
+        <local:DefaultDragDropAdornerConverter x:Key="defaultAdornerConv"/>
+
+        <DataTemplate x:Key="protocolItem">
+            <local:ProtocolItemBase/>
+        </DataTemplate>
+
+        <!--automatically sorts the protocol items by ascending SequenceNr-->
+        <CollectionViewSource x:Key="ProtocolItemsView" Source="{Binding tblProtocolItems}" IsLiveSortingRequested="true">
+            <CollectionViewSource.SortDescriptions>
+                <scm:SortDescription PropertyName="SequenceNr" Direction="Ascending"/>
+            </CollectionViewSource.SortDescriptions>
+        </CollectionViewSource>
+
+        <Style x:Key="ProtocolListBoxItemStyle" TargetType="ListBoxItem">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="IsSelected" Value="{Binding IsSelected}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border Name="_Border"
+                                Margin="0"
+                                Padding="4,0,4,0"
+                                BorderThickness="2,0"
+                                SnapsToDevicePixels="true">
+                            <ContentPresenter />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="true">
+                                <Setter TargetName="_Border" Property="Background" Value="#FFDEDEDE"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="true">
+                                <Setter TargetName="_Border" Property="Background" Value="#FFBCD9E7"/>
+                                <Setter TargetName="_Border" Property="BorderBrush" Value="#FF8BBED6"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ProtocolFinalizedListBoxItemStyle" TargetType="ListBoxItem">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+          
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border Name="_Border"
+                         Margin="0,-1"
+                         Padding="4,0,4,0"
+                         BorderThickness="1"
+                         SnapsToDevicePixels="true">
+                            <ContentPresenter />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+    </UserControl.Resources>
+
+    <Grid>
+
+        <DockPanel x:Name="pnlDock" Margin="0,0,0,16">
+
+            <Border x:Name="pnlProtocol" DockPanel.Dock="top" BorderBrush="#FFD4D4D4" BorderThickness="1" CornerRadius="0,0,8,8" 
+              Background="#FFF6F6F6">
+                
+                <ScrollViewer x:Name="scrlProtocol" VerticalScrollBarVisibility="auto" Margin="0,4,0,20" >
+
+                    <ListBox x:Name="lstProtocol"
+                        
+                        SelectionMode="Single" Background="transparent" BorderThickness="0" FocusVisualStyle="{x:Null}"              
+                        Grid.IsSharedSizeScope="true" HorizontalContentAlignment="stretch" AllowDrop="true"
+                        ScrollViewer.HorizontalScrollBarVisibility="Disabled" Padding="0,0,0,4"
+                        VirtualizingStackPanel.IsVirtualizing="False" MinHeight="20" d:Visibility="visible"
+                        Visibility="{Binding ElementName=lstProtocol, Path=Items.Count,Converter={StaticResource intToVisConv}}"
+                             
+                        ItemsSource="{Binding Source={StaticResource ProtocolItemsView}}"                       
+                        ItemTemplate="{StaticResource protocolItem}"
+                        ItemContainerStyle="{StaticResource ProtocolListBoxItemStyle}"
+                         
+                        dd:DragDrop.IsDragSource="True"
+                        dd:DragDrop.IsDropTarget="True"   
+                        dd:DragDrop.UseDefaultDragAdorner="{Binding WorkflowState,Converter={StaticResource defaultAdornerConv}}"
+                        dd:DragDrop.DropTargetAdornerBrush="#FF3877D4"
+                        dd:DragDrop.DropHandler="{StaticResource protDropHandler}" >
+
+                    </ListBox>
+                    
+                </ScrollViewer>
+                
+            </Border>
+
+        </DockPanel>
+
+        <Grid  Margin="0,0,0,-2" d:Visibility="visible" VerticalAlignment="bottom">
+
+            <Grid.Style>
+                <Style TargetType="Grid">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding WorkflowState}" Value="1">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding ElementName=lstProtocol, Path=Items.Count}" Value="0">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Style>
+            
+            <local:AdditionToolbar x:Name="addToolbar" HorizontalAlignment="center" VerticalAlignment="Bottom" />
+
+        </Grid>
+
+    </Grid>
+
+</UserControl>

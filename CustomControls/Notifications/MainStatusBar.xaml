@@ -1,0 +1,34 @@
+﻿<UserControl x:Class="MainStatusBar"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CustomControls"
+        mc:Ignorable="d">
+    
+    <Grid>
+
+        <StackPanel Orientation="horizontal" HorizontalAlignment="left" VerticalAlignment="Top" >
+
+            <Border x:Name="lblSaving" CornerRadius="6" Margin="0,1,4,0" Background="lightgreen"  BorderBrush="gray" Opacity="0"           
+                d:Opacity="1" BorderThickness="1" VerticalAlignment="Center" Width="12" Height="12" ToolTip="Auto-Save"/>
+
+            <StackPanel x:Name="pnlServerState" Orientation="Horizontal"  Visibility="collapsed" d:Visibility="visible">
+
+                <StackPanel x:Name="pnlServerOk" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,4,0"
+                   ToolTip="Connected to ELN server.">
+                    <ContentControl Content="{StaticResource icoDatabaseRunning}" Height="20" VerticalContentAlignment="Center" 
+                      Opacity="0.9" Margin="2,1,1,0"/>
+                </StackPanel>
+
+                <StackPanel x:Name="pnlServerError" Orientation="Horizontal" VerticalAlignment="Center" Visibility="visible"
+                  ToolTip="The ELN server currently is unavailable!">
+                    <ContentControl Content="{StaticResource icoDatabaseWarning}"  Height="18" VerticalContentAlignment="Center" Margin="2,0,2,0"/>
+                </StackPanel>
+
+            </StackPanel>
+
+        </StackPanel>
+    </Grid>
+    
+</UserControl>

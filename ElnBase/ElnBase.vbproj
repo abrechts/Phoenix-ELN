@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+
+    <AssemblyVersion>0.9.0.0</AssemblyVersion>
+    <FileVersion>0.9.0.0</FileVersion>
+
+    <RootNamespace>ElnBase</RootNamespace>
+    <TargetFramework>net8.0-windows7.0</TargetFramework>
+    <RootNamespace>ElnBase</RootNamespace>
+    <UseWPF>true</UseWPF>
+    <ImportedNamespaces>Microsoft.VisualBasic=True,System=True,System.Collections=True,System.Collections.Generic=True,System.Diagnostics=True,System.Linq=True,System.Xml.Linq=True,System.Threading.Tasks=True,ElnBase=True</ImportedNamespaces>
+  
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ElnCoreModel\ElnCoreModel.csproj" />
+  </ItemGroup>
+
+</Project>

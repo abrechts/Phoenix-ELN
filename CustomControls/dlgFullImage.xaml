@@ -1,0 +1,33 @@
+﻿<Window x:Class="dlgFullImage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:data="clr-namespace:ElnCoreModel;assembly=ElnCoreModel"
+             xmlns:local="clr-namespace:CustomControls"
+             mc:Ignorable="d" 
+             d:DataContext="{d:DesignInstance Type=data:tblEmbeddedFiles}"
+             DataContext="{Binding tblEmbeddedFiles}"
+             d:DesignHeight="450" d:DesignWidth="800" WindowStartupLocation="CenterScreen" Background="black"
+             Title="Full Image View" Height="800" Width="1200" WindowStyle="None" ShowInTaskbar="False" WindowState="Maximized">
+
+    <Window.Resources>
+        <local:BytesToBitmapImgConverter x:Key="bytesToImgSourceConv"/>
+    </Window.Resources>
+
+    <Grid>
+
+        <Viewbox>
+            <Image Name="displayImg" Grid.Column="2" Source="{Binding FileBytes,Converter={StaticResource bytesToImgSourceConv}}" 
+               Width="{Binding ImgDisplayWidth}" Height="{Binding ImgDisplayHeight}" />
+        </Viewbox>
+
+        <Border Background="LightCyan" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,20" CornerRadius="10"
+           Padding="3">
+            <Button Content="Close (Esc)" Width="90"  Background="Transparent" IsCancel="True" BorderThickness="0"
+              FontSize="16"/>
+        </Border>
+
+    </Grid>
+
+</Window>

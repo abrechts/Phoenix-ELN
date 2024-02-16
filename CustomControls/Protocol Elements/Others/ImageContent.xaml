@@ -1,0 +1,70 @@
+﻿<UserControl x:Class="ImageContent"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:CustomControls"
+             xmlns:data="clr-namespace:ElnCoreModel;assembly=ElnCoreModel"
+             mc:Ignorable="d" 
+             d:DesignHeight="250" d:DesignWidth="800"
+             d:DataContext="{d:DesignInstance Type=data:tblEmbeddedFiles}" DataContext="{Binding tblEmbeddedFiles}">
+
+    <UserControl.Resources>
+        
+        <local:BytesToBitmapImgRotateConverter x:Key="bytesToBitmapImgRotateConv"/>
+        <local:IntegerToVisibilityConverter x:Key="intToVisConv"/>
+        <local:BooleanToVisibilityConverter x:Key="boolToVisConv"/>
+
+    </UserControl.Resources>
+
+    <Grid>
+
+        <!--shared size grid -->
+        
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition SharedSizeGroup="amountCol" MinWidth="20" Width="Auto"/>
+            <ColumnDefinition SharedSizeGroup="unitCol" MinWidth="12" Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        
+        <Grid Grid.Column="2" >
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Grid Grid.Column="0" >
+                
+                <Image x:Name="displayImg" MinWidth="100" MinHeight="50" MaxHeight="140" Margin="0,0,0,0" Cursor="Hand"
+                  ToolTip="Click for full screen view.">
+                    <Image.Source>
+                        <MultiBinding Converter="{StaticResource bytesToBitmapImgRotateConv}">
+                            <Binding Path="FileBytes"/>
+                            <Binding Path="IsRotated"/>
+                        </MultiBinding>
+                    </Image.Source>
+                </Image>
+
+                <Border x:Name="pnlControls" BorderBrush="lightgray" BorderThickness="1,1,1,0" Background="whitesmoke"
+                  Visibility="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem},
+                  Converter={StaticResource boolToVisConv}}" VerticalAlignment="Bottom" HorizontalAlignment="center" Opacity="0.8">
+                    <StackPanel VerticalAlignment="Bottom" Orientation="Horizontal" Margin="4,0">
+                        <ContentControl x:Name="icoRotate" Content="{StaticResource icoRotateRight}" Opacity="0.9" Width="16" Height="16"
+                            Visibility="{Binding IsPortraitMode, Converter={StaticResource intToVisConv}}"
+                            ToolTip="Change Portrait/Landscape"/>
+                    </StackPanel>
+                </Border>
+
+            </Grid>
+
+            <TextBox x:Name="txtComments" Grid.Column="1" MaxLength="250" BorderThickness="0" Margin="8,2" TextWrapping="Wrap"           
+                Text="{Binding FileComment}" d:Text="Image_1234.jpg" AcceptsReturn="true" AcceptsTab="true" Padding="0,0,12,0"/>
+
+        </Grid>
+        
+    </Grid>
+
+
+
+</UserControl>

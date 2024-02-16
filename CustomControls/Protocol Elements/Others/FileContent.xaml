@@ -1,0 +1,38 @@
+﻿<UserControl x:Class="FileContent"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:CustomControls"
+             xmlns:data="clr-namespace:ElnCoreModel;assembly=ElnCoreModel"
+             mc:Ignorable="d" 
+             d:DesignHeight="50" d:DesignWidth="250"
+             d:DataContext="{d:DesignInstance Type=data:tblEmbeddedFiles}" DataContext="{Binding tblEmbeddedFiles}">
+
+    <UserControl.Resources>
+        <local:BytesToBitmapImgConverter x:Key="BytesToBitmapConv"/>
+    </UserControl.Resources>
+
+    <Grid x:Name="sharedSizeGrid">
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition SharedSizeGroup="amountCol" MinWidth="20" Width="Auto"/>
+            <ColumnDefinition SharedSizeGroup="unitCol" MinWidth="12" Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Orientation="Horizontal" Grid.Column="2">
+
+            <Border x:Name="iconImage" Cursor="Hand" BorderThickness="0" Padding="1" Margin="2,0,0,0">
+                <Image Width="22" Height="22" ToolTip="Click to view embedded file"
+                    Source="{Binding IconImage, Converter={StaticResource BytesToBitmapConv}}"/>
+            </Border>
+
+            <TextBox x:Name="txtFileTitle" Text="{Binding FileComment}" d:Text="Title" BorderThickness="0"
+               MaxLength="80" VerticalAlignment="Center" FontStyle="Italic" Padding="2,0,12,0"/>
+            
+        </StackPanel>
+
+    </Grid>
+
+</UserControl>

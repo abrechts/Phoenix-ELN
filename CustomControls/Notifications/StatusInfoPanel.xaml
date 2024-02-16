@@ -1,0 +1,121 @@
+﻿<UserControl x:Class="StatusInfoPanel"
+                xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+                xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+                xmlns:local="clr-namespace:CustomControls"
+                xmlns:base="clr-namespace:ElnCoreModel;assembly=ElnCoreModel"
+                d:DataContext="{d:DesignInstance Type=base:tblUsers}"
+                mc:Ignorable="d" 
+                d:DesignWidth="240">
+
+    <UserControl.Resources>
+        
+        <local:DemoVisibilityConverter x:Key="demoVisConv"/>
+        <local:UnfinalizedCountConverter x:Key="unfinalizedCountConv"/>
+        <local:UnfinalizedWarningVisibilityConverter x:Key="unfinalizedWarningVisConv"/>
+        <local:AppVersionConverter x:Key="appVersionConv"/>
+
+        <Style TargetType="TextBlock">
+            <Setter Property="LineHeight" Value="14"/>
+            <Setter Property="LineStackingStrategy" Value="BlockLineHeight"/>
+        </Style>
+        
+    </UserControl.Resources>
+
+    <Border BorderBrush="gray" BorderThickness="1" CornerRadius="6" Padding="10,6,8,4">
+        
+        <StackPanel>
+
+            <Grid>
+                
+                <TextBlock x:Name="blkWelcome" Text="{Binding FirstName,StringFormat={}Welcome {0}!}" d:Text="Welcome User!" 
+                   HorizontalAlignment="left" FontWeight="Bold" FontSize="12.5" 
+                   Foreground="{StaticResource DialogTitleForeground}" Margin="0,0,0,2" FontStyle="Italic"  />
+
+                <TextBlock Text="Status Info" HorizontalAlignment="Stretch" Margin="0,0,0,2" FontStyle="Italic" 
+                   FontWeight="Bold" Foreground="#FF0941CC" FontSize="12.5" Background="white"
+                   Visibility="{Binding UserID, Converter={StaticResource demoVisConv}}"/>
+
+
+            </Grid>
+
+            <ContentControl Content="{StaticResource HorizFadingLineBlue}" Margin="0,0,0,6"/>
+
+            <local:StatusDemo Margin="-2,0,0,4" Visibility="{Binding UserID,Converter={StaticResource demoVisConv}}"/>
+         
+            <StackPanel Margin="2,0,6,6" >
+
+                <Grid HorizontalAlignment="Left"
+                      >
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4" >
+                    
+                        <TextBlock Text="● App Version:" TextWrapping="Wrap" Margin="0,4,3,0"/>
+
+                        <Border Margin="0,4,4,0" CornerRadius="4" Background="#FFEBEBEB">
+                            <TextBlock Text="{Binding Database.CurrAppVersion,Converter={StaticResource appVersionConv}}" d:Text="2.12.3" 
+                               FontWeight="demibold"  Padding="4,0,4,0"/>
+                        </Border>
+                    
+                        <ContentControl x:Name="icoUpdateAvailable" Content="{StaticResource icoOkCheckmark}" Height="12" VerticalAlignment="center" Margin="0,4,0,0"
+                            ToolTip="The application is up to date!" d:Visibility="Visible" Visibility="visible"/>
+
+                        <ContentControl x:Name="icoNoUpdateAvailable" Content="{StaticResource icoWarning}" Height="14" VerticalAlignment="center" 
+                             Visibility="Collapsed" d:Visibility="visible" Margin="0,2,0,0"/>
+
+                    </StackPanel>
+
+                    <Separator Margin="11,1,0,1" VerticalAlignment="Bottom" Visibility="{Binding ElementName=pnlUpdateInfo, Path=Visibility}"/>
+                    
+                </Grid>
+                
+                <StackPanel x:Name="pnlUpdateInfo" Margin="11,0,0,5" Visibility="Collapsed" d:Visibility="visible">
+
+                    <TextBlock FontStyle="Italic">
+                        <Run Text="An"/>
+                        <Run FontWeight="Bold" Text="update" Foreground="#FF393939"/>
+                        <Run Text="is available:"/>
+                    </TextBlock>
+                    
+                    <TextBlock x:Name="lnkVersionInfo" Foreground="blue"  Margin="0,-1,0,0"
+                      Cursor="Hand" FontFamily="verdana" FontSize="11">
+                        <Run Text="Version"/>
+                        <Run x:Name="blkNewVersion" d:Text="2.12.4" Text=""/>
+                    </TextBlock>
+                    
+                </StackPanel>
+
+                <Grid HorizontalAlignment="Left">
+
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+
+                        <TextBlock Text="● Unfinalized Exp:" TextWrapping="Wrap" Margin="0,0,4,0" VerticalAlignment="Center"/>
+
+                        <Border Margin="0,0,4,0" CornerRadius="4" Background="#FFEBEBEB">
+                            <TextBlock d:Text="11" Text="{Binding tblExperiments, Converter={StaticResource unfinalizedCountConv}}"  
+                            VerticalAlignment="Center" FontWeight="demibold" Padding="3,0,4,0" ScrollViewer.CanContentScroll="True" />
+                        </Border>
+
+                        <ContentControl Content="{StaticResource icoOkCheckmark}" Height="12" VerticalAlignment="center" 
+                            Visibility="{Binding tblExperiments,Converter={StaticResource unfinalizedWarningVisConv},ConverterParameter=invert}"/>
+
+                        <ContentControl Content="{StaticResource icoWarning}" Height="12" VerticalAlignment="center"                            
+                            Visibility="{Binding tblExperiments,Converter={StaticResource unfinalizedWarningVisConv}}"/>
+
+                    </StackPanel>
+
+                    <Separator Margin="11,2,0,2" VerticalAlignment="bottom" 
+                        Visibility="{Binding tblExperiments,Converter={StaticResource unfinalizedWarningVisConv}}"/>
+                    
+                </Grid>
+
+                <TextBlock Text="Always finalize your experiments after completion to mark them as complete and to protect them against unintended changes (can be reverted)." 
+                    TextWrapping="Wrap" Margin="11,0,0,0" FontStyle="Italic"
+                    Visibility="{Binding tblExperiments,Converter={StaticResource unfinalizedWarningVisConv}}"/>
+
+            </StackPanel>
+
+        </StackPanel>
+    </Border>
+
+</UserControl>

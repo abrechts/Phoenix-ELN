@@ -1,0 +1,52 @@
+﻿<UserControl x:Class="WorkflowSeparator"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:CustomControls"
+             mc:Ignorable="d"   
+             xmlns:data="clr-namespace:ElnCoreModel;assembly=ElnCoreModel"           
+             d:DataContext="{d:DesignInstance Type=data:tblSeparators}" 
+             DataContext="{Binding tblSeparators}"
+             d:DesignWidth="400" >
+
+    <Grid  Margin="0,10,0,10" >
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition SharedSizeGroup="amountCol" MinWidth="20" Width="Auto"/>
+            <ColumnDefinition SharedSizeGroup="unitCol" MinWidth="12" Width="Auto"/>
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <Rectangle Grid.Column="0" Grid.ColumnSpan="2" Stroke="gray" VerticalAlignment="Center" Margin="2,3,8,0"/>
+
+        <DockPanel Grid.Column="2" >
+
+            <Border CornerRadius="6" BorderBrush="gray" BorderThickness="1" Padding="8,0" Margin="-2,0,0,-3" HorizontalAlignment="left" 
+                Background="Gray" >
+
+                <TextBox x:Name="txtTitle" d:Text="Reaction" Text="{Binding Title}" BorderThickness="0" VerticalAlignment="Center" 
+                    FontStyle="Italic" FontWeight="DemiBold" Padding="1,0" Margin="1,1,1,2" MaxLength="80" FontFamily="Verdana" FontSize="11">
+                    <TextBox.Style>
+                        <Style TargetType="TextBox">
+                            <Setter Property="Foreground" Value="white"/>
+                            <Setter Property="Background" Value="transparent"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsFocused" Value="True">
+                                    <Setter Property="Foreground" Value="#FF464646" />
+                                    <Setter Property="Background" Value="LightCyan" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBox.Style>
+                </TextBox>
+
+            </Border>
+
+            <Rectangle Stroke="gray" VerticalAlignment="Center"  Margin="6,3,0,0"/>
+
+        </DockPanel>
+        
+    </Grid>
+    
+</UserControl>

@@ -1,0 +1,91 @@
+﻿{
+   "CodeGenerationMode": 3,
+   "ContextClassName": "ElnDbContext",
+   "ContextNamespace": null,
+   "DefaultDacpacSchema": null,
+   "FilterSchemas": false,
+   "IncludeConnectionString": false,
+   "ModelNamespace": null,
+   "OutputContextPath": null,
+   "OutputPath": "",
+   "PreserveCasingWithRegex": true,
+   "ProjectRootNamespace": "ElnCoreModel",
+   "Schemas": null,
+   "SelectedHandlebarsLanguage": 0,
+   "SelectedToBeGenerated": 0,
+   "T4TemplatePath": null,
+   "Tables": [
+      {
+         "Name": "tblAuxiliaries",
+         "ObjectType": 0
+      },
+      {
+         "Name": "tblComments",
+         "ObjectType": 0
+      },
+      {
+         "Name": "tblDatabaseInfo",
+         "ObjectType": 0
+      },
+      {
+         "Name": "tblEmbeddedFiles",
+         "ObjectType": 0
+      },
+      {
+         "Name": "tblExperiments",
+         "ObjectType": 0
+      },
+      {
+         "Name": "tblMaterials",
+         "ObjectType": 0
+      },
+      {
+         "Name": "tblProducts",
+         "ObjectType": 0
+      },
+      {
+         "Name": "tblProjects",
+         "ObjectType": 0
+      },
+      {
+         "Name": "tblProtocolItems",
+         "ObjectType": 0
+      },
+      {
+         "Name": "tblReagents",
+         "ObjectType": 0
+      },
+      {
+         "Name": "tblRefReactants",
+         "ObjectType": 0
+      },
+      {
+         "Name": "tblSolvents",
+         "ObjectType": 0
+      },
+      {
+         "Name": "tblUsers",
+         "ObjectType": 0
+      }
+   ],
+   "UiHint": "F:\\Benutzer\\Stefan\\Documents\\Phoenix ELN Data\\ElnData.db",
+   "UncountableWords": null,
+   "UseBoolPropertiesWithoutDefaultSql": false,
+   "UseDatabaseNames": true,
+   "UseDateOnlyTimeOnly": false,
+   "UseDbContextSplitting": false,
+   "UseFluentApiOnly": true,
+   "UseHandleBars": false,
+   "UseHierarchyId": false,
+   "UseInflector": false,
+   "UseLegacyPluralizer": false,
+   "UseManyToManyEntity": false,
+   "UseNoDefaultConstructor": false,
+   "UseNoObjectFilter": true,
+   "UseNodaTime": false,
+   "UseNullableReferences": false,
+   "UseSchemaFolders": false,
+   "UseSchemaNamespaces": false,
+   "UseSpatial": false,
+   "UseT4": false
+}

@@ -1,0 +1,145 @@
+﻿<UserControl x:Class="ExperimentContent"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:CustomControls"
+             xmlns:base="clr-namespace:ElnCoreModel;assembly=ElnCoreModel" 
+             d:DataContext="{d:DesignInstance Type=base:tblExperiments}"
+             mc:Ignorable="d"  
+             d:DesignHeight="500" d:DesignWidth="720">
+
+    <UserControl.Resources>
+
+        <local:LocationTitleConverter x:Key="locationTitleConv"/>
+        <local:ExperimentDateConverter x:Key="ExpDateConv"/>
+        <local:ExperimentStateToVisibilityConverter x:Key="expStateVisConv"/>
+        <local:ExperimentStateToTabIndexConverter x:Key="expStateIndexConv"/>
+
+        <SolidColorBrush x:Key="BoldTitleForeground" Color="#FF252525"/>
+        
+        <!-- Used for selected tabs -->
+        <LinearGradientBrush x:Key="OrangeGradient" StartPoint="0,0" EndPoint="0,1">
+            <GradientStop Color="whitesmoke" Offset="0.00"/>
+            <GradientStop Color="#FFFFB976" Offset="0.98"/>
+            <GradientStop Color="#FFFCD888" Offset="0.85" />
+        </LinearGradientBrush>
+
+        <!-- This style is used for buttons, to remove the WPF default 'animated' mouse over effect -->
+        <Style x:Key="SimpleButton" TargetType="Button">
+            <Setter Property="OverridesDefaultStyle" Value="True"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Name="border"  
+                     BorderThickness="1" 
+                     Padding="4,2,6,2"  
+                     BorderBrush="DarkGray"  
+                     CornerRadius="3"  
+                     Background="{StaticResource OrangeGradient}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#FFFCD888" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="Black" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+       
+
+    </UserControl.Resources>
+
+        <Grid>
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+
+            <!--experiment header-->
+            <Border Grid.Row="0" Margin="12,10,12,0" Background="#FFEAF2FF" CornerRadius="8,8,0,0" Padding="12,4,12,0"
+               BorderBrush="#FFADADAD" BorderThickness="1,1,1,0" TextBlock.FontStyle="Italic" TextBlock.FontSize="10.5" 
+               TextBlock.FontFamily="Verdana">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="22"/>
+                        <RowDefinition/>
+                        <RowDefinition Height="30"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding User.FirstName}" d:Text="Alexander" Margin="0,0,3,0"/>
+                        <TextBlock Text="{Binding User.LastName}" d:Text="Miller"/>
+                    </StackPanel>
+
+                    <TextBlock d:Text="DemoCompany - Research (New York)" HorizontalAlignment="Center" VerticalAlignment="Center" >
+                        <TextBlock.Text>
+                            <MultiBinding Converter="{StaticResource locationTitleConv}" >
+                                <Binding Path="User.CompanyName"/>
+                                <Binding Path="User.DepartmentName"/>
+                                <Binding Path="User.City"/>
+                            </MultiBinding>
+                        </TextBlock.Text>
+                    </TextBlock>
+
+                    <TextBlock Grid.Row="0" d:Text="millera-00012" Text="{Binding ExperimentID}" HorizontalAlignment="Right" 
+                       FontWeight="bold" VerticalAlignment="Center" Foreground="{StaticResource BoldTitleForeground}"/>
+
+                    <Separator Grid.Row="1" Margin="0,1,0,1"/>
+
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" VerticalAlignment="Center" >
+                        <TextBlock Text="Created: " FontWeight="demibold" Foreground="{StaticResource BoldTitleForeground}"/>
+                        <TextBlock Text="{Binding CreationDate,Converter={StaticResource ExpDateConv}}" d:Text="August 13, 2029"/>
+                    </StackPanel>
+
+                    <TextBlock Grid.Row="2" Text="{Binding Project.Title}" d:Text="Testproject" HorizontalAlignment="Center" 
+                       VerticalAlignment="Center" Foreground="#FF1818C3" FontWeight="demibold"/>
+
+                    <TabControl x:Name="tabFinalized" Grid.Row="2" VerticalAlignment="Center" HorizontalAlignment="Right" 
+                      Background="transparent" BorderThickness="0" Margin="0,0,0,2"
+                      SelectedIndex="{Binding Path=WorkflowState,Converter={StaticResource expStateIndexConv},Mode=OneWay}">
+
+                        <TabItem Visibility="Collapsed">
+                            <StackPanel Grid.Row="2" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right" >
+                                <TextBlock Text="Finalized: " FontWeight="demibold" Foreground="{StaticResource BoldTitleForeground}"/>
+                                <TextBlock Text="{Binding FinalizeDate,Converter={StaticResource ExpDateConv}, 
+                                    ConverterParameter=In progress ...}" d:Text="August 13, 2029"/>
+                            </StackPanel>
+                        </TabItem>
+                        
+                        <TabItem Visibility="Collapsed">
+                            <Button Grid.Row="2" x:Name="btnFinalize" HorizontalAlignment="Right" Style="{StaticResource SimpleButton}" 
+                               Margin="0,0,-2,0">
+                                <StackPanel Orientation="Horizontal">
+                                    <ContentControl Content="{StaticResource icoOkBullet}" Height="16" Margin="0,0,3,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Finalize" FontStyle="Normal" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+                        </TabItem>
+                    </TabControl>
+                
+                </Grid>
+            </Border>
+
+            <Border Grid.Row="1" Background="white" BorderBrush="#FFADADAD" BorderThickness="1,1,1,0" Margin="12,0,12,0">
+                <Grid>
+                    <local:SketchArea x:Name="pnlSketch" ReactionSketch="{Binding RxnSketch}" Margin="12,8,12,6"/>
+                    <ContentControl x:Name="icoFinalized" Content="{StaticResource icoOkBullet}" Height="24" Margin="0,10,10,0" 
+                       Opacity="0.8" VerticalAlignment="Top" HorizontalAlignment="Right"
+                       Visibility="{Binding WorkflowState,Converter={StaticResource expStateVisConv}}"/>
+                </Grid>
+            </Border>
+
+            <local:Protocol x:Name="pnlProtocol" Grid.Row="2" Margin="12,0,12,12" />
+
+        </Grid>
+
+</UserControl>

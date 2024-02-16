@@ -1,0 +1,140 @@
+﻿<UserControl x:Class="AuxiliaryContent"
+            
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:local="clr-namespace:CustomControls"
+    xmlns:model="clr-namespace:ElnBase;assembly=ElnBase"
+    xmlns:data="clr-namespace:ElnCoreModel;assembly=ElnCoreModel"
+    mc:Ignorable="d"
+    d:DataContext="{d:DesignInstance Type=data:tblAuxiliaries}"
+    DataContext="{Binding tblAuxiliaries}"
+    Foreground="#FF860707"
+    Cursor="Hand" Background="Transparent" HorizontalAlignment="Left">
+
+    <UserControl.Resources>
+
+        <local:SignificantDigitsConverter x:Key="sigDigConv"/>
+        <local:VolumeUnitConverter x:Key="volumeUnitConv"/>
+        <local:WeightUnitConverter x:Key="weightUnitConv"/>
+        <local:EquivUnitConverter x:Key="equivUnitConv"/>
+        <local:StringToVisibilityConverter x:Key="stringToVisConv"/>
+        <local:NothingToVisibilityConverter x:Key="nothingToVisConv"/>
+        <local:IntegerToVisibilityConverter x:Key="integerToVisConv"/>
+
+    </UserControl.Resources>
+
+
+        <Grid>
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition SharedSizeGroup="amountCol"/>
+                <ColumnDefinition SharedSizeGroup="unitCol"/>
+                <ColumnDefinition MinWidth="110"/>
+            </Grid.ColumnDefinitions>
+
+            <!--amount-->
+            <StackPanel Grid.Column="0">
+
+                <!--lab view-->
+                <TextBlock d:Text="3.84" TextAlignment="right" Margin="7,0,3,0" 
+                   Visibility="{Binding ProtocolItem.Experiment.IsDesignView,Converter={StaticResource integerToVisConv},
+                   ConverterParameter=invert}">
+                    <TextBlock.Text>
+                        <MultiBinding Converter="{StaticResource weightUnitConv}" ConverterParameter="amount">
+                            <Binding Path="Grams"/>
+                            <Binding Path="Density"/>
+                            <Binding Path="IsDisplayAsVolume"/>
+                            <Binding Source="0"/>
+                        </MultiBinding>
+                    </TextBlock.Text>
+                </TextBlock>
+
+                <!--design view-->
+                <TextBlock d:Text="1.52" TextAlignment="right" Margin="7,0,3,0"
+                  Text="{Binding Equivalents,Converter={StaticResource sigDigConv},ConverterParameter=3}" 
+                  Visibility="{Binding ProtocolItem.Experiment.IsDesignView,Converter={StaticResource integerToVisConv}}"/>
+
+            </StackPanel>
+
+            <!--unit-->
+            <StackPanel Grid.Column="1" >
+
+                <!--lab view-->
+                <TextBlock d:Text="g" TextAlignment="left" Margin="0,0,6,0"
+             Visibility="{Binding ProtocolItem.Experiment.IsDesignView,Converter={StaticResource integerToVisConv},ConverterParameter=invert}">
+                    <TextBlock.Text>
+                        <MultiBinding Converter="{StaticResource weightUnitConv}" ConverterParameter="unit">
+                            <Binding Path="Grams"/>
+                            <Binding Path="Density"/>
+                            <Binding Path="IsDisplayAsVolume"/>
+                            <Binding Source="0"/>
+                        </MultiBinding>
+                    </TextBlock.Text>
+                </TextBlock>
+
+                <!--design view-->
+                <TextBlock Text="wq" TextAlignment="left" Margin="0,0,6,0"        
+             Visibility="{Binding ProtocolItem.Experiment.IsDesignView,Converter={StaticResource integerToVisConv}}"/>
+
+            </StackPanel>
+
+            <!--properties column-->
+            <StackPanel Orientation="Horizontal" Grid.Column="2" Margin="0,0,8,0">
+
+                <TextBlock d:Text="Silicagel" Text="{Binding Name}" FontWeight="DemiBold"/>
+                <TextBlock Text="(" Margin="2,0,1,0"/>
+                <TextBlock d:Text="Merck 12345" Text="{Binding Source}"/>
+                <TextBlock Text=";" Visibility="{Binding Source,Converter={StaticResource stringToVisConv}}" Margin="1,0,2,0"/>
+
+                <StackPanel>
+
+                    <!--lab view-->
+                    <TextBlock d:Text="1.52" Margin="1,0,2,0"
+                     Text="{Binding Equivalents,Converter={StaticResource sigDigConv},ConverterParameter=3}" 
+                  Visibility="{Binding ProtocolItem.Experiment.IsDesignView,Converter={StaticResource integerToVisConv},
+                    ConverterParameter=invert}"/>
+
+                    <!--design view-->
+                    <TextBlock d:Text="3.84" Margin="1,0,2,0"
+                  Visibility="{Binding ProtocolItem.Experiment.IsDesignView,Converter={StaticResource integerToVisConv}}">
+                        <TextBlock.Text>
+                            <MultiBinding Converter="{StaticResource volumeUnitConv}" ConverterParameter="amount">
+                                <Binding Path="Grams"/>
+                                <Binding Path="Density"/>
+                                <Binding Path="IsDisplayAsVolume"/>
+                                <Binding Source="0"/>
+                            </MultiBinding>
+                        </TextBlock.Text>
+                    </TextBlock>
+
+                </StackPanel>
+
+                <StackPanel>
+
+                    <!--lab view-->
+                    <TextBlock Visibility="{Binding ProtocolItem.Experiment.IsDesignView,Converter={StaticResource integerToVisConv},
+                 ConverterParameter=invert}" Text="wtEquiv" />
+
+                    <!--design view-->
+                    <TextBlock d:Text="g" Margin="1,0,2,0" 
+                 Visibility="{Binding ProtocolItem.Experiment.IsDesignView,Converter={StaticResource integerToVisConv}}">
+                        <TextBlock.Text>
+                            <MultiBinding Converter="{StaticResource weightUnitConv}" ConverterParameter="unit">
+                                <Binding Path="Grams"/>
+                                <Binding Path="Density"/>
+                                <Binding Path="IsDisplayAsVolume"/>
+                                <Binding Source="0"/>
+                            </MultiBinding>
+                        </TextBlock.Text>
+                    </TextBlock>
+
+                </StackPanel>
+                <TextBlock Text=")" Margin="1,0,0,0"/>
+
+            </StackPanel>
+
+        </Grid>
+   
+</UserControl>

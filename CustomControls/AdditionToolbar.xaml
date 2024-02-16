@@ -1,0 +1,160 @@
+﻿<UserControl x:Class="AdditionToolbar"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+        xmlns:local="clr-namespace:CustomControls"
+        mc:Ignorable="d"
+             FontSize="12.5">
+
+    <Control.Resources>
+
+        <LinearGradientBrush x:Key="ButtonGradient" EndPoint="0.5,1" StartPoint="0.5,0">
+            <GradientStop Color="White" Offset="0" />
+            <GradientStop Color="#FFE8E8E8" Offset="1" />
+        </LinearGradientBrush>
+
+    </Control.Resources>
+
+    <Border BorderThickness="1" BorderBrush="#FF84A0C4" Background="whitesmoke" Padding="4" CornerRadius="8" >
+
+        <StackPanel Orientation="Horizontal">
+          
+            <local:ComboPlus x:Name="cboAddMat" DropDownDirection="Up" Margin="2,0,4,0" IsEditable="False" SelectedIndex="0"
+               CboBackground="{StaticResource ButtonGradient}" CboBorderBrush="lightgray"
+               Grid.IsSharedSizeScope="true" Padding="3,3" >
+
+                <ComboBoxItem IsEnabled="False" Background="{StaticResource ButtonGradient}" >
+                    <StackPanel Orientation="Horizontal">
+                        <ContentControl Content="{StaticResource icoAddElement}" Height="16" Margin="0,0,3,0" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="blkAddMat" Text="Add Material" FontWeight="Demibold" Foreground="#FF171717"
+                                VerticalAlignment="Center" Margin="0,0,1,0"  />
+                    </StackPanel>
+                </ComboBoxItem>
+
+                <ComboBoxItem x:Name="AddReactant" Margin="1,1,1,0" Focusable="false">
+                    <Grid >
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition SharedSizeGroup="iconCol"/>
+                            <ColumnDefinition SharedSizeGroup="headerCol"/>
+                            <ColumnDefinition SharedSizeGroup="shortcutCol"/>
+                        </Grid.ColumnDefinitions>
+                        <ContentControl Grid.Column="0" Content="{StaticResource icoRedDot}" Margin="0,0,3,0" Height="16"  />
+                        <TextBlock Grid.Column="1" Text="Reactant" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Column="2" Text="(Ctrl-1)" FontStyle="Italic" VerticalAlignment="Center" Margin="4,0,3,0"/>
+                    </Grid>
+                </ComboBoxItem>
+
+                <ComboBoxItem x:Name="AddReagent" Margin="1,0,1,0" Focusable="false">
+                    <Grid  >
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition SharedSizeGroup="iconCol"/>
+                            <ColumnDefinition SharedSizeGroup="headerCol"/>
+                            <ColumnDefinition SharedSizeGroup="shortcutCol"/>
+                        </Grid.ColumnDefinitions>
+                        <ContentControl Grid.Column="0" Content="{StaticResource icoAddElement}" Margin="0,0,3,0" Height="16"  />
+                        <TextBlock Grid.Column="1" Text="Reagent" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Column="2" Text="(Ctrl-2)" FontStyle="Italic" VerticalAlignment="Center" Margin="4,0,3,0"/>
+                    </Grid>
+                </ComboBoxItem>
+
+                <ComboBoxItem x:Name="AddSolvent" Margin="1,0,1,0" Focusable="false">
+                    <Grid  >
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition SharedSizeGroup="iconCol"/>
+                            <ColumnDefinition SharedSizeGroup="headerCol"/>
+                            <ColumnDefinition SharedSizeGroup="shortcutCol"/>
+                        </Grid.ColumnDefinitions>
+                        <ContentControl Grid.Column="0" Content="{StaticResource icoAddElement}" Margin="0,0,3,0" Height="16"  />
+                        <TextBlock Grid.Column="1" Text="Solvent" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Column="2" Text="(Ctrl-3)" FontStyle="Italic" VerticalAlignment="Center" Margin="4,0,3,0"/>
+                    </Grid>
+                </ComboBoxItem>
+
+                <ComboBoxItem x:Name="AddAuxiliary"  Margin="1,0,1,0" Focusable="false">
+                    <Grid  >
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition SharedSizeGroup="iconCol"/>
+                            <ColumnDefinition SharedSizeGroup="headerCol"/>
+                            <ColumnDefinition SharedSizeGroup="shortcutCol"/>
+                        </Grid.ColumnDefinitions>
+                        <ContentControl Grid.Column="0" Content="{StaticResource icoAddElement}" Margin="0,0,3,0" Height="16"  />
+                        <TextBlock Grid.Column="1" Text="Auxiliary" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Column="2" Text="(Ctrl-4)" FontStyle="Italic" VerticalAlignment="Center" Margin="4,0,3,0"/>
+                    </Grid>
+                </ComboBoxItem>
+
+                <ComboBoxItem x:Name="AddProduct"  Margin="1,0,1,0" Focusable="false">
+                    <Grid  >
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition SharedSizeGroup="iconCol"/>
+                            <ColumnDefinition SharedSizeGroup="headerCol"/>
+                            <ColumnDefinition SharedSizeGroup="shortcutCol"/>
+                        </Grid.ColumnDefinitions>
+                        <ContentControl Grid.Column="0" Content="{StaticResource icoRedDot}" Margin="0,0,3,0" Height="16"  />
+                        <TextBlock Grid.Column="1" Text="Product" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Column="2" Text="(Ctrl-5)" FontStyle="Italic" VerticalAlignment="Center" Margin="4,0,3,0"/>
+                    </Grid>
+                </ComboBoxItem>
+
+            </local:ComboPlus>
+            
+
+            <Button x:Name="btnAddComment" Margin="2,0,2,0" Background="{StaticResource ButtonGradient}" BorderBrush="lightgray"
+                    BorderThickness="1">
+                <StackPanel Orientation="Horizontal">
+                    <ContentControl Content="{StaticResource icoMessageBubble}" Margin="4,0,4,0" Height="16"/>
+                    <TextBlock Text="Add Comment" Margin="0,0,4,0" FontWeight="DemiBold" Foreground="#FF171717"/>
+                </StackPanel>
+            </Button>
+            
+
+            <local:ComboPlus x:Name="cboAddOther" DropDownDirection="Up" Margin="4,0,4,0" IsEditable="False" SelectedIndex="0"
+              CboBackground="{StaticResource ButtonGradient}" CboBorderBrush="lightgray"
+              Grid.IsSharedSizeScope="true" Padding="3,3" >
+
+                <ComboBoxItem IsEnabled="False" Background="{StaticResource ButtonGradient}" >
+                    <StackPanel Orientation="Horizontal">
+                        <ContentControl Content="{StaticResource icoAddElement}" Height="16" Margin="0,0,3,0" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="blkAddOther" Text="Add Other" FontWeight="DemiBold"
+                               VerticalAlignment="Center" Margin="0,0,1,0" Foreground="#FF171717"  />
+                    </StackPanel>
+                </ComboBoxItem>
+
+                <ComboBoxItem x:Name="AddSeparator" Margin="1" Focusable="false">
+                    <Grid >
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition SharedSizeGroup="iconCol"/>
+                            <ColumnDefinition SharedSizeGroup="headerCol"/>
+                            <ColumnDefinition SharedSizeGroup="shortcutCol"/>
+                        </Grid.ColumnDefinitions>
+                        <ContentControl Grid.Column="0" Content="{StaticResource icoWorkflowSeparator}" Margin="0,0,6,0" Height="16"  />
+                        <TextBlock Grid.Column="1" Text="Workflow Separator" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Column="2" Text="(Ctrl-7)" FontStyle="Italic" VerticalAlignment="Center" Margin="4,0,3,0"/>
+                    </Grid>
+                </ComboBoxItem>
+
+                <ComboBoxItem x:Name="AddFile" Margin="1" Focusable="false">
+                    <Grid >
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition SharedSizeGroup="iconCol"/>
+                            <ColumnDefinition SharedSizeGroup="headerCol"/>
+                            <ColumnDefinition SharedSizeGroup="shortcutCol"/>
+                        </Grid.ColumnDefinitions>
+                        <ContentControl Grid.Column="0" Content="{StaticResource icoAddDocument}" Margin="0,0,6,0" Height="16"  />
+                        <TextBlock Grid.Column="1" Text="Images/Documents ..." VerticalAlignment="Center"/>
+                        <TextBlock Grid.Column="2" Text="(Ctrl-8)" FontStyle="Italic" VerticalAlignment="Center" Margin="4,0,3,0"/>
+                    </Grid>
+                </ComboBoxItem>
+
+            </local:ComboPlus>
+
+            <CheckBox x:Name="chkInsert" VerticalAlignment="Center" Content="Insert" Margin="2,0,2,0" ToolTipService.InitialShowDelay="500"
+                ToolTip="If checked, a new protocol item &#x0a;will be inserted below the currently &#x0a;selected one, instead of appended."
+                FontWeight="demibold"/>
+
+        </StackPanel>
+
+    </Border>
+
+</UserControl>

@@ -1,0 +1,18 @@
+﻿<UserControl x:Class="TreeViewEditLabel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:CustomControls"
+             mc:Ignorable="d" 
+             d:DesignHeight="18" d:DesignWidth="100" x:Name="editLabel">
+
+    <Grid>
+        <TextBox x:Name="txtTitle" d:Text="Title" BorderThickness="0" Background="{StaticResource ActiveEditBackground}" 
+           Padding="0,0,4,0" 
+            Text="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=local:TreeViewEditLabel}, Path=EditText,Mode=TwoWay}"/>
+        <TextBlock x:Name="blkTitle" d:Text="Title" Padding="2,0,6,0" Background="white"
+            Text="{Binding ElementName=txtTitle,Path=Text}"/>
+    </Grid>
+    
+</UserControl>

@@ -1,0 +1,64 @@
+﻿<UserControl x:Class="ExperimentTree"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:data="clr-namespace:ElnCoreModel;assembly=ElnCoreModel"
+             xmlns:local="clr-namespace:CustomControls"
+             xmlns:dd="clr-namespace:GongSolutions.Wpf.DragDrop;assembly=GongSolutions.Wpf.DragDrop"
+             mc:Ignorable="d" 
+             d:DataContext="{d:DesignInstance Type=data:tblUsers}"
+             d:DesignHeight="450" d:DesignWidth="800">
+
+    <UserControl.Resources>
+        
+        <local:ProjectsCollectionViewConverter x:Key="projectsCollectionViewConv"/>
+        <local:ExperimentsCollectionViewConverter x:Key="expCollectionViewConv"/>
+        <local:BindingTypeConverter x:Key="bindingTypeConv"/>
+        <local:IntegerToBooleanConverter x:Key="intToBooleanConv"/>
+        <local:NavTreeDropHandler x:Key="navTreeDropHandler"/>
+
+    </UserControl.Resources>
+
+    <Border CornerRadius="6" BorderBrush="#aaaaaa" BorderThickness="1" Padding="4" Background="white">
+
+        <TreeView x:Name="navTree" ItemsSource="{Binding tblProjects, Converter={StaticResource projectsCollectionViewConv}}" 
+            TreeViewItem.Selected="TreeViewItem_Selected" TreeViewItem.Unselected="TreeViewItem_Unselected" 
+            Padding="2,6,2,8" BorderThickness="0"
+            dd:DragDrop.IsDragSource="True"
+            dd:DragDrop.IsDropTarget="True"
+            dd:DragDrop.UseDefaultDragAdorner="false"
+            dd:DragDrop.DropTargetAdornerBrush="#FF6868FF"
+            dd:DragDrop.EffectMoveAdornerTemplate="{x:Null}"
+            dd:DragDrop.DropHandler="{StaticResource navTreeDropHandler}">
+
+            <TreeView.Resources>
+
+                <!--Project nodes-->
+                <HierarchicalDataTemplate DataType="{x:Type data:tblProjects}" ItemsSource="{Binding tblExperiments, 
+                  Converter={StaticResource expCollectionViewConv}}">
+                    <local:ProjectTreeHeader RequestAddExperiment="projectHeader_RequestAddExperiment" 
+                       RequestDeleteProject="projectHeader_RequestDeleteProject"/>
+                </HierarchicalDataTemplate>
+
+                <!--Experiment nodes-->
+                <DataTemplate DataType="{x:Type data:tblExperiments}">
+                    <local:ExpTreeHeader Margin="-16,0,0,0"/>
+                </DataTemplate>
+
+            </TreeView.Resources>
+
+            <TreeView.ItemContainerStyle>
+                
+                <Style TargetType="{x:Type TreeViewItem}">
+                    <!--Specifies the selection/deselection background behavior of the expItem-->
+                    <Setter Property="Template" Value="{StaticResource ExperimentTreeViewItem}"/>
+                    <Setter Property="IsExpanded" Value="{Binding IsNodeExpanded,Converter={StaticResource intToBooleanConv},
+                        Mode=TwoWay}"/>
+                </Style>
+                
+            </TreeView.ItemContainerStyle>
+
+        </TreeView>
+    </Border>
+</UserControl>

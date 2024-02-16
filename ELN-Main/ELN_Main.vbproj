@@ -1,0 +1,94 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    
+    <AssemblyVersion>0.9.1</AssemblyVersion>
+    <FileVersion>0.9.1</FileVersion>
+
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows10.0.17763.0</TargetFramework>  
+    <RootNamespace>ChemBytes</RootNamespace>
+    <UseWPF>true</UseWPF>
+    <ImportedNamespaces>Spire=False,Spire.License=False,System.IO=False,System.Linq.Experessions=False,System.Windows=False,System.Windows.Controls=False,System.Windows.Data=False,System.Windows.Documents=False,System.Windows.Input=False,System.Windows.Media=False,System.Windows.Media.Imaging=False,System.Windows.Navigation=False,System.Windows.Shapes=False,System.XML=False,Microsoft.VisualBasic=True,System=True,System.Collections=True,System.Collections.Generic=True,System.Diagnostics=True,System.Linq=True,System.Xml.Linq=True,System.Threading.Tasks=True,ELN_Main=True</ImportedNamespaces>
+    <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
+    <ApplicationManifest>My Project\app.manifest</ApplicationManifest>
+    <PackageId>$(AssemblyName)</PackageId>
+    <AssemblyName>PhoenixELN</AssemblyName>
+    <ApplicationIcon>Resources\Application.ico</ApplicationIcon>
+    <StartupObject>Sub Main</StartupObject>
+    <Version></Version>
+    <Copyright>(c) Stefan Abrecht, ChemBytes</Copyright>
+    <PackageProjectUrl></PackageProjectUrl>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="Resources\Application.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Import Include="System.IO" />
+    <Import Include="System.Windows" />
+    <Import Include="System.Windows.Controls" />
+    <Import Include="System.Windows.Data" />
+    <Import Include="System.Windows.Documents" />
+    <Import Include="System.Windows.Input" />
+    <Import Include="System.Windows.Media" />
+    <Import Include="System.Windows.Media.Imaging" />
+    <Import Include="System.Windows.Navigation" />
+    <Import Include="System.Windows.Shapes" />
+    <Import Include="System.XML" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Application.xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CustomControls\CustomControls.vbproj" />
+    <ProjectReference Include="..\ElnBase\ElnBase.vbproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="dlgChangeUsername.xaml.vb">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="My Project\Resources.Designer.vb">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Update="My Project\Settings.Designer.vb">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="My Project\Resources.resx">
+      <CustomToolNamespace>My.Resources</CustomToolNamespace>
+      <Generator>VbMyResourcesResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.vb</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="My Project\Settings.settings">
+      <CustomToolNamespace>My</CustomToolNamespace>
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.vb</LastGenOutput>
+    </None>
+  </ItemGroup>
+
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="XCOPY &quot;$(SolutionDir)References\libinchi\&quot; &quot;$(TargetDir)\libinchi&quot; /S /Y /I&#xD;&#xA;XCOPY &quot;$(SolutionDir)References\DB-Seed\&quot; &quot;$(TargetDir)\DB-Seed&quot; /S /Y /I" />
+  </Target>
+
+</Project>

@@ -1,0 +1,89 @@
+﻿<UserControl x:Class="StatusDemo"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:CustomControls"
+             xmlns:base="clr-namespace:ElnCoreModel;assembly=ElnCoreModel"
+            d:DataContext="{d:DesignInstance Type=base:tblUsers}"
+             mc:Ignorable="d" 
+            d:DesignWidth="250">
+
+    <UserControl.Resources>
+        <local:RemainingDemoCountConverter x:Key="demoCountConv"/>
+        <local:RemainingDemoBrushConverter x:Key="warningBrushConv"/>
+        <Style TargetType="TextBlock">
+            <Setter Property="LineHeight" Value="14"/>
+            <Setter Property="LineStackingStrategy" Value="BlockLineHeight"/>
+        </Style>
+    </UserControl.Resources>
+
+    <StackPanel>
+
+        <Grid Margin="0,6,0,0">
+
+            <Grid.ColumnDefinitions >
+                <ColumnDefinition Width="12" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <ContentControl Grid.Column="0" Content="{StaticResource icoBlueDot}" Height="14" VerticalAlignment="Top" Margin="0,0,2,0" HorizontalAlignment="Left" />
+            <StackPanel Grid.Column="1">
+                <TextBlock Text="You are in the 'demo' sandbox." FontWeight="bold" FontStyle="italic" Foreground="#FF3E3E3E"
+                    TextWrapping="wrap" Background="white" FontSize="12"/>
+                <TextBlock Text="Familiarize with the application as 'demo' user, then create a unique user for your real experiments."
+                    TextWrapping="wrap" Margin="0,2,0,0"/>
+            </StackPanel>
+
+        </Grid>
+
+        <Grid Margin="0,7,0,6">
+
+            <Grid.ColumnDefinitions >
+                <ColumnDefinition Width="12" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <ContentControl Grid.Column="0" Content="{StaticResource icoBlueDot}" Height="14" VerticalAlignment="Top" Margin="0,0,2,0"/>
+            <StackPanel Grid.Column="1">
+                <StackPanel x:Name="pnlRemainingExp" Orientation="Horizontal" 
+                    Background="{Binding tblExperiments.Count, Converter={StaticResource warningBrushConv}}" HorizontalAlignment="Left">
+                   <TextBlock Text="Demo experiments left:" FontWeight="bold" FontStyle="italic" Foreground="#FF3C3C3C"     
+                        TextWrapping="wrap" Background="white" FontSize="12"/>
+                    <TextBlock x:Name="blkRemainingCount" d:Text="20" FontWeight="bold" FontStyle="italic" Foreground="#FF2B2BFD"
+                        Text="{Binding tblExperiments.Count, Converter={StaticResource demoCountConv}}" Margin="3,0,4,0" FontSize="12"/>
+                    
+                </StackPanel>
+                <TextBlock Text="The number of sandbox experiments is limited, since they will be lost after creating your own username."
+                    TextWrapping="wrap" Margin="0,1,0,0"/>
+            </StackPanel>
+
+        </Grid>
+
+        <Separator Margin="12,2,12,8"/>
+
+        <TextBlock Margin="12,0,0,0" HorizontalAlignment="Left" FontStyle="Italic" Text="Create your own userID now:"/>
+
+        <Button x:Name="btnCreateUser" Content="Create User" BorderThickness="1" Padding="8,1,8,3"
+            BorderBrush="green" Background="#FFDCFFDC" HorizontalAlignment="Left" Margin="12,4,0,6" 
+            VerticalContentAlignment="Center" FocusVisualStyle="{x:Null}"
+            ToolTip="Leave the demo sandbox and start &#x0a;creating your own experiments."/>
+
+        <Separator Margin="12,4,12,8"/>
+
+        <TextBlock Margin="12,0,12,0" TextWrapping="wrap" HorizontalAlignment="left" FontStyle="Italic" IsHyphenationEnabled="true">
+            <Run FontWeight="DemiBold" FontSize="12" Foreground="#FF222222" Text="Existing Users"/><Run FontStyle="Normal" Text=": Restore your experiments from the backup:"/>
+        </TextBlock>
+
+        <StackPanel Orientation="Horizontal" Margin="12,4,22,6" HorizontalAlignment="Left">
+            <ContentControl Content="{StaticResource icoFromServer}" Height="20" Margin="0,0,5,0"/>
+            <TextBlock x:Name="lnkRestore" Text="Restore from server" HorizontalAlignment="Center" Foreground="blue" 
+                Cursor="Hand" TextDecorations="Underline" VerticalAlignment="Center" FontSize="12.5"
+                ToolTip="Replaces the demo database by your own experiments,&#x0a;e.g. after a fresh installation on a new machine."/>
+        </StackPanel>
+
+        <Separator/>
+
+    </StackPanel>
+   
+</UserControl>

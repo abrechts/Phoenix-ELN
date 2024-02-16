@@ -1,0 +1,157 @@
+﻿<Window x:Class="dlgNewUser"
+   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    mc:Ignorable="d" 
+    Title="New User" Width="436" WindowStyle="SingleBorderWindow" ResizeMode="NoResize" 
+    WindowStartupLocation="CenterOwner" SnapsToDevicePixels="False" ShowInTaskbar="False"
+    FontFamily="Verdana" FontSize="11" SizeToContent="Height">
+
+    <Grid  Background="Whitesmoke" >
+        
+        <TabControl x:Name="generalTab" Margin="0,-28,0,0" Background="transparent">
+
+            <TabItem x:Name="tabUserID" Header=" UserID " IsTabStop="True" TabIndex="0" Focusable="True">
+                <Grid VerticalAlignment="Top" Margin="0,12,12,16">
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="80" />
+                        <ColumnDefinition Width="422*" />
+                    </Grid.ColumnDefinitions>
+
+                    <ContentControl Content="{StaticResource icoUser}" Grid.Column="0" Height="48" HorizontalAlignment="Center" 
+                      Margin="0,8,0,0" VerticalAlignment="Top" />
+
+                    <StackPanel Margin="2,14,0,0" Grid.Column="1">
+
+                        <TextBlock Height="20" VerticalAlignment="Top" FontWeight="Bold" FontSize="12" HorizontalAlignment="Left"
+                          Text="New User: Specify User-ID" />
+
+                        <TextBlock Margin="0,4,0,0" TextWrapping="Wrap" HorizontalAlignment="Left" 
+                           Text="Specify a unique and short personal user-ID, max. 10 characters, which will uniquely identify you and your experiments (e.g. smithk1):"/>
+
+                        <TextBox x:Name="txtUserID" VerticalContentAlignment="Center" Padding="2,3,0,3" Width="104" Foreground="Blue"
+                            TabIndex="0" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="0,12,0,0" MaxLength="10" />
+
+                        <TextBlock Text="(characters and digits only)" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,8,0,0"/>
+
+                        <TextBlock Margin="0,12,20,0" TextWrapping="Wrap" VerticalAlignment="Top" HorizontalAlignment="Left" IsHyphenationEnabled="True"
+                            Text="Best use your personal user-ID within your organization to ensure uniqueness in your working environment (your name may not be unique)."/>
+
+                        <Button x:Name="btnContinue" Content="Continue &gt;" HorizontalAlignment="Center"  VerticalAlignment="Top" 
+                            Margin="0,16,0,0" Width="82" TabIndex="1" IsEnabled="False" IsDefault="True" Padding="1,3" Background="white">
+                        </Button>
+
+                    </StackPanel>
+
+                </Grid>
+
+            </TabItem>
+
+            <TabItem  x:Name="tabConfirm" Header=" Confirm " IsTabStop="False" Focusable="True">
+
+                <Grid Margin="2,24,0,12" Grid.Column="1">
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="80" />
+                        <ColumnDefinition Width="422*" />
+                    </Grid.ColumnDefinitions>
+
+                    <ContentControl Grid.Column="0" Content="{StaticResource icoOkBullet}" Height="38" HorizontalAlignment="Left" 
+                       Margin="15,0,0,0" VerticalAlignment="Top"/>
+
+                    <StackPanel Grid.Column="1" Margin="0,12,0,0">
+
+                        <TextBlock Text="Confirm your User-ID" FontSize="12" FontWeight="Bold" />
+
+                        <StackPanel Orientation="Horizontal" Margin="0,20,0,0" >
+                            <TextBlock Text="Your user-ID:" FontWeight="Bold" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                            <TextBlock x:Name="blkUserID" d:Text="abrechts" Margin="6,0,0,0" FontWeight="Bold" Background="Yellow" Padding="3,1,3,2"/>
+                        </StackPanel>
+
+                        <TextBlock Text="experiment-ID example:"  Margin="0,8,0,0"/>
+                        <TextBlock Text="abrechts-00001" Margin="0,2,0,0" Name="blkExample" FontStyle="Italic" Foreground="Blue"/>
+
+                        <TextBlock Margin="0,12,14,0" TextWrapping="Wrap" FontStyle="Italic" HorizontalAlignment="Left">
+                            <Run FontWeight="Bold" Text="Important:"/>
+                            <Run Text=" The specified user-ID cannot be changed any more after accepting it, since it will be an integral part of your experiment identifiers."/>
+                        </TextBlock>
+
+                        <DockPanel  Margin="0,24,0,14">
+                            <Button x:Name="btnBack" Content="&lt; Go Back" Width="87" Padding="1,3" Background="white"/>
+                            <Button x:Name="btnAccept" Content="Confirm >" DockPanel.Dock="right" IsDefault="True" Width="84" 
+                                Margin="0,0,32,0" Padding="1,3" HorizontalAlignment="Right" Background="white"/>
+                        </DockPanel>
+
+                    </StackPanel>
+
+                </Grid>
+                
+            </TabItem>
+            
+            <TabItem Header=" Settings " Name="tabSettings">
+
+                <Grid Margin="0,8,0,0">
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="80" />
+                        <ColumnDefinition Width="422*" />
+                    </Grid.ColumnDefinitions>
+
+                    <ContentControl Content="{StaticResource icoEdit}" Grid.Column="0" Height="28" Margin="0,12,0,0" 
+                      VerticalAlignment="Top" />
+
+                    <StackPanel Grid.Column="1">
+
+                        <TextBlock Margin="0,19,0,0" Text="Personal Settings" TextWrapping="Wrap" VerticalAlignment="Top"  
+                           FontWeight="Bold" FontSize="12" />
+
+                        <TextBlock Margin="0,10,0,0" Text="The information below will appear in the header of your experiments:" 
+                           TextWrapping="Wrap" FontStyle="Normal" HorizontalAlignment="Left" Width="279" />
+
+                        <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
+                            <TextBlock Text="First Name:" VerticalAlignment="Center" Width="84"  />
+                            <TextBox x:Name="txtFirstName" TabIndex="0" FontFamily="Comic Sans MS" Foreground="Blue" 
+                               HorizontalAlignment="Left" Width="197" Padding="0,1" />
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                            <TextBlock Text="Last Name:" VerticalAlignment="Center" Width="84" />
+                            <TextBox x:Name="txtLastName" TabIndex="1" FontFamily="Comic Sans MS" Foreground="Blue" 
+                               HorizontalAlignment="Left" Width="197" Padding="0,1" />
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                            <TextBlock Text="Organization:" Width="84" HorizontalAlignment="left" VerticalAlignment="Center"/>
+                            <TextBox x:Name="txtOrganization" TabIndex="2" FontFamily="Comic Sans MS" Foreground="Blue" 
+                                VerticalAlignment="Top" HorizontalAlignment="Left" Width="197" Padding="0,1" />
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                            <TextBlock Text="Department:" Width="84" HorizontalAlignment="left" VerticalAlignment="Center"/>
+                            <TextBox x:Name="txtDepartment" TabIndex="3" FontFamily="Comic Sans MS" Foreground="Blue" 
+                               VerticalAlignment="Top" HorizontalAlignment="Left" Width="197" Padding="0,1" />
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                            <TextBlock Text="City:" Width="84" HorizontalAlignment="left" VerticalAlignment="Center"/>
+                            <TextBox x:Name="txtSite" TabIndex="4" FontFamily="Comic Sans MS" Foreground="Blue" 
+                                VerticalAlignment="Top" HorizontalAlignment="Left" Width="197" Padding="0,1" />
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Grid.Column="1" HorizontalAlignment="Center" Margin="0,20,0,18" VerticalAlignment="Bottom">
+                            <Button x:Name="btnCancel" Content="Cancel" IsCancel="True" Width="67" Padding="1,3" Margin="0,0,24,0"
+                               Background="white"/>
+                            <Button x:Name="btnClose" Content="Done" IsDefault="True" Width="75" 
+                                IsEnabled="False" Padding="1,3" Background="white"/>
+                        </StackPanel>
+
+                    </StackPanel>
+
+                </Grid>
+
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Window>

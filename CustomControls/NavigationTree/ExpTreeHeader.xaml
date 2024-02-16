@@ -1,0 +1,77 @@
+﻿<UserControl x:Class="ExpTreeHeader"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+        xmlns:data="clr-namespace:ElnCoreModel;assembly=ElnCoreModel"
+        xmlns:local="clr-namespace:CustomControls"
+        mc:Ignorable="d" 
+        d:DataContext="{d:DesignInstance Type=data:tblExperiments}"
+        SnapsToDevicePixels="True">
+
+    <UserControl.Resources>
+        
+        <local:StatusIconConverter x:Key="statusIconConv"/>
+        <local:UserTagConverter x:Key="userTagConv"/>
+        <local:YieldStrConverter x:Key="yieldStrConv"/>
+        <local:WeightFromGramsConverter x:Key="weightFromGramsConv"/>
+        <local:IntegerToVisibilityConverter x:Key="intToVisConv"/>
+        <local:ExpStateToVisibilityConverter x:Key="expStateVisConv"/>
+        <local:PinnedToVisibilityConverter x:Key="pinnedToVisConv"/>
+
+        <Style TargetType="MenuItem">
+            <Setter Property="Template" Value="{StaticResource ContextMenuItem}"/>
+        </Style>
+        
+    </UserControl.Resources>
+
+    <UserControl.ContextMenu>
+        <ContextMenu>
+            <!--<MenuItem x:Name="mnuBookmark" Icon="{StaticResource icoArrowRight}" Header="Bookmark"/>-->     
+            <!--<Separator Visibility="{Binding WorkflowState, Converter={StaticResource expStateVisConv}}"/>-->
+            <MenuItem x:Name="mnuFinalize" Icon="{StaticResource icoOkBullet}" Header="Finalize Experiment" Opacity="0.8"
+                Visibility="{Binding WorkflowState, Converter={StaticResource expStateVisConv},ConverterParameter=invert}"/>
+            <MenuItem x:Name="mnuUnlock" Icon="{StaticResource icoReopened}" Header="Unlock Experiment" Opacity="0.8"
+               Visibility="{Binding WorkflowState, Converter={StaticResource expStateVisConv}}"/>
+        </ContextMenu>
+    </UserControl.ContextMenu>
+
+    <Grid>
+        <StackPanel Orientation="Horizontal" Margin="0,0,2,0">
+
+            <ContentControl Width="14" Visibility="{Binding DisplayIndex, Converter={StaticResource pinnedToVisConv}}" 
+             Margin="0,0,-3,0" VerticalAlignment="Center" Content="{StaticResource icoArrowRight}" Opacity="0.75"/>
+
+            <Border CornerRadius="6" >
+                
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="Background" Value="white"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsCurrent}" Value="1" >
+                                <Setter Property="Background" Value="#FFC4FAFF" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+
+                <StackPanel Orientation="Horizontal">
+                    
+                    <ContentControl Width="14" d:Content="{StaticResource icoRedDot}" Margin="0,0,1,0" Opacity="0.75"
+                        Content="{Binding WorkflowState, Converter={StaticResource statusIconConv}}"  />
+                    
+                    <TextBlock MinWidth="50" Margin="0,0,2,1" VerticalAlignment="Center">
+                        <Run Name="runExpID" d:Text="demo-00123" Text="{Binding ExperimentID}" Foreground="#FF2020CE"/>   
+                        <Run Text="-"/>
+                        <Run Name="runYield" d:Text="92.5%" Text="{Binding Yield, Converter={StaticResource yieldStrConv}}" />
+                        <Run Name="runScale" d:Text="(23.5 g)" Text="{Binding RefReactantGrams,Converter={StaticResource weightFromGramsConv}}"/>
+                    </TextBlock>
+                    
+                </StackPanel>
+
+            </Border>
+
+        </StackPanel>
+    </Grid>
+    
+</UserControl>

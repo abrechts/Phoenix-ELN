@@ -1,0 +1,39 @@
+﻿<Window x:Class="dlgServerConflict"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CustomControls"
+        mc:Ignorable="d"
+        Title="Server Data Conflict" Width="400" ShowInTaskbar="False" FontFamily="SegoeUI" FontSize="12.5" ResizeMode="NoResize" 
+        WindowStartupLocation="CenterOwner" SizeToContent="Height" >
+    <Grid>
+        <StackPanel Margin="30,15,30,20">
+            
+            <TextBlock Text="UserID Conflict" FontWeight="Bold" FontSize="13.5" FontStyle="Italic"  Foreground="{StaticResource DialogTitleForeground}"/>
+           
+            <TextBlock Text="Another version of your experiments database seems to be present on the server (same userID and full name). Uploading your current data therefore would lead to version conflicts." 
+               Margin="0,6,0,2" TextWrapping="Wrap" FontSize="12"/>
+
+            <TextBlock Text="Select an option for conflict resolution:" Margin="0,6,0,5" TextWrapping="Wrap" FontSize="12"/>
+
+            <RadioButton x:Name="rdoRestore" IsChecked="true">
+                <StackPanel Margin="0,2,0,0">
+                    <TextBlock Text="Restore your data from the server." FontWeight="DemiBold"/>
+                    <TextBlock Text="Replaces your current local experiments database by the version stored on the server. Discards your current local data." TextWrapping="Wrap" Margin="1,1,0,0" FontSize="12" FontStyle="Italic"/>
+                </StackPanel>
+            </RadioButton>
+
+            <RadioButton x:Name="rdoRename" Margin="0,5,0,0">
+                <StackPanel Margin="0,2,0,0">
+                    <TextBlock Text="Assign new experiment IDs to your local experiments." FontWeight="DemiBold"/>
+                    <TextBlock Text="Keeps the local data and both versions on the server. Already referenced local experiment-ID's are no more valid." TextWrapping="Wrap" Margin="1,1,0,0" FontSize="12" FontStyle="Italic"/>
+                </StackPanel>
+            </RadioButton>
+
+            <Button x:Name="btnOK" Content="OK" Margin="0,16,0,0" HorizontalAlignment="Center" Width="80" Height="22" 
+               VerticalAlignment="Center" FontSize="11" Padding="2,2,2,0" Background="#FFF9F9F9"/>
+            
+        </StackPanel>
+    </Grid>
+</Window>
