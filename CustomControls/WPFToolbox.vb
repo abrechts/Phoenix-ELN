@@ -199,7 +199,7 @@ Public Class WPFToolbox
     Public Shared Function IsInternetAvailable() As Boolean
 
         Try
-            Dim clnt As System.Net.Sockets.TcpClient = New System.Net.Sockets.TcpClient("www.microsoft.com", 80)
+            Dim clnt As New Sockets.TcpClient("www.microsoft.com", 80)
             clnt.Close()
             Return True
         Catch
@@ -607,7 +607,7 @@ Public Class WPFToolbox
     Public Shared Function FindVisualParent(Of T As DependencyObject)(child As DependencyObject) As T
         ' get parent item
 
-        If Not TypeOf child Is Visual Then
+        If TypeOf child IsNot Visual Then
             Return Nothing  'could be Run (e.g. for blue Now... link)
         End If
 
@@ -711,9 +711,7 @@ Public Class WPFToolbox
                 browser = browser.Substring(0, browser.LastIndexOf(".exe") + 4)
             End If
         Finally
-            If key IsNot Nothing Then
-                key.Close()
-            End If
+            key?.Close()
         End Try
         Return browser
 
@@ -750,7 +748,8 @@ Public Class WPFToolbox
         Dim ext = LCase(IO.Path.GetExtension(filePath))
         Dim imgList As New List(Of String)
 
-        imgList.AddRange(New String() {".jpg", ".jpeg", ".png", ".gif", ".giff", ".tif", ".tiff", ".emf", ".wmf"})
+        Dim collection = New String() {".jpg", ".jpeg", ".png", ".gif", ".giff", ".tif", ".tiff", ".emf", ".wmf"}
+        imgList.AddRange(collection)
 
         Return imgList.Contains(ext)
 

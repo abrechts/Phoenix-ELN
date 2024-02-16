@@ -80,8 +80,12 @@ Public Class ExperimentPrint
         Try
 
             If printAsPDF Then
-                Dim pdfDoc = PaginatorToPdfDoc(stackPrintTempl.Paginator)
-                CompletePDF(pdfDoc, pdfPath, expEntry)  'add attachments, convert to PDF/A-3b
+
+                Dim pdfDoc = PaginatorToPdfDoc(stackPrintTempl.Paginator, printAsPDF)
+                If pdfDoc IsNot Nothing Then
+                    CompletePDF(pdfDoc, pdfPath, expEntry)  'add attachments, convert to PDF/A-3b
+                End If
+
             Else
                 printDlg.PrintDocument(stackPrintTempl.Paginator, "Printing " + expEntry.ExperimentID)
             End If
@@ -139,7 +143,7 @@ Public Class ExperimentPrint
 
             Catch ex As Exception
 
-                'non-PDF/A-3b version (e.g. after exceeding 10 page limit of free Spire.PDF)
+                'non-PDF/A-3b version
                 convertedPDF = origPDF
                 MsgBox("Unable to save your document in PDF/A3b format." + vbCrLf +
                        "It will be saved as standard PDF instead.", MsgBoxStyle.Information, "PDF Export")
@@ -190,11 +194,11 @@ Public Class ExperimentPrint
     ''' <param name="docPaginator">The paginator to convert.</param>
     ''' <returns>The resulting Spire.PdfDocument</returns>
     '''
-    Private Shared Function PaginatorToPdfDoc(docPaginator As DocumentPaginator) As PdfDocument
+    Private Shared Function PaginatorToPdfDoc(docPaginator As DocumentPaginator, printAsPDF As Boolean) As PdfDocument
 
-        Using xpsMemStream = New System.IO.MemoryStream
+        Using xpsMemStream = New MemoryStream
 
-            Dim myPackage = Package.Open(xpsMemStream, System.IO.FileMode.Create, System.IO.FileAccess.ReadWrite)
+            Dim myPackage = Package.Open(xpsMemStream, FileMode.Create, FileAccess.ReadWrite)
             Dim u = New Uri("pack://TemporaryPackageUri.pdf")
             Dim pdfXPSDoc = New Xps.Packaging.XpsDocument(myPackage, CompressionOption.NotCompressed, u.AbsoluteUri)
             Dim paginator2PDFWriter = Xps.Packaging.XpsDocument.CreateXpsDocumentWriter(pdfXPSDoc)
@@ -202,6 +206,13 @@ Public Class ExperimentPrint
 
             pdfXPSDoc.Close()
             myPackage.Close()
+
+            'check for Spire.Pdf Free 10 page limit
+            If printAsPDF AndAlso docPaginator.PageCount > 1 Then
+                MsgBox("Sorry, can't create PDF documents larger " + vbCrLf +
+                       "than 10 pages.", MsgBoxStyle.Information, "PDF limits reached.")
+                Return Nothing
+            End If
 
             'workaround for decimal separator issue
             Dim cc = Thread.CurrentThread.CurrentCulture

@@ -1,9 +1,9 @@
 ﻿2024-01-21 16:08:22|   9.118.7305.8787|      545272|-R-S|C:\Program Files\InstallMate 9\Stubs80\Tsu32u.dll
-2024-02-16 06:14:30|                  |       78521|-R-S|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\Deployment\Phoenix ELN\Phoenix-ELN\Phoenix ELN-0.9.1-Setup.dat
-2024-02-16 06:14:30|                  |      235008|-R-S|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\Deployment\Phoenix ELN\Phoenix-ELN\Phoenix ELN-0.9.1-Setup32.dll
+2024-02-16 07:56:59|                  |       78665|-R-S|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\Deployment\Phoenix ELN\Phoenix-ELN\Phoenix-ELN-0.9.1-Setup.dat
+2024-02-16 07:56:59|                  |      235008|-R-S|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\Deployment\Phoenix ELN\Phoenix-ELN\Phoenix-ELN-0.9.1-Setup32.dll
 2015-09-08 13:36:32|                  |       23558|-R-S|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\Deployment\blankcd.ico
-2024-02-16 06:14:30|                  |        2060|-R-S|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\Deployment\Phoenix ELN\Phoenix-ELN\Readme.txt
-2024-02-16 06:14:30|           0.9.1.0|       46528|-R-S|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\Deployment\Phoenix ELN\Phoenix-ELN\_Setup.exe
+2024-02-16 07:56:59|                  |        2060|-R-S|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\Deployment\Phoenix ELN\Phoenix-ELN\Readme.txt
+2024-02-16 07:56:59|           0.9.1.0|       46528|-R-S|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\Deployment\Phoenix ELN\Phoenix-ELN\_Setup.exe
 2024-02-16 05:50:31|                  |     1769472|----|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\References\DB-Seed\ElnData.db
 2024-02-16 06:05:22|                  |      204576|----|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\ELN-Main\bin\Release\Publish\CustomControls.pdb
 2024-02-16 06:05:25|                  |       45744|----|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\ELN-Main\bin\Release\Publish\PhoenixELN.pdb

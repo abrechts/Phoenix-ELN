@@ -97,7 +97,7 @@ Public Class PrintPageTemplate
     ''' 
     Public Property IsHeaderVisible As Boolean
         Get
-            Return If(HeaderRow.MaxHeight = 0, False, True)
+            Return HeaderRow.MaxHeight <> 0
         End Get
         Set(value As Boolean)
             HeaderBorder.MaxHeight = If(value, Double.PositiveInfinity, 0)
@@ -111,7 +111,7 @@ Public Class PrintPageTemplate
     '''
     Public Property IsFooterVisible As Boolean
         Get
-            Return If(FooterBorder.MaxHeight = 0, False, True)
+            Return FooterBorder.MaxHeight <> 0
         End Get
         Set(value As Boolean)
             FooterBorder.MaxHeight = If(value, Double.PositiveInfinity, 0)
@@ -371,7 +371,7 @@ Public Class PrintPageTemplate
 
         Public Overrides ReadOnly Property PageCount As Integer
             Get
-                Return mPageNumber
+                Return mPageTotal
             End Get
         End Property
 
