@@ -87,7 +87,7 @@
 
                 <RadioButton x:Name="rdoClone" Content="Clone Experiment" FontWeight="Bold" Foreground="DarkBlue"/>
 
-                <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top" Margin="19,0,0,8">
+                <StackPanel x:Name="pnlCloneOptions" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="19,0,0,8">
 
                     <TextBlock Text="Copies sketch and content of the specified experiment into a new one:" 
                        FontSize="11.5" TextWrapping="Wrap" Width="270" FontStyle="Italic" HorizontalAlignment="Left"  />
@@ -100,7 +100,7 @@
                         <CheckBox x:Name="chkScale" Content="Scale to different reference reactant amount:" Margin="0,4,0,3" FontStyle="Italic"/>
 
                         <StackPanel Orientation="Horizontal"  Visibility="{Binding ElementName=chkScale, Path=IsChecked,Converter={StaticResource boolToVisConv}}">
-                            
+
                             <local:NumericTextBox x:Name="numMatAmount" Style="{StaticResource numBoxStyle}" HorizontalContentAlignment="Center"
                                 d:Text="2.53" VerticalAlignment="Top" Margin="22,0,0,0"/>
 
@@ -114,11 +114,8 @@
                                 <ComboBoxItem Content="mmol"/>
                             </local:ComboPlus>
 
-                            <!--<TextBlock Text=" reference reactant amount." VerticalAlignment="Center" FontStyle="Italic" />-->
-
                         </StackPanel>
 
-                        
                     </StackPanel>
 
                 </StackPanel>

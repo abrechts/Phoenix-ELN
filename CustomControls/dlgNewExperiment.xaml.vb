@@ -179,6 +179,13 @@ Public Class dlgNewExperiment
     End Sub
 
 
+    Private Sub chkCloneOptions_PreviewMouseDown() Handles pnlCloneOptions.PreviewMouseDown
+
+        rdoClone.IsChecked = True
+
+    End Sub
+
+
     Private Sub btnOK_Click(sender As Object, e As RoutedEventArgs) Handles btnOK.Click
 
         If CloneMethod = CloneType.FullExperiment AndAlso chkScale.IsChecked Then

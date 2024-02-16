@@ -82,7 +82,6 @@ Public Class ExperimentPrint
             If printAsPDF Then
 
                 Dim pdfDoc = PaginatorToPdfDoc(stackPrintTempl.Paginator, printAsPDF)
-
                 If pdfDoc IsNot Nothing Then
                     CompletePDF(pdfDoc, pdfPath, expEntry)  'add attachments, convert to PDF/A-3b
                 End If
