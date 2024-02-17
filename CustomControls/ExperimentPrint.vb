@@ -208,7 +208,7 @@ Public Class ExperimentPrint
             myPackage.Close()
 
             'check for Spire.Pdf Free 10 page limit
-            If printAsPDF AndAlso docPaginator.PageCount > 1 Then
+            If printAsPDF AndAlso docPaginator.PageCount > 10 Then
                 MsgBox("Sorry, can't create PDF documents larger " + vbCrLf +
                        "than 10 pages.", MsgBoxStyle.Information, "PDF limits reached.")
                 Return Nothing
