@@ -19,7 +19,6 @@ Project("{778DAE3C-4631-46EA-AA77-85C1314464D9}") = "ElnBase", "ElnBase\ElnBase.
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8772FD68-5671-4DD6-B8E5-4A2B12F008ED}"
 	ProjectSection(SolutionItems) = preProject
-		HelpDocs.md = HelpDocs.md
 		README.md = README.md
 	EndProjectSection
 EndProject
@@ -31,8 +30,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GitHub_Assets", "GitHub_Ass
 		GitHub_Assets\Same_Step_List.png = GitHub_Assets\Same_Step_List.png
 		GitHub_Assets\Server-Login.png = GitHub_Assets\Server-Login.png
 	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "HelpDoc_Assets", "HelpDoc_Assets", "{99E65F5C-1EF5-42BB-B526-9D4D5AC97271}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -59,9 +56,6 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{99E65F5C-1EF5-42BB-B526-9D4D5AC97271} = {610FECCA-813E-44EF-9C4D-13F1382387E2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8FD66902-8B5C-4170-81F4-EBD01D0E354E}
