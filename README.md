@@ -1,6 +1,6 @@
 # Phoenix ELN
 
-*Phoenix ELN* is an electronic lab notebook specialized in organic chemistry, including organometallic, peptide, resin and polymer subtypes. 
+*Phoenix ELN* is an electronic lab notebook supporting organic, organometallic, peptide, resin and polymer chemistry. 
 
 <img src="GitHub_Assets/Protocol_Overall_1.png" alt="drawing" width=800/> 
 
