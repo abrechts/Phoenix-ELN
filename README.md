@@ -2,7 +2,7 @@
 
 *Phoenix ELN* is an electronic lab notebook supporting organic, organometallic, peptide, resin and polymer chemistry. 
 
-<img src="GitHub_Assets/Protocol_Overall_1.png" alt="drawing" width=800/> 
+<img src="GitHub_Assets/Phoenix-ELN.png" alt="drawing" width=800/> 
 
 ## The Experiment Protocol
 
@@ -40,6 +40,6 @@
 
 ## ELN Server Integration (optional)
 
-*Phoenix ELN* runs fully self-sustained without any server connection. However, if you wish to take advantage of automatic in-house server synchronization of your data for continuous backup and experiment sharing across your organization, you may consider to install the *[Phoenix ELN Server Package](https://github.com/abrechts/Phoenix-ELN-Server-Package)*. This package contains an installation script for the required MySQL or MariaDB server database, along with detailed instructions, also covering inexpensive NAS systems. 
+*Phoenix ELN* runs fully self-sustained without any server connection. However, if you wish to take advantage of in-house server synchronization of your data for continuous backup and experiment sharing across your organization, you may consider to install the *[Phoenix ELN Server Package](https://github.com/abrechts/Phoenix-ELN-Server-Package)*. This package contains an installation script for the required MySQL or MariaDB server database, along with detailed instructions, also covering inexpensive NAS systems. 
 
 <img src="GitHub_Assets/Server-Login.png" alt="drawing" width=350/>
