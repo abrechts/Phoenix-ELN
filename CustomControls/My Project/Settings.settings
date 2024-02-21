@@ -72,7 +72,7 @@
       <Value Profile="(Default)">g</Value>
     </Setting>
     <Setting Name="IsServerEnabled" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">True</Value>
+      <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="RestoreFromServer" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>

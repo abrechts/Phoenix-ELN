@@ -42,7 +42,7 @@
             </StackPanel>
           
             <local:ComboPlus x:Name="cboSortType" SelectedIndex="0" HorizontalAlignment="Center" Margin="-10,1,0,4" Padding="6,1,6,2" 
-               CboBackground="white" VerticalAlignment="Center"  DockPanel.Dock="top">
+               CboBackground="white" VerticalAlignment="Center" DockPanel.Dock="top">
                 <ComboBoxItem Content="by yield"/>
                 <ComboBoxItem Content="by scale"/>
             </local:ComboPlus>

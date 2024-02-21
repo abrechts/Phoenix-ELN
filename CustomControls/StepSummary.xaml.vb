@@ -31,7 +31,7 @@ Public Class StepSummary
 
         If Me.DataContext IsNot Nothing Then
             cvsStepExperiments.Source = CType(Me.DataContext, tblUsers).tblExperiments
-            cvsStepExperiments.View.Refresh()
+            cboSortType_Changed()
         End If
 
     End Sub

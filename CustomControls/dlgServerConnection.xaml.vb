@@ -3,7 +3,6 @@ Imports System.Windows
 Imports System.Windows.Input
 Imports ElnBase
 Imports ElnCoreModel
-Imports Microsoft.EntityFrameworkCore
 
 
 Public Class dlgServerConnection
