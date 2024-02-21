@@ -37,7 +37,7 @@
 
 *Phoenix ELN* summarizes all experiments containing the same chemical reaction (same reference reactant and product) as the current experiment in an auto-generated list, sortable by experiment yield and scale. This provides a valuable overview on the current state of work, especially during optimizations.
 
-<img src="GitHub_Assets/Same_Step_List.png" alt="drawing" width=230/>
+<img src="GitHub_Assets/SameStepRxn-2.png" alt="drawing" width=250/>
 
 ## ELN Server Integration (optional)
 
