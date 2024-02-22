@@ -16,7 +16,7 @@ Public Class ImageContent
     Public Sub ActivateEdit()
 
         txtComments.Focus()
-        txtComments.Select(255, 0)
+        txtComments.Select(0, 255)
 
     End Sub
 
@@ -53,13 +53,6 @@ Public Class ImageContent
             .DataContext = Me.DataContext
             .ShowDialog()
         End With
-
-    End Sub
-
-
-    Private Sub txtComments_GotKeyboardFocus() Handles txtComments.GotKeyboardFocus
-
-        txtComments.Select(255, 0)
 
     End Sub
 

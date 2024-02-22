@@ -912,7 +912,7 @@ Public Class Protocol
 
         End If
 
-        lstProtocol.Focus()
+        '    lstProtocol.Focus()
 
     End Sub
 

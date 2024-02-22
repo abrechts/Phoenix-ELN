@@ -52,12 +52,6 @@ Public Class FileContent
     End Sub
 
 
-    Private Sub txtFileTitle_GotKeyboardFocus() Handles txtFileTitle.GotKeyboardFocus
-
-        txtFileTitle.Select(255, 0)
-
-    End Sub
-
     ''' <summary>
     ''' Enters document title editing.
     ''' </summary>
@@ -65,7 +59,7 @@ Public Class FileContent
     Public Sub ActivateEdit()
 
         txtFileTitle.Focus()
-        txtFileTitle.Select(255, 0)
+        txtFileTitle.Select(0, 255)
 
     End Sub
 
