@@ -10,7 +10,7 @@
         xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=data:tblUsers}"
-        Title="Phoenix ELN" Height="800" MinWidth="1280" MinHeight="600" 
+        Title="Phoenix ELN" Height="800" MinWidth="1280" MinHeight="600" d:Height="900" TextOptions.TextFormattingMode="Display" 
         WindowStartupLocation="CenterScreen">
 
     <Window.Resources>
@@ -162,7 +162,7 @@
             </Border>
         </Grid>
 
-        <Grid x:Name="pnlInfo" DockPanel.Dock="right" Width="280">
+        <Grid x:Name="pnlInfo" DockPanel.Dock="right" Width="285">
            
             <!--Status Panel-->
             <Border CornerRadius="8" Background="White" Margin="4,12" BorderBrush="gray" BorderThickness="1">
