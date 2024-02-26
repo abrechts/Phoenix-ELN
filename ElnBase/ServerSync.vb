@@ -84,19 +84,19 @@ Public Class ServerSync
     ''' Sets or gets if the server connection was present during the last server sync.
     ''' </summary>
     ''' 
-    Public Shared Property IsConnected As Boolean
-        Get
-            Return _IsConnected
-        End Get
-        Set(value As Boolean)
-            If _IsConnected <> value Then
-                _IsConnected = value
-                RaiseEvent ConnectedChanged(value)
-            End If
-        End Set
-    End Property
+    Public Shared Property IsConnected As Boolean = True
+    '    Get
+    '        Return _IsConnected
+    '    End Get
+    '    Set(value As Boolean)
+    '        If _IsConnected <> value Then
+    '            _IsConnected = value
+    '            '   RaiseEvent ConnectedChanged(value)
+    '        End If
+    '    End Set
+    'End Property
 
-    Private Shared _IsConnected As Boolean = True
+    '  Private Shared _IsConnected As Boolean = True
 
 
     ''' <summary>
@@ -353,6 +353,7 @@ Public Class ServerSync
             If Not isAvailable Then
                 HasServerError = True
                 IsConnected = False
+                RaiseEvent ConnectedChanged(False)
                 Return Nothing
             End If
 
