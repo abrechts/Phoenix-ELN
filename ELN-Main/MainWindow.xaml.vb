@@ -148,22 +148,27 @@ Class MainWindow
         AddHandler ExpTabHeader.PinStateChanged, AddressOf expTabHeader_PinStateChanged
         AddHandler StepSummary.RequestOpenExperiment, AddressOf StepSummary_RequestOpenExperiment
 
-
         'created async to reduce startup time
+
         If DBContext.tblDatabaseInfo.First.tblUsers.First.UserID <> "demo" Then
+
             With CustomControls.My.MySettings.Default
-                If .ServerName <> "" AndAlso .IsServerEnabled Then
+                If .IsServerEnabled Then
                     'handled by ServerSync_ServerContextCreated
                     ServerSync.CreateServerContextAsync(.ServerName, .ServerDbUserName, .ServerDbPassword, .ServerPort,
                   DBContext.tblDatabaseInfo.First)
                 Else
-                    statusBar.DisplayServerError = .ServerName <> ""
-                    statusBar.DisplayServerStatus = .ServerName <> ""
+                    statusBar.DisplayServerError = .IsServerEnabled
+                    statusBar.DisplayServerStatus = .IsServerEnabled
                 End If
             End With
+
         Else
+
             statusBar.DisplayServerError = False
+            ServerSync.IsConnected = False
             CustomControls.My.MySettings.Default.IsServerEnabled = False
+
         End If
 
         'select experiment tab of current experiment (may be a pinned one)
@@ -225,7 +230,9 @@ Class MainWindow
         If serverContext IsNot Nothing Then
 
             '- handle syncID mismatch
+
             If ServerSync.HasSyncMismatch Then
+
                 statusBar.DisplayServerError = True
                 Dim syncMismatchWarningDlg As New dlgServerSyncIssue
                 With syncMismatchWarningDlg
@@ -235,6 +242,7 @@ Class MainWindow
                 End With
                 ServerSync.IsConnected = False
                 Exit Sub
+
             End If
 
             ServerDBContext = serverContext
@@ -265,9 +273,10 @@ Class MainWindow
             End If
 
         Else
-            'e.g. due to server login error
+
+            'e.g. server unavailable
             ServerSync.IsConnected = False
-            CustomControls.My.MySettings.Default.IsServerEnabled = False
+
         End If
 
     End Sub
@@ -315,7 +324,6 @@ Class MainWindow
             '- no userID conflicts with server
 
             ServerSync.IsConnected = True
-            CustomControls.My.MySettings.Default.IsServerEnabled = True
             statusBar.DisplayServerError = False
 
             ServerSync.DatabaseGUID = DBContext.tblDatabaseInfo.First.GUID
@@ -330,7 +338,6 @@ Class MainWindow
         Else
 
             ServerSync.IsConnected = False
-            CustomControls.My.MySettings.Default.IsServerEnabled = False
 
         End If
 
@@ -430,7 +437,6 @@ Class MainWindow
             'display connect dialog if not connected (e.g. demo user)
             If ServerDBContext Is Nothing Then
                 If Not ConnectToServer(isRestore:=True) Then
-                    CustomControls.My.MySettings.Default.IsServerEnabled = False
                     _isRestoring = False
                     Exit Sub
                 End If
@@ -1096,15 +1102,16 @@ Class MainWindow
     ''' 
     Friend Function ConnectToServer(Optional isRestore As Boolean = False) As Boolean
 
-        If Not isRestore Then
-            If CType(Me.DataContext, tblUsers).UserID = "demo" Then
-                MsgBox("Sorry, the 'demo' user can't connect " + vbCrLf +
+        If CType(Me.DataContext, tblUsers).UserID = "demo" AndAlso Not isRestore Then
+
+            MsgBox("Sorry, the 'demo' user can't connect " + vbCrLf +
                    "to the server database.", MsgBoxStyle.Information, "Server Connect")
-                Return False
-            End If
+            Return False
+
         End If
 
         Dim connDlg As New dlgServerConnection(DBContext, ServerDBContext)
+
         With connDlg
             .Owner = Me
 
@@ -1129,6 +1136,7 @@ Class MainWindow
                     Return False
                 End If
             Else
+                '-- cancel
                 Return False
             End If
 

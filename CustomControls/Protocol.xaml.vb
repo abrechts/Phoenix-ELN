@@ -116,7 +116,7 @@ Public Class Protocol
                 '- save locally, which also sets sync info flags and tombstone
                 .SaveChanges()
 
-                If My.Settings.IsServerEnabled = True AndAlso Not ServerSync.HasSyncMismatch Then
+                If ServerSync.IsConnected Then
 
                     If .ServerSynchronization IsNot Nothing Then
                         If Not ServerSync.IsSynchronizing Then
@@ -129,11 +129,9 @@ Public Class Protocol
                         End If
                     Else
                         'try to reconnect with no startup connection (serverSync is nothing)
-                        With My.MySettings.Default
-                            If .ServerName <> "" AndAlso .IsServerEnabled Then
-                                ServerSync.CreateServerContextAsync(.ServerName, .ServerDbUserName, .ServerDbPassword, .ServerPort,
-                                    ExperimentContent.DbContext.tblDatabaseInfo.First)
-                            End If
+                        With My.Settings
+                            ServerSync.CreateServerContextAsync(.ServerName, .ServerDbUserName, .ServerDbPassword, .ServerPort,
+                              ExperimentContent.DbContext.tblDatabaseInfo.First)
                         End With
                     End If
 
