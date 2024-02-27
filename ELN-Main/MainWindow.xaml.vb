@@ -154,18 +154,18 @@ Class MainWindow
 
             With CustomControls.My.MySettings.Default
                 If .IsServerEnabled Then
-                    'handled by ServerSync_ServerContextCreated
                     ServerSync.CreateServerContextAsync(.ServerName, .ServerDbUserName, .ServerDbPassword, .ServerPort,
-                  DBContext.tblDatabaseInfo.First)
+                        DBContext.tblDatabaseInfo.First)
+                    'handled by ServerSync_ServerContextCreated (also sets statusBar)
                 Else
-                    statusBar.DisplayServerError = .IsServerEnabled
-                    statusBar.DisplayServerStatus = .IsServerEnabled
+                    statusBar.DisplayServerStatus = .IsServerOffByUser
+                    statusBar.DisplayServerError = .IsServerOffByUser
                 End If
             End With
 
         Else
 
-            statusBar.DisplayServerError = False
+            statusBar.DisplayServerStatus = False
             ServerSync.IsConnected = False
             CustomControls.My.MySettings.Default.IsServerEnabled = False
 
@@ -276,6 +276,7 @@ Class MainWindow
 
             'e.g. server unavailable
             ServerSync.IsConnected = False
+            statusBar.DisplayServerError = True
 
         End If
 
@@ -1129,6 +1130,7 @@ Class MainWindow
                     If CustomControls.My.MySettings.Default.IsServerEnabled = False Then
                         If ServerDBContext IsNot Nothing Then
                             ServerSync.IsConnected = False
+                            statusBar.DisplayServerError = True
                             ServerDBContext.Dispose()
                             ServerDBContext = Nothing
                         End If

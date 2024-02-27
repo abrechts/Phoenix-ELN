@@ -112,6 +112,7 @@ Public Class dlgServerConnection
         If res = MsgBoxResult.Ok Then
 
             My.Settings.IsServerEnabled = False
+            My.Settings.IsServerOffByUser = True
             DialogResult = True
 
         End If
@@ -143,6 +144,7 @@ Public Class dlgServerConnection
                 .ServerDbPassword = txtPassword.Password
                 .ServerPort = If(rdoCustomPort.IsChecked, Val(txtCustomPort.Text), 3306)
                 .IsServerEnabled = True
+                .IsServerOffByUser = False
             End With
 
             DialogResult = True
