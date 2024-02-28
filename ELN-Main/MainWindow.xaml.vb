@@ -166,7 +166,6 @@ Class MainWindow
         Else
 
             statusBar.DisplayServerStatus = False
-            ServerSync.IsConnected = False
             CustomControls.My.MySettings.Default.IsServerEnabled = False
 
         End If
@@ -240,7 +239,7 @@ Class MainWindow
                     .ShowDialog()
                     RestoreFromServer()  'restarts app when done
                 End With
-                ServerSync.IsConnected = False
+
                 Exit Sub
 
             End If
@@ -255,7 +254,6 @@ Class MainWindow
                 If ServerSync.DatabaseGUID <> "" Then
 
                     '- standard case: sync all pending items at startup
-                    ServerSync.IsConnected = True
                     WPFToolbox.WaitForPriority(Threading.DispatcherPriority.Background)
                     DBContext.ServerSynchronization.SynchronizeAsync()
 
@@ -325,7 +323,6 @@ Class MainWindow
 
             '- no userID conflicts with server
 
-            ServerSync.IsConnected = True
             statusBar.DisplayServerError = False
 
             ServerSync.DatabaseGUID = DBContext.tblDatabaseInfo.First.GUID
@@ -336,10 +333,6 @@ Class MainWindow
                 .ShowDialog()
             End With
             DBContext.ServerSynchronization.SynchronizeAsync()
-
-        Else
-
-            ServerSync.IsConnected = False
 
         End If
 
@@ -1130,14 +1123,12 @@ Class MainWindow
                     '-- apply new server context
                     ServerDBContext = .NewServerContext
                     DBContext.ServerSynchronization = New ServerSync(DBContext, ServerDBContext)
-                    ServerSync.IsConnected = True
                     statusBar.DisplayServerError = False
                     Return True
                 Else
                     '-- disconnect
                     If CustomControls.My.MySettings.Default.IsServerEnabled = False Then
                         If ServerDBContext IsNot Nothing Then
-                            ServerSync.IsConnected = False
                             statusBar.DisplayServerError = True
                             ServerDBContext.Dispose()
                             ServerDBContext = Nothing

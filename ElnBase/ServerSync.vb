@@ -69,13 +69,6 @@ Public Class ServerSync
 
 
     ''' <summary>
-    ''' Sets or gets if the server connection was present during the last server sync.
-    ''' </summary>
-    ''' 
-    Public Shared Property IsConnected As Boolean = True
-
-
-    ''' <summary>
     ''' Gets if there are mismatching sync GUIDs which are preventing sync
     ''' </summary>
     '''
@@ -305,7 +298,7 @@ Public Class ServerSync
 
         Catch ex As Exception
 
-            IsConnected = False
+            'do nothing 
 
         Finally
 
@@ -386,12 +379,9 @@ Public Class ServerSync
 
             Next
 
-            IsConnected = True
-
-
         Catch ex As Exception
 
-            IsConnected = False
+            'do nothing
 
         End Try
 
