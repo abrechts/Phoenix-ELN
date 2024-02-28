@@ -50,7 +50,7 @@
                       >
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,4" >
                     
-                        <TextBlock Text="● App Version:" TextWrapping="Wrap" Margin="0,4,3,0"/>
+                        <TextBlock Text="● App Version:" TextWrapping="Wrap" Margin="0,4,3,0" FontStyle="Italic"/>
 
                         <Border Margin="0,4,4,0" CornerRadius="4" Background="#FFEBEBEB">
                             <TextBlock Text="{Binding Database.CurrAppVersion,Converter={StaticResource appVersionConv}}" d:Text="2.12.3" 
@@ -89,7 +89,7 @@
 
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
 
-                        <TextBlock Text="● Unfinalized Exp:" TextWrapping="Wrap" Margin="0,0,4,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="● Unfinalized Exp:" TextWrapping="Wrap" Margin="0,0,4,0" VerticalAlignment="Center" FontStyle="Italic"/>
 
                         <Border Margin="0,0,4,0" CornerRadius="4" Background="#FFEBEBEB">
                             <TextBlock d:Text="11" Text="{Binding tblExperiments, Converter={StaticResource unfinalizedCountConv}}"  
@@ -109,8 +109,8 @@
                     
                 </Grid>
 
-                <TextBlock Text="Always finalize your experiments after completion to mark them as complete and to protect them against unintended changes (can be reverted)." 
-                    TextWrapping="Wrap" Margin="11,0,0,0" FontStyle="Italic"
+                <TextBlock Text="Always finalize your experiments after completion to mark them as complete, and to protect them against unintended changes (can be reverted)." 
+                    TextWrapping="Wrap" Margin="11,0,0,0" FontStyle="Italic" IsHyphenationEnabled="true"
                     Visibility="{Binding tblExperiments,Converter={StaticResource unfinalizedWarningVisConv}}"/>
 
             </StackPanel>

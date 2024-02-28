@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:CustomControls"
              mc:Ignorable="d">
 
-    <Grid x:Name="sketchGrid" Background="white" Cursor="Hand" Height="180" MinWidth="632" Margin="0" >
+    <Grid x:Name="sketchGrid" Background="white" Cursor="Hand" Height="160" MinWidth="632" Margin="0" >
 
         <Viewbox x:Name="sketchViewbox" StretchDirection="DownOnly"/>
 
