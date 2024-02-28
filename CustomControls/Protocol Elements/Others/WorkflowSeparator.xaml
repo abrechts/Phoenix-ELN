@@ -23,7 +23,7 @@
         <DockPanel Grid.Column="2" >
 
             <Border CornerRadius="6" BorderBrush="gray" BorderThickness="1" Padding="8,0" Margin="-2,0,0,-3" HorizontalAlignment="left" 
-                Background="Gray" >
+                Background="#FF898989" >
 
                 <TextBox x:Name="txtTitle" d:Text="Reaction" Text="{Binding Title}" BorderThickness="0" VerticalAlignment="Center" 
                     FontStyle="Italic" FontWeight="DemiBold" Padding="1,0" Margin="1,1,1,2" MaxLength="80" FontFamily="Verdana" FontSize="11">

@@ -80,9 +80,27 @@ Public Class StepSummary
     End Sub
 
 
-    Private Sub lnkChemSpicerReact_Click() Handles lnkChemSpiderReact.PreviewMouseUp
+    Private Sub lnkChemSpiderReact_Click() Handles lnkChemSpiderReact.PreviewMouseUp
 
         Dim info As New ProcessStartInfo("https://www.chemspider.com/Search.aspx?q=" + blkInChIKeyReact.Text)
+        info.UseShellExecute = True
+        Process.Start(info)
+
+    End Sub
+
+
+    Private Sub lnkPubChemProd_Click() Handles lnkPubChemProd.PreviewMouseUp
+
+        Dim info As New ProcessStartInfo("https://pubchem.ncbi.nlm.nih.gov/compound/" + blkInChIKeyProd.Text)
+        info.UseShellExecute = True
+        Process.Start(info)
+
+    End Sub
+
+
+    Private Sub lnkChemSpiderProd_Click() Handles lnkChemSpiderProd.PreviewMouseUp
+
+        Dim info As New ProcessStartInfo("https://www.chemspider.com/Search.aspx?q=" + blkInChIKeyProd.Text)
         info.UseShellExecute = True
         Process.Start(info)
 

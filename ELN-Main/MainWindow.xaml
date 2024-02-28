@@ -5,12 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:custom="clr-namespace:CustomControls;assembly=CustomControls"
         xmlns:data="clr-namespace:ElnCoreModel;assembly=ElnCoreModel" 
-        xmlns:phoenixeln="clr-namespace:ChemBytes" 
-        xmlns:clr="http://schemas.microsoft.com/winfx/2009/xaml" 
-        xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=data:tblUsers}"
-        Title="Phoenix ELN" Height="800" MinWidth="1280" MinHeight="600" d:Height="900" TextOptions.TextFormattingMode="Display" 
+        Title="Phoenix ELN" Height="900" MinWidth="1280" MinHeight="800" d:Height="900" TextOptions.TextFormattingMode="Display" 
         WindowStartupLocation="CenterScreen">
 
     <Window.Resources>
