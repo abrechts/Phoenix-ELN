@@ -30,7 +30,7 @@
             <ContentControl Grid.Column="0" Content="{StaticResource icoBlueDot}" Height="14" VerticalAlignment="Top" Margin="0,0,2,0" HorizontalAlignment="Left" />
             <StackPanel Grid.Column="1">
                 <TextBlock Text="You are in the 'demo' sandbox." FontWeight="bold" FontStyle="italic" Foreground="#FF3E3E3E"
-                    TextWrapping="wrap" Background="white" FontSize="12"/>
+                    TextWrapping="wrap" FontSize="12" Background="WhiteSmoke" TextDecorations="Underline"/>
                 <TextBlock Text="Familiarize with the application as 'demo' user, then create a unique user for your real experiments."
                     TextWrapping="wrap" Margin="0,2,0,0"/>
             </StackPanel>
@@ -49,7 +49,7 @@
                 <StackPanel x:Name="pnlRemainingExp" Orientation="Horizontal" 
                     Background="{Binding tblExperiments.Count, Converter={StaticResource warningBrushConv}}" HorizontalAlignment="Left">
                    <TextBlock Text="Demo experiments left:" FontWeight="bold" FontStyle="italic" Foreground="#FF3C3C3C"     
-                        TextWrapping="wrap" Background="white" FontSize="12"/>
+                        TextWrapping="wrap" Background="whitesmoke" FontSize="12" TextDecorations="underline"/>
                     <TextBlock x:Name="blkRemainingCount" d:Text="20" FontWeight="bold" FontStyle="italic" Foreground="#FF2B2BFD"
                         Text="{Binding tblExperiments.Count, Converter={StaticResource demoCountConv}}" Margin="3,0,4,0" FontSize="12"/>
                     

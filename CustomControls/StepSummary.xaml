@@ -153,9 +153,9 @@
                     <TextBlock Text="no items present so far ..." Foreground="#FF6C6C6C" Margin="0,2,0,0" VerticalAlignment="Top" 
                                 HorizontalAlignment="Center"/>
 
-                    <ListBox x:Name="lstStepExperiments" HorizontalAlignment="center"
+                    <ListBox x:Name="lstStepExperiments"
                                 SelectionMode="Single" Background="transparent" BorderThickness="0" FocusVisualStyle="{x:Null}"              
-                                Grid.IsSharedSizeScope="true" AllowDrop="false" Margin="-6,2,0,2"
+                                Grid.IsSharedSizeScope="true" AllowDrop="false" Margin="12,2,2,2"
                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                                 VirtualizingStackPanel.IsVirtualizing="False" MinHeight="25"
                                 ItemsSource="{Binding Source={StaticResource cvsStepExperiments}}"
