@@ -32,13 +32,6 @@ Public Class ServerSync
     Public Shared Event SyncComplete(sender As Object)
 
 
-    ''' <summary>
-    ''' Raises an event when the connection to the server was lost or is available again.
-    ''' </summary>
-    ''' 
-    Public Shared Event ConnectedChanged(isConnected As Boolean)
-
-
     Public Sub New(sqliteContext As ElnDbContext, mySQLContext As ElnDbContext)
 
         LocalContext = sqliteContext
@@ -53,11 +46,6 @@ Public Class ServerSync
     ''' 
     Public Shared Property IsSynchronizing As Boolean = False
 
-    ''' <summary>
-    ''' Gets the total number of rows across all tables to be synchronized.
-    ''' </summary>
-    ''' 
-    Public Property HasServerError As Boolean = False
 
     ''' <summary>
     ''' Gets the GUID of the synchronizing local database
@@ -77,7 +65,7 @@ Public Class ServerSync
     ''' Sets or gets the MySQL server database context
     ''' </summary>
     ''' 
-    Private Property ServerContext As ElnDbContext
+    Private Shared Property ServerContext As ElnDbContext
 
 
     ''' <summary>
@@ -85,18 +73,6 @@ Public Class ServerSync
     ''' </summary>
     ''' 
     Public Shared Property IsConnected As Boolean = True
-    '    Get
-    '        Return _IsConnected
-    '    End Get
-    '    Set(value As Boolean)
-    '        If _IsConnected <> value Then
-    '            _IsConnected = value
-    '            '   RaiseEvent ConnectedChanged(value)
-    '        End If
-    '    End Set
-    'End Property
-
-    '  Private Shared _IsConnected As Boolean = True
 
 
     ''' <summary>
@@ -114,14 +90,17 @@ Public Class ServerSync
     Public Shared Property CreationErrorMessage As String = ""
 
 
-    Public Shared Function IsServerConnectionAvailable(serverContext As ElnDbContext) As Boolean
+    ''' <summary>
+    ''' Asynchronously determines if the server connection is available.
+    ''' </summary>
+    ''' 
+    Public Shared Function IsServerConnAvailable() As Boolean
 
-        Try
-            Dim res = serverContext.tblDatabaseInfo.First   'dummy test operation
-            Return True
-        Catch ex As Exception
+        If ServerContext IsNot Nothing Then
+            Return ServerContext.Database.CanConnect
+        Else
             Return False
-        End Try
+        End If
 
     End Function
 
@@ -181,25 +160,25 @@ Public Class ServerSync
 
             'check synchronization validity
             Dim serverDbInfo = (From info In serverDbContext.tblDatabaseInfo Where info.GUID = localDbInfoEntry.GUID).FirstOrDefault
-                If serverDbInfo IsNot Nothing Then
-                    DatabaseGUID = serverDbInfo.GUID
-                    If serverDbInfo.LastSyncID <> localDbInfoEntry.LastSyncID Then
-                        HasSyncMismatch = True
-                    End If
-                Else
-                    '- db does not (yet) exist on server (e.g. before bulk upload) -> leave DatabaseGUID empty
+            If serverDbInfo IsNot Nothing Then
+                DatabaseGUID = serverDbInfo.GUID
+                If serverDbInfo.LastSyncID <> localDbInfoEntry.LastSyncID Then
+                    HasSyncMismatch = True
                 End If
+            Else
+                '- db does not (yet) exist on server (e.g. before bulk upload) -> leave DatabaseGUID empty
+            End If
 
-                CreationErrorMessage = ""
+            CreationErrorMessage = ""
 
-                Return serverDbContext
+            Return serverDbContext
 
-                '- Debug: For testing success
-                'Dim currMaxPacket = serverDbContext.Database.SqlQueryRaw(Of Integer)("SELECT @@global.max_allowed_packet").AsEnumerable(0)
+            '- Debug: For testing success
+            'Dim currMaxPacket = serverDbContext.Database.SqlQueryRaw(Of Integer)("SELECT @@global.max_allowed_packet").AsEnumerable(0)
 
-            Catch ex As MySqlException
+        Catch ex As MySqlException
 
-                Select Case ex.ErrorCode
+            Select Case ex.ErrorCode
                 Case 1045
                     CreationErrorMessage = "Wrong username/password, please try again."
                 Case 1042, 2013
@@ -326,7 +305,6 @@ Public Class ServerSync
 
         Catch ex As Exception
 
-            HasServerError = True
             IsConnected = False
 
         Finally
@@ -346,16 +324,6 @@ Public Class ServerSync
     Private Async Function SyncToServer(syncItems As List(Of ServerSyncItem)) As Task(Of List(Of ServerSyncItem))
 
         Try
-
-            '- check server availability
-
-            Dim isAvailable = Await Task.Run(Of Boolean)(Function() IsServerConnectionAvailable(ServerContext))
-            If Not isAvailable Then
-                HasServerError = True
-                IsConnected = False
-                RaiseEvent ConnectedChanged(False)
-                Return Nothing
-            End If
 
             RaiseEvent SyncProgress(0)
 
@@ -418,13 +386,11 @@ Public Class ServerSync
 
             Next
 
-            HasServerError = False
             IsConnected = True
 
 
         Catch ex As Exception
 
-            HasServerError = True
             IsConnected = False
 
         End Try

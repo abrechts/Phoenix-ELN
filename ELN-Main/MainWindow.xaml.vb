@@ -142,7 +142,7 @@ Class MainWindow
         AddHandler StatusDemo.RequestCreateFirstUser, AddressOf DemoStatus_RequestCreateFirstUser
         AddHandler StatusDemo.RequestRestoreServer, AddressOf DemoStatus_RequestRestoreServer
         AddHandler ServerSync.ServerContextCreated, AddressOf ServerSync_ServerContextCreated
-        AddHandler ServerSync.ConnectedChanged, AddressOf ServerSync_ConnectedChanged
+        AddHandler Protocol.ConnectedChanged, AddressOf Protocol_ConnectedChanged
         AddHandler ServerSync.SyncProgress, AddressOf ServerSync_SyncProgress
         AddHandler dlgServerConnection.ServerContextCreated, AddressOf ServerSync_ServerContextCreated
         AddHandler ExpTabHeader.PinStateChanged, AddressOf expTabHeader_PinStateChanged
@@ -275,8 +275,9 @@ Class MainWindow
         Else
 
             'e.g. server unavailable
-            ServerSync.IsConnected = False
-            statusBar.DisplayServerError = True
+
+            Dispatcher.Invoke(Sub() ServerWarningDelegate(False))
+            MsgBox("The ELN server is unavailable!" + vbCrLf + "Changes currently are not backed up.", MsgBoxStyle.Information, "Server Sync")
 
         End If
 
@@ -478,15 +479,22 @@ Class MainWindow
     ''' Handles server availability warning display
     ''' </summary>
     ''' 
-    Private Sub ServerSync_ConnectedChanged(isConnected As Boolean)
+    Private Sub Protocol_ConnectedChanged(isConnected As Boolean)
 
-        Dispatcher.Invoke(Sub() ServerWarningDelegate(isConnected))
+        Dim isInError = statusBar.DisplayServerError
 
         If isConnected Then
-            MsgBox("Server reconnected!", MsgBoxStyle.Information, "Server Sync")
-            DBContext.ServerSynchronization.SynchronizeAsync()
+            If isInError Then
+                Dispatcher.Invoke(Sub() ServerWarningDelegate(isConnected))
+                MsgBox("Server reconnected!", MsgBoxStyle.Information, "Server Sync")
+                DBContext.ServerSynchronization.SynchronizeAsync()
+            End If
         Else
-            MsgBox("The ELN server is unavailable!" + vbCrLf + "Changes currently are not backed up.", MsgBoxStyle.Information, "Server Sync")
+            If Not isInError Then
+                Dispatcher.Invoke(Sub() ServerWarningDelegate(isConnected))
+                MsgBox("The ELN server is unavailable!" + vbCrLf + "Changes currently are not backed up.", MsgBoxStyle.Information, "Server Sync")
+            End If
+
         End If
 
     End Sub

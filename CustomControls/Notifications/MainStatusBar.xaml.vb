@@ -29,7 +29,11 @@
     ''' Sets if a server error should be displayed or not
     ''' </summary>
     ''' 
-    Public WriteOnly Property DisplayServerError() As Boolean
+    Public Property DisplayServerError() As Boolean
+
+        Get
+            Return pnlServerError.IsVisible
+        End Get
 
         Set(value As Boolean)
             If value = True Then

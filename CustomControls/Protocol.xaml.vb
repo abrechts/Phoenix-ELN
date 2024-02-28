@@ -18,6 +18,7 @@ Public Class Protocol
 
     Public Shared Event WorkflowStateChanged(sender As Object)
     Public Shared Event RequestSaveIcon(sender As Object)
+    Public Shared Event ConnectedChanged(isConnected As Boolean)
 
 
     Public Sub New()
@@ -101,7 +102,7 @@ Public Class Protocol
     ''' <param name="noUndoPoint">Set to true for special cases where no Undo point should be created, 
     ''' e.g. for auto-saving an Undo/Redo operation, or after creating a new experiment. The default is false.</param>
     ''' 
-    Public Sub AutoSave(Optional allowFinalized As Boolean = False, Optional noUndoPoint As Boolean = False)
+    Public Async Sub AutoSave(Optional allowFinalized As Boolean = False, Optional noUndoPoint As Boolean = False)
 
         Dim expEntry = CType(Me.DataContext, tblExperiments)
         If allowFinalized OrElse expEntry.WorkflowState <> WorkflowStatus.Finalized Then
@@ -116,7 +117,9 @@ Public Class Protocol
                 '- save locally, which also sets sync info flags and tombstone
                 .SaveChanges()
 
-                If ServerSync.IsConnected Then
+                RaiseEvent RequestSaveIcon(Me)
+
+                If My.Settings.IsServerEnabled AndAlso Not My.Settings.IsServerOffByUser AndAlso Await Task.Run(Function() ServerSync.IsServerConnAvailable()) Then
 
                     If .ServerSynchronization IsNot Nothing Then
                         If Not ServerSync.IsSynchronizing Then
@@ -131,13 +134,17 @@ Public Class Protocol
                         'try to reconnect with no startup connection (serverSync is nothing)
                         With My.Settings
                             ServerSync.CreateServerContextAsync(.ServerName, .ServerDbUserName, .ServerDbPassword, .ServerPort,
-                              ExperimentContent.DbContext.tblDatabaseInfo.First)
+                          ExperimentContent.DbContext.tblDatabaseInfo.First)
                         End With
                     End If
 
-                End If
+                    RaiseEvent ConnectedChanged(True)
 
-                RaiseEvent RequestSaveIcon(Me)
+                Else
+
+                    RaiseEvent ConnectedChanged(False)
+
+                End If
 
             End With
 
@@ -154,12 +161,11 @@ Public Class Protocol
             'a request while the now completed sync was ongoing.
 
             If _wasSkipped Then
-                If ServerSync.IsConnected Then
-                    'Debug.WriteLine("-- Retry Skipped ---")
-                    .SynchronizeAsync()
-                End If
+                'Debug.WriteLine("-- Retry Skipped ---")
+                .SynchronizeAsync()
                 _wasSkipped = False
             End If
+
         End With
 
     End Sub
@@ -300,9 +306,7 @@ Public Class Protocol
                 lstProtocol.ItemContainerStyle = FindResource("ProtocolFinalizedListBoxItemStyle")
                 lstProtocol.AllowDrop = False
                 UnselectAll()
-                If UndoEngine IsNot Nothing Then
-                    UndoEngine.Reset()
-                End If
+                UndoEngine?.Reset()
 
             Else
 

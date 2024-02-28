@@ -38,7 +38,7 @@ Partial Public Class dlgRestoreServer
     End Sub
 
 
-    Private Sub btnGoToRestore_Click() Handles btnGoToRestore.Click
+    Private Async Sub btnGoToRestore_Click() Handles btnGoToRestore.Click
 
         If LCase(txtUserID.Text) = "demo" Then
             MsgBox("Sorry, the sandbox 'demo' user can't be restored!" + vbCrLf +
@@ -49,7 +49,7 @@ Partial Public Class dlgRestoreServer
         Me.Cursor = Cursors.Wait
         Me.ForceCursor = True
 
-        If ServerSync.IsConnected Then
+        If Await Task.Run(Function() ServerSync.IsServerConnAvailable()) Then
 
             Dim userEntry = (From user In _ServerEntity.tblUsers Where user.UserID = txtUserID.Text).FirstOrDefault
 
