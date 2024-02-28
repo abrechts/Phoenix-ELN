@@ -40,32 +40,52 @@ Public Class StepSummary
 
     Private Sub SketchArea_SketchInfoAvailable(sender As Object, skInfo As SketchResults)  'shared event
 
-        If skInfo IsNot Nothing Then
-            With skInfo
+        If skInfo IsNot Nothing AndAlso skInfo.Reactants.Count > 0 AndAlso skInfo.Products.Count > 0 Then
 
-                If .Reactants.Count > 0 AndAlso .Products.Count > 0 Then
+            RefReactInChIKey = skInfo.Reactants.First.InChIKey
+            RefProductInChIKey = skInfo.Products.First.InChIKey
+            cvsStepExperiments.View.Refresh()
 
-                    RefReactInChIKey = .Reactants.First.InChIKey
-                    RefProductInChIKey = .Products.First.InChIKey
-                    cvsStepExperiments.View.Refresh()
+            pnlReactLinks.IsEnabled = True
+            pnlProdLinks.IsEnabled = True
+            pnlReactLinks.Opacity = 1
+            pnlProdLinks.Opacity = 1
 
-                    With skInfo.Reactants.First
-                        blkInChIKeyReact.Text = .InChIKey
-                        blkReactEf.Text = .EFString
-                        blkReactMw.Text = Format(.Molweight, "0.00")
-                        blkReactEM.Text = Format(.ExactMass, "0.00")
-                    End With
-
-                    With skInfo.Products.First
-                        blkInChIKeyProd.Text = .InChIKey
-                        blkProdEf.Text = .EFString
-                        blkProdMw.Text = Format(.Molweight, "0.00")
-                        blkProdEM.Text = Format(.ExactMass, "0.00")
-                    End With
-
-                End If
-
+            With skInfo.Reactants.First
+                blkInChIKeyReact.Text = .InChIKey
+                blkReactEf.Text = .EFString
+                blkReactMw.Text = Format(.Molweight, "0.00")
+                blkReactEM.Text = Format(.ExactMass, "0.00")
             End With
+
+            With skInfo.Products.First
+                blkInChIKeyProd.Text = .InChIKey
+                blkProdEf.Text = .EFString
+                blkProdMw.Text = Format(.Molweight, "0.00")
+                blkProdEM.Text = Format(.ExactMass, "0.00")
+            End With
+
+        Else
+
+            pnlReactLinks.IsEnabled = False
+            pnlProdLinks.IsEnabled = False
+            pnlReactLinks.Opacity = 0.5
+            pnlProdLinks.Opacity = 0.5
+
+            RefReactInChIKey = " --- "
+            RefProductInChIKey = " --- "
+            cvsStepExperiments.View.Refresh()
+
+            blkInChIKeyReact.Text = " --- "
+            blkReactEf.Text = " --- "
+            blkReactMw.Text = " --- "
+            blkReactEM.Text = " --- "
+
+            blkInChIKeyProd.Text = " --- "
+            blkProdEf.Text = " --- "
+            blkProdMw.Text = " --- "
+            blkProdEM.Text = " --- "
+
         End If
 
     End Sub
