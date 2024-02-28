@@ -143,7 +143,7 @@
                 <Separator Margin="0,0,0,2" DockPanel.Dock="top"/>
 
                 <local:ComboPlus x:Name="cboSortType" SelectedIndex="0" HorizontalAlignment="Center" Margin="0,4,0,0" Padding="6,1,6,2" 
-                        CboBackground="white" VerticalAlignment="Center" DockPanel.Dock="top" FontSize="11.5">
+                  CboBackground="white" VerticalAlignment="Center" DockPanel.Dock="top" FontSize="11.5">
                     <ComboBoxItem Content="by yield"/>
                     <ComboBoxItem Content="by scale"/>
                 </local:ComboPlus>
@@ -155,13 +155,11 @@
 
                     <ListBox x:Name="lstStepExperiments"
                                 SelectionMode="Single" Background="transparent" BorderThickness="0" FocusVisualStyle="{x:Null}"              
-                                Grid.IsSharedSizeScope="true" AllowDrop="false" Margin="12,2,2,2"
+                                Grid.IsSharedSizeScope="true" AllowDrop="false" Margin="20,2,2,2"
                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                                 VirtualizingStackPanel.IsVirtualizing="False" MinHeight="25"
                                 ItemsSource="{Binding Source={StaticResource cvsStepExperiments}}"
-                                ItemTemplate="{StaticResource expTreeItem}" >
-                    </ListBox>
-
+                                ItemTemplate="{StaticResource expTreeItem}" />
                 </Grid>
 
             </DockPanel>
