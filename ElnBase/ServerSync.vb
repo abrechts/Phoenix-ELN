@@ -65,7 +65,7 @@ Public Class ServerSync
     ''' Sets or gets the MySQL server database context
     ''' </summary>
     ''' 
-    Private Shared Property ServerContext As ElnDbContext
+    Public Shared Property ServerContext As ElnDbContext
 
 
     ''' <summary>
@@ -82,20 +82,6 @@ Public Class ServerSync
     ''' 
     Public Shared Property CreationErrorMessage As String = ""
 
-
-    ''' <summary>
-    ''' Asynchronously determines if the server connection is available.
-    ''' </summary>
-    ''' 
-    Public Shared Function IsServerConnAvailable() As Boolean
-
-        If ServerContext IsNot Nothing Then
-            Return ServerContext.Database.CanConnect
-        Else
-            Return False
-        End If
-
-    End Function
 
     Friend Class ServerSyncItem
 
