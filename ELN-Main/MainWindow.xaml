@@ -159,7 +159,7 @@
             </Border>
         </Grid>
 
-        <Grid x:Name="pnlInfo" DockPanel.Dock="right" Width="285">
+        <Grid x:Name="pnlInfo" DockPanel.Dock="right" Width="290">
            
             <!--Status Panel-->
             <Border CornerRadius="8" Background="White" Margin="4,12" BorderBrush="gray" BorderThickness="1">

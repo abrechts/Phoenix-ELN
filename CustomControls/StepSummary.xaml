@@ -43,14 +43,14 @@
         <!--Ref.Reactant-->
         <StackPanel DockPanel.Dock="Top" Margin="0,2,0,8">
 
-            <Border CornerRadius="6" BorderBrush="gray" BorderThickness="1" Padding="8,0" HorizontalAlignment="Center" Background="#FF919191">
+            <Border CornerRadius="6" BorderBrush="#FF4D84D7" BorderThickness="1" Padding="8,0" HorizontalAlignment="Center" Background="#FF4D84D7">
                 <TextBlock Text="Reactant >" VerticalAlignment="Center" Foreground="white" Background="transparent" 
                         FontStyle="Italic" FontWeight="demibold" Padding="1,0" Margin="1,1,1,1" FontFamily="Verdana" FontSize="10"/>
             </Border>
 
-            <Separator Margin="0,0,0,0"/>
+            <Separator Margin="0,0,0,0" Background="#FF4D84D7"/>
 
-            <StackPanel Margin="0,0,0,2" Background="whitesmoke">
+            <StackPanel Margin="0,0,0,0" Background="whitesmoke">
 
                 <StackPanel Orientation="Horizontal" Margin="6,3,0,0" >
                     <TextBlock Text="Elemental:" Width="70" FontWeight="DemiBold"/>
@@ -74,7 +74,7 @@
                     <TextBlock x:Name="lnkChemSpiderReact" Text="ChemSpider" Foreground="blue" TextDecorations="Underline"  Cursor="Hand" Margin="4,0,40,0" />
                 </StackPanel>
 
-                <StackPanel Orientation="Horizontal" Margin="6,0,0,6" >
+                <StackPanel Orientation="Horizontal" Margin="6,0,0,5" >
                     <TextBlock HorizontalAlignment="Left" Text="InChIKey:" FontWeight="Demibold" VerticalAlignment="Center" Width="70"/>
                     <TextBox x:Name="blkInChIKeyReact" d:Text="CATMAVIUJSKTCV-UHFFFAOYSA-N" IsReadOnly="true" BorderThickness="0" 
                             Margin="-2,4,0,0" FontSize="11" VerticalAlignment="Center" FontFamily="Calibri" Background="transparent"/>
@@ -82,20 +82,21 @@
 
             </StackPanel>
 
+            <Separator Margin="0,0,0,2" DockPanel.Dock="top" Background="#FF4D84D7"/>
+            
         </StackPanel>
 
         <!--Ref.Product-->
         <StackPanel DockPanel.Dock="Top" >
 
-            <Border CornerRadius="6" BorderBrush="gray" BorderThickness="1" Padding="8,0"  HorizontalAlignment="Center" 
-              Background="#FF919191">
+            <Border CornerRadius="6" BorderBrush="#FF4D84D7" BorderThickness="1" Padding="8,0"  HorizontalAlignment="Center" Background="#FF4D84D7">
                 <TextBlock Text="> Product" VerticalAlignment="Center" Foreground="white" FontFamily="Verdana" FontSize="10"
                    Background="transparent" FontStyle="Italic" FontWeight="demibold" Padding="1,0" Margin="1,1,1,1"/>
             </Border>
 
-            <Separator Margin="0,0,0,2"/>
+            <Separator Margin="0,0,0,2" Background="#FF4D84D7"/>
 
-            <StackPanel Margin="0,0,0,2" Background="whitesmoke">
+            <StackPanel Margin="0,0,0,0" Background="whitesmoke">
 
                 <StackPanel Orientation="Horizontal" Margin="6,3,0,0" >
                     <TextBlock Text="Elemental:" Width="70" FontWeight="DemiBold"/>
@@ -119,7 +120,7 @@
                     <TextBlock x:Name="lnkChemSpiderProd" Text="ChemSpider" Foreground="blue" TextDecorations="Underline"  Cursor="Hand" Margin="4,0,40,0" />
                 </StackPanel>
 
-                <StackPanel Orientation="Horizontal" Margin="6,0,0,6">
+                <StackPanel Orientation="Horizontal" Margin="6,0,0,4">
                     <TextBlock HorizontalAlignment="Left" Text="InChIKey:" FontWeight="Demibold" VerticalAlignment="Center" Width="70"/>
                     <TextBox x:Name="blkInChIKeyProd" d:Text="CATMAVIUJSKTCV-UHFFFAOYSA-N" IsReadOnly="true" BorderThickness="0" 
                             Margin="-2,3,0,0" FontSize="11" VerticalAlignment="Center" FontFamily="Calibri" Background="transparent"/>
@@ -127,20 +128,22 @@
 
             </StackPanel>
 
+            <Separator Margin="0,0,0,0" DockPanel.Dock="top" Background="#FF4D84D7"/>
+
         </StackPanel>
 
 
         <DockPanel Margin="0,10,0,0" >
 
-            <Border CornerRadius="6" BorderBrush="gray" BorderThickness="1" Padding="8,0"  HorizontalAlignment="Center" DockPanel.Dock="top"
-                    Background="#FF919191">
+            <Border CornerRadius="6" BorderBrush="#FF4D84D7" BorderThickness="1" Padding="8,0"  HorizontalAlignment="Center" 
+                    DockPanel.Dock="top" Background="#FF4D84D7">
                 <TextBlock Text="Same Step" VerticalAlignment="Center" Foreground="white" FontFamily="Verdana" FontSize="10"
                         Background="transparent" FontStyle="Italic" FontWeight="demibold" Padding="1,0" Margin="1,1,1,1"/>
             </Border>
 
             <DockPanel Background="WhiteSmoke" DockPanel.Dock="top">
 
-                <Separator Margin="0,0,0,2" DockPanel.Dock="top"/>
+                <Separator Margin="0,0,0,2" DockPanel.Dock="top" Background="#FF4D84D7"/>
 
                 <local:ComboPlus x:Name="cboSortType" SelectedIndex="0" HorizontalAlignment="Center" Margin="0,4,0,0" Padding="6,1,6,2" 
                   CboBackground="white" VerticalAlignment="Center" DockPanel.Dock="top" FontSize="11.5">
@@ -164,7 +167,7 @@
 
             </DockPanel>
 
-            <Separator Margin="0,0,0,2" VerticalAlignment="Top"/>
+            <Separator Margin="0,0,0,2" VerticalAlignment="Top" Background="#FF4D84D7"/>
 
         </DockPanel>
 
