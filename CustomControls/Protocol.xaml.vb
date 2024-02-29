@@ -119,30 +119,34 @@ Public Class Protocol
 
                 RaiseEvent RequestSaveIcon(Me)
 
-                If My.Settings.IsServerEnabled AndAlso Not My.Settings.IsServerOffByUser AndAlso Await Task.Run(Function() ServerSync.IsServerConnAvailable()) Then
+                If My.Settings.IsServerEnabled AndAlso Not My.Settings.IsServerOffByUser Then
 
-                    If .ServerSynchronization IsNot Nothing Then
-                        If Not ServerSync.IsSynchronizing Then
-                            '- sync to server asynchronously
-                            .ServerSynchronization.SynchronizeAsync()
+                    If Await Task.Run(Function() ServerSync.IsServerConnAvailable()) Then
+
+                        If .ServerSynchronization IsNot Nothing Then
+                            If Not ServerSync.IsSynchronizing Then
+                                '- sync to server asynchronously
+                                .ServerSynchronization.SynchronizeAsync()
+                            Else
+                                '- skip this sync while another one is ongoing
+                                _wasSkipped = True
+                                '  Debug.WriteLine("skipped: " + Now.ToString)
+                            End If
                         Else
-                            '- skip this sync while another one is ongoing
-                            _wasSkipped = True
-                            '  Debug.WriteLine("skipped: " + Now.ToString)
-                        End If
-                    Else
-                        'try to reconnect with no startup connection (serverSync is nothing)
-                        With My.Settings
-                            ServerSync.CreateServerContextAsync(.ServerName, .ServerDbUserName, .ServerDbPassword, .ServerPort,
+                            'try to reconnect with no startup connection (serverSync is nothing)
+                            With My.Settings
+                                ServerSync.CreateServerContextAsync(.ServerName, .ServerDbUserName, .ServerDbPassword, .ServerPort,
                           ExperimentContent.DbContext.tblDatabaseInfo.First)
-                        End With
+                            End With
+                        End If
+
+                        RaiseEvent ConnectedChanged(True)
+
+                    Else
+
+                        RaiseEvent ConnectedChanged(False)
+
                     End If
-
-                    RaiseEvent ConnectedChanged(True)
-
-                Else
-
-                    RaiseEvent ConnectedChanged(False)
 
                 End If
 
