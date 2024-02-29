@@ -106,12 +106,15 @@ Public Class dlgServerConnection
     End Sub
 
 
-    Private Sub btnRemoveConn_Click() Handles btnDisconnect.Click
+    Private Sub btnDisconnect_Click() Handles btnDisconnect.Click
 
         Dim res = MsgBox("Do you really want to disconnect from the server?", MsgBoxStyle.OkCancel + MsgBoxStyle.Exclamation, "Server Connection")
         If res = MsgBoxResult.Ok Then
+
             My.Settings.IsServerEnabled = False
+            My.Settings.IsServerOffByUser = True
             DialogResult = True
+
         End If
 
     End Sub
@@ -141,6 +144,7 @@ Public Class dlgServerConnection
                 .ServerDbPassword = txtPassword.Password
                 .ServerPort = If(rdoCustomPort.IsChecked, Val(txtCustomPort.Text), 3306)
                 .IsServerEnabled = True
+                .IsServerOffByUser = False
             End With
 
             DialogResult = True
@@ -150,7 +154,7 @@ Public Class dlgServerConnection
 
         Else
 
-            'wrong connection data, password, etc.
+            'wrong connection data, password, etc. (does not close dialog)
             MsgBox(ServerSync.CreationErrorMessage, MsgBoxStyle.Exclamation, "Server error")
             Me.Cursor = Cursors.Arrow
 

@@ -89,7 +89,7 @@
 
                 <StackPanel x:Name="pnlCloneOptions" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="19,0,0,8">
 
-                    <TextBlock Text="Copies sketch and content of the specified experiment into a new one:" 
+                    <TextBlock Text="Copies sketch and content of the current experiment into a new one:" 
                        FontSize="11.5" TextWrapping="Wrap" Width="270" FontStyle="Italic" HorizontalAlignment="Left"  />
 
                     <StackPanel IsEnabled="{Binding ElementName=rdoClone, Path=IsChecked}">

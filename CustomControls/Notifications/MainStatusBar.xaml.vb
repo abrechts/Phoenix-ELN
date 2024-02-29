@@ -5,10 +5,6 @@
         ' This call is required by the designer.
         InitializeComponent()
 
-        If Not My.Settings.IsServerEnabled Then
-            pnlServerError.ToolTip = "ELN server disconnected by user."
-        End If
-
     End Sub
 
 
@@ -33,12 +29,21 @@
     ''' Sets if a server error should be displayed or not
     ''' </summary>
     ''' 
-    Public WriteOnly Property DisplayServerError() As Boolean
+    Public Property DisplayServerError() As Boolean
+
+        Get
+            Return pnlServerError.IsVisible
+        End Get
 
         Set(value As Boolean)
             If value = True Then
                 pnlServerError.Visibility = Windows.Visibility.Visible
                 pnlServerOk.Visibility = Windows.Visibility.Collapsed
+                If My.Settings.IsServerOffByUser Then
+                    pnlServerError.ToolTip = "ELN server disconnected by user."
+                Else
+                    pnlServerError.ToolTip = "The ELN server currently is unavailable!"
+                End If
             Else
                 pnlServerError.Visibility = Windows.Visibility.Collapsed
                 pnlServerOk.Visibility = Windows.Visibility.Visible

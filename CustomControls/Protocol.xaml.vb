@@ -10,6 +10,7 @@ Imports ElnBase
 Imports ElnBase.ELNEnumerations
 Imports ElnCoreModel
 Imports GongSolutions.Wpf.DragDrop
+Imports Microsoft.EntityFrameworkCore
 Imports Microsoft.Win32
 
 Public Class Protocol
@@ -18,6 +19,7 @@ Public Class Protocol
 
     Public Shared Event WorkflowStateChanged(sender As Object)
     Public Shared Event RequestSaveIcon(sender As Object)
+    Public Shared Event ConnectedChanged(isConnected As Boolean)
 
 
     Public Sub New()
@@ -101,7 +103,7 @@ Public Class Protocol
     ''' <param name="noUndoPoint">Set to true for special cases where no Undo point should be created, 
     ''' e.g. for auto-saving an Undo/Redo operation, or after creating a new experiment. The default is false.</param>
     ''' 
-    Public Sub AutoSave(Optional allowFinalized As Boolean = False, Optional noUndoPoint As Boolean = False)
+    Public Async Sub AutoSave(Optional allowFinalized As Boolean = False, Optional noUndoPoint As Boolean = False)
 
         Dim expEntry = CType(Me.DataContext, tblExperiments)
         If allowFinalized OrElse expEntry.WorkflowState <> WorkflowStatus.Finalized Then
@@ -116,30 +118,33 @@ Public Class Protocol
                 '- save locally, which also sets sync info flags and tombstone
                 .SaveChanges()
 
-                If My.Settings.IsServerEnabled = True AndAlso Not ServerSync.HasSyncMismatch Then
+                RaiseEvent RequestSaveIcon(Me)
 
-                    If .ServerSynchronization IsNot Nothing Then
-                        If Not ServerSync.IsSynchronizing Then
-                            '- sync to server asynchronously
-                            .ServerSynchronization.SynchronizeAsync()
-                        Else
-                            '- skip this sync while another one is ongoing
-                            _wasSkipped = True
-                            '  Debug.WriteLine("skipped: " + Now.ToString)
-                        End If
-                    Else
-                        'try to reconnect with no startup connection (serverSync is nothing)
-                        With My.MySettings.Default
-                            If .ServerName <> "" AndAlso .IsServerEnabled Then
-                                ServerSync.CreateServerContextAsync(.ServerName, .ServerDbUserName, .ServerDbPassword, .ServerPort,
-                                    ExperimentContent.DbContext.tblDatabaseInfo.First)
+                If My.Settings.IsServerEnabled AndAlso Not My.Settings.IsServerOffByUser Then
+
+                    '    If Await Task.Run(Function() ServerSync.IsServerConnAvailable()) Then
+                    If Await Task.Run(Function() IsServerConnAvailable()) Then
+
+                        If .ServerSynchronization IsNot Nothing Then
+                            If Not ServerSync.IsSynchronizing Then
+                                '- sync to server asynchronously
+                                .ServerSynchronization.SynchronizeAsync()
+                            Else
+                                '- skip this sync while another one is ongoing
+                                _wasSkipped = True
+                                '  Debug.WriteLine("skipped: " + Now.ToString)
                             End If
-                        End With
+                        End If
+
+                        RaiseEvent ConnectedChanged(True)
+
+                    Else
+
+                        RaiseEvent ConnectedChanged(False)
+
                     End If
 
                 End If
-
-                RaiseEvent RequestSaveIcon(Me)
 
             End With
 
@@ -156,15 +161,49 @@ Public Class Protocol
             'a request while the now completed sync was ongoing.
 
             If _wasSkipped Then
-                If ServerSync.IsConnected Then
-                    'Debug.WriteLine("-- Retry Skipped ---")
-                    .SynchronizeAsync()
-                End If
+                'Debug.WriteLine("-- Retry Skipped ---")
+                .SynchronizeAsync()
                 _wasSkipped = False
             End If
+
         End With
 
     End Sub
+
+
+    ''' <summary>
+    ''' Gets if a server connection currently is present.
+    ''' </summary>
+    ''' <remarks>If no server context is present so far (no server available at startup), the creation of a new one is attempted.</remarks>
+    ''' 
+    Public Shared Function IsServerConnAvailable() As Boolean
+
+        If ServerSync.ServerContext IsNot Nothing Then
+
+            '-- server was present on startup
+            Return ServerSync.ServerContext.Database.CanConnect
+
+        Else
+
+            '-- no server was available on application startup
+            With My.Settings
+
+                Dim serverContext = ServerSync.CreateMySQLContext(.ServerName, .ServerDbUserName, .ServerDbPassword, .ServerPort,
+                  ExperimentContent.DbContext.tblDatabaseInfo.First)
+
+                If serverContext IsNot Nothing Then
+                    ExperimentContent.DbContext.ServerSynchronization = New ServerSync(ExperimentContent.DbContext, serverContext)
+                    ServerSync.ServerContext = serverContext
+                    Return True
+                Else
+                    Return False
+                End If
+
+            End With
+
+        End If
+
+    End Function
 
 
     ''' <summary>
@@ -302,9 +341,7 @@ Public Class Protocol
                 lstProtocol.ItemContainerStyle = FindResource("ProtocolFinalizedListBoxItemStyle")
                 lstProtocol.AllowDrop = False
                 UnselectAll()
-                If UndoEngine IsNot Nothing Then
-                    UndoEngine.Reset()
-                End If
+                UndoEngine?.Reset()
 
             Else
 

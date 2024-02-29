@@ -142,28 +142,32 @@ Class MainWindow
         AddHandler StatusDemo.RequestCreateFirstUser, AddressOf DemoStatus_RequestCreateFirstUser
         AddHandler StatusDemo.RequestRestoreServer, AddressOf DemoStatus_RequestRestoreServer
         AddHandler ServerSync.ServerContextCreated, AddressOf ServerSync_ServerContextCreated
-        AddHandler ServerSync.ConnectedChanged, AddressOf ServerSync_ConnectedChanged
+        AddHandler Protocol.ConnectedChanged, AddressOf Protocol_ConnectedChanged
         AddHandler ServerSync.SyncProgress, AddressOf ServerSync_SyncProgress
         AddHandler dlgServerConnection.ServerContextCreated, AddressOf ServerSync_ServerContextCreated
         AddHandler ExpTabHeader.PinStateChanged, AddressOf expTabHeader_PinStateChanged
         AddHandler StepSummary.RequestOpenExperiment, AddressOf StepSummary_RequestOpenExperiment
 
-
         'created async to reduce startup time
+
         If DBContext.tblDatabaseInfo.First.tblUsers.First.UserID <> "demo" Then
+
             With CustomControls.My.MySettings.Default
-                If .ServerName <> "" AndAlso .IsServerEnabled Then
-                    'handled by ServerSync_ServerContextCreated
+                If .IsServerEnabled Then
                     ServerSync.CreateServerContextAsync(.ServerName, .ServerDbUserName, .ServerDbPassword, .ServerPort,
-                  DBContext.tblDatabaseInfo.First)
+                        DBContext.tblDatabaseInfo.First)
+                    'handled by ServerSync_ServerContextCreated (also sets statusBar)
                 Else
-                    statusBar.DisplayServerError = .ServerName <> ""
-                    statusBar.DisplayServerStatus = .ServerName <> ""
+                    statusBar.DisplayServerStatus = .IsServerOffByUser
+                    statusBar.DisplayServerError = .IsServerOffByUser
                 End If
             End With
+
         Else
-            statusBar.DisplayServerError = False
+
+            statusBar.DisplayServerStatus = False
             CustomControls.My.MySettings.Default.IsServerEnabled = False
+
         End If
 
         'select experiment tab of current experiment (may be a pinned one)
@@ -225,7 +229,9 @@ Class MainWindow
         If serverContext IsNot Nothing Then
 
             '- handle syncID mismatch
+
             If ServerSync.HasSyncMismatch Then
+
                 statusBar.DisplayServerError = True
                 Dim syncMismatchWarningDlg As New dlgServerSyncIssue
                 With syncMismatchWarningDlg
@@ -233,8 +239,9 @@ Class MainWindow
                     .ShowDialog()
                     RestoreFromServer()  'restarts app when done
                 End With
-                ServerSync.IsConnected = False
+
                 Exit Sub
+
             End If
 
             ServerDBContext = serverContext
@@ -247,7 +254,6 @@ Class MainWindow
                 If ServerSync.DatabaseGUID <> "" Then
 
                     '- standard case: sync all pending items at startup
-                    ServerSync.IsConnected = True
                     WPFToolbox.WaitForPriority(Threading.DispatcherPriority.Background)
                     DBContext.ServerSynchronization.SynchronizeAsync()
 
@@ -265,9 +271,12 @@ Class MainWindow
             End If
 
         Else
-            'e.g. due to server login error
-            ServerSync.IsConnected = False
-            CustomControls.My.MySettings.Default.IsServerEnabled = False
+
+            'e.g. server unavailable
+
+            Dispatcher.Invoke(Sub() ServerWarningDelegate(False))
+            MsgBox("The ELN server is unavailable!" + vbCrLf + "Changes currently are not backed up.", MsgBoxStyle.Information, "Server Sync")
+
         End If
 
     End Sub
@@ -314,8 +323,6 @@ Class MainWindow
 
             '- no userID conflicts with server
 
-            ServerSync.IsConnected = True
-            CustomControls.My.MySettings.Default.IsServerEnabled = True
             statusBar.DisplayServerError = False
 
             ServerSync.DatabaseGUID = DBContext.tblDatabaseInfo.First.GUID
@@ -326,11 +333,6 @@ Class MainWindow
                 .ShowDialog()
             End With
             DBContext.ServerSynchronization.SynchronizeAsync()
-
-        Else
-
-            ServerSync.IsConnected = False
-            CustomControls.My.MySettings.Default.IsServerEnabled = False
 
         End If
 
@@ -430,7 +432,6 @@ Class MainWindow
             'display connect dialog if not connected (e.g. demo user)
             If ServerDBContext Is Nothing Then
                 If Not ConnectToServer(isRestore:=True) Then
-                    CustomControls.My.MySettings.Default.IsServerEnabled = False
                     _isRestoring = False
                     Exit Sub
                 End If
@@ -471,15 +472,22 @@ Class MainWindow
     ''' Handles server availability warning display
     ''' </summary>
     ''' 
-    Private Sub ServerSync_ConnectedChanged(isConnected As Boolean)
+    Private Sub Protocol_ConnectedChanged(isConnected As Boolean)
 
-        Dispatcher.Invoke(Sub() ServerWarningDelegate(isConnected))
+        Dim isInError = statusBar.DisplayServerError
 
         If isConnected Then
-            MsgBox("Server reconnected!", MsgBoxStyle.Information, "Server Sync")
-            DBContext.ServerSynchronization.SynchronizeAsync()
+            If isInError Then
+                Dispatcher.Invoke(Sub() ServerWarningDelegate(isConnected))
+                MsgBox("Server reconnected!", MsgBoxStyle.Information, "Server Sync")
+                DBContext.ServerSynchronization.SynchronizeAsync()
+            End If
         Else
-            MsgBox("The ELN server is unavailable!" + vbCrLf + "Changes currently are not backed up.", MsgBoxStyle.Information, "Server Sync")
+            If Not isInError Then
+                Dispatcher.Invoke(Sub() ServerWarningDelegate(isConnected))
+                MsgBox("The ELN server is unavailable!" + vbCrLf + "Changes currently are not backed up.", MsgBoxStyle.Information, "Server Sync")
+            End If
+
         End If
 
     End Sub
@@ -1096,15 +1104,16 @@ Class MainWindow
     ''' 
     Friend Function ConnectToServer(Optional isRestore As Boolean = False) As Boolean
 
-        If Not isRestore Then
-            If CType(Me.DataContext, tblUsers).UserID = "demo" Then
-                MsgBox("Sorry, the 'demo' user can't connect " + vbCrLf +
+        If CType(Me.DataContext, tblUsers).UserID = "demo" AndAlso Not isRestore Then
+
+            MsgBox("Sorry, the 'demo' user can't connect " + vbCrLf +
                    "to the server database.", MsgBoxStyle.Information, "Server Connect")
-                Return False
-            End If
+            Return False
+
         End If
 
         Dim connDlg As New dlgServerConnection(DBContext, ServerDBContext)
+
         With connDlg
             .Owner = Me
 
@@ -1114,14 +1123,13 @@ Class MainWindow
                     '-- apply new server context
                     ServerDBContext = .NewServerContext
                     DBContext.ServerSynchronization = New ServerSync(DBContext, ServerDBContext)
-                    ServerSync.IsConnected = True
                     statusBar.DisplayServerError = False
                     Return True
                 Else
                     '-- disconnect
                     If CustomControls.My.MySettings.Default.IsServerEnabled = False Then
                         If ServerDBContext IsNot Nothing Then
-                            ServerSync.IsConnected = False
+                            statusBar.DisplayServerError = True
                             ServerDBContext.Dispose()
                             ServerDBContext = Nothing
                         End If
@@ -1129,6 +1137,7 @@ Class MainWindow
                     Return False
                 End If
             Else
+                '-- cancel
                 Return False
             End If
 

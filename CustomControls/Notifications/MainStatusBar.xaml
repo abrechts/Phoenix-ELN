@@ -21,7 +21,7 @@
                       Opacity="0.9" Margin="2,1,1,0"/>
                 </StackPanel>
 
-                <StackPanel x:Name="pnlServerError" Orientation="Horizontal" VerticalAlignment="Center" Visibility="visible"
+                <StackPanel x:Name="pnlServerError" Orientation="Horizontal" VerticalAlignment="Center" d:Visibility="visible"
                   ToolTip="The ELN server currently is unavailable!">
                     <ContentControl Content="{StaticResource icoDatabaseWarning}"  Height="18" VerticalContentAlignment="Center" Margin="2,0,2,0"/>
                 </StackPanel>

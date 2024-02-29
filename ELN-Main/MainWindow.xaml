@@ -24,7 +24,7 @@
 
             <Grid>
                 <ToolBar x:Name="mainToolbar" Focusable="true" Style="{StaticResource ToolBarWithoutOverflowBarStyle}"
-                   FontFamily="Verdana" FontSize="12">
+                   FontFamily="Verdana" FontSize="12" Margin="-2,0,1,0">
 
                     <Button x:Name="btnAddProject" HorizontalAlignment="Left" VerticalAlignment="Top" ToolTip="Add a new project folder" Margin="4,0,0,0">
                         <StackPanel Orientation="Horizontal">
