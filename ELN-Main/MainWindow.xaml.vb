@@ -90,10 +90,10 @@ Class MainWindow
         ApplyAllDataBindings()
 
         ApplicationVersion = GetType(MainWindow).Assembly.GetName().Version
+        DBContext.tblDatabaseInfo.First.CurrAppVersion = ApplicationVersion.ToString
 
-        'Version update: Save application version and send install statistics
+        'Version update: Send install statistics
         If _IsVersionUpgrade Then
-            DBContext.tblDatabaseInfo.First.CurrAppVersion = ApplicationVersion.ToString
             PhpServices.SendInstallInfo(ApplicationVersion.ToString(3), DBContext, CustomControls.My.MySettings.Default.IsServerEnabled)
         End If
 
