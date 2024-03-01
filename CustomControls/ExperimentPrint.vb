@@ -25,10 +25,13 @@ Public Class ExperimentPrint
         Dim pdfPath As String = ""
 
         If Not printAsPDF Then
+
             If Not printDlg.ShowDialog Then
                 Exit Sub
             End If
+
         Else
+
             Dim saveFileDlg As New SaveFileDialog
             With saveFileDlg
                 If My.Settings.LastPdfSaveDir = "" Then
@@ -46,10 +49,10 @@ Public Class ExperimentPrint
                     Exit Sub
                 End If
             End With
+
         End If
 
-        '- set wait cursor on application window
-        '    Dim appWindow = WPFToolbox.FindVisualParent(Of Window)(Me)
+        'set wait cursor on application window
         appWindow.Cursor = Cursors.Wait
         appWindow.ForceCursor = True
         WPFToolbox.WaitForPriority(Threading.DispatcherPriority.ContextIdle)
@@ -86,8 +89,14 @@ Public Class ExperimentPrint
                     CompletePDF(pdfDoc, pdfPath, expEntry)  'add attachments, convert to PDF/A-3b
                 End If
 
+                Dim info As New ProcessStartInfo(pdfPath)
+                info.UseShellExecute = True
+                Process.Start(info)
+
             Else
+
                 printDlg.PrintDocument(stackPrintTempl.Paginator, "Printing " + expEntry.ExperimentID)
+
             End If
 
         Catch ex As Exception
