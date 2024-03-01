@@ -13,7 +13,7 @@
 - Rearrange all protocol elements via drag & drop.
 - Insert or append elements.
 - Switch between lab view (weights/volumes first) and design view (equivalents first).
-- Export the protocol content to PDF/A-3b (archival format), or print it. Documents inserted into the protocol are embedded as PDF attachments.
+- Export the protocol content to PDF (compliant with PDF/A-3b archival format), or print it. Documents inserted into the protocol are embedded as PDF attachments.
 
 
 ## Materials Database
