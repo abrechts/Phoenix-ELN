@@ -230,6 +230,8 @@ Class MainWindow
 
             '- handle syncID mismatch
 
+            ServerDBContext = serverContext
+
             If ServerSync.HasSyncMismatch Then
 
                 statusBar.DisplayServerError = True
@@ -243,8 +245,6 @@ Class MainWindow
                 Exit Sub
 
             End If
-
-            ServerDBContext = serverContext
 
             If Not _isRestoring Then
 
