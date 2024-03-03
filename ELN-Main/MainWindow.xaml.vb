@@ -148,6 +148,13 @@ Class MainWindow
         AddHandler ExpTabHeader.PinStateChanged, AddressOf expTabHeader_PinStateChanged
         AddHandler StepSummary.RequestOpenExperiment, AddressOf StepSummary_RequestOpenExperiment
 
+
+        'TEST
+        Dim x As New dlgSearch
+        x.Owner = Me
+        x.ShowDialog()
+
+
         'created async to reduce startup time
 
         If DBContext.tblDatabaseInfo.First.tblUsers.First.UserID <> "demo" Then

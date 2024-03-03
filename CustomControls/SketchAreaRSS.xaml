@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="SketchArea"
+﻿<UserControl x:Class="SketchAreaRSS"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -10,7 +10,7 @@
 
         <Viewbox x:Name="sketchViewbox" StretchDirection="DownOnly"/>
 
-        <TextBlock x:Name="blkClickInfo" Foreground="Gray" FontStyle="Oblique" Text="Click to edit reaction sketch ..." 
+        <TextBlock x:Name="blkClickInfo" Foreground="Gray" FontStyle="Oblique" Text="Click to edit substructure query ..." 
             TextAlignment="Center" FontFamily="Verdana" FontSize="10" Cursor="Hand" VerticalAlignment="Center" HorizontalAlignment="Center"/>
         
     </Grid>
