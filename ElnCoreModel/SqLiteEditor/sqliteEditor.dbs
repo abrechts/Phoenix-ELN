@@ -418,7 +418,7 @@
 		<entity schema="Default" name="tblExperiments" color="3986C1" x="960" y="48" />
 		<entity schema="Default" name="tblMaterials" color="3986C1" x="80" y="336" />
 		<entity schema="Default" name="tblProjects" color="3986C1" x="672" y="48" />
-		<entity schema="Default" name="tblProtocolItems" color="3986C1" x="1008" y="464" />
+		<entity schema="Default" name="tblProtocolItems" color="3986C1" x="992" y="496" />
 		<entity schema="Default" name="tblSeparators" color="3986C1" x="672" y="496" />
 		<entity schema="Default" name="tblUsers" color="3986C1" x="368" y="48" />
 	</layout>

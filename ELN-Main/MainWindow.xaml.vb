@@ -86,7 +86,10 @@ Class MainWindow
             DbUpgradeLocal.Upgrade(SQLiteDbPath)
         End If
 
-        'Connect data model of local database with UI
+        'Create local SqliteContext
+        DBContext = New SQLiteContext(SQLiteDbPath).ElnContext
+
+        'Connect local database model with UI
         ApplyAllDataBindings()
 
         ApplicationVersion = GetType(MainWindow).Assembly.GetName().Version
@@ -108,9 +111,6 @@ Class MainWindow
     ''' </summary>
     ''' 
     Private Sub ApplyAllDataBindings()
-
-        'Create local SqliteContext
-        DBContext = New SQLiteContext(SQLiteDbPath).ElnContext
 
         'Assign initial contexts
         Me.DataContext = DBContext.tblUsers.First   'currently only one local user assumed
