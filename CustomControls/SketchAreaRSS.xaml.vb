@@ -7,7 +7,7 @@ Imports ElnBase.ELNEnumerations
 
 Public Class SketchAreaRSS
 
-    Public Shared Event SketchInfoAvailable(sender As Object, sketchInfo As SketchResults)
+    Public Event SketchEdited(sender As Object, skInfo As SketchResults)
 
     Public Sub New()
 
@@ -50,20 +50,7 @@ Public Class SketchAreaRSS
                 .blkClickInfo.Visibility = Visibility.Visible
             End If
 
-            .RaiseSketchInfoAvailableEvent()
-
         End With
-
-    End Sub
-
-
-    ''' <summary>
-    ''' Raises the ReactionSketchChanged event.
-    ''' </summary>
-    ''' 
-    Private Sub RaiseSketchInfoAvailableEvent()
-
-        RaiseEvent SketchInfoAvailable(Me, SketchInfo)
 
     End Sub
 
@@ -111,7 +98,9 @@ Public Class SketchAreaRSS
             blkClickInfo.Visibility = Visibility.Collapsed
 
             DrawReactionSketch()
-            RaiseSketchInfoAvailableEvent()
+            '  RaiseSketchSourceChangedEvent()
+
+            RaiseEvent SketchEdited(Me, skInfo)
 
         End If
 

@@ -144,6 +144,8 @@
                         </MenuItem>
                     </Menu>
 
+                    <Button x:Name="btnSearch" Content="Search"/>
+
                 </ToolBar>
 
                 <custom:MainStatusBar x:Name="statusBar" HorizontalAlignment="Right" Margin="0,0,6,0" VerticalAlignment="Center"/>

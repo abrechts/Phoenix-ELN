@@ -89,6 +89,13 @@ Class MainWindow
         'Create local SqliteContext
         DBContext = New SQLiteContext(SQLiteDbPath).ElnContext
 
+        'Check for legacy Rss backlog registration (--> can be removed later!)
+        If New Version(DBContext.tblDatabaseInfo.First.CurrAppVersion) < New Version("0.9.4") Then
+            Dim rss As New RxnSubstructure
+            rss.RegisterRssBacklog(DBContext.tblDatabaseInfo.First.tblUsers.First)
+            DBContext.SaveChanges()
+        End If
+
         'Connect local database model with UI
         ApplyAllDataBindings()
 
@@ -102,6 +109,16 @@ Class MainWindow
 
         RemainingDemoCountConverter.MaxDemoCount = 15
         RemainingDemoCountConverter.FactoryDemoCount = 6
+
+    End Sub
+
+
+    Private Sub btnSearch_Click() Handles btnSearch.Click
+
+        Dim x As New dlgSearch
+        x.Owner = Me
+        x.DBContext = DBContext
+        x.ShowDialog()
 
     End Sub
 
@@ -147,12 +164,6 @@ Class MainWindow
         AddHandler dlgServerConnection.ServerContextCreated, AddressOf ServerSync_ServerContextCreated
         AddHandler ExpTabHeader.PinStateChanged, AddressOf expTabHeader_PinStateChanged
         AddHandler StepSummary.RequestOpenExperiment, AddressOf StepSummary_RequestOpenExperiment
-
-
-        'TEST
-        Dim x As New dlgSearch
-        x.Owner = Me
-        x.ShowDialog()
 
 
         'created async to reduce startup time

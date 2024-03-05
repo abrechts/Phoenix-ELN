@@ -5,19 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CustomControls"
         mc:Ignorable="d"
-        Title="dlgSearch" Width="569" TextOptions.TextFormattingMode="Display" WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
+        Title="dlgSearch" Width="569" TextOptions.TextFormattingMode="Display" WindowStartupLocation="CenterOwner" ShowInTaskbar="False" d:DesignHeight="320.5">
 
     <Grid>
 
         <StackPanel>
-
-            <TextBlock Text="Source Reaction" FontWeight="Bold" Margin="0,12,0,2" HorizontalAlignment="Center" FontStyle="Italic" FontSize="13" Opacity="0.8"/>
-
-            <Border Grid.Row="1" Background="white" BorderBrush="#FFADADAD" BorderThickness="1" Margin="12,0,12,0">
-                <local:SketchAreaRSS x:Name="pnlFullSketch" ReactionSketch="{Binding}" Margin="12,8,12,6"/>
-            </Border>
-
-            <TextBlock x:Name="blkSourceSmarts" d:Text="source smarts" HorizontalAlignment="Center" Margin="0,2,0,0"/>
 
             <TextBlock Text="RSS Query" FontWeight="Bold" Margin="180,12,0,2" HorizontalAlignment="left" FontStyle="Italic" FontSize="13" Opacity="0.8"/>
 
@@ -25,9 +17,11 @@
                 <local:SketchAreaRSS x:Name="pnlQuerySketch" ReactionSketch="{Binding}" Margin="12,8,12,6" />
             </Border>
 
-            <TextBlock x:Name="blkQuerySmarts" d:Text="query smarts" HorizontalAlignment="Center" Margin="0,2,0,12"/>
+            <ListBox x:Name="hitList" Margin="12" DisplayMemberPath="ExperimentID">
+                
+            </ListBox>
 
-        
+
         </StackPanel>
 
     </Grid>

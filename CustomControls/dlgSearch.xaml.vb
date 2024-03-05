@@ -7,49 +7,20 @@ Public Class dlgSearch
         ' This call is required by the designer.
         InitializeComponent()
 
-        ' Add any initialization after the InitializeComponent() call.
-
     End Sub
 
 
-
-    Public Property SourceSketchRxn As String
-
-    Public Property QuerySketchRxn As String
+    Public Property DBContext As ElnDbContext
 
 
-    Private Sub PerformMatch()
+    Private Sub pnlQuerySketch_SketchEdited(sender As Object, skInfo As SketchResults) Handles pnlQuerySketch.SketchEdited
 
         Dim rxnSub As New RxnSubstructure
+        Dim expHits = rxnSub.PerformRssQuery(skInfo.MDLRxnFileString, DBContext)
 
-        If rxnSub.MatchReaction(SourceSketchRxn, QuerySketchRxn) Then
-            MsgBox("Hit!")
-        Else
-            MsgBox("No Hit!")
-        End If
+        hitList.ItemsSource = expHits
 
     End Sub
-
-
-    Private Sub pnlQuerySketch_SketchInfoAvailable(sender As Object, skInfo As SketchResults) Handles pnlQuerySketch.SketchInfoAvailable
-
-        If sender.Name = "pnlFullSketch" Then
-
-            SourceSketchRxn = skInfo.MDLRxnFileString
-
-        Else
-
-            QuerySketchRxn = skInfo.MDLRxnFileString
-            If SourceSketchRxn <> "" Then
-                PerformMatch()
-                Dim x = 1
-            End If
-
-        End If
-
-    End Sub
-
-
 
 
 End Class

@@ -17,7 +17,7 @@ Public Class StepSummary
 
         cvsStepExperiments = Me.TryFindResource("cvsStepExperiments")
 
-        AddHandler SketchArea.SketchInfoAvailable, AddressOf SketchArea_SketchInfoAvailable
+        AddHandler SketchArea.SketchSourceChanged, AddressOf SketchArea_SketchSourceChanged
 
     End Sub
 
@@ -38,7 +38,8 @@ Public Class StepSummary
 
     End Sub
 
-    Private Sub SketchArea_SketchInfoAvailable(sender As Object, skInfo As SketchResults)  'shared event
+
+    Private Sub SketchArea_SketchSourceChanged(sender As Object, skInfo As SketchResults) 'shared event
 
         If skInfo IsNot Nothing AndAlso skInfo.Reactants.Count > 0 AndAlso skInfo.Products.Count > 0 Then
 
