@@ -1,6 +1,4 @@
 ﻿Imports System.ComponentModel
-Imports System.Windows
-Imports System.Windows.Controls
 Imports System.Windows.Data
 Imports System.Windows.Input
 Imports ElnCoreModel
@@ -179,39 +177,6 @@ Public Class StepSummary
             End With
 
         End If
-
-    End Sub
-
-
-
-    ''' <summary>
-    ''' Scales the summary compound ViewBox in a way to obtain an uniform bond length across all components.
-    ''' </summary>
-    ''' <param name="cpdView">ViewBox containing the components.</param>
-    ''' 
-    Private Sub ScaleViewBoxSize(ByRef cpdView As Viewbox, maxExtent As Double)
-
-        With CType(cpdView.Child, Canvas)
-            cpdView.Height = 0.21 * .Height
-            cpdView.Width = 0.21 * .Width
-        End With
-
-        With cpdView
-
-            '  Dim maxExtent = 400
-
-            If .Height > maxExtent Then
-                .Height = maxExtent
-                .Width = .Width * (maxExtent / .Height)
-            ElseIf .Width > maxExtent Then
-                .Width = maxExtent
-                .Height = .Height * (maxExtent / .Width)
-            End If
-
-            .Margin = New Thickness(-4)
-
-        End With
-
 
     End Sub
 

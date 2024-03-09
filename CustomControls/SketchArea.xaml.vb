@@ -136,7 +136,7 @@ Public Class SketchArea
 
             'register RSS query fields
             Dim rss As New RxnSubstructure
-            rss.RegisterReactionRss(currExp)
+            rss.RegisterReactionRSS(currExp)
 
             blkClickInfo.Visibility = Visibility.Collapsed
 

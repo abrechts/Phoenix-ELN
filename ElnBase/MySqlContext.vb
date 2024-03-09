@@ -20,8 +20,7 @@ Public Class MySqlContext
             .Database = dbName
             .UserID = userID
             .Password = password
-            .ConnectionIdleTimeout = 5
-            .ConnectionTimeout = 5
+            .ConnectionTimeout = 10
             serverConnStr = .ToString
         End With
 

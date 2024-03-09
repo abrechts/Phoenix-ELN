@@ -86,21 +86,24 @@ Public Class SketchAreaRSS
 
         Dim cbDraw As New DrawingEditor(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\Phoenix ELN Data")
 
-        cbDraw.DialogProperties.SketchValidation = EditorOptions.SketchConditions.Reaction
+        If cbDraw IsNot Nothing Then
 
-        'CORE
-        Dim skInfo = cbDraw.DisplayDialog(rxnSketch)
+            cbDraw.DialogProperties.SketchValidation = EditorOptions.SketchConditions.Reaction
 
-        'editor not cancelled?
-        If skInfo IsNot Nothing Then
+            'CORE
+            Dim skInfo = cbDraw.DisplayDialog(rxnSketch)
 
-            SketchInfo = skInfo
-            blkClickInfo.Visibility = Visibility.Collapsed
+            'editor not cancelled?
+            If skInfo IsNot Nothing Then
 
-            DrawReactionSketch()
-            '  RaiseSketchSourceChangedEvent()
+                SketchInfo = skInfo
+                blkClickInfo.Visibility = Visibility.Collapsed
 
-            RaiseEvent SketchEdited(Me, skInfo)
+                DrawReactionSketch()
+
+                RaiseEvent SketchEdited(Me, skInfo)
+
+            End If
 
         End If
 
@@ -119,12 +122,12 @@ Public Class SketchAreaRSS
             Dim skCanvas = SketchInfo.SketchCanvas
             sketchViewbox.Child = SketchInfo.SketchCanvas
 
-            Dim shrinkThreshold = 700
+            Dim shrinkThreshold = 400 '700
 
             If skCanvas.Height < shrinkThreshold Then         'limit upscaling
 
                 Dim canvasTopDiff = (shrinkThreshold - skCanvas.Height) / 2
-                Dim viewBoxDiff = canvasTopDiff * (sketchGrid.Height / shrinkThreshold)
+                Dim viewBoxDiff = canvasTopDiff * (sketchGrid.ActualHeight / shrinkThreshold)
                 sketchViewbox.Margin = New Thickness(viewBoxDiff)
 
             Else

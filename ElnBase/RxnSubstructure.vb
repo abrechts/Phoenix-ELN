@@ -1,6 +1,13 @@
 ﻿
+Imports System.Windows.Controls
 Imports com.epam.indigo
 Imports ElnCoreModel
+Imports Microsoft.EntityFrameworkCore
+
+' * Performance notes: 
+' * MatchRxnFingerprint: 36 ms for 100'000 experiments (comparison only, no LINQ database access overhead)
+' * MatchRxnSubstructure: 700 ms for 10'000 comparisons (using serialized rxnObject overload, comparison only, no LINQ database access overhead)
+' * --> Fingerprint matching is performed first, then substructure query on result for hit confirmation (if selected).
 
 Public Class RxnSubstructure
 
@@ -27,7 +34,7 @@ Public Class RxnSubstructure
         Dim queryRxnObj = GetMappedIndigoRxn(queryRxnStr, True)
         Dim queryFp = queryRxnObj.fingerprint("sub")
 
-        Dim fpRes = From exp In dbContext.tblExperiments.AsEnumerable Where MatchRssFingerpint(exp.RxnFingerprint, queryFp)
+        Dim fpRes = From exp In dbContext.tblExperiments.AsEnumerable Where MatchRxnFingerpint(exp.RxnFingerprint, queryFp)
 
         If fpOnly Then
             Return fpRes
@@ -36,7 +43,7 @@ Public Class RxnSubstructure
         If fpRes.Any Then
 
             'confirm fingerprint hits by substructure macht
-            Dim rssRes = From exp In fpRes Where MatchReaction(exp.RxnIndigoObj, queryRxnObj)
+            Dim rssRes = From exp In fpRes Where MatchRxnSubstructure(exp.RxnIndigoObj, queryRxnObj)
             If rssRes.Any Then
                 Debug.WriteLine("Hits: " + fpRes.Count.ToString + "-fp; " + rssRes.Count.ToString + "-rss")
             Else
@@ -62,7 +69,7 @@ Public Class RxnSubstructure
     Public Sub RegisterRssBacklog(userEntry As tblUsers)
 
         For Each exp In userEntry.tblExperiments
-            RegisterReactionRss(exp)
+            RegisterReactionRSS(exp)
         Next
 
     End Sub
@@ -72,7 +79,7 @@ Public Class RxnSubstructure
     ''' Register the reaction properties of the specified experiment entry required for performing RSS searches.
     ''' </summary>
     ''' 
-    Public Sub RegisterReactionRss(ByRef expEntry As tblExperiments)
+    Public Sub RegisterReactionRSS(ByRef expEntry As tblExperiments)
 
         If expEntry.MDLRxnFileString <> "" Then
 
@@ -85,12 +92,11 @@ Public Class RxnSubstructure
     End Sub
 
 
-
     ''' <summary>
     ''' Gets if specified source reaction fingerprint matches the specified query reaction fingerprint.
     ''' </summary>
     ''' 
-    Private Function MatchRssFingerpint(fpSourceArr As Byte(), fpQuery As IndigoObject) As Boolean
+    Private Function MatchRxnFingerpint(fpSourceArr As Byte(), fpQuery As IndigoObject) As Boolean
 
         If fpSourceArr IsNot Nothing Then
 
@@ -108,19 +114,23 @@ Public Class RxnSubstructure
     End Function
 
 
-    Private Function MatchReaction(srcIndigoRxnArr As Byte(), queryIndigoRxnObj As IndigoObject) As Boolean
+    ''' <summary>
+    ''' Gets if the specified serialized reaction object and the specified reaction substructure result in a RSS substructure hit.
+    ''' </summary>
+    ''' 
+    Private Function MatchRxnSubstructure(srcIndigoRxnArr As Byte(), queryIndigoRxnObj As IndigoObject) As Boolean
 
         Dim srcIndigoObj = IndigoBase.loadReaction(srcIndigoRxnArr)
-        Return MatchReaction(srcIndigoObj, queryIndigoRxnObj)
+        Return MatchRxnSubstructure(srcIndigoObj, queryIndigoRxnObj)
 
     End Function
 
 
     ''' <summary>
-    ''' Gets if the pre-formed source and query Indigo reaction objects result in a RSS substructure hit.
+    ''' Gets if the specified reaction object and the specified reaction substructure result in a RSS substructure hit.
     ''' </summary>
     ''' 
-    Private Function MatchReaction(sourceIndigoRxnObj As IndigoObject, queryIndigoRxnObj As IndigoObject) As Boolean
+    Private Function MatchRxnSubstructure(sourceIndigoRxnObj As IndigoObject, queryIndigoRxnObj As IndigoObject) As Boolean
 
         If sourceIndigoRxnObj Is Nothing OrElse queryIndigoRxnObj Is Nothing Then
             Return Nothing
@@ -130,45 +140,6 @@ Public Class RxnSubstructure
         Return match IsNot Nothing
 
     End Function
-
-
-    '''' <summary>
-    '''' Gets if the specified source reaction and query sub reaction, both in MDL rxnFile format, 
-    '''' result in a RSS substructure hit.
-    '''' </summary>
-    '''' <param name="sourceMdlRxn">The reaction to test for a hit, as MDL rxnFile string.</param>
-    '''' <param name="queryMdlRxn">The query substructure reaction, as MDL rxnFile string.</param>
-    '''' <returns>True, if the queryMdlRxn matches the sourceMdlRxn.</returns>
-    '''' 
-    'Friend Function MatchReaction(sourceMdlRxn As String, queryMdlRxn As String) As Boolean
-
-    '    Dim srcReaction = GetMappedIndigoRxn(sourceMdlRxn, False)
-    '    Dim queryReaction = GetMappedIndigoRxn(queryMdlRxn, True)
-
-    '    Dim fpSource = srcReaction.fingerprint("sub")
-    '    Dim fpQuery = queryReaction.fingerprint("sub")
-
-    '    'Result: 36 ms for 100'000 comparisons!
-    '    'For i = 1 To 100000
-    '    '    MatchRssFingerpint(fpSource, fpQuery)
-    '    'Next
-
-    '    Dim srcStr = fpSource.toBuffer  'length = 534
-    '    Dim srcRxnSerialized = srcReaction.serialize '501 for mid-size structure
-
-    '    If MatchRssFingerpint(fpSource.toBuffer, fpQuery) Then
-    '        Return MatchReaction(srcReaction, queryReaction)
-    '    Else
-    '        MsgBox("No fingerprint hit!")
-    '        Return False
-    '    End If
-
-    '    '  For i = 1 To 10000
-    '    '  dstReaction = indigo.loadReaction(srcRxnSerialized)
-    '    'indigo.substructureMatcher(dstReaction).match(queryReaction)
-    '    '  Next
-
-    'End Function
 
 
     ''' <summary>
@@ -223,6 +194,10 @@ Public Class RxnSubstructure
     ''' 
     Private Function RemoveExcessReactants(srcReaction As IndigoObject, isQueryRxn As Boolean) As IndigoObject
 
+        If srcReaction.countReactants = 1 Then
+            Return srcReaction
+        End If
+
         Dim dstReaction As IndigoObject
 
         If Not isQueryRxn Then
@@ -242,7 +217,6 @@ Public Class RxnSubstructure
         Return dstReaction
 
     End Function
-
 
 End Class
 

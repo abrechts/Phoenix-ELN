@@ -115,10 +115,13 @@ Class MainWindow
 
     Private Sub btnSearch_Click() Handles btnSearch.Click
 
-        Dim x As New dlgSearch
-        x.Owner = Me
-        x.DBContext = DBContext
-        x.ShowDialog()
+        Dim searchDlg As New dlgSearch
+        With searchDlg
+            .Owner = Me
+            .LocalDBContext = DBContext
+            .ServerDBContext = ServerDBContext
+            .ShowDialog()
+        End With
 
     End Sub
 
@@ -138,6 +141,7 @@ Class MainWindow
         'Bind experiments tab to filtered and sorted experiments CollectionViewSource
         Dim cvs As New CollectionViewSource
         cvs.Source = CType(Me.DataContext, tblUsers).tblExperiments
+
         cvs.LiveSortingProperties.Add("DisplayIndex")
         ExpDisplayView = cvs.View
         With ExpDisplayView
@@ -163,7 +167,8 @@ Class MainWindow
         AddHandler ServerSync.SyncProgress, AddressOf ServerSync_SyncProgress
         AddHandler dlgServerConnection.ServerContextCreated, AddressOf ServerSync_ServerContextCreated
         AddHandler ExpTabHeader.PinStateChanged, AddressOf expTabHeader_PinStateChanged
-        AddHandler StepSummary.RequestOpenExperiment, AddressOf StepSummary_RequestOpenExperiment
+        AddHandler StepSummary.RequestOpenExperiment, AddressOf ExpList_RequestOpenExperiment
+        AddHandler RssItemGroup.RequestOpenExperiment, AddressOf ExpList_RequestOpenExperiment
 
 
         'created async to reduce startup time
@@ -888,9 +893,21 @@ Class MainWindow
     ''' Handles experiment selection within step summary control.
     ''' </summary>
     ''' 
-    Private Sub StepSummary_RequestOpenExperiment(sender As Object, targetExp As tblExperiments)
+    Private Sub ExpList_RequestOpenExperiment(sender As Object, targetExp As tblExperiments)
 
-        expNavTree.SelectExperiment(targetExp)
+        If targetExp.UserID = CType(Me.DataContext, tblUsers).UserID Then
+
+            'local experiment
+            expNavTree.SelectExperiment(targetExp)
+
+        Else
+
+            'server experiment
+            targetExp.DisplayIndex = 0
+
+
+        End If
+
 
     End Sub
 
@@ -1184,7 +1201,7 @@ Class MainWindow
         'For TESTING server-side experiments only!
         '---------------------------------------------
         'ServerSync.IsConnected = False
-        'DBContext = serverContext
+        'LocalDBContext = serverContext
         'Me.DataContext = ServerDBContext.tblUsers.First
         'ExperimentContent.DbContext = ServerDBContext
         'ProtocolItemBase.DbInfo = ServerDBContext.tblDatabaseInfo.First
