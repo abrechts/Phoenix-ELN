@@ -5,7 +5,7 @@ Imports ElnCoreModel
 
 Public Class RssItemGroup
 
-    Public Shared Event RequestOpenExperiment(sender As Object, expEntry As tblExperiments)
+    Public Shared Event RequestOpenExperiment(sender As Object, expEntry As tblExperiments, isFromServer As Boolean)
 
 
     Public Sub New()
@@ -21,7 +21,7 @@ Public Class RssItemGroup
     Private Sub lstRssHits_PreviewMouseUp(sender As Object, e As MouseButtonEventArgs) Handles lstRssHits.PreviewMouseUp
 
         Dim selItem = lstRssHits.SelectedItem
-        RaiseEvent RequestOpenExperiment(Me, lstRssHits.SelectedItem)
+        RaiseEvent RequestOpenExperiment(Me, lstRssHits.SelectedItem, dlgSearch.IsServerQuery)
 
     End Sub
 

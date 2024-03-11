@@ -5,7 +5,7 @@ Imports ElnCoreModel
 
 Public Class StepSummary
 
-    Public Shared Event RequestOpenExperiment(sender As Object, expEntry As tblExperiments)
+    Public Shared Event RequestOpenExperiment(sender As Object, expEntry As tblExperiments, isFromServer As Boolean)
 
 
     Public Sub New()
@@ -148,7 +148,7 @@ Public Class StepSummary
 
         If selExp IsNot Nothing Then
             lstStepExperiments.UnselectAll()
-            RaiseEvent RequestOpenExperiment(Me, selExp)
+            RaiseEvent RequestOpenExperiment(Me, selExp, False)
         End If
 
     End Sub

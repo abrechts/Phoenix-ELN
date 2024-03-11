@@ -13,14 +13,26 @@ Public Class dlgSearch
     End Sub
 
 
+    ''' <summary>
+    ''' Sets or gets if the current query is server based (true) or local (false).
+    ''' </summary>
+    '''
+    Public Shared Property IsServerQuery As Boolean = False
+
+
     Private Sub Me_Loaded() Handles Me.Loaded
 
-        Me.Left = Owner.Left + Owner.ActualWidth - Me.ActualWidth - 10
-        Me.Top = Owner.Top + 10
+        '   Me.Left = Owner.Left + Owner.ActualWidth - Me.ActualWidth - 10
+        Me.Left = Owner.Left + Owner.ActualWidth / 2 - Me.ActualWidth / 2
+        Me.Top = Owner.Top + 30
         Me.MinHeight = 260
         Me.MaxHeight = 260
 
         CurrentDbContext = LocalDBContext
+
+        If ServerDBContext Is Nothing Then
+            rdoServer.IsEnabled = False
+        End If
 
     End Sub
 
@@ -72,7 +84,9 @@ Public Class dlgSearch
             index += 1
         Next
 
+        Me.Left = Owner.Left + Owner.ActualWidth - Me.ActualWidth - 5
         Me.MaxHeight = Owner.ActualHeight - 20
+
         Me.UpdateLayout()
 
         blkResultsTitle.Visibility = Windows.Visibility.Visible
@@ -88,7 +102,9 @@ Public Class dlgSearch
 
         CurrentDbContext = If(rdoLocal.IsChecked, LocalDBContext, ServerDBContext)
 
-        If CurrentDbContext IsNot Nothing AndAlso QueryRxnFileString <> "" Then
+        IsServerQuery = Not rdoLocal.IsChecked
+
+        If QueryRxnFileString <> "" Then
             PerformQuery(QueryRxnFileString)
         End If
 
@@ -110,6 +126,16 @@ Public Class dlgSearch
         lstRssHitGroups.RaiseEvent(e2)
 
     End Sub
+
+
+    Private Sub Me_PreviewKeyDown(sender As Object, e As KeyEventArgs) Handles Me.PreviewKeyDown
+
+        If e.Key = Key.Escape Then
+            Me.Close()
+        End If
+
+    End Sub
+
 
 End Class
 

@@ -500,24 +500,24 @@ Public Class ServerSync
         Dim newSyncGuid = Guid.NewGuid.ToString("D")
 
         Dim serverInfo = (From info In ServerContext.tblDatabaseInfo Where info.GUID = localDbGuid).FirstOrDefault
-        If serverInfo IsNot Nothing Then
+            If serverInfo IsNot Nothing Then
 
-            Dim syncTime = Now.ToString("yyyy-MM-dd HH:mm:ss")
+                Dim syncTime = Now.ToString("yyyy-MM-dd HH:mm:ss")
 
-            With LocalContext.tblDatabaseInfo.First
-                .LastSyncID = newSyncGuid
-                .LastSyncTime = syncTime
-            End With
+                With LocalContext.tblDatabaseInfo.First
+                    .LastSyncID = newSyncGuid
+                    .LastSyncTime = syncTime
+                End With
 
-            serverInfo.LastSyncID = newSyncGuid
-            serverInfo.LastSyncTime = syncTime
+                serverInfo.LastSyncID = newSyncGuid
+                serverInfo.LastSyncTime = syncTime
 
-            DatabaseGUID = serverInfo.GUID
+                DatabaseGUID = serverInfo.GUID
 
-            LocalContext.SaveChangesNoSyncTracking()
-            ServerContext.SaveChangesNoSyncTracking()
+                LocalContext.SaveChangesNoSyncTracking()
+                ServerContext.SaveChangesNoSyncTracking()
 
-        End If
+            End If
 
     End Sub
 

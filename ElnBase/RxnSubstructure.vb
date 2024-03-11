@@ -44,17 +44,12 @@ Public Class RxnSubstructure
 
             'confirm fingerprint hits by substructure macht
             Dim rssRes = From exp In fpRes Where MatchRxnSubstructure(exp.RxnIndigoObj, queryRxnObj)
-            If rssRes.Any Then
-                Debug.WriteLine("Hits: " + fpRes.Count.ToString + "-fp; " + rssRes.Count.ToString + "-rss")
-            Else
-                Debug.WriteLine("Hits: " + fpRes.Count.ToString + "-fp; 0-rss")
-            End If
+
 
             Return rssRes
 
         Else
 
-            Debug.WriteLine("No Hit!")
             Return fpRes
 
         End If
@@ -84,8 +79,9 @@ Public Class RxnSubstructure
         If expEntry.MDLRxnFileString <> "" Then
 
             Dim rxnObj = GetMappedIndigoRxn(expEntry.MDLRxnFileString, False)
+
             expEntry.RxnIndigoObj = rxnObj.serialize
-            expEntry.RxnFingerprint = rxnObj.fingerprint("sub").toBuffer
+            expEntry.RxnFingerprint = rxnObj.fingerprint("full").toBuffer
 
         End If
 

@@ -132,13 +132,17 @@ Class MainWindow
     ''' 
     Private Sub ApplyAllDataBindings()
 
-        'Assign initial contexts
+        '-- Assign initial contexts
+
         Me.DataContext = DBContext.tblUsers.First   'currently only one local user assumed
+
         ExperimentContent.DbContext = DBContext
+
         ProtocolItemBase.DbInfo = DBContext.tblDatabaseInfo.First
         pnlInfo.DataContext = Me.DataContext
 
-        'Bind experiments tab to filtered and sorted experiments CollectionViewSource
+        '-- Bind experiments tabs to filtered and sorted experiments CollectionViewSource
+
         Dim cvs As New CollectionViewSource
         cvs.Source = CType(Me.DataContext, tblUsers).tblExperiments
 
@@ -149,7 +153,31 @@ Class MainWindow
             .SortDescriptions.Clear()
             .SortDescriptions.Add(New SortDescription("DisplayIndex", ListSortDirection.Ascending))
         End With
+
+        'actually creates experiment tabs (core)
         tabExperiments.ItemsSource = ExpDisplayView
+
+        expNavTree.IsEnabled = True
+
+
+    End Sub
+
+
+    Private Sub SetServerView(lstServerExpItems As List(Of tblExperiments))
+
+        If ServerDBContext IsNot Nothing Then
+
+            'TODO:Clone server exp for specifying independent displayIndex, isCurrent, etc.
+
+            Dim cvs As New CollectionViewSource
+            cvs.Source = lstServerExpItems
+            ExpDisplayView = cvs.View
+
+            tabExperiments.ItemsSource = ExpDisplayView
+
+            expNavTree.IsEnabled = False
+
+        End If
 
     End Sub
 
@@ -893,9 +921,9 @@ Class MainWindow
     ''' Handles experiment selection within step summary control.
     ''' </summary>
     ''' 
-    Private Sub ExpList_RequestOpenExperiment(sender As Object, targetExp As tblExperiments)
+    Private Sub ExpList_RequestOpenExperiment(sender As Object, targetExp As tblExperiments, isFromServer As Boolean)
 
-        If targetExp.UserID = CType(Me.DataContext, tblUsers).UserID Then
+        If Not isFromServer Then
 
             'local experiment
             expNavTree.SelectExperiment(targetExp)
@@ -903,8 +931,11 @@ Class MainWindow
         Else
 
             'server experiment
-            targetExp.DisplayIndex = 0
 
+            Dim serverExpList As New List(Of tblExperiments)
+            serverExpList.Add(targetExp)
+
+            SetServerView(serverExpList)
 
         End If
 

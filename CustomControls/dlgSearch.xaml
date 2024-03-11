@@ -42,8 +42,8 @@
 
             <StackPanel DockPanel.Dock="Top">
             
-                <TextBlock Text="Reaction Substructure" FontWeight="Bold" Margin="0,12,0,4" HorizontalAlignment="Center" FontStyle="Italic" 
-                   FontSize="13" Foreground="#FF282828"/>
+                <TextBlock Text="Find Reactions" FontWeight="Bold" Margin="0,12,0,4" HorizontalAlignment="Center" FontStyle="Italic" 
+                   FontSize="13" Foreground="{StaticResource DialogTitleForeground}"/>
 
                 <Border Grid.Row="1" Background="white" BorderBrush="#FFADADAD" BorderThickness="1" Margin="12,0,12,0" 
                    CornerRadius="6" >
@@ -78,7 +78,7 @@
             </StackPanel>
 
             <TextBlock x:Name="blkResultsTitle" DockPanel.Dock="top" Text="Results" HorizontalAlignment="Center" FontWeight="Bold" 
-               FontSize="13" Foreground="#FF282828" Margin="0,4,0,0" FontStyle="Italic" d:Visibility="visible" Visibility="collapsed" />
+               FontSize="13" Foreground="{StaticResource DialogTitleForeground}" Margin="0,4,0,0" FontStyle="Italic" d:Visibility="visible" Visibility="collapsed" />
 
             <Border x:Name="pnlNoHits" DockPanel.Dock="top" CornerRadius="6" BorderThickness="1" BorderBrush="gray" Margin="0,24,0,30" 
               HorizontalAlignment="Center" Background="#FFFCE9E9" d:Visibility="Visible" Visibility="Collapsed">

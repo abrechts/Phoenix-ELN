@@ -35,10 +35,15 @@
         <!--Ref.Reactant-->
         <StackPanel DockPanel.Dock="Top" Margin="0,2,0,8">
 
-            <Border CornerRadius="6" BorderBrush="#FF4D84D7" BorderThickness="1" Padding="8,0" HorizontalAlignment="Center" Background="#5D86C5">
-                <TextBlock Text="Reactant >" VerticalAlignment="Center" Foreground="white" Background="transparent" 
-                        FontStyle="Italic" FontWeight="demibold" Padding="1,0" Margin="1,1,1,1" FontFamily="Verdana" FontSize="10"/>
-            </Border>
+            <!--<Border CornerRadius="6,6,0,0" BorderBrush="#FF4D84D7" BorderThickness="1,1,1,0" Padding="8,0" HorizontalAlignment="Center" 
+               Background="#FFF0F6FF" Margin="0,0,0,0">
+                <TextBlock Text="Reactant" VerticalAlignment="Center" Foreground="#FF0049B9" Background="transparent" 
+                        FontStyle="Italic" FontWeight="demibold" Padding="1,0" Margin="1,1,1,2" FontFamily="Verdana" FontSize="10"/>
+            </Border>-->
+
+            <TextBlock Text="Reagent" DockPanel.Dock="top" VerticalAlignment="Center" Foreground="{StaticResource DialogTitleForeground}"
+                Background="transparent"  FontStyle="Italic" FontWeight="demibold" Padding="1,0" Margin="0,0,0,1" FontFamily="Verdana" 
+                FontSize="11" HorizontalAlignment="Center"/>
 
             <Separator Margin="0,0,0,0" Background="#FF4D84D7"/>
 
@@ -75,16 +80,20 @@
             </StackPanel>
 
             <Separator Margin="0,0,0,2" DockPanel.Dock="top" Background="#FF4D84D7"/>
-            
+
         </StackPanel>
 
         <!--Ref.Product-->
         <StackPanel DockPanel.Dock="Top" >
 
-            <Border CornerRadius="6" BorderBrush="#FF4D84D7" BorderThickness="1" Padding="8,0"  HorizontalAlignment="Center" Background="#5D86C5">
-                <TextBlock Text="> Product" VerticalAlignment="Center" Foreground="white" FontFamily="Verdana" FontSize="10"
+            <!--<Border CornerRadius="6,6,0,0" BorderBrush="#FF4D84D7" BorderThickness="1,1,1,0" Padding="8,0" HorizontalAlignment="Center"  Background="#FFF0F6FF">
+                <TextBlock Text="Product" VerticalAlignment="Center" Foreground="#FF205BB5" FontFamily="Verdana" FontSize="10"
                    Background="transparent" FontStyle="Italic" FontWeight="demibold" Padding="1,0" Margin="1,1,1,1"/>
-            </Border>
+            </Border>-->
+
+            <TextBlock Text="Product" DockPanel.Dock="top" VerticalAlignment="Center" Foreground="{StaticResource DialogTitleForeground}"
+                Background="transparent" FontStyle="Italic" FontWeight="demibold" Padding="1,0" Margin="0,0,0,1" FontFamily="Verdana" 
+                FontSize="11" HorizontalAlignment="Center"/>
 
             <Separator Margin="0,0,0,2" Background="#FF4D84D7"/>
 
@@ -127,11 +136,15 @@
 
         <DockPanel Margin="0,10,0,0" >
 
-            <Border CornerRadius="6" BorderBrush="#FF4D84D7" BorderThickness="1" Padding="8,0"  HorizontalAlignment="Center" 
-                    DockPanel.Dock="top" Background="#5D86C5">
-                <TextBlock Text="Same Step" VerticalAlignment="Center" Foreground="white" FontFamily="Verdana" FontSize="10"
-                        Background="transparent" FontStyle="Italic" FontWeight="demibold" Padding="1,0" Margin="1,1,1,1"/>
-            </Border>
+            <!--<Border CornerRadius="6,6,0,0" BorderBrush="#FF4D84D7" BorderThickness="1,1,1,0" Padding="8,0" HorizontalAlignment="Center"
+              DockPanel.Dock="top" Background="#FFF0F6FF">
+                <TextBlock Text="Same Step" VerticalAlignment="Center" Foreground="#FF0049B9" Background="transparent" 
+                   FontStyle="Italic" FontWeight="demibold" Padding="1,0" Margin="1,1,1,2" FontFamily="Verdana" FontSize="10"/>
+            </Border>-->
+
+            <TextBlock Text="Same Step" DockPanel.Dock="top" VerticalAlignment="Center" Foreground="{StaticResource DialogTitleForeground}"
+                Background="transparent" FontStyle="Italic" FontWeight="demibold" Padding="1,0" Margin="0,0,0,1" FontFamily="Verdana" 
+                FontSize="11" HorizontalAlignment="Center"/>
 
             <DockPanel Background="WhiteSmoke" DockPanel.Dock="top">
 
