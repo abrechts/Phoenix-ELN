@@ -109,7 +109,7 @@
 
                     <Separator/>
 
-                    <Menu TextBlock.FontFamily="Verdana" Background="White">
+                   <Menu TextBlock.FontFamily="Verdana" Background="White">
                         <MenuItem VerticalAlignment="Center" Padding="4,2">
                             <MenuItem.Header>
                                 <StackPanel Orientation="Horizontal" >
@@ -144,7 +144,13 @@
                         </MenuItem>
                     </Menu>
 
-                    <Button x:Name="btnSearch" Content="Search"/>
+                    <Button x:Name="btnSearch" HorizontalAlignment="Left" VerticalAlignment="Top" ToolTip="Find experiments" d:Visibility="Visible"
+                       Visibility="Collapsed">
+                        <StackPanel Orientation="Horizontal">
+                            <ContentControl Content="{StaticResource icoSearch}" Height="16" Margin="0,0,3,0"/>
+                            <TextBlock Text="Search" Margin="0,0,2,0" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
 
                 </ToolBar>
 

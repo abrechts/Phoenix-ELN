@@ -186,12 +186,21 @@ Public Class dlgNewExperiment
     End Sub
 
 
+    Private Sub numMatAmount_IsVisibleChanged() Handles numMatAmount.IsVisibleChanged
+
+        If chkScale.IsChecked Then
+            numMatAmount.Focus()
+        End If
+
+    End Sub
+
+
     Private Sub btnOK_Click(sender As Object, e As RoutedEventArgs) Handles btnOK.Click
 
         If CloneMethod = CloneType.FullExperiment AndAlso chkScale.IsChecked Then
 
             If numMatAmount.IsZeroOrNothing Then
-                MsgBox("Please enter a valid material scaling amount!", MsgBoxStyle.Information, "Validation")
+                MsgBox("Please enter a valid scaling amount!", MsgBoxStyle.Information, "Validation")
                 numMatAmount.Focus()
                 e.Handled = True
                 Exit Sub

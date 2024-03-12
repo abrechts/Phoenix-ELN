@@ -22,7 +22,6 @@ Public Class dlgSearch
 
     Private Sub Me_Loaded() Handles Me.Loaded
 
-        '   Me.Left = Owner.Left + Owner.ActualWidth - Me.ActualWidth - 10
         Me.Left = Owner.Left + Owner.ActualWidth / 2 - Me.ActualWidth / 2
         Me.Top = Owner.Top + 30
         Me.MinHeight = 260
@@ -33,6 +32,9 @@ Public Class dlgSearch
         If ServerDBContext Is Nothing Then
             rdoServer.IsEnabled = False
         End If
+
+        'disable server query  until server experiment display is finalized
+        rdoServer.Visibility = Windows.Visibility.Collapsed
 
     End Sub
 
@@ -86,6 +88,7 @@ Public Class dlgSearch
 
         Me.Left = Owner.Left + Owner.ActualWidth - Me.ActualWidth - 5
         Me.MaxHeight = Owner.ActualHeight - 20
+        Me.Height = Me.MaxHeight
 
         Me.UpdateLayout()
 

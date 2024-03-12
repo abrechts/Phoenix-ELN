@@ -61,9 +61,9 @@
 
                         </Border>
 
-                        <StackPanel Grid.Column="2" Margin="6,12">
+                        <StackPanel Grid.Column="2" Margin="6,12" VerticalAlignment="Center">
 
-                            <StackPanel>
+                            <StackPanel >
                                 <RadioButton x:Name="rdoLocal" Content="Local search" IsChecked="true" Margin="0,0,0,2"/>
                                 <RadioButton x:Name="rdoServer" Content="Server search"/>
                             </StackPanel>

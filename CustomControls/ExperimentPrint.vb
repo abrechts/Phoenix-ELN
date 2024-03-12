@@ -58,17 +58,18 @@ Public Class ExperimentPrint
         WPFToolbox.WaitForPriority(Threading.DispatcherPriority.ContextIdle)
 
         Dim printExpContent As New ExperimentContent
-        With printExpContent
-            .Measure(New Windows.Size)
-            .Arrange(New Rect)
-            .DataContext = expEntry
-        End With
+        printExpContent.DataContext = expEntry
 
         WPFToolbox.WaitForPriority(Threading.DispatcherPriority.ContextIdle)
 
         Dim printStack As New StackPanel
         printStack.Children.Add(printExpContent)
         printExpContent.SetPrintUI()
+
+        With printExpContent
+            .Measure(New Windows.Size)
+            .Arrange(New Rect)
+        End With
 
         Dim stackPrintTempl As New PrintPageTemplate(printStack, printDlg.PrintTicket, 0.95)
 

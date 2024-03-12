@@ -1,5 +1,7 @@
 ﻿
+Imports System.Text.RegularExpressions
 Imports System.Windows.Controls
+Imports System.Windows.Documents
 Imports com.epam.indigo
 Imports ElnCoreModel
 Imports Microsoft.EntityFrameworkCore
@@ -7,7 +9,7 @@ Imports Microsoft.EntityFrameworkCore
 ' * Performance notes: 
 ' * MatchRxnFingerprint: 36 ms for 100'000 experiments (comparison only, no LINQ database access overhead)
 ' * MatchRxnSubstructure: 700 ms for 10'000 comparisons (using serialized rxnObject overload, comparison only, no LINQ database access overhead)
-' * --> Fingerprint matching is performed first, then substructure query on result for hit confirmation (if selected).
+' * --> Fingerprint matching is performed first, then substructure query on newSmarts for hit confirmation (if selected).
 
 Public Class RxnSubstructure
 
@@ -79,6 +81,7 @@ Public Class RxnSubstructure
         If expEntry.MDLRxnFileString <> "" Then
 
             Dim rxnObj = GetMappedIndigoRxn(expEntry.MDLRxnFileString, False)
+            rxnObj.aromatize()
 
             expEntry.RxnIndigoObj = rxnObj.serialize
             expEntry.RxnFingerprint = rxnObj.fingerprint("full").toBuffer
@@ -111,7 +114,7 @@ Public Class RxnSubstructure
 
 
     ''' <summary>
-    ''' Gets if the specified serialized reaction object and the specified reaction substructure result in a RSS substructure hit.
+    ''' Gets if the specified serialized reaction object and the specified reaction substructure newSmarts in a RSS substructure hit.
     ''' </summary>
     ''' 
     Private Function MatchRxnSubstructure(srcIndigoRxnArr As Byte(), queryIndigoRxnObj As IndigoObject) As Boolean
@@ -123,7 +126,7 @@ Public Class RxnSubstructure
 
 
     ''' <summary>
-    ''' Gets if the specified reaction object and the specified reaction substructure result in a RSS substructure hit.
+    ''' Gets if the specified reaction object and the specified reaction substructure newSmarts in a RSS substructure hit.
     ''' </summary>
     ''' 
     Private Function MatchRxnSubstructure(sourceIndigoRxnObj As IndigoObject, queryIndigoRxnObj As IndigoObject) As Boolean
@@ -153,21 +156,22 @@ Public Class RxnSubstructure
                 Dim indigoRxn As IndigoObject
 
                 If isQueryRxn Then
-                    'load as query reaction
-                    indigoRxn = IndigoBase.loadQueryReaction(mdlRxnString)
+                    'query reaction
+                    indigoRxn = GetEnhancedQueryReaction(mdlRxnString)
                 Else
-                    'load as standard reaction
+                    'source reaction
                     indigoRxn = IndigoBase.loadReaction(mdlRxnString)
+                    With indigoRxn
+                        .aromatize()
+                        .automap()
+                        .correctReactingCenters()
+                    End With
                 End If
 
                 'remove non-reference reactants if specified (default)
                 If refReactantOnly Then
                     indigoRxn = RemoveExcessReactants(indigoRxn, isQueryRxn)
                 End If
-
-                'prepare for queries
-                indigoRxn.aromatize()
-                indigoRxn.automap()
 
                 Return indigoRxn
 
@@ -178,6 +182,42 @@ Public Class RxnSubstructure
         Else
             Return Nothing
         End If
+
+    End Function
+
+
+    ''' <summary>
+    ''' Gets an indigo query reaction with adapted query features.
+    ''' </summary>
+    ''' <param name="mdlRxnString">MDL reaction file string of query sketch.</param>
+    ''' <returns>Indigo query reaction.</returns>
+    ''' 
+    Private Function GetEnhancedQueryReaction(mdlRxnString As String) As IndigoObject
+
+        'alleviates issue where implicit heteroatom e.g. aldehyde carbon hydrogens are interpreted as any connection 
+
+        Dim indigoRxn = IndigoBase.loadQueryReaction(mdlRxnString)
+        indigoRxn.aromatize()
+
+        Dim rxnSmarts = indigoRxn.smarts
+
+        'redefine alcohol with explicitly drawn hydrogen R-O-H (but not R-OH with implicit hydrogen)
+        Dim newSmarts = rxnSmarts.Replace("[#8]-[H]", "[#8;H]")
+        newSmarts = newSmarts.Replace("[H]-[#8]", "[#8;H]")
+
+        'redefine *primary* amine with explicitly drawn hydrogen R-N(-H)-H (but not RNH with implicit hydrogen)
+        newSmarts = newSmarts.Replace("[#7](-[H])-[H]", "[#7;H2]")
+
+        'redefine *secondary* amine
+        newSmarts = newSmarts.Replace("[#7](-[H])", "[#7;H]")
+
+        'redefine aldehyde with explicitly drawn hydrogen: C-CH=O (only one of the 2 replacements will apply)
+        newSmarts = newSmarts.Replace("[#6](-[H])=[#8]", "[#6;H]=[#8]")
+        newSmarts = newSmarts.Replace("[H]-[#6](-[#6])=[#8]", "[#6;H](-[#6])=[#8]")
+
+        'redefine imine with explicitly drawn hydrogen
+
+        Return IndigoBase.loadReactionSmarts(newSmarts)
 
     End Function
 
