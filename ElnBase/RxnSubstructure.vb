@@ -81,7 +81,6 @@ Public Class RxnSubstructure
         If expEntry.MDLRxnFileString <> "" Then
 
             Dim rxnObj = GetMappedIndigoRxn(expEntry.MDLRxnFileString, False)
-            rxnObj.aromatize()
 
             expEntry.RxnIndigoObj = rxnObj.serialize
             expEntry.RxnFingerprint = rxnObj.fingerprint("full").toBuffer
@@ -161,17 +160,18 @@ Public Class RxnSubstructure
                 Else
                     'source reaction
                     indigoRxn = IndigoBase.loadReaction(mdlRxnString)
-                    With indigoRxn
-                        .aromatize()
-                        .automap()
-                        .correctReactingCenters()
-                    End With
                 End If
 
                 'remove non-reference reactants if specified (default)
                 If refReactantOnly Then
                     indigoRxn = RemoveExcessReactants(indigoRxn, isQueryRxn)
                 End If
+
+                With indigoRxn
+                    .aromatize()
+                    .automap()
+                    .correctReactingCenters()
+                End With
 
                 Return indigoRxn
 
@@ -201,7 +201,7 @@ Public Class RxnSubstructure
 
         Dim rxnSmarts = indigoRxn.smarts
 
-        'redefine alcohol with explicitly drawn hydrogen R-O-H (but not R-OH with implicit hydrogen)
+        ' redefine alcohol with explicitly drawn hydrogen R-O-H (but Not R-OH with implicit hydrogen)
         Dim newSmarts = rxnSmarts.Replace("[#8]-[H]", "[#8;H]")
         newSmarts = newSmarts.Replace("[H]-[#8]", "[#8;H]")
 
@@ -217,7 +217,7 @@ Public Class RxnSubstructure
 
         'redefine imine with explicitly drawn hydrogen
 
-        Return IndigoBase.loadReactionSmarts(newSmarts)
+        Return IndigoBase.loadQueryReaction(newSmarts)
 
     End Function
 
