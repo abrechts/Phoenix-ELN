@@ -201,6 +201,9 @@ Public Class RxnSubstructure
 
         Dim rxnSmarts = indigoRxn.smarts
 
+        'remove stereochemistry in query, otherwise no hits after reloading smarts to reaction ...
+        rxnSmarts = rxnSmarts.Replace("@", "")
+
         ' redefine alcohol with explicitly drawn hydrogen R-O-H (but Not R-OH with implicit hydrogen)
         Dim newSmarts = rxnSmarts.Replace("[#8]-[H]", "[#8;H]")
         newSmarts = newSmarts.Replace("[H]-[#8]", "[#8;H]")
