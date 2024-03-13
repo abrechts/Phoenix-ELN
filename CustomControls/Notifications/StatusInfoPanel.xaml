@@ -109,7 +109,7 @@
                     
                 </Grid>
 
-                <TextBlock Text="Always finalize your experiments after completion to mark them as complete, and to protect them against unintended changes (can be reverted)." 
+                <TextBlock Text="Finalize your experiments after completion for better status overview and to protect them against unintended changes (can be reverted)." 
                     TextWrapping="Wrap" Margin="11,0,0,0" FontStyle="Italic" IsHyphenationEnabled="true"
                     Visibility="{Binding tblExperiments,Converter={StaticResource unfinalizedWarningVisConv}}"/>
 

@@ -15,15 +15,15 @@ Public Class DbUpgradeLocal
 
         Using sqliteConn = New SqliteConnection("DataSource = " + sqlitePath + "; foreign keys=FALSE")
 
-            '    'apply changes sequentially from initial ones to most recent ones
+            'apply changes sequentially from initial ones to most recent ones
 
-            '    'introduced in version 1.0.0
-            'If Not DbColumnExists("tblExperiments", "PinIndex", sqliteConn) Then
+            'introduced in version 0.9.4 (RSS queries)
+            If Not DbColumnExists("tblExperiments", "RxnIndigoObj", sqliteConn) Then
+                DbAddColumn("tblExperiments", "RxnIndigoObj", "longblob", "", sqliteConn)
+                DbAddColumn("tblExperiments", "RxnFingerprint", "blob", "", sqliteConn)
+            End If
 
-            '    DbAddColumn("tblExperiments", "PinIndex", "SMALLINT", "", sqliteConn)
-
-            'End If
-
+            'example:
             '    'introduced in version 1.3.0
             '    If Not DbColumnExists("tblUsers", "Test", sqliteConn) Then
 

@@ -5,12 +5,13 @@ Imports System.Windows.Controls
 Imports ElnBase.ELNCalculations
 Imports ElnBase.ELNEnumerations
 Imports System.Windows.Media
+Imports ElnBase
 
 Public Class SketchArea
 
-    Public Event ReactionSketchChanged(sender As Object, IsReactantModified As Boolean)
+    Public Event SketchEdited(sender As Object, IsReactantModified As Boolean)
 
-    Public Shared Event SketchInfoAvailable(sender As Object, sketchInfo As SketchResults)
+    Public Shared Event SketchSourceChanged(sender As Object, sketchInfo As SketchResults)
 
 
     Public Sub New()
@@ -55,7 +56,7 @@ Public Class SketchArea
                 .blkClickInfo.Visibility = Visibility.Visible
             End If
 
-            .RaiseSketchInfoAvailableEvent()
+            .RaiseSketchSourceChangedEvent()
 
         End With
 
@@ -63,11 +64,11 @@ Public Class SketchArea
 
 
     ''' <summary>
-    ''' Raises the ReactionSketchChanged event.
+    ''' Raises the SketchSourceChanged event.
     ''' </summary>
     ''' 
-    Private Sub RaiseSketchInfoAvailableEvent()
-        RaiseEvent SketchInfoAvailable(Me, SketchInfo)
+    Private Sub RaiseSketchSourceChangedEvent()
+        RaiseEvent SketchSourceChanged(Me, SketchInfo)
     End Sub
 
 
@@ -133,9 +134,13 @@ Public Class SketchArea
                 .ProductInChIKey = SketchInfo.Products.First.InChIKey
             End With
 
+            'register RSS query fields
+            Dim rss As New RxnSubstructure
+            rss.RegisterReactionRSS(currExp)
+
             blkClickInfo.Visibility = Visibility.Collapsed
 
-            RaiseEvent ReactionSketchChanged(Me, reactantModified)
+            RaiseEvent SketchEdited(Me, reactantModified)
 
         End If
 

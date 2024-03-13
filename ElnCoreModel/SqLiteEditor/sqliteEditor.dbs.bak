@@ -335,6 +335,29 @@
 				<fk_column name="ProtocolItemID" pk="GUID" />
 			</fk>
 		</table>
+		<table name="tblSeparators" spec="" >
+			<column name="GUID" type="VARCHAR" length="36" jt="12" mandatory="y" />
+			<column name="ProtocolItemID" type="VARCHAR" length="36" jt="12" mandatory="y" />
+			<column name="ElementType" type="SMALLINT" jt="5" mandatory="y" >
+				<defo><![CDATA[0]]></defo>
+			</column>
+			<column name="DisplayType" type="SMALLINT" jt="5" mandatory="y" >
+				<defo><![CDATA[0]]></defo>
+			</column>
+			<column name="Title" type="VARCHAR" length="80" jt="12" />
+			<column name="SyncState" type="TINYINT" jt="-6" >
+				<defo><![CDATA[0]]></defo>
+			</column>
+			<index name="pk_tblSeparators" unique="PRIMARY_KEY" >
+				<column name="GUID" />
+			</index>
+			<index name="unq_tblSeparators_ProtocolItemID" unique="UNIQUE_KEY" >
+				<column name="ProtocolItemID" />
+			</index>
+			<fk name="Fk_5" to_schema="Default" to_table="tblProtocolItems" delete_action="cascade" >
+				<fk_column name="ProtocolItemID" pk="GUID" />
+			</fk>
+		</table>
 		<table name="tblSolvents" spec="" >
 			<column name="GUID" type="VARCHAR" length="36" jt="12" mandatory="y" />
 			<column name="ProtocolItemID" type="VARCHAR" length="36" jt="12" mandatory="y" />
@@ -396,6 +419,7 @@
 		<entity schema="Default" name="tblMaterials" color="3986C1" x="80" y="336" />
 		<entity schema="Default" name="tblProjects" color="3986C1" x="672" y="48" />
 		<entity schema="Default" name="tblProtocolItems" color="3986C1" x="1008" y="464" />
+		<entity schema="Default" name="tblSeparators" color="3986C1" x="672" y="496" />
 		<entity schema="Default" name="tblUsers" color="3986C1" x="368" y="48" />
 	</layout>
 	<layout name="Protocol Elements" id="Layout-16d" show_column_type="y" show_relation="cascade" >

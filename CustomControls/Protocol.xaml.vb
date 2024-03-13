@@ -122,7 +122,6 @@ Public Class Protocol
 
                 If My.Settings.IsServerEnabled AndAlso Not My.Settings.IsServerOffByUser Then
 
-                    '    If Await Task.Run(Function() ServerSync.IsServerConnAvailable()) Then
                     If Await Task.Run(Function() IsServerConnAvailable()) Then
 
                         If .ServerSynchronization IsNot Nothing Then
@@ -161,9 +160,8 @@ Public Class Protocol
             'a request while the now completed sync was ongoing.
 
             If _wasSkipped Then
-                'Debug.WriteLine("-- Retry Skipped ---")
-                .SynchronizeAsync()
                 _wasSkipped = False
+                .SynchronizeAsync()
             End If
 
         End With

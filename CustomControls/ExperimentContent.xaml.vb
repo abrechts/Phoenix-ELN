@@ -28,7 +28,7 @@ Public Class ExperimentContent
         ' This call is required by the designer.
         InitializeComponent()
 
-        AddHandler SketchArea.SketchInfoAvailable, AddressOf SketchArea_SketchInfoAvailable
+        AddHandler SketchArea.SketchSourceChanged, AddressOf SketchArea_SketchSourceChanged
 
     End Sub
 
@@ -152,27 +152,15 @@ Public Class ExperimentContent
     End Sub
 
 
-    Private Sub SketchArea_SketchInfoAvailable(sender As Object, skInfo As SketchResults)  'shared event
+    Private Sub SketchArea_SketchSourceChanged(sender As Object, skInfo As SketchResults)  'shared event
 
-        If skInfo IsNot Nothing Then
-
-            Dim expEntry = CType(Me.DataContext, tblExperiments)
-            With expEntry
-                .ReactantInChIKey = skInfo.Reactants.First.InChIKey
-                If skInfo.Products.Count > 0 Then   'is 0 when creating next step sketch
-                    .ProductInChIKey = skInfo.Products.First.InChIKey
-                End If
-            End With
-
-            pnlProtocol.SketchInfo = skInfo
-
-        End If
+        pnlProtocol.SketchInfo = skInfo
 
     End Sub
 
 
-    Private Sub pnlSketch_SketchChanged(sender As Object, isReactantModified As Boolean) Handles _
-      pnlSketch.ReactionSketchChanged
+    Private Sub pnlSketch_SketchEdited(sender As Object, isReactantModified As Boolean) Handles _
+      pnlSketch.SketchEdited
 
         Dim expEntry = CType(Me.DataContext, tblExperiments)
 
@@ -181,11 +169,14 @@ Public Class ExperimentContent
         Dim isRefProdAttached = pnlSketch.SketchInfo.Products.First.IsAttachedToResin
 
         If pnlSketch.SketchInfo IsNot Nothing Then
+
             If expEntry.tblProtocolItems.Count = 0 Then
                 'new experiment
-                pnlProtocol.AddSeparator("Reaction", False)
-                pnlProtocol.AddRefReactant()
-                pnlProtocol.RecalculateExperiment(False)
+                With pnlProtocol
+                    .AddSeparator("Reaction", False)
+                    .AddRefReactant()
+                    .RecalculateExperiment(False)
+                End With
             Else
                 'existing experiment
                 With pnlProtocol

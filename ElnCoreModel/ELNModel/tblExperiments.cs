@@ -47,6 +47,10 @@ public partial class tblExperiments
 
     public byte? SyncState { get; set; }
 
+    public byte[]? RxnIndigoObj { get; set; }
+
+    public byte[]? RxnFingerprint { get; set; }
+
     public virtual tblProjects Project { get; set; } = null!;
 
     public virtual tblUsers User { get; set; } = null!;

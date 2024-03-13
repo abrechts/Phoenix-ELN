@@ -1,0 +1,104 @@
+﻿<Window x:Class="dlgSearch"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CustomControls"
+        mc:Ignorable="d"
+        Title="Substructure Search" TextOptions.TextFormattingMode="Display" WindowStartupLocation="Manual" ShowInTaskbar="False" 
+        Height="750" MaxWidth="690" MinWidth="690" SizeToContent="Height">
+
+    <Window.Resources>
+        
+        <DataTemplate x:Key="expTreeItem">
+            <local:RssItemGroup/>
+        </DataTemplate>
+
+        <Style x:Key="ListBoxNoHighlight" TargetType="ListBoxItem">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="left" VerticalAlignment="Center" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="Transparent"/>
+                </Trigger>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="Transparent"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+    </Window.Resources>
+
+    <Grid>
+
+        <DockPanel>
+
+            <StackPanel DockPanel.Dock="Top">
+            
+                <TextBlock Text="Find Reactions" FontWeight="Bold" Margin="0,12,0,4" HorizontalAlignment="Center" FontStyle="Italic" 
+                   FontSize="13" Foreground="{StaticResource DialogTitleForeground}"/>
+
+                <Border Grid.Row="1" Background="white" BorderBrush="#FFADADAD" BorderThickness="1" Margin="12,0,12,0" 
+                   CornerRadius="6" >
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="400"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+
+                        <Border Grid.Column="1" CornerRadius="6" BorderBrush="#FF54A2D1" BorderThickness="1" Padding="3" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,12" Width="380" Height="130">
+
+                            <local:SketchAreaRSS x:Name="pnlQuerySketch" ReactionSketch="{Binding}" Margin="12,8,12,6"/>
+
+                        </Border>
+
+                        <StackPanel Grid.Column="2" Margin="6,12" VerticalAlignment="Center">
+
+                            <StackPanel >
+                                <RadioButton x:Name="rdoLocal" Content="Local search" IsChecked="true" Margin="0,0,0,2"/>
+                                <RadioButton x:Name="rdoServer" Content="Server search"/>
+                            </StackPanel>
+                            
+                        </StackPanel>
+                    
+                    
+                    </Grid>
+                
+                </Border>
+
+            </StackPanel>
+
+            <TextBlock x:Name="blkResultsTitle" DockPanel.Dock="top" Text="Results" HorizontalAlignment="Center" FontWeight="Bold" 
+               FontSize="13" Foreground="{StaticResource DialogTitleForeground}" Margin="0,4,0,0" FontStyle="Italic" d:Visibility="visible" Visibility="collapsed" />
+
+            <Border x:Name="pnlNoHits" DockPanel.Dock="top" CornerRadius="6" BorderThickness="1" BorderBrush="gray" Margin="0,24,0,30" 
+              HorizontalAlignment="Center" Background="#FFFCE9E9" d:Visibility="Visible" Visibility="Collapsed">
+                <TextBlock Text=" -- no reaction matches found! -- " Margin="2,1,2,3" />
+            </Border>
+
+            <Border DockPanel.Dock="top" CornerRadius="6" Margin="12,0,12,12" Padding="3" HorizontalAlignment="Center">
+
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+
+                    <ListBox x:Name="lstRssHitGroups" ItemsSource="{Binding}" ItemTemplate="{StaticResource expTreeItem}" BorderThickness="0"
+                       ItemContainerStyle="{StaticResource ListBoxNoHighlight}" MinHeight="200" HorizontalAlignment="left" MinWidth="400"
+                       HorizontalContentAlignment="left" ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                       d:Visibility="visible" Visibility="Collapsed"/>
+
+                </ScrollViewer>
+
+            </Border>
+
+        </DockPanel>
+
+    </Grid>
+</Window>

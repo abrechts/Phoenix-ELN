@@ -13,15 +13,17 @@ Public Class DbUpgradeServer
 
     Public Shared Sub Upgrade(serverConnStr As String)
 
+        'apply changes sequentially from initial ones to most recent ones
+
         Using serverConn = New MySqlConnection(serverConnStr)
 
-            ' --> examples
+            'introduced in version 0.9.4 (RSS queries)
+            If Not DbColumnExists("tblExperiments", "RxnIndigoObj", serverConn) Then
+                DbAddColumn("tblExperiments", "RxnIndigoObj", "LONGBLOB", "IsNodeExpanded", serverConn)
+                DbAddColumn("tblExperiments", "RxnFingerprint", "BLOB", "RxnIndigoObj", serverConn)
+            End If
 
-            ''fields were introduced in e.g. version 7.0.0
-            'If Not DbColumnExists("tblExperiments", "PinIndex", serverConn) Then
-            '    DbAddColumn("tblExperiments", "PinIndex", "SMALLINT", "FinalizeDate", serverConn)
-            'End If
-
+            'example:
             'table introduced in e.g. version 7.5.0 (exists check already included in command)
             'Dim cmd = "CREATE TABLE IF NOT EXISTS tblDummy (
             '    ID varchar(36) PRIMARY KEY Not NULL,

@@ -86,7 +86,17 @@ Class MainWindow
             DbUpgradeLocal.Upgrade(SQLiteDbPath)
         End If
 
-        'Connect data model of local database with UI
+        'Create local SqliteContext
+        DBContext = New SQLiteContext(SQLiteDbPath).ElnContext
+
+        'Check for legacy Rss backlog registration (--> can be removed later!)
+        If New Version(DBContext.tblDatabaseInfo.First.CurrAppVersion) < New Version("0.9.4") Then
+            Dim rss As New RxnSubstructure
+            rss.RegisterRssBacklog(DBContext.tblDatabaseInfo.First.tblUsers.First)
+            DBContext.SaveChanges()
+        End If
+
+        'Connect local database model with UI
         ApplyAllDataBindings()
 
         ApplicationVersion = GetType(MainWindow).Assembly.GetName().Version
@@ -103,24 +113,39 @@ Class MainWindow
     End Sub
 
 
+    Private Sub btnSearch_Click() Handles btnSearch.Click
+
+        Dim searchDlg As New dlgSearch
+        With searchDlg
+            .Owner = Me
+            .LocalDBContext = DBContext
+            .ServerDBContext = ServerDBContext
+            .ShowDialog()
+        End With
+
+    End Sub
+
+
     ''' <summary>
     ''' Performs all data binding between data model and UI.
     ''' </summary>
     ''' 
     Private Sub ApplyAllDataBindings()
 
-        'Create local SqliteContext
-        DBContext = New SQLiteContext(SQLiteDbPath).ElnContext
+        '-- Assign initial contexts
 
-        'Assign initial contexts
         Me.DataContext = DBContext.tblUsers.First   'currently only one local user assumed
+
         ExperimentContent.DbContext = DBContext
+
         ProtocolItemBase.DbInfo = DBContext.tblDatabaseInfo.First
         pnlInfo.DataContext = Me.DataContext
 
-        'Bind experiments tab to filtered and sorted experiments CollectionViewSource
+        '-- Bind experiments tabs to filtered and sorted experiments CollectionViewSource
+
         Dim cvs As New CollectionViewSource
         cvs.Source = CType(Me.DataContext, tblUsers).tblExperiments
+
         cvs.LiveSortingProperties.Add("DisplayIndex")
         ExpDisplayView = cvs.View
         With ExpDisplayView
@@ -128,7 +153,31 @@ Class MainWindow
             .SortDescriptions.Clear()
             .SortDescriptions.Add(New SortDescription("DisplayIndex", ListSortDirection.Ascending))
         End With
+
+        'actually creates experiment tabs (core)
         tabExperiments.ItemsSource = ExpDisplayView
+
+        expNavTree.IsEnabled = True
+
+
+    End Sub
+
+
+    Private Sub SetServerView(lstServerExpItems As List(Of tblExperiments))
+
+        If ServerDBContext IsNot Nothing Then
+
+            'TODO:Clone server exp for specifying independent displayIndex, isCurrent, etc.
+
+            Dim cvs As New CollectionViewSource
+            cvs.Source = lstServerExpItems
+            ExpDisplayView = cvs.View
+
+            tabExperiments.ItemsSource = ExpDisplayView
+
+            expNavTree.IsEnabled = False
+
+        End If
 
     End Sub
 
@@ -146,7 +195,9 @@ Class MainWindow
         AddHandler ServerSync.SyncProgress, AddressOf ServerSync_SyncProgress
         AddHandler dlgServerConnection.ServerContextCreated, AddressOf ServerSync_ServerContextCreated
         AddHandler ExpTabHeader.PinStateChanged, AddressOf expTabHeader_PinStateChanged
-        AddHandler StepSummary.RequestOpenExperiment, AddressOf StepSummary_RequestOpenExperiment
+        AddHandler StepSummary.RequestOpenExperiment, AddressOf ExpList_RequestOpenExperiment
+        AddHandler RssItemGroup.RequestOpenExperiment, AddressOf ExpList_RequestOpenExperiment
+
 
         'created async to reduce startup time
 
@@ -870,9 +921,24 @@ Class MainWindow
     ''' Handles experiment selection within step summary control.
     ''' </summary>
     ''' 
-    Private Sub StepSummary_RequestOpenExperiment(sender As Object, targetExp As tblExperiments)
+    Private Sub ExpList_RequestOpenExperiment(sender As Object, targetExp As tblExperiments, isFromServer As Boolean)
 
-        expNavTree.SelectExperiment(targetExp)
+        If Not isFromServer Then
+
+            'local experiment
+            expNavTree.SelectExperiment(targetExp)
+
+        Else
+
+            'server experiment
+
+            Dim serverExpList As New List(Of tblExperiments)
+            serverExpList.Add(targetExp)
+
+            SetServerView(serverExpList)
+
+        End If
+
 
     End Sub
 
@@ -1166,7 +1232,7 @@ Class MainWindow
         'For TESTING server-side experiments only!
         '---------------------------------------------
         'ServerSync.IsConnected = False
-        'DBContext = serverContext
+        'LocalDBContext = serverContext
         'Me.DataContext = ServerDBContext.tblUsers.First
         'ExperimentContent.DbContext = ServerDBContext
         'ProtocolItemBase.DbInfo = ServerDBContext.tblDatabaseInfo.First

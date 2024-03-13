@@ -99,7 +99,8 @@
 
                         <CheckBox x:Name="chkScale" Content="Scale to different reference reactant amount:" Margin="0,4,0,3" FontStyle="Italic"/>
 
-                        <StackPanel Orientation="Horizontal"  Visibility="{Binding ElementName=chkScale, Path=IsChecked,Converter={StaticResource boolToVisConv}}">
+                        <StackPanel Orientation="Horizontal" d:Visibility="Visible"  Visibility="{Binding ElementName=chkScale, 
+                           Path=IsChecked,Converter={StaticResource boolToVisConv}}">
 
                             <local:NumericTextBox x:Name="numMatAmount" Style="{StaticResource numBoxStyle}" HorizontalContentAlignment="Center"
                                 d:Text="2.53" VerticalAlignment="Top" Margin="22,0,0,0"/>

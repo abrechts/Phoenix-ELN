@@ -60,6 +60,9 @@
     <Compile Update="Notifications\ContentInfoPanel.xaml.vb">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="SketchAreaRSS.xaml.vb">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>
