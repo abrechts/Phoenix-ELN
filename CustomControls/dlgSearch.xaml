@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:CustomControls"
         mc:Ignorable="d"
         Title="Substructure Search" TextOptions.TextFormattingMode="Display" WindowStartupLocation="Manual" ShowInTaskbar="False" 
-        Height="750" MaxWidth="690" MinWidth="690" SizeToContent="Height">
+        Height="550" MaxWidth="690" MinWidth="690" SizeToContent="Height">
 
     <Window.Resources>
         

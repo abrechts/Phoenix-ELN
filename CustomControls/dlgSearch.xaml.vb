@@ -33,9 +33,6 @@ Public Class dlgSearch
             rdoServer.IsEnabled = False
         End If
 
-        'disable server query  until server experiment display is finalized
-        rdoServer.Visibility = Windows.Visibility.Collapsed
-
     End Sub
 
 

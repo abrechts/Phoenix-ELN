@@ -2,6 +2,7 @@
 Imports System.Text.RegularExpressions
 Imports System.Windows.Controls
 Imports System.Windows.Documents
+Imports System.Windows.Input
 Imports com.epam.indigo
 Imports ElnCoreModel
 Imports Microsoft.EntityFrameworkCore
@@ -17,14 +18,21 @@ Public Class RxnSubstructure
 
 
     Public Sub New()
+
         IndigoBase = New Indigo
+
+        IndigoBase.setOption("embedding-uniqueness", "atoms")   'provides unique matches
+
     End Sub
+
+
+    Public Property SearchRxnObj As IndigoObject    'non-query reaction type of query reaction
 
 
     ''' <summary>
     ''' Gets all experiment entries with a reaction sketch containing the specified substructure reaction.
     ''' </summary>
-    ''' <param name="queryRxnStr">MDL reaction file string of the query substructure reaction to match.</param>
+    ''' <param name="queryRxnStr">MDL reaction file string of the query substructure reaction to subMatch.</param>
     ''' <param name="dbContext">Database context for query.</param>
     ''' <param Name="fpOnly">Optional: The reaction fingerprints are not confirmed by subsequent reaction substructure tests. 
     ''' This is an extremely fast search, but most likely will contain some false positives. E.g. chiral query centers are 
@@ -36,6 +44,8 @@ Public Class RxnSubstructure
         Dim queryRxnObj = GetMappedIndigoRxn(queryRxnStr, True)
         Dim queryFp = queryRxnObj.fingerprint("sub")
 
+        SearchRxnObj = GetMappedIndigoRxn(queryRxnStr, False)
+
         Dim fpRes = From exp In dbContext.tblExperiments.AsEnumerable Where MatchRxnFingerpint(exp.RxnFingerprint, queryFp)
 
         If fpOnly Then
@@ -46,7 +56,6 @@ Public Class RxnSubstructure
 
             'confirm fingerprint hits by substructure macht
             Dim rssRes = From exp In fpRes Where MatchRxnSubstructure(exp.RxnIndigoObj, queryRxnObj)
-
 
             Return rssRes
 
@@ -119,23 +128,93 @@ Public Class RxnSubstructure
     Private Function MatchRxnSubstructure(srcIndigoRxnArr As Byte(), queryIndigoRxnObj As IndigoObject) As Boolean
 
         Dim srcIndigoObj = IndigoBase.loadReaction(srcIndigoRxnArr)
+
         Return MatchRxnSubstructure(srcIndigoObj, queryIndigoRxnObj)
 
     End Function
 
 
     ''' <summary>
-    ''' Gets if the specified reaction object and the specified reaction substructure newSmarts in a RSS substructure hit.
+    ''' Gets if the specified reaction object and the specified reaction substructure result in a RSS hit.
     ''' </summary>
     ''' 
     Private Function MatchRxnSubstructure(sourceIndigoRxnObj As IndigoObject, queryIndigoRxnObj As IndigoObject) As Boolean
+
+        '207 ms for 1000 hits
 
         If sourceIndigoRxnObj Is Nothing OrElse queryIndigoRxnObj Is Nothing Then
             Return Nothing
         End If
 
-        Dim match = IndigoBase.substructureMatcher(sourceIndigoRxnObj).match(queryIndigoRxnObj)
-        Return match IsNot Nothing
+        'get query reactant and product fragments
+        Dim reactFrag As IndigoObject = queryIndigoRxnObj.iterateReactants(0)
+        Dim prodFrag As IndigoObject = queryIndigoRxnObj.iterateProducts(0)
+
+        'get source reactant and products
+        Dim srcRefReact = sourceIndigoRxnObj.iterateReactants(0)
+        Dim srcRefProd = sourceIndigoRxnObj.iterateProducts(0)
+
+        'get unique match counts
+        Dim rrCount = UniqueMatchCount(srcRefReact, reactFrag) 'reactFrags in reactant
+        Dim prCount = UniqueMatchCount(srcRefReact, prodFrag)  'prodFrags in reactant
+        Dim rpCount = UniqueMatchCount(srcRefProd, reactFrag) 'reactFrags in product
+        Dim ppCount = UniqueMatchCount(srcRefProd, prodFrag)  'prodFrags in product
+
+        'get query molecules as non-query molecules for subsequent inter-match
+        Dim stdReactFrag = IndigoBase.loadMolecule(reactFrag.smiles)
+        Dim stdProdFrag = IndigoBase.loadMolecule(prodFrag.smiles)
+
+        'correct for query reactant fragment being part of product fragment
+        Dim reactInProdCount = UniqueMatchCount(stdProdFrag, reactFrag)
+        rpCount -= reactInProdCount
+
+        'correct for query product fragment being part of reactant fragment
+        Dim prodInReactCount = UniqueMatchCount(stdReactFrag, prodFrag)
+        prCount -= prodInReactCount
+
+        '--> match, if reactFrag count decreases and prodFrag count increases in srcRefReact -> srcRefProd
+        Return (rrCount > rpCount) AndAlso (prCount < ppCount)
+
+    End Function
+
+
+    ''' <summary>
+    ''' Gets the number of *unique* matches between the specified source molecule and the specified query fragment.
+    ''' </summary>
+    ''' <remarks>Indigo usually returns a number of geometrically possible matches for one single match. 
+    ''' UniqueMatchCount reduces this to one match per same same match geometry.</remarks>
+    ''' 
+    Private Function UniqueMatchCount(srcComponent As IndigoObject, queryFragment As IndigoObject) As Integer
+
+        Dim substrMatcher As IndigoObject = IndigoBase.substructureMatcher(srcComponent)
+        Dim uniqueCount As Integer = 0
+
+        For Each subMatch As IndigoObject In substrMatcher.iterateMatches(queryFragment)
+
+            Dim found As Boolean = False
+
+            For Each queryAtom As IndigoObject In queryFragment.iterateAtoms
+                Dim matchedAtom As IndigoObject = subMatch.mapAtom(queryAtom)   'gets source atom (non-query)
+                If matchedAtom IsNot Nothing Then
+                    If Not matchedAtom.isHighlighted Then
+                        matchedAtom.highlight()
+                        found = True
+                    Else
+                        found = False
+                        Exit For
+                    End If
+                End If
+            Next
+
+            If found Then
+                uniqueCount += 1
+            End If
+
+        Next
+
+        srcComponent.unhighlight()
+
+        Return uniqueCount
 
     End Function
 
@@ -197,12 +276,16 @@ Public Class RxnSubstructure
         'alleviates issue where implicit heteroatom e.g. aldehyde carbon hydrogens are interpreted as any connection 
 
         Dim indigoRxn = IndigoBase.loadQueryReaction(mdlRxnString)
+
         indigoRxn.aromatize()
 
         Dim rxnSmarts = indigoRxn.smarts
 
         'remove stereochemistry in query, otherwise no hits after reloading smarts to reaction ...
         rxnSmarts = rxnSmarts.Replace("@", "")
+
+
+        '"(?<!-)(x-|-x)(?!-)" -- regex for matching -x or x- but NOT -x-
 
         ' redefine alcohol with explicitly drawn hydrogen R-O-H (but Not R-OH with implicit hydrogen)
         Dim newSmarts = rxnSmarts.Replace("[#8]-[H]", "[#8;H]")
