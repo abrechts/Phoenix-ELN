@@ -1,16 +1,19 @@
-﻿
-Imports System.Text.RegularExpressions
-Imports System.Windows.Controls
-Imports System.Windows.Documents
-Imports System.Windows.Input
-Imports com.epam.indigo
+﻿Imports com.epam.indigo
 Imports ElnCoreModel
-Imports Microsoft.EntityFrameworkCore
 
 ' * Performance notes: 
-' * MatchRxnFingerprint: 36 ms for 100'000 experiments (comparison only, no LINQ database access overhead)
-' * MatchRxnSubstructure: 700 ms for 10'000 comparisons (using serialized rxnObject overload, comparison only, no LINQ database access overhead)
-' * --> Fingerprint matching is performed first, then substructure query on newSmarts for hit confirmation (if selected).
+' * MatchRxnFingerprint: 36 ms for 100'000 comparisons (comparison code only, no LINQ database access overhead)
+' * MatchRxnSubstructure: 240 ms for 1000 comparisons (using serialized rxnObject overload, comparison code only, no LINQ database access overhead)
+' * --> Fingerprint matching is performed first, then substructure query on newSmarts for hit confirmation.
+
+Public Enum RssErrorType
+
+    None
+    TooManyHits
+    QueryStructureError
+
+End Enum
+
 
 Public Class RxnSubstructure
 
@@ -21,12 +24,21 @@ Public Class RxnSubstructure
 
         IndigoBase = New Indigo
 
-        IndigoBase.setOption("embedding-uniqueness", "atoms")   'provides unique matches
-
     End Sub
 
 
+    ''' <summary> 
+    ''' Sets or gets the current query reaction object.
+    ''' </summary>
+    '''
     Public Property SearchRxnObj As IndigoObject    'non-query reaction type of query reaction
+
+
+    ''' <summary>
+    ''' Sets or gets the maximum number of fingerprint hits before too many hits are reported.
+    ''' </summary>
+    ''' 
+    Public Shared Property FingerPrintCutOffLimit As Integer = 500
 
 
     ''' <summary>
@@ -39,9 +51,21 @@ Public Class RxnSubstructure
     ''' ignored in this mode.</param>
     ''' <returns>Query hits as IEnumerable of tblExperiments, or empty IEnumerable if not hits found.</returns>
     ''' 
-    Public Function PerformRssQuery(queryRxnStr As String, dbContext As ElnDataContext, Optional fpOnly As Boolean = False) As IEnumerable(Of tblExperiments)
+    Public Function PerformRssQuery(queryRxnStr As String, dbContext As ElnDataContext, Optional fpOnly As Boolean = False) As RssQueryResult
+
+        Dim rssResult As New RssQueryResult
 
         Dim queryRxnObj = GetMappedIndigoRxn(queryRxnStr, True)
+
+        If queryRxnObj Is Nothing Then
+            'most likely a structure error (e.g. impossible chirality)
+            With rssResult
+                .ExperimentHits = Nothing
+                .ErrorType = RssErrorType.QueryStructureError
+            End With
+            Return rssResult
+        End If
+
         Dim queryFp = queryRxnObj.fingerprint("sub")
 
         SearchRxnObj = GetMappedIndigoRxn(queryRxnStr, False)
@@ -54,14 +78,35 @@ Public Class RxnSubstructure
 
         If fpRes.Any Then
 
-            'confirm fingerprint hits by substructure macht
-            Dim rssRes = From exp In fpRes Where MatchRxnSubstructure(exp.RxnIndigoObj, queryRxnObj)
+            If fpRes.Count <= FingerPrintCutOffLimit Then
 
-            Return rssRes
+                'confirm fingerprint hits by substructure match
+                Dim rssRes = From exp In fpRes Where MatchRxnSubstructure(exp.RxnIndigoObj, queryRxnObj)
+                With rssResult
+                    .ExperimentHits = rssRes
+                    .ErrorType = RssErrorType.None
+                End With
+                Return rssResult
+
+            Else
+
+                'maximum fingerprint hit limit reached
+                With rssResult
+                    .ExperimentHits = Nothing
+                    .ErrorType = RssErrorType.TooManyHits
+                End With
+                Return rssResult
+
+            End If
 
         Else
 
-            Return fpRes
+            'no fingerprint hits found
+            With rssResult
+                .ExperimentHits = fpRes 'empty IEnumerable
+                .ErrorType = RssErrorType.None  'no hits is not an error ....
+            End With
+            Return rssResult
 
         End If
 
@@ -75,28 +120,43 @@ Public Class RxnSubstructure
     Public Sub RegisterRssBacklog(userEntry As tblUsers)
 
         For Each exp In userEntry.tblExperiments
-            RegisterReactionRSS(exp)
+            Dim ok = RegisterReactionRSS(exp)    'ignore if registration failed  (ok=false)
+            Dim x = 1
         Next
 
     End Sub
 
 
     ''' <summary>
-    ''' Register the reaction properties of the specified experiment entry required for performing RSS searches.
+    ''' Registers the reaction sketch properties of the specified experiment which are required for performing RSS searches.
     ''' </summary>
+    ''' <returns>True if the registration was successful, false if the reaction sketch was invalid. </returns>
     ''' 
-    Public Sub RegisterReactionRSS(ByRef expEntry As tblExperiments)
+    Public Function RegisterReactionRSS(ByRef expEntry As tblExperiments) As Boolean
 
         If expEntry.MDLRxnFileString <> "" Then
 
             Dim rxnObj = GetMappedIndigoRxn(expEntry.MDLRxnFileString, False)
 
-            expEntry.RxnIndigoObj = rxnObj.serialize
-            expEntry.RxnFingerprint = rxnObj.fingerprint("full").toBuffer
+            If rxnObj IsNot Nothing Then
+
+                expEntry.RxnIndigoObj = rxnObj.serialize
+                expEntry.RxnFingerprint = rxnObj.fingerprint("full").toBuffer
+                Return True
+
+            Else
+
+                Return False
+
+            End If
+
+        Else
+
+            Return False
 
         End If
 
-    End Sub
+    End Function
 
 
     ''' <summary>
@@ -129,6 +189,11 @@ Public Class RxnSubstructure
 
         Dim srcIndigoObj = IndigoBase.loadReaction(srcIndigoRxnArr)
 
+
+        'For i = 1 To 1000
+        '    MatchRxnSubstructure(srcIndigoObj, queryIndigoRxnObj)
+        'Next
+
         Return MatchRxnSubstructure(srcIndigoObj, queryIndigoRxnObj)
 
     End Function
@@ -140,7 +205,7 @@ Public Class RxnSubstructure
     ''' 
     Private Function MatchRxnSubstructure(sourceIndigoRxnObj As IndigoObject, queryIndigoRxnObj As IndigoObject) As Boolean
 
-        '207 ms for 1000 hits
+        '240 ms for 1000 hits
 
         If sourceIndigoRxnObj Is Nothing OrElse queryIndigoRxnObj Is Nothing Then
             Return Nothing
@@ -213,7 +278,6 @@ Public Class RxnSubstructure
         Next
 
         srcComponent.unhighlight()
-
         Return uniqueCount
 
     End Function
@@ -235,7 +299,7 @@ Public Class RxnSubstructure
 
                 If isQueryRxn Then
                     'query reaction
-                    indigoRxn = GetEnhancedQueryReaction(mdlRxnString)
+                    indigoRxn = IndigoBase.loadQueryReaction(mdlRxnString) 'GetQueryReaction(mdlRxnString)
                 Else
                     'source reaction
                     indigoRxn = IndigoBase.loadReaction(mdlRxnString)
@@ -246,11 +310,7 @@ Public Class RxnSubstructure
                     indigoRxn = RemoveExcessReactants(indigoRxn, isQueryRxn)
                 End If
 
-                With indigoRxn
-                    .aromatize()
-                    .automap()
-                    .correctReactingCenters()
-                End With
+                indigoRxn.aromatize()
 
                 Return indigoRxn
 
@@ -263,50 +323,6 @@ Public Class RxnSubstructure
         End If
 
     End Function
-
-
-    ''' <summary>
-    ''' Gets an indigo query reaction with adapted query features.
-    ''' </summary>
-    ''' <param name="mdlRxnString">MDL reaction file string of query sketch.</param>
-    ''' <returns>Indigo query reaction.</returns>
-    ''' 
-    Private Function GetEnhancedQueryReaction(mdlRxnString As String) As IndigoObject
-
-        'alleviates issue where implicit heteroatom e.g. aldehyde carbon hydrogens are interpreted as any connection 
-
-        Dim indigoRxn = IndigoBase.loadQueryReaction(mdlRxnString)
-
-        indigoRxn.aromatize()
-
-        Dim rxnSmarts = indigoRxn.smarts
-
-        'remove stereochemistry in query, otherwise no hits after reloading smarts to reaction ...
-        rxnSmarts = rxnSmarts.Replace("@", "")
-
-
-        '"(?<!-)(x-|-x)(?!-)" -- regex for matching -x or x- but NOT -x-
-
-        ' redefine alcohol with explicitly drawn hydrogen R-O-H (but Not R-OH with implicit hydrogen)
-        Dim newSmarts = rxnSmarts.Replace("[#8]-[H]", "[#8;H]")
-        newSmarts = newSmarts.Replace("[H]-[#8]", "[#8;H]")
-
-        'redefine *primary* amine with explicitly drawn hydrogen R-N(-H)-H (but not RNH with implicit hydrogen)
-        newSmarts = newSmarts.Replace("[#7](-[H])-[H]", "[#7;H2]")
-
-        'redefine *secondary* amine
-        newSmarts = newSmarts.Replace("[#7](-[H])", "[#7;H]")
-
-        'redefine aldehyde with explicitly drawn hydrogen: C-CH=O (only one of the 2 replacements will apply)
-        newSmarts = newSmarts.Replace("[#6](-[H])=[#8]", "[#6;H]=[#8]")
-        newSmarts = newSmarts.Replace("[H]-[#6](-[#6])=[#8]", "[#6;H](-[#6])=[#8]")
-
-        'redefine imine with explicitly drawn hydrogen
-
-        Return IndigoBase.loadQueryReaction(newSmarts)
-
-    End Function
-
 
 
     ''' <summary>
@@ -341,5 +357,17 @@ Public Class RxnSubstructure
     End Function
 
 End Class
+
+
+Public Class RssQueryResult
+
+    Public Property ExperimentHits As IEnumerable(Of tblExperiments)
+
+    Public Property ErrorType As RssErrorType
+
+End Class
+
+
+
 
 

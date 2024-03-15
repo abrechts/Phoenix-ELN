@@ -22,11 +22,6 @@ Public Class dlgSearch
 
     Private Sub Me_Loaded() Handles Me.Loaded
 
-        Me.Left = Owner.Left + Owner.ActualWidth / 2 - Me.ActualWidth / 2
-        Me.Top = Owner.Top + 30
-        Me.MinHeight = 260
-        Me.MaxHeight = 260
-
         CurrentDbContext = LocalDBContext
 
         If ServerDBContext Is Nothing Then
@@ -56,10 +51,30 @@ Public Class dlgSearch
     Private Sub PerformQuery(rxnFileStr As String)
 
         Dim rxnSub As New RxnSubstructure
-        Dim expHits = rxnSub.PerformRssQuery(rxnFileStr, CurrentDbContext)
+        Dim expHitInfo = rxnSub.PerformRssQuery(rxnFileStr, CurrentDbContext)
+
+        Select Case expHitInfo.ErrorType
+
+            Case RssErrorType.None
+                'do nothing and proceed
+
+            Case RssErrorType.TooManyHits
+                lstRssHitGroups.DataContext = Nothing
+                MsgBox("Too many hits expected - please" + vbCrLf +
+                       "redefine your query!", MsgBoxStyle.OkOnly + MsgBoxStyle.Information, "RSS query error")
+                Exit Sub
+
+            Case RssErrorType.QueryStructureError
+                lstRssHitGroups.DataContext = Nothing
+                MsgBox("There's a structure error in your" + vbCrLf +
+                       "query sketch (stereochemistry?)." + vbCrLf +
+                       "Please correct!", MsgBoxStyle.OkOnly + MsgBoxStyle.Information, "RSS query error")
+                Exit Sub
+
+        End Select
 
         'the multi-property grouping criterion is achieved by concatenating the reactant and product InChIKeys 
-        Dim sameRxnGroups = expHits.GroupBy(Function(item) item.ReactantInChIKey + "/" + item.ProductInChIKey) _
+        Dim sameRxnGroups = expHitInfo.ExperimentHits.GroupBy(Function(item) item.ReactantInChIKey + "/" + item.ProductInChIKey) _
                              .Select(Function(group) New With {
                                  .MaxYield = group.Max(Function(item) item.Yield),
                                  .ExpEntries = group.OrderByDescending(Function(exp) exp.Yield)
@@ -83,6 +98,7 @@ Public Class dlgSearch
             index += 1
         Next
 
+        Me.Top = Owner.Top + 5
         Me.Left = Owner.Left + Owner.ActualWidth - Me.ActualWidth - 5
         Me.MaxHeight = Owner.ActualHeight - 20
         Me.Height = Me.MaxHeight

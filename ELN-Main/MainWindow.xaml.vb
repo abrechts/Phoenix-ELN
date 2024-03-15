@@ -90,7 +90,7 @@ Class MainWindow
         DBContext = New SQLiteContext(SQLiteDbPath).ElnContext
 
         'Check for legacy Rss backlog registration (--> can be removed later!)
-        If New Version(DBContext.tblDatabaseInfo.First.CurrAppVersion) < New Version("0.9.4") Then
+        If New Version(DBContext.tblDatabaseInfo.First.CurrAppVersion) < New Version("0.9.5") Then
             Dim rss As New RxnSubstructure
             rss.RegisterRssBacklog(DBContext.tblDatabaseInfo.First.tblUsers.First)
             DBContext.SaveChanges()
