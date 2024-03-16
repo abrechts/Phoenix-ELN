@@ -1,0 +1,41 @@
+.ui-footer .ui-btn {
+	margin-top: 0;
+}
+
+/* TOC */
+
+.ui-listview > li.level1 > .ui-btn {
+	padding-left: 1em;
+}
+
+.ui-listview > li.level2 > .ui-btn {
+	padding-left: 2em;
+}
+
+.ui-listview > li.level3 > .ui-btn {
+	padding-left: 3em;
+}
+
+.ui-listview > li.level4 > .ui-btn {
+	padding-left: 4em;
+}
+
+.ui-listview > li.level5 > .ui-btn {
+	padding-left: 5em;
+}
+
+.ui-listview > li.level6 > .ui-btn {
+	padding-left: 6em;
+}
+
+.ui-listview > li.level7 > .ui-btn {
+	padding-left: 7em;
+}
+
+.ui-listview > li.level8 > .ui-btn {
+	padding-left: 8em;
+}
+
+.ui-listview > li.level9 > .ui-btn {
+	padding-left: 9em;
+}*/
