@@ -131,7 +131,7 @@ Public Class dlgSearch
     ''' Allows the use of the MouseWheel for results scrolling
     ''' </summary>
     ''' 
-    Private Sub lstProtocol_PreviewMouseWheel(sender As Object, e As MouseWheelEventArgs) Handles lstRssHitGroups.PreviewMouseWheel
+    Private Sub lstHitGroups_PreviewMouseWheel(sender As Object, e As MouseWheelEventArgs) Handles lstRssHitGroups.PreviewMouseWheel
 
         e.Handled = True
 
