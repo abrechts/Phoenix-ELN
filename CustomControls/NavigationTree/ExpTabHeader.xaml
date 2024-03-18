@@ -23,7 +23,7 @@
 
             <TextBlock d:Text="demo-00012" Text="{Binding ExperimentID}"  Margin="0,0,1,0" VerticalAlignment="Center"/>
 
-            <Button x:Name="btnPin" Width="16" Background="Transparent" ToolTipService.InitialShowDelay="50" BorderThickness="1" 
+            <Button x:Name="btnPin" Width="16" Background="transparent" ToolTipService.InitialShowDelay="50" BorderThickness="1" 
                BorderBrush="transparent" Margin="2,0,0,0"
                ToolTip="{Binding DisplayIndex,Converter={StaticResource pinToolTipConv}}"
                IsEnabled="{Binding }">

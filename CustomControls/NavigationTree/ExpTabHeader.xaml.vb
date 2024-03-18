@@ -17,11 +17,13 @@ Public Class ExpTabHeader
     End Sub
 
 
-    Private Sub btnPinned_Click(sender As Object, e As RoutedEventArgs) Handles btnPin.PreviewMouseLeftButtonDown
+    Private Sub Me_PreviewMouseLeftButtonDown(sender As Object, e As RoutedEventArgs) Handles Me.PreviewMouseLeftButtonDown
 
-        e.Handled = True
-        Dim expEntry = CType(DataContext, tblExperiments)
-        RaiseEvent PinStateChanged(Me, expEntry)
+        If btnPin.IsMouseOver Then
+            Dim expEntry = CType(DataContext, tblExperiments)
+            RaiseEvent PinStateChanged(Me, expEntry)
+            e.Handled = True
+        End If
 
     End Sub
 

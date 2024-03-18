@@ -16,11 +16,7 @@ Class MainWindow
 
     Friend Shared Property ApplicationVersion As Version
 
-    ''' <summary>
-    ''' Sets or gets the filtered and sored items source of the experiments tab control
-    ''' </summary>
-    ''' 
-    Private Property ExpDisplayView As ICollectionView
+    Private Property ExpDisplayList As List(Of tblExperiments)
 
     Private _IsVersionUpgrade As Boolean = False
 
@@ -143,22 +139,24 @@ Class MainWindow
 
         '-- Bind experiments tabs to filtered and sorted experiments CollectionViewSource
 
-        Dim cvs As New CollectionViewSource
-        cvs.Source = CType(Me.DataContext, tblUsers).tblExperiments
+        ExpDisplayList = (From exp In CType(Me.DataContext, tblUsers).tblExperiments Where exp.DisplayIndex IsNot Nothing
+                          Order By exp.DisplayIndex Ascending).ToList
 
-        cvs.LiveSortingProperties.Add("DisplayIndex")
-        ExpDisplayView = cvs.View
-        With ExpDisplayView
-            .Filter = New Predicate(Of Object)(AddressOf FilterList)
-            .SortDescriptions.Clear()
-            .SortDescriptions.Add(New SortDescription("DisplayIndex", ListSortDirection.Ascending))
-        End With
+        tabExperiments.ItemsSource = ExpDisplayList
 
-        'actually creates experiment tabs (core)
-        tabExperiments.ItemsSource = ExpDisplayView
+    End Sub
 
-        expNavTree.IsEnabled = True
 
+    Private Sub UpdateExperimentTabs(Optional newExpItem As tblExperiments = Nothing)
+
+        If newExpItem IsNot Nothing Then
+            ExpDisplayList.Add(newExpItem)
+        End If
+
+        ExpDisplayList = (From exp In ExpDisplayList Where exp.DisplayIndex IsNot Nothing
+                          Order By exp.DisplayIndex Ascending).ToList
+
+        tabExperiments.ItemsSource = ExpDisplayList
 
     End Sub
 
@@ -169,13 +167,12 @@ Class MainWindow
 
             'TODO:Clone server exp for specifying independent displayIndex, isCurrent, etc.
 
-            Dim cvs As New CollectionViewSource
-            cvs.Source = lstServerExpItems
-            ExpDisplayView = cvs.View
+            'Dim cvs As New CollectionViewSource
+            'cvs.Source = lstServerExpItems
+            'ExpDisplayView = cvs.View
 
-            tabExperiments.ItemsSource = ExpDisplayView
+            'tabExperiments.ItemsSource = ExpDisplayView
 
-            expNavTree.IsEnabled = False
 
         End If
 
@@ -918,7 +915,7 @@ Class MainWindow
 
 
     ''' <summary>
-    ''' Handles experiment selection within step summary control.
+    ''' Handles experiment selection within RSS results and step summary control.
     ''' </summary>
     ''' 
     Private Sub ExpList_RequestOpenExperiment(sender As Object, targetExp As tblExperiments, isFromServer As Boolean)
@@ -947,14 +944,14 @@ Class MainWindow
     ''' Handles experiment selection within experiment navigation tree.
     ''' </summary>
     ''' 
-    Private Sub expNavTree_ItemSelected(sender As Object, selectedItem As Object) Handles expNavTree.ExperimentSelected
+    Private Sub expNavTree_ExperimentSelected(sender As Object, selectedItem As Object) Handles expNavTree.ExperimentSelected
 
         If TypeOf selectedItem Is tblExperiments Then
 
             Dim currUser = CType(Me.DataContext, tblUsers)
             Dim selExp = CType(selectedItem, tblExperiments)
 
-            If selExp.DisplayIndex > 0 Then
+            If ExpDisplayList.Contains(selExp) Then
 
                 '- experiment already pinned
                 Dim thisTab As TabItem = tabExperiments.ItemContainerGenerator.ContainerFromItem(selExp)
@@ -987,11 +984,9 @@ Class MainWindow
                     End Select
 
                     selExp.DisplayIndex = 0
+                    UpdateExperimentTabs(selExp)
 
-                    ExpDisplayView.Refresh()
                     DBContext.SaveChanges()     'no exp-level undo/redo required
-
-                    SelectedExpContent.ExpProtocol.UnselectAll()
 
                 End If
 
@@ -1010,6 +1005,7 @@ Class MainWindow
     Private Sub expTabHeader_PreviewMouseLeftButtonDown(sender As Object, e As MouseButtonEventArgs)   'XAML event
 
         'remember current scroll position
+
         Dim thisTab As TabItem = tabExperiments.ItemContainerGenerator.ContainerFromItem(tabExperiments.SelectedItem)
         If thisTab IsNot Nothing Then
             Dim tabItemInfo = CType(thisTab.Tag, TabItemInfo)
@@ -1050,18 +1046,23 @@ Class MainWindow
 
             Case Else
 
+                Dim doomedIndex = targetExp.DisplayIndex
+
                 targetExp.DisplayIndex = Nothing 'removes pin and tab
-                'is selected tab doomed one?
+
+                'is selected tab doomed one? -> remove and select neighbor to its left
                 If CType(tabExperiments.SelectedItem, tblExperiments) Is targetExp Then
-                    Dim firstExp = CType(tabExperiments.Items(0), tblExperiments)
-                    If firstExp.IsCurrent = 0 Then
-                        expNavTree.SelectExperiment(firstExp)
+                    Dim expToLeft = CType(tabExperiments.Items(doomedIndex - 1), tblExperiments)
+                    If expToLeft.IsCurrent = 0 Then
+                        expNavTree.SelectExperiment(expToLeft, False)
+                        tabExperiments.SelectedIndex = doomedIndex - 1
                     End If
                 End If
 
         End Select
 
-        ExpDisplayView.Refresh()
+        UpdateExperimentTabs()
+
         DBContext.SaveChanges()
 
     End Sub
