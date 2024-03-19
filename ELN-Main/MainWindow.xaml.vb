@@ -161,24 +161,6 @@ Class MainWindow
     End Sub
 
 
-    Private Sub SetServerView(lstServerExpItems As List(Of tblExperiments))
-
-        If ServerDBContext IsNot Nothing Then
-
-            'TODO:Clone server exp for specifying independent displayIndex, isCurrent, etc.
-
-            'Dim cvs As New CollectionViewSource
-            'cvs.Source = lstServerExpItems
-            'ExpDisplayView = cvs.View
-
-            'tabExperiments.ItemsSource = ExpDisplayView
-
-
-        End If
-
-    End Sub
-
-
     Private Sub Me_Loaded() Handles Me.Loaded
 
         'register shared events
@@ -914,6 +896,22 @@ Class MainWindow
     End Sub
 
 
+    Private Sub btnServerTest_Click() Handles btnServerTest.Click
+
+        If ServerDBContext IsNot Nothing Then
+
+            Dim expID = "miked1-00001"
+            Dim serverExp = (From exp In ServerDBContext.tblExperiments Where exp.ExperimentID = expID).FirstOrDefault
+
+            If serverExp IsNot Nothing Then
+                ExpList_RequestOpenExperiment(Nothing, serverExp, True)
+            End If
+
+        End If
+
+    End Sub
+
+
     ''' <summary>
     ''' Handles experiment selection within RSS results and step summary control.
     ''' </summary>
@@ -922,17 +920,30 @@ Class MainWindow
 
         If Not isFromServer Then
 
-            'local experiment
+            '-- local experiment
+
             expNavTree.SelectExperiment(targetExp)
 
         Else
 
-            'server experiment
+            '-- server experiment
 
-            Dim serverExpList As New List(Of tblExperiments)
-            serverExpList.Add(targetExp)
+            If Not ExpDisplayList.Contains(targetExp) Then
 
-            SetServerView(serverExpList)
+                'replace previous leftmost server exp, if present
+                Dim leftmostExp = CType(tabExperiments.Items(0), tblExperiments)
+                If leftmostExp.DisplayIndex = -2 Then
+                    leftmostExp.DisplayIndex = Nothing
+                End If
+
+                ''add to experiments tab
+                targetExp.DisplayIndex = -2
+                UpdateExperimentTabs(targetExp)
+
+                'select leftmost experiments tab containing this server exp
+                tabExperiments.SelectedIndex = 0
+
+            End If
 
         End If
 
@@ -948,49 +959,50 @@ Class MainWindow
 
         If TypeOf selectedItem Is tblExperiments Then
 
-            Dim currUser = CType(Me.DataContext, tblUsers)
             Dim selExp = CType(selectedItem, tblExperiments)
 
             If ExpDisplayList.Contains(selExp) Then
 
-                '- experiment already pinned
+                '- experiment already displayed in a tab
+
                 Dim thisTab As TabItem = tabExperiments.ItemContainerGenerator.ContainerFromItem(selExp)
                 thisTab.IsSelected = True
 
             Else
 
-                '- unpinned experiment selected
-                Dim currExp As tblExperiments = (From exp In currUser.tblExperiments Where exp.DisplayIndex <= 0).FirstOrDefault
-                If currExp IsNot Nothing Then
+                '- experiment not yet present in tab
 
-                    Select Case currExp.DisplayIndex
+                Dim leftmostExp = CType(tabExperiments.Items(0), tblExperiments)
+                Dim localStartIndex = If(leftmostExp.DisplayIndex = -2, 1, 0)   'displayIndex = -2 means server experiment (leftmost)
+                Dim firstLocalExp = CType(tabExperiments.Items(localStartIndex), tblExperiments)
+
+                If firstLocalExp IsNot Nothing Then
+
+                    Select Case firstLocalExp.DisplayIndex
 
                         Case 0
+
                             'replace current leftmost exp tab
-                            currExp.DisplayIndex = Nothing
+                            firstLocalExp.DisplayIndex = Nothing
 
                         Case -1
+
                             'leftmost was pinned
-                            If selExp.ExperimentID <> currExp.ExperimentID Then
-                                For i = 1 To tabExperiments.Items.Count - 1
-                                    Dim expItem = CType(tabExperiments.Items(i), tblExperiments)
-                                    expItem.DisplayIndex += 1
-                                Next
-                                currExp.DisplayIndex = 1
-                            Else
-                                Exit Sub
-                            End If
+                            For i = localStartIndex + 1 To tabExperiments.Items.Count - 1
+                                Dim expItem = CType(tabExperiments.Items(i), tblExperiments)
+                                expItem.DisplayIndex += 1
+                            Next
+                            firstLocalExp.DisplayIndex = 1
 
                     End Select
 
                     selExp.DisplayIndex = 0
                     UpdateExperimentTabs(selExp)
-
                     DBContext.SaveChanges()     'no exp-level undo/redo required
 
                 End If
 
-                tabExperiments.SelectedIndex = 0 'select first tab
+                tabExperiments.SelectedIndex = localStartIndex 'select first tab
 
             End If
         End If
@@ -1014,7 +1026,10 @@ Class MainWindow
 
         'change to target experiment tab
         Dim currExp = CType(sender.DataContext, tblExperiments)
-        expNavTree.SelectExperiment(currExp, populateContent:=False)
+        If currExp.DisplayIndex <> -2 Then
+            'local experiments only (not server)
+            expNavTree.SelectExperiment(currExp, populateContent:=False)
+        End If
 
     End Sub
 
@@ -1022,15 +1037,24 @@ Class MainWindow
     Private Sub expTabHeader_PinStateChanged(sender As Object, targetExp As tblExperiments)
 
         Select Case targetExp.DisplayIndex
+
+            Case -2
+
+                'release server experiment
+                targetExp.DisplayIndex = Nothing
+                tabExperiments.SelectedIndex = 1
+
             Case -1
 
-                targetExp.DisplayIndex = 0  'undo first pin
+                'undo pre-pin of leftmost local experiment
+                targetExp.DisplayIndex = 0
 
             Case 0
 
                 If tabExperiments.Items.Count <= 5 Then
 
-                    targetExp.DisplayIndex = -1 'set first pin
+                    'pre-pin leftmost local experiment
+                    targetExp.DisplayIndex = -1
 
                 Else
 
@@ -1046,9 +1070,10 @@ Class MainWindow
 
             Case Else
 
-                Dim doomedIndex = targetExp.DisplayIndex
+                'release pinned experiment
 
-                targetExp.DisplayIndex = Nothing 'removes pin and tab
+                Dim doomedIndex = targetExp.DisplayIndex
+                targetExp.DisplayIndex = Nothing
 
                 'is selected tab doomed one? -> remove and select neighbor to its left
                 If CType(tabExperiments.SelectedItem, tblExperiments) Is targetExp Then

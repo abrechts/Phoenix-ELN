@@ -1,4 +1,5 @@
 ﻿Imports com.epam.indigo
+Imports ElnBase.ELNEnumerations
 Imports ElnCoreModel
 
 ' * Performance notes: 
@@ -42,7 +43,7 @@ Public Class RxnSubstructure
 
 
     ''' <summary>
-    ''' Gets all experiment entries with a reaction sketch containing the specified substructure reaction.
+    ''' Gets all *finalized* experiment entries with a reaction sketch containing the specified substructure reaction.
     ''' </summary>
     ''' <param name="queryRxnStr">MDL reaction file string of the query substructure reaction to subMatch.</param>
     ''' <param name="dbContext">Database context for query.</param>
@@ -70,7 +71,8 @@ Public Class RxnSubstructure
 
         SearchRxnObj = GetMappedIndigoRxn(queryRxnStr, False)
 
-        Dim fpRes = From exp In dbContext.tblExperiments.AsEnumerable Where MatchRxnFingerpint(exp.RxnFingerprint, queryFp)
+        Dim fpRes = From exp In dbContext.tblExperiments.AsEnumerable Where exp.WorkflowState = WorkflowStatus.Finalized AndAlso
+                    MatchRxnFingerpint(exp.RxnFingerprint, queryFp)
 
         If fpOnly Then
             Return fpRes
