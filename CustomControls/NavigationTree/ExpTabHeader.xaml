@@ -7,23 +7,30 @@
              mc:Ignorable="d" 
              xmlns:data="clr-namespace:ElnCoreModel;assembly=ElnCoreModel"
              d:DataContext="{d:DesignInstance Type=data:tblExperiments}"
-             d:DesignHeight="20" >
+             d:DesignHeight="20">
 
     <UserControl.Resources>
         <local:IntegerToVisibilityConverter x:Key="intToVisConv"/>
         <local:PinToolTipConverter x:Key="pinToolTipConv"/>
-        <local:StatusIconConverter x:Key="statusIconConv"/>
+        <local:TabStatusIconConverter x:Key="statusIconConv"/>
     </UserControl.Resources>
 
     <Grid>
         <StackPanel Orientation="Horizontal">
 
-            <ContentControl Width="14" d:Content="{StaticResource icoRedDot}" Margin="0,2,1,0" Opacity="0.65"
-                Content="{Binding WorkflowState, Converter={StaticResource statusIconConv}}" VerticalAlignment="Center" HorizontalAlignment="Center"  />
+            <ContentControl Width="14" d:Content="{StaticResource icoRedDot}" Margin="0,2,1,0" Opacity="0.75" VerticalAlignment="Center" 
+              HorizontalAlignment="Center">
+                <ContentControl.Content>
+                    <MultiBinding Converter="{StaticResource statusIconConv}">
+                        <Binding Path="WorkflowState"/>
+                        <Binding Path="DisplayIndex" />
+                    </MultiBinding>
+                </ContentControl.Content>
+            </ContentControl>
 
-            <TextBlock d:Text="demo-00012" Text="{Binding ExperimentID}"  Margin="0,0,1,0" VerticalAlignment="Center"/>
+            <TextBlock x:Name="blkExpID" d:Text="demo-00012" Text="{Binding ExperimentID}"  Margin="0,0,1,0" VerticalAlignment="Center"/>
 
-            <Button x:Name="btnPin" Width="16" Background="Transparent" ToolTipService.InitialShowDelay="50" BorderThickness="1" 
+            <Button x:Name="btnPin" Width="16" Background="transparent" ToolTipService.InitialShowDelay="50" BorderThickness="1" 
                BorderBrush="transparent" Margin="2,0,0,0"
                ToolTip="{Binding DisplayIndex,Converter={StaticResource pinToolTipConv}}"
                IsEnabled="{Binding }">
@@ -45,9 +52,9 @@
                 </Button.Style>
 
                 <Grid>
-                    <ContentControl Content="{StaticResource icoPin}" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="-2"
+                    <ContentControl x:Name="icoPin" Content="{StaticResource icoPin}" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="-2"
                         Visibility="{Binding DisplayIndex,Converter={StaticResource intToVisConv}}"/>
-                    <ContentControl Content="{StaticResource icoPin2}" Height="14" VerticalAlignment="Center" Margin="0,0,0,-1"  
+                    <ContentControl  Content="{StaticResource icoPin2}" Height="14" VerticalAlignment="Center" Margin="0,0,0,-1"  
                         Visibility="{Binding DisplayIndex,Converter={StaticResource intToVisConv},ConverterParameter=invert}"/>
                 </Grid>
 

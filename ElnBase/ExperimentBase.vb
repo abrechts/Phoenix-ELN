@@ -52,7 +52,7 @@ Public Class ExperimentBase
 
 
     ''' <summary>
-    ''' Creates a new experiment ,or copies the specified experiment entry and adds it to the specified project with the highest 
+    ''' Creates a new experiment, or copies the specified experiment entry and adds it to the specified project with the highest 
     ''' available experiment ID.
     ''' </summary>
     ''' <param name="dbContext">The current database entity context.</param>
@@ -184,6 +184,17 @@ Public Class ExperimentBase
         End Try
 
     End Function
+
+
+    Public Shared Function CloneExperimentEntity(expEntry As tblExperiments) As tblExperiments
+
+        Dim json = ExperimentBase.ExperimentToJsonString(expEntry, "")
+        Dim clonedExp = ExperimentFromJsonString(json, "")
+
+        Return clonedExp
+
+    End Function
+
 
 
     ''' <summary>

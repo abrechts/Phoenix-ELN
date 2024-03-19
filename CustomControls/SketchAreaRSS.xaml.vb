@@ -11,7 +11,7 @@ Public Class SketchAreaRSS
 
     Public Sub New()
 
-        ' This call is required by the de§signer.
+        ' This call is required by the designer.
         InitializeComponent()
 
     End Sub
@@ -91,7 +91,7 @@ Public Class SketchAreaRSS
             cbDraw.DialogProperties.SketchValidation = EditorOptions.SketchConditions.Reaction
 
             'CORE
-            Dim skInfo = cbDraw.DisplayDialog(rxnSketch)
+            Dim skInfo = cbDraw.DisplayDialog(rxnSketch, Nothing, False)
 
             'editor not cancelled?
             If skInfo IsNot Nothing Then

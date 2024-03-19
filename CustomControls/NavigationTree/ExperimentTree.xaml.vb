@@ -215,6 +215,7 @@ Public Class ExperimentTree
         If TypeOf entityObj Is tblExperiments Then
 
             Dim expEntry = CType(entityObj, tblExperiments)
+
             expEntry.IsCurrent = 1
             If LastCurrentExperiment IsNot Nothing AndAlso LastCurrentExperiment IsNot expEntry Then
                 LastCurrentExperiment.IsCurrent = 0
