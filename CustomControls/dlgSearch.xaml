@@ -5,8 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CustomControls"
         mc:Ignorable="d"
-        Title="Substructure Search" TextOptions.TextFormattingMode="Display" WindowStartupLocation="Manual" ShowInTaskbar="False" 
-        Height="750" MaxWidth="690" MinWidth="690" SizeToContent="Height">
+        Title="Substructure Search" TextOptions.TextFormattingMode="Display" WindowStartupLocation="CenterOwner" ShowInTaskbar="False" 
+        MaxHeight="300" MaxWidth="690" MinWidth="690"  >
 
     <Window.Resources>
         

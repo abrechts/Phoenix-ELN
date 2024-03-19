@@ -136,10 +136,17 @@ Public Class SketchArea
 
             'register RSS query fields
             Dim rss As New RxnSubstructure
-            rss.RegisterReactionRSS(currExp)
+
+            If Not rss.RegisterReactionRSS(currExp) Then
+
+                MsgBox("Your reaction sketch seems to have a structure" + vbCrLf +
+                       "error (stereochemistry?) and therefore will not" + vbCrLf +
+                       "not be searchable! - Please try to correct if " + vbCrLf +
+                       "before continuing ... ",
+                       MsgBoxStyle.OkOnly + MsgBoxStyle.Information, "Sketch Validation")
+            End If
 
             blkClickInfo.Visibility = Visibility.Collapsed
-
             RaiseEvent SketchEdited(Me, reactantModified)
 
         End If

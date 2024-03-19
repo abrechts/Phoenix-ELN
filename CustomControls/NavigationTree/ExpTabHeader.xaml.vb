@@ -17,11 +17,24 @@ Public Class ExpTabHeader
     End Sub
 
 
-    Private Sub btnPinned_Click(sender As Object, e As RoutedEventArgs) Handles btnPin.PreviewMouseLeftButtonDown
+    Private Sub Me_Loaded() Handles Me.Loaded
 
-        e.Handled = True
-        Dim expEntry = CType(DataContext, tblExperiments)
-        RaiseEvent PinStateChanged(Me, expEntry)
+        '     Dim currExp = CType(Me.DataContext, tblExperiments)
+
+        If CType(Me.DataContext, tblExperiments).DisplayIndex = -2 Then
+            blkExpID.FontStyle = FontStyles.Italic
+            icoPin.Content = "X"
+        End If
+
+    End Sub
+
+    Private Sub Me_PreviewMouseLeftButtonDown(sender As Object, e As RoutedEventArgs) Handles Me.PreviewMouseLeftButtonDown
+
+        If btnPin.IsMouseOver Then
+            Dim expEntry = CType(DataContext, tblExperiments)
+            RaiseEvent PinStateChanged(Me, expEntry)
+            e.Handled = True
+        End If
 
     End Sub
 
@@ -55,6 +68,8 @@ Public Class PinToolTipConverter
         Dim displayIndex As Integer = value
 
         Select Case displayIndex
+            Case -2
+                Return "Close server experiment"
             Case -1
                 Return "Undo Pin"
             Case 0

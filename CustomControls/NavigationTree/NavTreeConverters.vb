@@ -100,6 +100,49 @@ Public Class StatusIconConverter
 End Class
 
 
+Public Class TabStatusIconConverter
+
+    Implements IMultiValueConverter
+
+    Public Function Convert(value() As Object, targetType As Type, parameter As Object, culture As CultureInfo) As Object _
+    Implements IMultiValueConverter.Convert
+
+        Dim workFlowState As WorkflowStatus = value(0)
+        Dim displayIndex As Integer = value(1)
+
+        Dim imgSrc As Viewbox
+
+        'server experiment?
+        If displayIndex = -2 Then
+            imgSrc = Application.Current.FindResource("icoDatabase")
+            Return imgSrc
+        End If
+
+        'local experiment
+        Select Case workFlowState
+            Case WorkflowStatus.Finalized
+                imgSrc = Application.Current.FindResource("icoOkBulletBlue")'
+            Case WorkflowStatus.InProgress
+                imgSrc = Application.Current.FindResource("icoRedDot")'
+            Case WorkflowStatus.Unlocked
+                imgSrc = Application.Current.FindResource("icoReopened") '
+            Case Else
+                imgSrc = Application.Current.FindResource("icoReopened") '
+        End Select
+
+        Return imgSrc
+
+    End Function
+
+    Public Function ConvertBack(value As Object, targetTypes() As Type, parameter As Object, culture As CultureInfo) As Object() Implements IMultiValueConverter.ConvertBack
+
+        Throw New NotImplementedException()
+
+    End Function
+
+End Class
+
+
 Public Class UserTagConverter
 
     Implements IValueConverter

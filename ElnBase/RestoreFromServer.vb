@@ -41,12 +41,21 @@ Public Class RestoreFromServer
                         'get and transfer root entity
                         AddEntity(serverDbInfoEntry)
 
-                        'iterate server db hierarchy starting from root
+                        'core: iterate server db hierarchy starting from root
                         ProcessChildren(serverDbInfoEntry)
+
+                        'Replace all local DisplayIndex values by nothing, except for IsCurrent=1 (may be -2 artefacts from local server exp views).
+                        'Pinned experiments are unpinned in the process, as an inevitable but tolerable side effect.
+                        Dim res = From exp In TmpLocalContext.tblExperiments Where exp.DisplayIndex IsNot Nothing
+                        For Each exp In res
+                            exp.DisplayIndex = If(exp.IsCurrent = 1, 0, Nothing)
+                        Next
+
                         TmpLocalContext.SaveChangesNoSyncTracking()
 
                     End If
                 End Using
+
             End Using
 
             Return True

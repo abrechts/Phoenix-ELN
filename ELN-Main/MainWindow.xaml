@@ -145,12 +145,15 @@
                     </Menu>
 
                     <Button x:Name="btnSearch" HorizontalAlignment="Left" VerticalAlignment="Top" ToolTip="Find experiments" d:Visibility="Visible"
-                       Visibility="Collapsed">
+                       Visibility="Visible">
                         <StackPanel Orientation="Horizontal">
                             <ContentControl Content="{StaticResource icoSearch}" Height="16" Margin="0,0,3,0"/>
                             <TextBlock Text="Search" Margin="0,0,2,0" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
+
+                    <Separator/>
+                    <Button x:Name="btnServerTest" Content="Server Test"/>
 
                 </ToolBar>
 
