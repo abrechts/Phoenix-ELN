@@ -896,22 +896,6 @@ Class MainWindow
     End Sub
 
 
-    Private Sub btnServerTest_Click() Handles btnServerTest.Click
-
-        If ServerDBContext IsNot Nothing Then
-
-            Dim expID = "miked1-00001"
-            Dim serverExp = (From exp In ServerDBContext.tblExperiments Where exp.ExperimentID = expID).FirstOrDefault
-
-            If serverExp IsNot Nothing Then
-                ExpList_RequestOpenExperiment(Nothing, serverExp, True)
-            End If
-
-        End If
-
-    End Sub
-
-
     ''' <summary>
     ''' Handles experiment selection within RSS results and step summary control.
     ''' </summary>
