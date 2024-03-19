@@ -188,7 +188,7 @@ Public Class ExperimentBase
 
     Public Shared Function CloneExperimentEntity(expEntry As tblExperiments) As tblExperiments
 
-        Dim json = ExperimentBase.ExperimentToJsonString(expEntry, "")
+        Dim json = ExperimentToJsonString(expEntry, "")
         Dim clonedExp = ExperimentFromJsonString(json, "")
 
         Return clonedExp
@@ -208,7 +208,7 @@ Public Class ExperimentBase
     Public Shared Function ExportExperiment(expEntry As tblExperiments, exportFilePath As String, appVersion As String) As Boolean
 
         Try
-            Dim json = ExperimentBase.ExperimentToJsonString(expEntry, appVersion)
+            Dim json = ExperimentToJsonString(expEntry, appVersion)
             File.WriteAllText(exportFilePath, json)
             Return True
 
