@@ -1,7 +1,9 @@
 ﻿Imports System.IO
+Imports System.Reflection
 Imports System.Text.Json
 Imports System.Text.Json.Nodes
 Imports System.Text.Json.Serialization
+Imports System.Text.Json.Serialization.Metadata
 Imports ElnBase.ELNEnumerations
 Imports ElnCoreModel
 Imports Microsoft.EntityFrameworkCore
@@ -186,17 +188,6 @@ Public Class ExperimentBase
     End Function
 
 
-    Public Shared Function CloneExperimentEntity(expEntry As tblExperiments) As tblExperiments
-
-        Dim json = ExperimentToJsonString(expEntry, "")
-        Dim clonedExp = ExperimentFromJsonString(json, "")
-
-        Return clonedExp
-
-    End Function
-
-
-
     ''' <summary>
     ''' Serializes the specified experiment entry to Json and writes its contents to the specified file path.
     ''' </summary>
@@ -208,6 +199,7 @@ Public Class ExperimentBase
     Public Shared Function ExportExperiment(expEntry As tblExperiments, exportFilePath As String, appVersion As String) As Boolean
 
         Try
+
             Dim json = ExperimentToJsonString(expEntry, appVersion)
             File.WriteAllText(exportFilePath, json)
             Return True
@@ -236,14 +228,13 @@ Public Class ExperimentBase
         jsonOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles
         jsonOptions.WriteIndented = True
 
+        Dim res As New DefaultJsonTypeInfoResolver
+        res.Modifiers.Clear()
+        res.Modifiers.Add(AddressOf ExcludeProperties)
+
+        jsonOptions.TypeInfoResolver = res
+
         With expEntry
-
-            Dim prevProj = .Project
-            Dim prevUser = .User
-
-            'prevent upstream serializing of complete database at the end 
-            .Project = Nothing
-            .User = Nothing
 
             'serialize experiment
             Dim jsonStr = JsonSerializer.Serialize(expEntry, jsonOptions)
@@ -253,16 +244,29 @@ Public Class ExperimentBase
             jsonObject.Add("AppVersion", appVersion)
             jsonStr = JsonSerializer.Serialize(jsonObject)
 
-            .UserID = prevUser.UserID
-            .User = prevUser
-            .ProjectID = prevProj.GUID
-            .Project = prevProj
-
             Return jsonStr
 
         End With
 
     End Function
+
+
+    Public Shared Sub ExcludeProperties(info As JsonTypeInfo)
+
+        If info.Kind = JsonTypeInfoKind.Object Then
+            If info.Type Is GetType(tblExperiments) Then
+                ' Exclude properties with specific names
+                For Each prop In info.Properties
+                    If prop.Name = "Project" OrElse prop.Name = "User" Then
+                        prop.ShouldSerialize = Function(obj, value) As Boolean
+                                                   Return False
+                                               End Function
+                    End If
+                Next
+            End If
+        End If
+
+    End Sub
 
 
     ''' <summary>
@@ -278,8 +282,8 @@ Public Class ExperimentBase
             jsonObj.TryGetPropertyValue("AppVersion", exportAppVersion)
             jsonObj.Remove("AppVersion")
 
-            currAppVersion = "1.1.3"
-            exportAppVersion = "1.1.4"
+            'currAppVersion = "1.1.3"
+            ' exportAppVersion = "1.1.4"
 
             Dim currVersion = New Version(currAppVersion)
             Dim exportVersion = New Version(exportAppVersion)
@@ -333,3 +337,32 @@ Public Class ExperimentBase
     End Function
 
 End Class
+
+
+
+'Public NotInheritable Class ExcludePropertyModifier
+
+'    Inherits DefaultJsonTypeInfoResolver
+
+
+'    Public Overrides Function GetTypeInfo(type As Object, options As JsonSerializerOptions) As JsonTypeInfo
+
+'        Return Nothing
+
+'    End Function
+
+'    'Public Overrides Function GetTypeInfo(Type, options) As JsonTypeInfo
+'    'End Function
+
+
+'    '    'Public Sub Modify(typeInfo As JsonTypeInfo)
+'    '    '    If typeInfo.Kind = JsonTypeInfoKind.Object Then
+'    '    '        ' Exclude properties with specific names
+'    '    '        For Each property In typeInfo.Properties
+'    '    '            If property.GetMemberName() = "PropertyToExclude" Then
+'    '    '            Property.ShouldSerialize = Function(obj, value) False
+'    '    'End If
+'    '    'Next
+'    '    'End If
+'    '    'End Sub
+'End Class
