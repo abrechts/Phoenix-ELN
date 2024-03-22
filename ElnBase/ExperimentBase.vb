@@ -229,7 +229,6 @@ Public Class ExperimentBase
         jsonOptions.WriteIndented = True
 
         Dim res As New DefaultJsonTypeInfoResolver
-        res.Modifiers.Clear()
         res.Modifiers.Add(AddressOf ExcludeProperties)
 
         jsonOptions.TypeInfoResolver = res
@@ -282,6 +281,7 @@ Public Class ExperimentBase
             jsonObj.TryGetPropertyValue("AppVersion", exportAppVersion)
             jsonObj.Remove("AppVersion")
 
+            'Debug only:
             'currAppVersion = "1.1.3"
             ' exportAppVersion = "1.1.4"
 
