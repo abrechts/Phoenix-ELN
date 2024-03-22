@@ -58,7 +58,7 @@ Public Class Protocol
         AddHandler FileContent.MouseOverChanged, AddressOf AccessibleContent_MouseOverChanged
         AddHandler ExpTreeHeader.RequestUpdateWorkflowState, AddressOf ExpTreeHeader_RequestUpdateWorkflowState
         AddHandler ServerSync.SyncComplete, AddressOf ServerSync_SyncComplete
-        AddHandler ProtocolItemBase.ElementLeftMouseUp, AddressOf ProtocolItemBase_ElementMouseUp
+        '   AddHandler ProtocolItemBase.ElementLeftMouseUp, AddressOf ProtocolItemBase_ElementMouseUp
 
     End Sub
 
@@ -467,7 +467,7 @@ Public Class Protocol
     ''' Handles opening the target protocol item to initiate edit operations.
     ''' </summary>
     ''' 
-    Private Sub ProtocolItemBase_ElementMouseUp(sender As Object, e As MouseEventArgs)
+    Private Sub ProtocolItem_PreviewMouseLeftButtonUp(sender As Object, e As RoutedEventArgs)
 
         'don't allow editing protocol elements of finalized experiments
         If CType(Me.DataContext, tblExperiments).WorkflowState = WorkflowStatus.Finalized Then

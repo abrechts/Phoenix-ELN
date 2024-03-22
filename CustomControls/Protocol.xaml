@@ -54,6 +54,7 @@
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
+            <EventSetter Event="PreviewMouseLeftButtonDown" Handler="ProtocolItem_PreviewMouseLeftButtonUp" />
         </Style>
 
         <Style x:Key="ProtocolFinalizedListBoxItemStyle" TargetType="ListBoxItem">
