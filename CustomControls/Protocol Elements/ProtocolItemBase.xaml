@@ -87,7 +87,7 @@
             </Grid.ColumnDefinitions>
 
             <ContentControl Grid.Column="0" Content="{Binding}" ContentTemplateSelector="{StaticResource protocolTypeSel}"
-               Margin="10,1,0,1" MouseLeftButtonUp="ProtocolItem_MouseUp"/>
+               Margin="10,1,0,1"/>
 
             <ContentControl Grid.Column="1" Content="{StaticResource icoDrag}" Cursor="Hand" 
                ToolTip="Drag to move element up/down." HorizontalAlignment="Right">

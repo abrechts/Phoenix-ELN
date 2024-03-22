@@ -568,7 +568,7 @@ Public Class Protocol
 
     Private Sub SetExpContentCenterStartupPos(targetWindow As Window)
 
-        Dim expContent = WPFToolbox.FindVisualParent(Of ExperimentContent)(Me)
+        Dim expContent = WPFToolbox.FindVisualParent(Of ContentPresenter)(Me)
 
         Dim screenPos = expContent.PointToScreen(New Windows.Point(0, 0))
         Dim middleX = screenPos.X + (expContent.ActualWidth - targetWindow.ActualWidth) / 2

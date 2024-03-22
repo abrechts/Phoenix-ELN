@@ -1,15 +1,10 @@
 ﻿
 Imports System.Windows
 Imports System.Windows.Controls
-Imports System.Windows.Data
-Imports System.Windows.Input
 Imports ElnBase.ELNEnumerations
 Imports ElnCoreModel
 
 Public Class ProtocolItemBase
-
-    Public Shared Event ElementLeftMouseUp(sender As Object, e As MouseEventArgs)
-
 
     Private WithEvents ParentListBoxItem As ListBoxItem
 
@@ -49,16 +44,6 @@ Public Class ProtocolItemBase
 
         If CType(Me.DataContext, tblProtocolItems).Experiment.WorkflowState = WorkflowStatus.Finalized Then
             e.Handled = True
-        End If
-
-    End Sub
-
-
-    Private Sub ProtocolItem_MouseUp(sender As Object, e As MouseEventArgs)
-
-        If sender.Content IsNot BindingOperations.DisconnectedSource Then
-            ' i.e. is not product placeholder
-            RaiseEvent ElementLeftMouseUp(sender, e)
         End If
 
     End Sub

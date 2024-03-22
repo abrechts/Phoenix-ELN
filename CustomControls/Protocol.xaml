@@ -30,8 +30,10 @@
         </CollectionViewSource>
 
         <Style x:Key="ProtocolListBoxItemStyle" TargetType="ListBoxItem">
+            
             <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
             <Setter Property="IsSelected" Value="{Binding IsSelected}"/>
+            
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ListBoxItem">
@@ -54,7 +56,9 @@
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
+            
             <EventSetter Event="PreviewMouseLeftButtonDown" Handler="ProtocolItem_PreviewMouseLeftButtonUp" />
+            
         </Style>
 
         <Style x:Key="ProtocolFinalizedListBoxItemStyle" TargetType="ListBoxItem">
