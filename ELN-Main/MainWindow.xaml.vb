@@ -1,4 +1,5 @@
-﻿Imports System.ComponentModel
+﻿Imports System.Collections.ObjectModel
+Imports System.ComponentModel
 Imports CustomControls
 Imports ElnBase
 Imports ElnBase.ELNEnumerations
@@ -16,7 +17,7 @@ Class MainWindow
 
     Friend Shared Property ApplicationVersion As Version
 
-    Private Property ExpDisplayList As List(Of tblExperiments)
+    Private Property ExpDisplayList As ObservableCollection(Of tblExperiments)
 
     Private _IsVersionUpgrade As Boolean = False
 
@@ -139,8 +140,10 @@ Class MainWindow
 
         '-- Bind experiments tabs to filtered and sorted experiments CollectionViewSource
 
-        ExpDisplayList = (From exp In CType(Me.DataContext, tblUsers).tblExperiments Where exp.DisplayIndex IsNot Nothing
-                          Order By exp.DisplayIndex Ascending).ToList
+        Dim res = (From exp In CType(Me.DataContext, tblUsers).tblExperiments Where exp.DisplayIndex IsNot Nothing
+                   Order By exp.DisplayIndex Ascending).ToList
+
+        ExpDisplayList = New ObservableCollection(Of tblExperiments)(res)
 
         tabExperiments.ItemsSource = ExpDisplayList
 
@@ -149,14 +152,22 @@ Class MainWindow
 
     Private Sub UpdateExperimentTabs(Optional newExpItem As tblExperiments = Nothing)
 
-        If newExpItem IsNot Nothing Then
-            ExpDisplayList.Add(newExpItem)
+        'remove doomed items (DisplayIndex = nothing)
+        Dim doomedExp = (From exp In ExpDisplayList Where exp.DisplayIndex Is Nothing).FirstOrDefault
+        If doomedExp IsNot Nothing Then
+            ExpDisplayList.Remove(doomedExp)
         End If
 
-        ExpDisplayList = (From exp In ExpDisplayList Where exp.DisplayIndex IsNot Nothing
-                          Order By exp.DisplayIndex Ascending).ToList
-
-        tabExperiments.ItemsSource = ExpDisplayList
+        'replace unpinned experiment
+        If newExpItem IsNot Nothing Then
+            With ExpDisplayList
+                If .Item(0).DisplayIndex = -2 AndAlso newExpItem.DisplayIndex > -2 Then
+                    .Insert(1, newExpItem) 'insert local experiment after server experiment
+                Else
+                    .Insert(0, newExpItem)
+                End If
+            End With
+        End If
 
     End Sub
 
@@ -981,6 +992,7 @@ Class MainWindow
                     End Select
 
                     selExp.DisplayIndex = 0
+
                     UpdateExperimentTabs(selExp)
                     DBContext.SaveChanges()     'no exp-level undo/redo required
 
@@ -1058,6 +1070,12 @@ Class MainWindow
 
                 Dim doomedIndex = targetExp.DisplayIndex
                 targetExp.DisplayIndex = Nothing
+
+                'renumber DisplayIndexes of exp to the right of the doomed one
+                Dim res = From exp In ExpDisplayList Where exp.DisplayIndex > doomedIndex
+                For Each exp In res
+                    exp.DisplayIndex -= 1
+                Next
 
                 'is selected tab doomed one? -> remove and select neighbor to its left
                 If CType(tabExperiments.SelectedItem, tblExperiments) Is targetExp Then

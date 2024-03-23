@@ -260,9 +260,9 @@ Public Class ExperimentContent
                     '--------------------------------------
 
                     Dim clonedExp = ExperimentBase.CloneExperiment(dbContext, currExp, .TargetProject, .CloneMethod, .SkipEmbeddedDocs)
-                    clonedExp.DisplayIndex = 0
+                    clonedExp.DisplayIndex = Nothing
 
-                    'scale experiment
+                    ' scale experiment
                     If .CloneMethod = CloneType.FullExperiment Then
 
                         Dim scaleFactor = .ScaleFactor
@@ -271,13 +271,15 @@ Public Class ExperimentContent
                             protItem.tblRefReactants.Grams *= scaleFactor
                         Next
 
-                        ExpProtocol.UpdateRefReactants(clonedExp)
+                        pnlProtocol.UpdateRefReactants(clonedExp)
                         ELNCalculations.RecalculateMaterials(clonedExp, RecalculationMode.KeepEquivalents)
 
                     End If
 
+                    Me.DataContext = clonedExp
+
                     expNavTree.RefreshItems()
-                    expNavTree.SelectExperiment(clonedExp)  'also sets the data context to ExperimentContent to clonedExp
+                    expNavTree.SelectExperiment(clonedExp)  'also sets the data context of ExperimentContent to clonedExp
 
                     If .CloneMethod <> CloneType.EmptyExperiment Then
 
@@ -291,26 +293,41 @@ Public Class ExperimentContent
                             pnlProtocol.AddSeparator("Reaction", activateEdit:=False)
                             pnlProtocol.AddRefReactant()
 
+
                         ElseIf .CloneMethod = CloneType.NextStepSketch Then
 
                             Dim origInfo = DrawingEditor.GetSketchInfo(currExp.RxnSketch)
                             If origInfo IsNot Nothing Then
 
-                                Dim nextStepXML = origInfo.CreateNextStepRxnXML
-                                clonedExp.RxnSketch = nextStepXML
-                                Dim skArea As New SketchArea
-                                skArea.EditSketch(clonedExp)
+                                clonedExp.RxnSketch = origInfo.CreateNextStepRxnXML()
+                                '  Dim skArea As New SketchArea
+                                'skArea.EditSketch(clonedExp)
+                                pnlSketch.EditSketch(clonedExp)
 
-                                pnlProtocol.AddSeparator("Reaction", activateEdit:=False)
-                                pnlProtocol.AddRefReactant()
+                                '  pnlProtocol.AddSeparator("Reaction", activateEdit:=False)
+                                ' pnlProtocol.AddRefReactant()
 
                             End If
 
-                        End If
+                        ElseIf .CloneMethod = CloneType.FullExperiment Then
 
-                        If .CloneMethod = CloneType.FullExperiment Then
+                            ''scale experiment
+                            'Dim scaleFactor = .ScaleFactor
+                            'Dim res = From item In clonedExp.tblProtocolItems Where item.tblRefReactants IsNot Nothing
+                            'For Each protItem In res
+                            '    protItem.tblRefReactants.Grams *= scaleFactor
+                            'Next
+
+                            'pnlProtocol.UpdateRefReactants(clonedExp)
+                            'ELNCalculations.RecalculateMaterials(clonedExp, RecalculationMode.KeepEquivalents)
+
+                            'ELNCalculations.UpdateExperimentTotals(clonedExp)
+                            'pnlSketch.SetComponentLabels()
+
                             ExpProtocol.UnselectAll()
+
                             MsgBox("Cloning succeeded!", MsgBoxStyle.Information, "Cloning")
+
                         End If
 
                     End If
@@ -339,14 +356,15 @@ Public Class ExperimentContent
                         If .ShowDialog Then
 
                             Dim importExp = ExperimentBase.ImportExperiment(dbContext, .FileName, newDlg.TargetProject, dbContext.tblDatabaseInfo.First.CurrAppVersion)
-                            importExp.DisplayIndex = 0
 
                             If importExp IsNot Nothing Then
+
+                                Me.DataContext = importExp
 
                                 ELNCalculations.UpdateExperimentTotals(importExp)
 
                                 expNavTree.RefreshItems()
-                                expNavTree.SelectExperiment(importExp)  'also sets the data context to ExperimentContent to clonedExp
+                                expNavTree.SelectExperiment(importExp)  'also sets the data context of ExperimentContent to clonedExp
 
                                 ExpProtocol.AutoSave(, noUndoPoint:=True)
 

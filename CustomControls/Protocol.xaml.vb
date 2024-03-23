@@ -475,6 +475,13 @@ Public Class Protocol
             Exit Sub
         End If
 
+        'test if mouse is over ProtocolItem
+        Dim thisLbItem = CType(sender, ListBoxItem)
+        Dim childItem = WPFToolbox.FindVisualChild(Of ProtocolItemBase)(thisLbItem)
+        If Not childItem.ProtocolItemContent.IsMouseOver Then
+            Exit Sub
+        End If
+
         Dim protocolItemEntry = CType(sender.Content, tblProtocolItems)
 
         Select Case protocolItemEntry.ElementType
@@ -1173,13 +1180,16 @@ Public Class Protocol
 
         Dim newLbItem As ListBoxItem = lstProtocol.ItemContainerGenerator.ContainerFromItem(protocolEntry)
 
-        With newLbItem
-            .IsSelected = True
-            .Focus()
-        End With
+        If newLbItem IsNot Nothing Then
 
-        WPFToolbox.ScrollItemIntoView(scrlProtocol, lstProtocol, newLbItem)
+            With newLbItem
+                .IsSelected = True
+                .Focus()
+            End With
 
+            WPFToolbox.ScrollItemIntoView(scrlProtocol, lstProtocol, newLbItem)
+
+        End If
         Return newLbItem
 
     End Function

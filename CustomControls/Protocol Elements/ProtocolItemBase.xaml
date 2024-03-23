@@ -86,7 +86,7 @@
                 <ColumnDefinition Width="18" />
             </Grid.ColumnDefinitions>
 
-            <ContentControl Grid.Column="0" Content="{Binding}" ContentTemplateSelector="{StaticResource protocolTypeSel}"
+            <ContentControl x:Name="itemContent" Grid.Column="0" Content="{Binding}" ContentTemplateSelector="{StaticResource protocolTypeSel}"
                Margin="10,1,0,1"/>
 
             <ContentControl Grid.Column="1" Content="{StaticResource icoDrag}" Cursor="Hand" 

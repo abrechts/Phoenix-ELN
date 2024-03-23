@@ -1,6 +1,7 @@
 ﻿
 Imports System.Windows
 Imports System.Windows.Controls
+Imports System.Windows.Data
 Imports ElnBase.ELNEnumerations
 Imports ElnCoreModel
 
@@ -23,14 +24,23 @@ Public Class ProtocolItemBase
     End Sub
 
 
+    Public ReadOnly Property ProtocolItemContent()
+        Get
+            Return itemContent
+        End Get
+    End Property
+
+
     ''' <summary>
     ''' Prevent protocol item selection in finalized experiment.
     ''' </summary>
     '''
     Private Sub Me_PreviewMouseDown(sender As Object, e As RoutedEventArgs) Handles Me.PreviewMouseDown
 
-        If CType(Me.DataContext, tblProtocolItems).Experiment.WorkflowState = WorkflowStatus.Finalized Then
-            e.Handled = True
+        If Me.DataContext IsNot BindingOperations.DisconnectedSource Then
+            If CType(Me.DataContext, tblProtocolItems).Experiment.WorkflowState = WorkflowStatus.Finalized Then
+                e.Handled = True
+            End If
         End If
 
     End Sub
