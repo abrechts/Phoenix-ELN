@@ -923,25 +923,35 @@ Class MainWindow
 
             '-- server experiment
 
-            If Not ExpDisplayList.Contains(targetExp) Then
+            If tabExperiments.Items.Count > 4 AndAlso Not ExpDisplayList.First.DisplayIndex = -2 Then
 
-                'replace previous leftmost server exp, if present
-                Dim leftmostExp = CType(tabExperiments.Items(0), tblExperiments)
-                If leftmostExp.DisplayIndex = -2 Then
-                    leftmostExp.DisplayIndex = Nothing
+                'warn for too many open exp tabs
+                Dim res = MsgBox("The maximum of 5 open experiments will be" + vbCrLf +
+                                 "exceeded if opening the server experiment." + vbCrLf + vbCrLf +
+                                 "Release the rightmost experiment?", MsgBoxStyle.OkCancel + MsgBoxStyle.Information, "Pin Limit")
+                If res = MsgBoxResult.Ok Then
+                    Dim lastIndex = tabExperiments.Items.Count - 1
+                    CType(tabExperiments.Items(lastIndex), tblExperiments).DisplayIndex = Nothing
+                Else
+                    Exit Sub
                 End If
-
-                ''add to experiments tab
-                targetExp.DisplayIndex = -2
-                UpdateExperimentTabs(targetExp)
-
-                'select leftmost experiments tab containing this server exp
-                tabExperiments.SelectedIndex = 0
 
             End If
 
-        End If
+            'replace previous leftmost server exp, if present
+            Dim leftmostExp = CType(tabExperiments.Items(0), tblExperiments)
+            If leftmostExp.DisplayIndex = -2 Then
+                leftmostExp.DisplayIndex = Nothing
+            End If
 
+            ''add to experiments tab
+            targetExp.DisplayIndex = -2
+            UpdateExperimentTabs(targetExp)
+
+            'select leftmost experiments tab containing this server exp
+            tabExperiments.SelectedIndex = 0
+
+        End If
 
     End Sub
 
@@ -1047,14 +1057,14 @@ Class MainWindow
 
             Case 0
 
-                If tabExperiments.Items.Count <= 5 Then
+                If tabExperiments.Items.Count < 5 Then
 
                     'pre-pin leftmost local experiment
                     targetExp.DisplayIndex = -1
 
                 Else
 
-                    Dim res = MsgBox("Maximum of 5 pinned experiments reached!" + vbCrLf +
+                    Dim res = MsgBox("Maximum of 4 pinned experiments reached!" + vbCrLf +
                                      "Release the rightmost experiment?", MsgBoxStyle.OkCancel + MsgBoxStyle.Information, "Pin Limit")
                     If res = MsgBoxResult.Ok Then
                         Dim lastIndex = tabExperiments.Items.Count - 1
