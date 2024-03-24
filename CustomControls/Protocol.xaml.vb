@@ -330,6 +330,8 @@ Public Class Protocol
 
         If TypeOf Me.DataContext Is tblExperiments Then
 
+            ProtocolItemsViewSrc = Me.TryFindResource("ProtocolItemsView")
+
             Dim expEntry = CType(Me.DataContext, tblExperiments)
 
             If expEntry.WorkflowState = WorkflowStatus.Finalized Then
@@ -779,11 +781,13 @@ Public Class Protocol
         newProtocolEntry.tblSeparators = newSeparator
 
         Dim newLbItem = AddProtocolItem(newProtocolEntry)
-        Dim currSeparator = WPFToolbox.FindVisualChild(Of WorkflowSeparator)(newLbItem)
-        If activateEdit Then
-            currSeparator.ActivateEdit()
-        Else
-            currSeparator.Focus()
+        If Not IsNothing(newLbItem) Then
+            Dim currSeparator = WPFToolbox.FindVisualChild(Of WorkflowSeparator)(newLbItem)
+            If activateEdit Then
+                currSeparator.ActivateEdit()
+            Else
+                currSeparator.Focus()
+            End If
         End If
 
     End Sub

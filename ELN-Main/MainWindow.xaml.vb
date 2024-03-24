@@ -93,9 +93,6 @@ Class MainWindow
             DBContext.SaveChanges()
         End If
 
-        'Connect local database model with UI
-        ApplyAllDataBindings()
-
         ApplicationVersion = GetType(MainWindow).Assembly.GetName().Version
         DBContext.tblDatabaseInfo.First.CurrAppVersion = ApplicationVersion.ToString
 
@@ -144,8 +141,9 @@ Class MainWindow
                    Order By exp.DisplayIndex Ascending).ToList
 
         ExpDisplayList = New ObservableCollection(Of tblExperiments)(res)
-
         tabExperiments.ItemsSource = ExpDisplayList
+
+        ExperimentContent.TabExperimentsPresenter = WPFToolbox.FindVisualChild(Of ContentPresenter)(tabExperiments)
 
     End Sub
 
@@ -169,6 +167,8 @@ Class MainWindow
             End With
         End If
 
+        tabExperiments.UpdateLayout()
+
     End Sub
 
 
@@ -189,8 +189,10 @@ Class MainWindow
         AddHandler RssItemGroup.RequestOpenExperiment, AddressOf ExpList_RequestOpenExperiment
 
 
-        'created async to reduce startup time
+        'Connect local database model with UI
+        ApplyAllDataBindings()
 
+        'created async to reduce startup time
         If DBContext.tblDatabaseInfo.First.tblUsers.First.UserID <> "demo" Then
 
             With CustomControls.My.MySettings.Default
@@ -895,7 +897,6 @@ Class MainWindow
             End If
 
         End If
-
 
         If SelectedExpContent.CreateExperiment(DBContext, expNavTree, projectEntry) Then
 

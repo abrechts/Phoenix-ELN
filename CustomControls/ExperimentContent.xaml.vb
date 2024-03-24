@@ -40,9 +40,17 @@ Public Class ExperimentContent
     Public Shared Property DbContext As ElnDbContext
 
 
+    ''' <summary>
+    ''' Sets or gets the single ContentPresenter of the tabExperiments TabControl. Note that there's only one 
+    ''' ¨content presenter for all TabItems in a data bound TabControl.
+    ''' </summary>
+    ''' 
+    Public Shared Property TabExperimentsPresenter As ContentPresenter
+
+
     Private Sub DataContext_Changed() Handles Me.DataContextChanged
 
-        If TypeOf Me.DataContext Is tblExperiments Then
+        If Me.DataContext IsNot Nothing AndAlso TypeOf Me.DataContext Is tblExperiments Then
 
             Dim expTabCtrl = WPFToolbox.FindVisualParent(Of TabControl)(Me)
 
@@ -262,37 +270,25 @@ Public Class ExperimentContent
                     Dim clonedExp = ExperimentBase.CloneExperiment(dbContext, currExp, .TargetProject, .CloneMethod, .SkipEmbeddedDocs)
                     clonedExp.DisplayIndex = Nothing
 
-                    ' scale experiment
-                    If .CloneMethod = CloneType.FullExperiment Then
-
-                        Dim scaleFactor = .ScaleFactor
-                        Dim res = From item In clonedExp.tblProtocolItems Where item.tblRefReactants IsNot Nothing
-                        For Each protItem In res
-                            protItem.tblRefReactants.Grams *= scaleFactor
-                        Next
-
-                        pnlProtocol.UpdateRefReactants(clonedExp)
-                        ELNCalculations.RecalculateMaterials(clonedExp, RecalculationMode.KeepEquivalents)
-
-                    End If
-
-                    Me.DataContext = clonedExp
-
                     expNavTree.RefreshItems()
-                    expNavTree.SelectExperiment(clonedExp)  'also sets the data context of ExperimentContent to clonedExp
+                    expNavTree.SelectExperiment(clonedExp)
+
+                    'After SelectExperiment this ExperimentContent is removed from the visual tree
+                    'since replaced by the new one -> access the new ExperimentContent now!
+
+                    Dim newExpContent = WPFToolbox.FindVisualChild(Of ExperimentContent)(TabExperimentsPresenter)
+
 
                     If .CloneMethod <> CloneType.EmptyExperiment Then
-
-                        ELNCalculations.UpdateExperimentTotals(clonedExp)
-                        pnlSketch.SetComponentLabels()
 
                         'Sketch-only clone handling:
 
                         If .CloneMethod = CloneType.SketchOnly Then
 
-                            pnlProtocol.AddSeparator("Reaction", activateEdit:=False)
-                            pnlProtocol.AddRefReactant()
-
+                            With newExpContent
+                                .pnlProtocol.AddSeparator("Reaction", activateEdit:=False)
+                                .pnlProtocol.AddRefReactant()
+                            End With
 
                         ElseIf .CloneMethod = CloneType.NextStepSketch Then
 
@@ -300,31 +296,32 @@ Public Class ExperimentContent
                             If origInfo IsNot Nothing Then
 
                                 clonedExp.RxnSketch = origInfo.CreateNextStepRxnXML()
-                                '  Dim skArea As New SketchArea
-                                'skArea.EditSketch(clonedExp)
-                                pnlSketch.EditSketch(clonedExp)
+                                Dim skArea As New SketchArea
+                                skArea.EditSketch(clonedExp)
 
-                                '  pnlProtocol.AddSeparator("Reaction", activateEdit:=False)
-                                ' pnlProtocol.AddRefReactant()
+                                With newExpContent
+                                    .pnlProtocol.AddSeparator("Reaction", activateEdit:=False)
+                                    .pnlProtocol.AddRefReactant()
+                                End With
 
                             End If
 
                         ElseIf .CloneMethod = CloneType.FullExperiment Then
 
-                            ''scale experiment
-                            'Dim scaleFactor = .ScaleFactor
-                            'Dim res = From item In clonedExp.tblProtocolItems Where item.tblRefReactants IsNot Nothing
-                            'For Each protItem In res
-                            '    protItem.tblRefReactants.Grams *= scaleFactor
-                            'Next
+                            'scale experiment
+                            Dim scaleFactor = .ScaleFactor
+                            Dim res = From item In clonedExp.tblProtocolItems Where item.tblRefReactants IsNot Nothing
+                            For Each protItem In res
+                                protItem.tblRefReactants.Grams *= scaleFactor
+                            Next
 
-                            'pnlProtocol.UpdateRefReactants(clonedExp)
-                            'ELNCalculations.RecalculateMaterials(clonedExp, RecalculationMode.KeepEquivalents)
+                            newExpContent.pnlProtocol.UpdateRefReactants(clonedExp)
+                            ELNCalculations.RecalculateMaterials(clonedExp, RecalculationMode.KeepEquivalents)
 
-                            'ELNCalculations.UpdateExperimentTotals(clonedExp)
-                            'pnlSketch.SetComponentLabels()
+                            ELNCalculations.UpdateExperimentTotals(clonedExp)
+                            newExpContent.pnlSketch.SetComponentLabels()
 
-                            ExpProtocol.UnselectAll()
+                            newExpContent.pnlProtocol.UnselectAll()
 
                             MsgBox("Cloning succeeded!", MsgBoxStyle.Information, "Cloning")
 
@@ -332,9 +329,9 @@ Public Class ExperimentContent
 
                     End If
 
-                    result = True
+                    newExpContent.pnlProtocol.AutoSave(, noUndoPoint:=True)
 
-                    ExpProtocol.AutoSave(, noUndoPoint:=True)
+                    result = True
 
                 Else
 
@@ -359,14 +356,19 @@ Public Class ExperimentContent
 
                             If importExp IsNot Nothing Then
 
-                                Me.DataContext = importExp
+                                '   Me.DataContext = importExp
+                                importExp.DisplayIndex = Nothing
 
                                 ELNCalculations.UpdateExperimentTotals(importExp)
 
                                 expNavTree.RefreshItems()
                                 expNavTree.SelectExperiment(importExp)  'also sets the data context of ExperimentContent to clonedExp
 
-                                ExpProtocol.AutoSave(, noUndoPoint:=True)
+                                'After SelectExperiment this ExperimentContent is removed from the visual tree
+                                'since replaced by the new one -> access the new ExperimentContent now!
+
+                                Dim newExpContent = WPFToolbox.FindVisualChild(Of ExperimentContent)(TabExperimentsPresenter)
+                                newExpContent.ExpProtocol.AutoSave(, noUndoPoint:=True)
 
                                 MsgBox("Import succeeded!", MsgBoxStyle.Information, "Cloning")
                                 result = True
