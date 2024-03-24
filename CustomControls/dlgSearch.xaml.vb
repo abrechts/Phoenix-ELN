@@ -26,6 +26,8 @@ Public Class dlgSearch
 
         If ServerDBContext Is Nothing Then
             rdoServer.IsEnabled = False
+        Else
+            rdoServer.IsChecked = IsServerQuery
         End If
 
     End Sub
@@ -116,12 +118,18 @@ Public Class dlgSearch
 
     Private Sub rdoLocal_CheckedChanged() Handles rdoLocal.Checked, rdoLocal.Unchecked
 
-        CurrentDbContext = If(rdoLocal.IsChecked, LocalDBContext, ServerDBContext)
+        If rdoLocal.IsInitialized Then
 
-        IsServerQuery = Not rdoLocal.IsChecked
+            CurrentDbContext = If(rdoLocal.IsChecked, LocalDBContext, ServerDBContext)
 
-        If QueryRxnFileString <> "" Then
-            PerformQuery(QueryRxnFileString)
+            IsServerQuery = Not rdoLocal.IsChecked
+
+            blkFinalizedInfo.Visibility = If(IsServerQuery, Windows.Visibility.Visible, Windows.Visibility.Collapsed)
+
+            If QueryRxnFileString <> "" Then
+                PerformQuery(QueryRxnFileString)
+            End If
+
         End If
 
     End Sub

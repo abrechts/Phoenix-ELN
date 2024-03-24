@@ -305,6 +305,7 @@ Public Class SketchArea
                 .FontWeight = FontWeights.DemiBold
                 .TextAlignment = TextAlignment.Center
                 .Foreground = Brushes.Blue
+                .Opacity = 0.85
                 .Text = Chr(Asc("A") + prodIndex)
 
                 Dim yield = GetTotalProductYield(currExp, prodIndex)

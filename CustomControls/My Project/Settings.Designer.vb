@@ -365,6 +365,18 @@ Namespace My
                 Me("IsServerOffByUser") = value
             End Set
         End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("False")>  _
+        Public Property IsServerQuery() As Boolean
+            Get
+                Return CType(Me("IsServerQuery"),Boolean)
+            End Get
+            Set
+                Me("IsServerQuery") = value
+            End Set
+        End Property
     End Class
 End Namespace
 

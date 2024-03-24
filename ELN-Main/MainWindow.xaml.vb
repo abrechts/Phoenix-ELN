@@ -114,7 +114,11 @@ Class MainWindow
             .Owner = Me
             .LocalDBContext = DBContext
             .ServerDBContext = ServerDBContext
-            .ShowDialog()
+            With CustomControls.My.MySettings.Default
+                dlgSearch.IsServerQuery = .IsServerQuery
+                searchDlg.ShowDialog()
+                .IsServerQuery = dlgSearch.IsServerQuery
+            End With
         End With
 
     End Sub

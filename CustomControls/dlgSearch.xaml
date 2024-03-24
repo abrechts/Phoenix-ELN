@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:CustomControls"
         mc:Ignorable="d"
         Title="Substructure Search" TextOptions.TextFormattingMode="Display" WindowStartupLocation="CenterOwner" ShowInTaskbar="False" 
-        MaxHeight="300" MaxWidth="690" MinWidth="690"  >
+        MaxHeight="330" MaxWidth="690" MinWidth="690"  >
 
     <Window.Resources>
         
@@ -55,22 +55,20 @@
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
 
-                        <Border Grid.Column="1" CornerRadius="6" BorderBrush="#FF54A2D1" BorderThickness="1" Padding="3" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,12" Width="380" Height="130">
 
-                            <local:SketchAreaRSS x:Name="pnlQuerySketch" ReactionSketch="{Binding}" Margin="12,8,12,6"/>
-
+                        <Border Grid.Column="1" CornerRadius="6" BorderBrush="#FF54A2D1" BorderThickness="1" Padding="3" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,12,0,14" Width="380" Height="130">
+                            <local:SketchAreaRSS x:Name="pnlQuerySketch" ReactionSketch="{Binding}" Margin="12,8,12,5"/>
                         </Border>
 
                         <StackPanel Grid.Column="2" Margin="6,12" VerticalAlignment="Center">
 
                             <StackPanel >
-                                <RadioButton x:Name="rdoLocal" Content="Local search" IsChecked="true" Margin="0,0,0,2"/>
+                                <RadioButton x:Name="rdoLocal" IsChecked="True" Content="Local search" Margin="0,0,0,2"/>
                                 <RadioButton x:Name="rdoServer" Content="Server search"/>
                             </StackPanel>
-                            
+
                         </StackPanel>
-                    
-                    
+                           
                     </Grid>
                 
                 </Border>
@@ -82,7 +80,12 @@
 
             <Border x:Name="pnlNoHits" DockPanel.Dock="top" CornerRadius="6" BorderThickness="1" BorderBrush="gray" Margin="0,24,0,30" 
               HorizontalAlignment="Center" Background="#FFFCE9E9" d:Visibility="Visible" Visibility="Collapsed">
-                <TextBlock Text=" -- no reaction matches found! -- " Margin="2,1,2,3" />
+                <StackPanel>
+                    <TextBlock Text=" --No reaction matches found! -- " Margin="2,2,2,3" HorizontalAlignment="center" FontWeight="demibold"/>
+                    <TextBlock x:Name="blkFinalizedInfo" Visibility="Collapsed" d:Visibility="Visible" Margin="4,-4,4,4"><Run Text=" (Only "/><Run FontStyle="italic" Text="finalized"/>
+                        <Run Text="server experiments are shown) "/>
+                    </TextBlock>
+                </StackPanel>
             </Border>
 
             <Border DockPanel.Dock="top" CornerRadius="6" Margin="12,0,12,12" Padding="3" HorizontalAlignment="Center">
