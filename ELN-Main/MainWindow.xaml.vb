@@ -159,7 +159,7 @@ Class MainWindow
         'replace unpinned experiment
         If newExpItem IsNot Nothing Then
             With ExpDisplayList
-                If .Item(0).DisplayIndex = -2 AndAlso newExpItem.DisplayIndex > -2 Then
+                If .Count > 0 AndAlso .Item(0).DisplayIndex = -2 AndAlso newExpItem.DisplayIndex > -2 Then
                     .Insert(1, newExpItem) 'insert local experiment after server experiment
                 Else
                     .Insert(0, newExpItem)
