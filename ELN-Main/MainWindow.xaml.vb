@@ -1113,13 +1113,13 @@ Class MainWindow
 
     Private Sub btnPrint_Click() Handles btnPrint.Click
 
-        ExperimentPrint.Print(SelectedExpContent.DataContext, False, Me)
+        ExperimentPrint.Print(SelectedExpContent, False, Me)
     End Sub
 
 
     Private Sub btnPDF_Click() Handles btnPDF.Click
 
-        ExperimentPrint.Print(SelectedExpContent.DataContext, True, Me)
+        ExperimentPrint.Print(SelectedExpContent, True, Me)
 
     End Sub
 

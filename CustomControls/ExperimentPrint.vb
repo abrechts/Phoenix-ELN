@@ -19,7 +19,10 @@ Public Class ExperimentPrint
     ''' </summary>
     ''' <param name="appWindow">The application window. Required for displaying a global Wait cursor while processing.</param>
     ''' 
-    Public Shared Sub Print(expEntry As tblExperiments, printAsPDF As Boolean, appWindow As Window)
+    Public Shared Sub Print(expContent As ExperimentContent, printAsPDF As Boolean, appWindow As Window)
+
+        Dim expEntry = expContent.DataContext
+        Dim origSketchArea = expContent.SketchPanel
 
         Dim printDlg As New PrintDialog
         Dim pdfPath As String = ""
@@ -69,6 +72,7 @@ Public Class ExperimentPrint
         With printExpContent
             .Measure(New Windows.Size)
             .Arrange(New Rect)
+            .SketchPanel.SetComponentLabels(origSketchArea.ComponentFontSize, origSketchArea.BottomOffset)
         End With
 
         Dim stackPrintTempl As New PrintPageTemplate(printStack, printDlg.PrintTicket, 0.95)

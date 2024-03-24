@@ -141,6 +141,17 @@ Public Class ExperimentContent
 
 
     ''' <summary>
+    ''' Gets the experiment sketch panel
+    ''' </summary>
+    ''' 
+    Public Function SketchPanel() As SketchArea
+
+        Return pnlSketch
+
+    End Function
+
+
+    ''' <summary>
     ''' Updates the sketch component labels
     ''' </summary>
     ''' 

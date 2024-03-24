@@ -237,13 +237,25 @@ Public Class SketchArea
 
 
     ''' <summary>
+    ''' Gets the currently calculated component label font size (used or printing)
+    ''' </summary>
+    '''
+    Public Property ComponentFontSize As Double? = Nothing
+
+
+    ''' <summary>
+    ''' Gets the currently calculated component label bottom offset
+    ''' </summary>
+    '''
+    Public Property BottomOffset As Double? = Nothing
+
+
+    ''' <summary>
     ''' Places labels A, B, C ... below components.
     ''' </summary>
     ''' 
-    Public Sub SetComponentLabels()
+    Public Sub SetComponentLabels(Optional fontSize As Double? = Nothing, Optional bOffset As Double? = Nothing)
 
-        Dim bottomOffset As Single
-        Dim cpdFontSize As Double
         Dim currExp = CType(DataContext, tblExperiments)
 
         'finalize internal canvas layout
@@ -253,12 +265,21 @@ Public Class SketchArea
         End With
         sketchViewbox.UpdateLayout()
 
-        'adjust element sizes to ViewBox scaleFactor (ViewBox must be in visual tree!)
-        Dim child As ContainerVisual = VisualTreeHelper.GetChild(sketchViewbox, 0)
-        Dim scaleTransf As ScaleTransform = child.Transform
-        Dim scaleFactor As Double = If(Not IsNothing(scaleTransf), scaleTransf.ScaleX, 1)
-        cpdFontSize = 10.5 / scaleFactor
-        bottomOffset = 2 / scaleFactor
+        If fontSize Is Nothing AndAlso bOffset Is Nothing Then
+
+            'adjust element sizes to ViewBox scaleFactor (ViewBox must be in visual tree!)
+            Dim child As ContainerVisual = VisualTreeHelper.GetChild(sketchViewbox, 0)
+            Dim scaleTransf As ScaleTransform = child.Transform
+            Dim scaleFactor As Double = If(Not IsNothing(scaleTransf), scaleTransf.ScaleX, 1)
+            ComponentFontSize = 12 / scaleFactor
+            BottomOffset = 2 / scaleFactor
+
+        Else
+
+            ComponentFontSize = fontSize
+            BottomOffset = bOffset
+
+        End If
 
         'remove current index tags
         Dim myCanvas As Canvas = CType(sketchViewbox.Child, Canvas)
@@ -279,8 +300,8 @@ Public Class SketchArea
             With blkLabel
 
                 .Tag = "cpdIndex"
-                .FontFamily = New FontFamily("Comic Sans")
-                .FontSize = cpdFontSize
+                .FontFamily = New FontFamily("Calibri")
+                .FontSize = ComponentFontSize
                 .FontWeight = FontWeights.DemiBold
                 .TextAlignment = TextAlignment.Center
                 .Foreground = Brushes.Blue
@@ -309,7 +330,7 @@ Public Class SketchArea
 
                 Dim lowestBottom As Double = GetOverallSketchRect().Bottom + sketchViewbox.Margin.Bottom - 15
                 Canvas.SetLeft(blkLabel, prodRect.Left)
-                Canvas.SetTop(blkLabel, bottomOffset + lowestBottom)
+                Canvas.SetTop(blkLabel, BottomOffset + lowestBottom)
 
                 myCanvas.Children.Add(blkLabel)
 
