@@ -53,7 +53,7 @@ Public Class dlgSearch
     Private Sub PerformQuery(rxnFileStr As String)
 
         Dim rxnSub As New RxnSubstructure
-        Dim expHitInfo = rxnSub.PerformRssQuery(rxnFileStr, CurrentDbContext)
+        Dim expHitInfo = rxnSub.PerformRssQuery(rxnFileStr, CurrentDbContext, IsServerQuery)
 
         Select Case expHitInfo.ErrorType
 

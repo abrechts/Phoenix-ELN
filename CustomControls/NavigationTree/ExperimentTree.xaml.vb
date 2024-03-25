@@ -181,6 +181,9 @@ Public Class ExperimentTree
                 RaiseEvent ExperimentSelected(Me, expEntry)
             End If
 
+            'wait for content to load into tabControl presenter
+            WPFToolbox.WaitForPriority(DispatcherPriority.Loaded)
+
         End If
 
     End Sub

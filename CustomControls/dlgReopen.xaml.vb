@@ -22,7 +22,7 @@ Public Class dlgReopen
     End Sub
 
 
-    Private Sub btnSign_Click() Handles btnSign.Click
+    Private Sub btnSign_Click() Handles btnUnlock.Click
 
         If ELNCryptography.GetSHA256Hash(passwordBox.Password) =
          _userEntry.PWHash Then

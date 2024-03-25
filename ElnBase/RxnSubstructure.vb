@@ -52,7 +52,7 @@ Public Class RxnSubstructure
     ''' ignored in this mode.</param>
     ''' <returns>Query hits as IEnumerable of tblExperiments, or empty IEnumerable if not hits found.</returns>
     ''' 
-    Public Function PerformRssQuery(queryRxnStr As String, dbContext As ElnDataContext, Optional fpOnly As Boolean = False) As RssQueryResult
+    Public Function PerformRssQuery(queryRxnStr As String, dbContext As ElnDataContext, isFromServer As Boolean) As RssQueryResult
 
         Dim rssResult As New RssQueryResult
 
@@ -71,11 +71,12 @@ Public Class RxnSubstructure
 
         SearchRxnObj = GetMappedIndigoRxn(queryRxnStr, False)
 
-        Dim fpRes = From exp In dbContext.tblExperiments.AsEnumerable Where exp.WorkflowState = WorkflowStatus.Finalized AndAlso
-                    MatchRxnFingerpint(exp.RxnFingerprint, queryFp)
-
-        If fpOnly Then
-            Return fpRes
+        Dim fpRes As IEnumerable(Of tblExperiments)
+        If Not isFromServer Then
+            fpRes = From exp In dbContext.tblExperiments.AsEnumerable Where MatchRxnFingerpint(exp.RxnFingerprint, queryFp)
+        Else
+            fpRes = From exp In dbContext.tblExperiments.AsEnumerable Where exp.WorkflowState = WorkflowStatus.Finalized AndAlso
+              MatchRxnFingerpint(exp.RxnFingerprint, queryFp)
         End If
 
         If fpRes.Any Then
@@ -123,7 +124,6 @@ Public Class RxnSubstructure
 
         For Each exp In userEntry.tblExperiments
             Dim ok = RegisterReactionRSS(exp)    'ignore if registration failed  (ok=false)
-            Dim x = 1
         Next
 
     End Sub

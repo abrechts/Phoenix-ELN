@@ -58,7 +58,6 @@ Public Class Protocol
         AddHandler FileContent.MouseOverChanged, AddressOf AccessibleContent_MouseOverChanged
         AddHandler ExpTreeHeader.RequestUpdateWorkflowState, AddressOf ExpTreeHeader_RequestUpdateWorkflowState
         AddHandler ServerSync.SyncComplete, AddressOf ServerSync_SyncComplete
-        '   AddHandler ProtocolItemBase.ElementLeftMouseUp, AddressOf ProtocolItemBase_ElementMouseUp
 
     End Sub
 
@@ -411,7 +410,11 @@ Public Class Protocol
 
     Private Sub ExpTreeHeader_RequestUpdateWorkflowState(sender As Object, expEntry As tblExperiments, requestedState As WorkflowStatus)
 
-        ChangeWorkflowState(expEntry, requestedState)
+        'testing for empty data context is important for preventing recursive dialogs ...
+
+        If Me.DataContext IsNot Nothing Then
+            ChangeWorkflowState(expEntry, requestedState)
+        End If
 
     End Sub
 
