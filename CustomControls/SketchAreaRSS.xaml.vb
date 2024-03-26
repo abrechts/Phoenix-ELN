@@ -88,7 +88,7 @@ Public Class SketchAreaRSS
 
         If cbDraw IsNot Nothing Then
 
-            cbDraw.DialogProperties.SketchValidation = EditorOptions.SketchConditions.Reaction
+            cbDraw.DialogProperties.SketchValidation = EditorOptions.SketchConditions.RssQuery
 
             'CORE
             Dim skInfo = cbDraw.DisplayDialog(rxnSketch, Nothing, False)

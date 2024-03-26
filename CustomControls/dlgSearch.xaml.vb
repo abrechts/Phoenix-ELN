@@ -63,7 +63,7 @@ Public Class dlgSearch
             Case RssErrorType.TooManyHits
                 lstRssHitGroups.DataContext = Nothing
                 MsgBox("Too many hits expected - please" + vbCrLf +
-                       "redefine your query!", MsgBoxStyle.OkOnly + MsgBoxStyle.Information, "RSS query error")
+                       "make your query more specific!", MsgBoxStyle.OkOnly + MsgBoxStyle.Information, "RSS query error")
                 Exit Sub
 
             Case RssErrorType.QueryStructureError
@@ -148,6 +148,15 @@ Public Class dlgSearch
         e2.Source = e.Source
 
         lstRssHitGroups.RaiseEvent(e2)
+
+    End Sub
+
+
+    Private Sub icoInfo_PreviewMouseUp() Handles icoInfo.PreviewMouseUp
+
+        Dim info As New ProcessStartInfo("https://github.com/abrechts/Phoenix-ELN/wiki#find-reactions")
+        info.UseShellExecute = True
+        Process.Start(info)
 
     End Sub
 

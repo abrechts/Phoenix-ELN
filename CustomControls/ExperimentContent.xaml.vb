@@ -289,7 +289,6 @@ Public Class ExperimentContent
 
                     Dim newExpContent = WPFToolbox.FindVisualChild(Of ExperimentContent)(TabExperimentsPresenter)
 
-
                     If .CloneMethod <> CloneType.EmptyExperiment Then
 
                         'Sketch-only clone handling:

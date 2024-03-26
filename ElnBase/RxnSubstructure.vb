@@ -1,4 +1,5 @@
-﻿Imports com.epam.indigo
+﻿Imports System.Windows.Documents
+Imports com.epam.indigo
 Imports ElnBase.ELNEnumerations
 Imports ElnCoreModel
 
@@ -26,13 +27,6 @@ Public Class RxnSubstructure
         IndigoBase = New Indigo
 
     End Sub
-
-
-    ''' <summary> 
-    ''' Sets or gets the current query reaction object.
-    ''' </summary>
-    '''
-    Public Property SearchRxnObj As IndigoObject    'non-query reaction type of query reaction
 
 
     ''' <summary>
@@ -68,8 +62,6 @@ Public Class RxnSubstructure
         End If
 
         Dim queryFp = queryRxnObj.fingerprint("sub")
-
-        SearchRxnObj = GetMappedIndigoRxn(queryRxnStr, False)
 
         Dim fpRes As IEnumerable(Of tblExperiments)
         If Not isFromServer Then
@@ -190,11 +182,6 @@ Public Class RxnSubstructure
     Private Function MatchRxnSubstructure(srcIndigoRxnArr As Byte(), queryIndigoRxnObj As IndigoObject) As Boolean
 
         Dim srcIndigoObj = IndigoBase.loadReaction(srcIndigoRxnArr)
-
-
-        'For i = 1 To 1000
-        '    MatchRxnSubstructure(srcIndigoObj, queryIndigoRxnObj)
-        'Next
 
         Return MatchRxnSubstructure(srcIndigoObj, queryIndigoRxnObj)
 
@@ -346,10 +333,7 @@ Public Class RxnSubstructure
             dstReaction = IndigoBase.createQueryReaction
         End If
 
-        For Each react As IndigoObject In srcReaction.iterateReactants
-            dstReaction.addReactant(react)
-            Exit For
-        Next
+        dstReaction.addReactant(srcReaction.iterateReactants(0))
         For Each prod As IndigoObject In srcReaction.iterateProducts
             dstReaction.addProduct(prod)
         Next
