@@ -47,7 +47,7 @@
                     <TextBlock Text="Find Reactions" FontWeight="Bold"  HorizontalAlignment="Center" FontStyle="Italic" 
                        FontSize="13" Foreground="{StaticResource DialogTitleForeground}"/>
 
-                    <ContentControl Content="{StaticResource icoInfo}" Height="14" Margin="6,1,0,0"/>
+                    <ContentControl x:Name="icoInfo" Content="{StaticResource icoInfo}" Cursor="Hand" Height="14" Margin="6,1,0,0"/>
 
                 </StackPanel>
                 
