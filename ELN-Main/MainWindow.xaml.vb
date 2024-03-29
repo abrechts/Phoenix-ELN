@@ -196,26 +196,18 @@ Class MainWindow
         'Connect local database model with UI
         ApplyAllDataBindings()
 
-        'created async to reduce startup time
-        If DBContext.tblDatabaseInfo.First.tblUsers.First.UserID <> "demo" Then
-
-            With CustomControls.My.MySettings.Default
+        'create server context async to reduce startup time
+        With CustomControls.My.MySettings.Default
+            If DBContext.tblDatabaseInfo.First.tblUsers.First.UserID <> "demo" Then
                 If .IsServerSpecified Then
                     ServerSync.CreateServerContextAsync(.ServerName, .ServerDbUserName, .ServerDbPassword, .ServerPort,
-                        DBContext.tblDatabaseInfo.First)
-                    'handled by ServerSync_ServerContextCreated (also sets statusBar)
-                Else
-                    statusBar.DisplayServerStatus = .IsServerOffByUser
-                    statusBar.DisplayServerError = .IsServerOffByUser
+                        DBContext.tblDatabaseInfo.First) 'handled by ServerSync_ServerContextCreated (also sets serverStatusInfo)
                 End If
-            End With
-
-        Else
-
-            statusBar.DisplayServerStatus = False
-            CustomControls.My.MySettings.Default.IsServerSpecified = False
-
-        End If
+            Else
+                .IsServerSpecified = False
+            End If
+            serverStatusInfo.DisplayServerStatus = .IsServerSpecified
+        End With
 
         'select experiment tab of current experiment (may be a pinned one)
         Dim currUser = CType(Me.DataContext, tblUsers)
@@ -271,8 +263,6 @@ Class MainWindow
         Me.Cursor = Cursors.Arrow
         Me.ForceCursor = False
 
-        statusBar.DisplayServerStatus = True
-
         If serverContext IsNot Nothing Then
 
             '- handle syncID mismatch
@@ -281,7 +271,7 @@ Class MainWindow
 
             If ServerSync.HasSyncMismatch Then
 
-                statusBar.DisplayServerError = True
+                serverStatusInfo.DisplayServerError = True
                 Dim syncMismatchWarningDlg As New dlgServerSyncIssue
                 With syncMismatchWarningDlg
                     .Owner = Me
@@ -296,7 +286,7 @@ Class MainWindow
             If Not _isRestoring Then
 
                 DBContext.ServerSynchronization = New ServerSync(DBContext, ServerDBContext)
-                statusBar.DisplayServerError = False
+                serverStatusInfo.DisplayServerError = False
 
                 If ServerSync.DatabaseGUID <> "" Then
 
@@ -370,7 +360,7 @@ Class MainWindow
 
             '- no userID conflicts with server
 
-            statusBar.DisplayServerError = False
+            serverStatusInfo.DisplayServerError = False
 
             ServerSync.DatabaseGUID = DBContext.tblDatabaseInfo.First.GUID
 
@@ -521,7 +511,7 @@ Class MainWindow
     ''' 
     Private Sub Protocol_ConnectedChanged(isConnected As Boolean)
 
-        Dim isInError = statusBar.DisplayServerError
+        Dim isInError = serverStatusInfo.DisplayServerError
 
         If isConnected Then
             If isInError Then
@@ -541,7 +531,7 @@ Class MainWindow
 
     Private Sub ServerWarningDelegate(isConnected As Boolean)
 
-        statusBar.DisplayServerError = Not isConnected
+        serverStatusInfo.DisplayServerError = Not isConnected
 
     End Sub
 
@@ -563,7 +553,7 @@ Class MainWindow
     '''
     Private Sub Protocol_RequestSaveIcon(sender As Object)
 
-        statusBar.AnimateSaveIcon()
+        serverStatusInfo.AnimateSaveIcon()
 
     End Sub
 
@@ -1232,13 +1222,13 @@ Class MainWindow
                     '-- apply new server context
                     ServerDBContext = .NewServerContext
                     DBContext.ServerSynchronization = New ServerSync(DBContext, ServerDBContext)
-                    statusBar.DisplayServerError = False
+                    serverStatusInfo.DisplayServerError = False
                     Return True
                 Else
                     '-- disconnect
                     If CustomControls.My.MySettings.Default.IsServerSpecified Then
                         If ServerDBContext IsNot Nothing Then
-                            statusBar.DisplayServerError = True
+                            serverStatusInfo.DisplayServerError = True
                             ServerDBContext.Dispose()
                             ServerDBContext = Nothing
                         End If
