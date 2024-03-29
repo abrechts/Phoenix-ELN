@@ -49,7 +49,7 @@ Partial Public Class dlgRestoreServer
         Me.Cursor = Cursors.Wait
         Me.ForceCursor = True
 
-        If My.Settings.IsServerEnabled AndAlso Not My.Settings.IsServerOffByUser AndAlso
+        If My.Settings.IsServerSpecified AndAlso Not My.Settings.IsServerOffByUser AndAlso
           Await Task.Run(Function() Protocol.IsServerConnAvailable()) Then
 
             Dim userEntry = (From user In _ServerEntity.tblUsers Where user.UserID = txtUserID.Text).FirstOrDefault

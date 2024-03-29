@@ -71,7 +71,7 @@
     <Setting Name="LastScaleUnit" Type="System.String" Scope="User">
       <Value Profile="(Default)">g</Value>
     </Setting>
-    <Setting Name="IsServerEnabled" Type="System.Boolean" Scope="User">
+    <Setting Name="IsServerSpecified" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="RestoreFromServer" Type="System.Boolean" Scope="User">

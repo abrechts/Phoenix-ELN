@@ -119,7 +119,7 @@ Public Class Protocol
 
                 RaiseEvent RequestSaveIcon(Me)
 
-                If My.Settings.IsServerEnabled AndAlso Not My.Settings.IsServerOffByUser Then
+                If My.Settings.IsServerSpecified AndAlso Not My.Settings.IsServerOffByUser Then
 
                     If Await Task.Run(Function() IsServerConnAvailable()) Then
 

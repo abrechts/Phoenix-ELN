@@ -98,7 +98,7 @@ Class MainWindow
 
         'Version update: Send install statistics
         If _IsVersionUpgrade Then
-            PhpServices.SendInstallInfo(ApplicationVersion.ToString(3), DBContext, CustomControls.My.MySettings.Default.IsServerEnabled)
+            PhpServices.SendInstallInfo(ApplicationVersion.ToString(3), DBContext, CustomControls.My.MySettings.Default.IsServerSpecified)
         End If
 
         RemainingDemoCountConverter.MaxDemoCount = 15
@@ -200,7 +200,7 @@ Class MainWindow
         If DBContext.tblDatabaseInfo.First.tblUsers.First.UserID <> "demo" Then
 
             With CustomControls.My.MySettings.Default
-                If .IsServerEnabled Then
+                If .IsServerSpecified Then
                     ServerSync.CreateServerContextAsync(.ServerName, .ServerDbUserName, .ServerDbPassword, .ServerPort,
                         DBContext.tblDatabaseInfo.First)
                     'handled by ServerSync_ServerContextCreated (also sets statusBar)
@@ -213,7 +213,7 @@ Class MainWindow
         Else
 
             statusBar.DisplayServerStatus = False
-            CustomControls.My.MySettings.Default.IsServerEnabled = False
+            CustomControls.My.MySettings.Default.IsServerSpecified = False
 
         End If
 
@@ -1236,7 +1236,7 @@ Class MainWindow
                     Return True
                 Else
                     '-- disconnect
-                    If CustomControls.My.MySettings.Default.IsServerEnabled = False Then
+                    If CustomControls.My.MySettings.Default.IsServerSpecified Then
                         If ServerDBContext IsNot Nothing Then
                             statusBar.DisplayServerError = True
                             ServerDBContext.Dispose()

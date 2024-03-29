@@ -333,12 +333,12 @@ Namespace My
         <Global.System.Configuration.UserScopedSettingAttribute(),  _
          Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
          Global.System.Configuration.DefaultSettingValueAttribute("False")>  _
-        Public Property IsServerEnabled() As Boolean
+        Public Property IsServerSpecified() As Boolean
             Get
-                Return CType(Me("IsServerEnabled"),Boolean)
+                Return CType(Me("IsServerSpecified"),Boolean)
             End Get
             Set
-                Me("IsServerEnabled") = value
+                Me("IsServerSpecified") = value
             End Set
         End Property
         

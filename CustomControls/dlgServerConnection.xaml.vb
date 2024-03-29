@@ -37,7 +37,7 @@ Public Class dlgServerConnection
 
         _LocalContext = localContext
 
-        btnDisconnect.IsEnabled = (My.Settings.IsServerEnabled AndAlso currServerContext IsNot Nothing)
+        btnDisconnect.IsEnabled = (My.Settings.IsServerSpecified AndAlso currServerContext IsNot Nothing)
         If Not btnDisconnect.IsEnabled Then
             btnDisconnect.Opacity = 0.7
         End If
@@ -111,7 +111,6 @@ Public Class dlgServerConnection
         Dim res = MsgBox("Do you really want to disconnect from the server?", MsgBoxStyle.OkCancel + MsgBoxStyle.Exclamation, "Server Connection")
         If res = MsgBoxResult.Ok Then
 
-            My.Settings.IsServerEnabled = False
             My.Settings.IsServerOffByUser = True
             DialogResult = True
 
@@ -143,7 +142,7 @@ Public Class dlgServerConnection
                 .ServerDbUserName = txtUserID.Text
                 .ServerDbPassword = txtPassword.Password
                 .ServerPort = If(rdoCustomPort.IsChecked, Val(txtCustomPort.Text), 3306)
-                .IsServerEnabled = True
+                .IsServerSpecified = True
                 .IsServerOffByUser = False
             End With
 
