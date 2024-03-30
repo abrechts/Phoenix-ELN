@@ -9,23 +9,6 @@
 
 
     ''' <summary>
-    ''' Sets if the server status items should be displayed or not.
-    ''' </summary>
-    ''' 
-    Public WriteOnly Property DisplayServerStatus() As Boolean
-
-        Set(value As Boolean)
-            If value = True Then
-                pnlServerState.Visibility = Windows.Visibility.Visible
-            Else
-                pnlServerState.Visibility = Windows.Visibility.Collapsed
-            End If
-        End Set
-
-    End Property
-
-
-    ''' <summary>
     ''' Sets if a server error should be displayed or not
     ''' </summary>
     ''' 

@@ -107,19 +107,53 @@ Class MainWindow
     End Sub
 
 
-    Private Sub btnSearch_Click() Handles btnSearch.Click
+    Private Sub Me_Loaded() Handles Me.Loaded
 
-        Dim searchDlg As New dlgSearch
-        With searchDlg
-            .Owner = Me
-            .LocalDBContext = DBContext
-            .ServerDBContext = ServerDBContext
-            With CustomControls.My.MySettings.Default
-                dlgSearch.IsServerQuery = .IsServerQuery
-                searchDlg.ShowDialog()
-                .IsServerQuery = dlgSearch.IsServerQuery
-            End With
+        'register shared events
+        AddHandler Protocol.RequestSaveIcon, AddressOf Protocol_RequestSaveIcon
+        AddHandler UndoRedo.CanUndoChanged, AddressOf UndoRedo_CanUndoChanged
+        AddHandler UndoRedo.CanRedoChanged, AddressOf UndoRedo_CanRedoChanged
+        AddHandler StatusDemo.RequestCreateFirstUser, AddressOf DemoStatus_RequestCreateFirstUser
+        AddHandler StatusDemo.RequestRestoreServer, AddressOf DemoStatus_RequestRestoreServer
+        AddHandler ServerSync.ServerContextCreated, AddressOf ServerSync_ServerContextCreated
+        AddHandler Protocol.ConnectedChanged, AddressOf Protocol_ConnectedChanged
+        AddHandler ServerSync.SyncProgress, AddressOf ServerSync_SyncProgress
+        AddHandler dlgServerConnection.ServerContextCreated, AddressOf ServerSync_ServerContextCreated
+        AddHandler ExpTabHeader.PinStateChanged, AddressOf expTabHeader_PinStateChanged
+        AddHandler StepSummary.RequestOpenExperiment, AddressOf ExpList_RequestOpenExperiment
+        AddHandler RssItemGroup.RequestOpenExperiment, AddressOf ExpList_RequestOpenExperiment
+
+
+        'Connect local database model with UI
+        ApplyAllDataBindings()
+
+        'create server context async to reduce startup time
+        With CustomControls.My.MySettings.Default
+            If DBContext.tblDatabaseInfo.First.tblUsers.First.UserID <> "demo" Then
+                If .IsServerSpecified Then
+                    ServerSync.CreateServerContextAsync(.ServerName, .ServerDbUserName, .ServerDbPassword, .ServerPort,
+                        DBContext.tblDatabaseInfo.First) 'handled by ServerSync_ServerContextCreated (also sets mainStatusInfo)
+                End If
+            Else
+                .IsServerSpecified = False  'visibility of server status items is data bound to this setting
+            End If
         End With
+
+        'select experiment tab of current experiment (may be a pinned one)
+        Dim currUser = CType(Me.DataContext, tblUsers)
+        Dim currExp = (From exp In currUser.tblExperiments Where exp.IsCurrent).FirstOrDefault
+        If currExp IsNot Nothing Then
+            Dim thisTab As TabItem = tabExperiments.ItemContainerGenerator.ContainerFromItem(currExp)
+            If thisTab IsNot Nothing Then
+                thisTab.IsSelected = True
+            End If
+        End If
+
+        'start the periodic cleanup process for embedded document editing resources (currently set to every hour)
+        FileContent.StartDocEditCleanupTimer(New TimeSpan(1, 0, 0))
+
+        'check for updates async
+        CheckForUpdatesAsync()
 
     End Sub
 
@@ -152,6 +186,30 @@ Class MainWindow
     End Sub
 
 
+    ''' <summary>
+    ''' Asynchronously checks for new version updates and displays the update notification in 
+    ''' the application toolbar accordingly.
+    ''' </summary>
+    ''' 
+    Private Async Sub CheckForUpdatesAsync()
+
+        'IMPORTANT: It may take a few minutes until updates to the publisher version database 
+        'actually become available to the PHP service.
+
+        Dim newVersionStr = Await PhpServices.GetLatestAppVersion
+        If newVersionStr = "" Then
+            Exit Sub 'server error
+        End If
+
+        Dim latestVersion = New Version(newVersionStr)
+        If ApplicationVersion < latestVersion Then
+            pnlStatus.ShowAvailableUpdate(newVersionStr)
+        End If
+
+    End Sub
+
+
+
     Private Sub UpdateExperimentTabs(Optional newExpItem As tblExperiments = Nothing)
 
         'remove doomed items (DisplayIndex = nothing)
@@ -176,80 +234,6 @@ Class MainWindow
     End Sub
 
 
-    Private Sub Me_Loaded() Handles Me.Loaded
-
-        'register shared events
-        AddHandler Protocol.RequestSaveIcon, AddressOf Protocol_RequestSaveIcon
-        AddHandler UndoRedo.CanUndoChanged, AddressOf UndoRedo_CanUndoChanged
-        AddHandler UndoRedo.CanRedoChanged, AddressOf UndoRedo_CanRedoChanged
-        AddHandler StatusDemo.RequestCreateFirstUser, AddressOf DemoStatus_RequestCreateFirstUser
-        AddHandler StatusDemo.RequestRestoreServer, AddressOf DemoStatus_RequestRestoreServer
-        AddHandler ServerSync.ServerContextCreated, AddressOf ServerSync_ServerContextCreated
-        AddHandler Protocol.ConnectedChanged, AddressOf Protocol_ConnectedChanged
-        AddHandler ServerSync.SyncProgress, AddressOf ServerSync_SyncProgress
-        AddHandler dlgServerConnection.ServerContextCreated, AddressOf ServerSync_ServerContextCreated
-        AddHandler ExpTabHeader.PinStateChanged, AddressOf expTabHeader_PinStateChanged
-        AddHandler StepSummary.RequestOpenExperiment, AddressOf ExpList_RequestOpenExperiment
-        AddHandler RssItemGroup.RequestOpenExperiment, AddressOf ExpList_RequestOpenExperiment
-
-
-        'Connect local database model with UI
-        ApplyAllDataBindings()
-
-        'create server context async to reduce startup time
-        With CustomControls.My.MySettings.Default
-            If DBContext.tblDatabaseInfo.First.tblUsers.First.UserID <> "demo" Then
-                If .IsServerSpecified Then
-                    ServerSync.CreateServerContextAsync(.ServerName, .ServerDbUserName, .ServerDbPassword, .ServerPort,
-                        DBContext.tblDatabaseInfo.First) 'handled by ServerSync_ServerContextCreated (also sets serverStatusInfo)
-                End If
-            Else
-                .IsServerSpecified = False
-            End If
-            serverStatusInfo.DisplayServerStatus = .IsServerSpecified
-        End With
-
-        'select experiment tab of current experiment (may be a pinned one)
-        Dim currUser = CType(Me.DataContext, tblUsers)
-        Dim currExp = (From exp In currUser.tblExperiments Where exp.IsCurrent).FirstOrDefault
-        If currExp IsNot Nothing Then
-            Dim thisTab As TabItem = tabExperiments.ItemContainerGenerator.ContainerFromItem(currExp)
-            If thisTab IsNot Nothing Then
-                thisTab.IsSelected = True
-            End If
-        End If
-
-        'start the periodic cleanup process for embedded document editing resources (currently set to every hour)
-        FileContent.StartDocEditCleanupTimer(New TimeSpan(1, 0, 0))
-
-        'check for updates async
-        CheckForUpdatesAsync()
-
-    End Sub
-
-
-    ''' <summary>
-    ''' Asynchronously checks for new version updates and displays the update notification in 
-    ''' the application toolbar accordingly.
-    ''' </summary>
-    ''' 
-    Private Async Sub CheckForUpdatesAsync()
-
-        'IMPORTANT: It may take a few minutes until updates to the publisher version database 
-        'actually become available to the PHP service.
-
-        Dim newVersionStr = Await PhpServices.GetLatestAppVersion
-        If newVersionStr = "" Then
-            Exit Sub 'server error
-        End If
-
-        Dim latestVersion = New Version(newVersionStr)
-        If ApplicationVersion < latestVersion Then
-            pnlStatus.ShowAvailableUpdate(newVersionStr)
-        End If
-
-    End Sub
-
 
     Private Function FilterList(expItem As tblExperiments) As Boolean
 
@@ -271,7 +255,7 @@ Class MainWindow
 
             If ServerSync.HasSyncMismatch Then
 
-                serverStatusInfo.DisplayServerError = True
+                mainStatusInfo.DisplayServerError = True
                 Dim syncMismatchWarningDlg As New dlgServerSyncIssue
                 With syncMismatchWarningDlg
                     .Owner = Me
@@ -286,7 +270,7 @@ Class MainWindow
             If Not _isRestoring Then
 
                 DBContext.ServerSynchronization = New ServerSync(DBContext, ServerDBContext)
-                serverStatusInfo.DisplayServerError = False
+                mainStatusInfo.DisplayServerError = False
 
                 If ServerSync.DatabaseGUID <> "" Then
 
@@ -360,7 +344,7 @@ Class MainWindow
 
             '- no userID conflicts with server
 
-            serverStatusInfo.DisplayServerError = False
+            mainStatusInfo.DisplayServerError = False
 
             ServerSync.DatabaseGUID = DBContext.tblDatabaseInfo.First.GUID
 
@@ -511,7 +495,7 @@ Class MainWindow
     ''' 
     Private Sub Protocol_ConnectedChanged(isConnected As Boolean)
 
-        Dim isInError = serverStatusInfo.DisplayServerError
+        Dim isInError = mainStatusInfo.DisplayServerError
 
         If isConnected Then
             If isInError Then
@@ -531,7 +515,7 @@ Class MainWindow
 
     Private Sub ServerWarningDelegate(isConnected As Boolean)
 
-        serverStatusInfo.DisplayServerError = Not isConnected
+        mainStatusInfo.DisplayServerError = Not isConnected
 
     End Sub
 
@@ -553,7 +537,7 @@ Class MainWindow
     '''
     Private Sub Protocol_RequestSaveIcon(sender As Object)
 
-        serverStatusInfo.AnimateSaveIcon()
+        mainStatusInfo.AnimateSaveIcon()
 
     End Sub
 
@@ -1197,6 +1181,23 @@ Class MainWindow
     End Sub
 
 
+    Private Sub btnSearch_Click() Handles btnSearch.Click
+
+        Dim searchDlg As New dlgSearch
+        With searchDlg
+            .Owner = Me
+            .LocalDBContext = DBContext
+            .ServerDBContext = ServerDBContext
+            With CustomControls.My.MySettings.Default
+                dlgSearch.IsServerQuery = .IsServerQuery
+                searchDlg.ShowDialog()
+                .IsServerQuery = dlgSearch.IsServerQuery
+            End With
+        End With
+
+    End Sub
+
+
     ''' <summary>
     ''' Displays server connect dialog and return true if the connection succeeded
     ''' </summary>
@@ -1222,13 +1223,13 @@ Class MainWindow
                     '-- apply new server context
                     ServerDBContext = .NewServerContext
                     DBContext.ServerSynchronization = New ServerSync(DBContext, ServerDBContext)
-                    serverStatusInfo.DisplayServerError = False
+                    mainStatusInfo.DisplayServerError = False
                     Return True
                 Else
                     '-- disconnect
                     If CustomControls.My.MySettings.Default.IsServerSpecified Then
                         If ServerDBContext IsNot Nothing Then
-                            serverStatusInfo.DisplayServerError = True
+                            mainStatusInfo.DisplayServerError = True
                             ServerDBContext.Dispose()
                             ServerDBContext = Nothing
                         End If
