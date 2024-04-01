@@ -119,7 +119,7 @@ Public Class Protocol
 
                 RaiseEvent RequestSaveIcon(Me)
 
-                If My.Settings.IsServerSpecified AndAlso Not My.Settings.IsServerOffByUser Then
+                If My.Settings.IsServerSpecified AndAlso Not My.Settings.IsServerOffByUser AndAlso Not ServerSync.IsServerConnectionLost Then
 
                     If Await Task.Run(Function() IsServerConnAvailable()) Then
 
@@ -133,8 +133,6 @@ Public Class Protocol
                                 '  Debug.WriteLine("skipped: " + Now.ToString)
                             End If
                         End If
-
-                        RaiseEvent ConnectedChanged(True)
 
                     Else
 
@@ -177,27 +175,15 @@ Public Class Protocol
 
         If ServerSync.ServerContext IsNot Nothing Then
 
-            '-- server was present on startup
-            Return ServerSync.ServerContext.Database.CanConnect
+            Try
+                Dim test = ServerSync.ServerContext.tblDatabaseInfo.First.CurrAppVersion 'much faster than .ServerContext.Database.CanConnect
+                Return True
+            Catch ex As Exception
+                Return False
+            End Try
 
         Else
-
-            '-- no server was available on application startup
-            With My.Settings
-
-                Dim serverContext = ServerSync.CreateMySQLContext(.ServerName, .ServerDbUserName, .ServerDbPassword, .ServerPort,
-                  ExperimentContent.DbContext.tblDatabaseInfo.First)
-
-                If serverContext IsNot Nothing Then
-                    ExperimentContent.DbContext.ServerSynchronization = New ServerSync(ExperimentContent.DbContext, serverContext)
-                    ServerSync.ServerContext = serverContext
-                    Return True
-                Else
-                    Return False
-                End If
-
-            End With
-
+            Return False
         End If
 
     End Function

@@ -1,4 +1,6 @@
-﻿Public Class MainStatusBar
+﻿Imports ElnBase
+
+Public Class MainStatusBar
 
     Public Sub New()
 
@@ -19,7 +21,11 @@
         End Get
 
         Set(value As Boolean)
+
+            ServerSync.IsServerConnectionLost = value
+
             If value = True Then
+
                 pnlServerError.Visibility = Windows.Visibility.Visible
                 pnlServerOk.Visibility = Windows.Visibility.Collapsed
                 If My.Settings.IsServerOffByUser Then
@@ -27,10 +33,14 @@
                 Else
                     pnlServerError.ToolTip = "The ELN server currently is unavailable!"
                 End If
+
             Else
+
                 pnlServerError.Visibility = Windows.Visibility.Collapsed
                 pnlServerOk.Visibility = Windows.Visibility.Visible
+
             End If
+
         End Set
 
     End Property

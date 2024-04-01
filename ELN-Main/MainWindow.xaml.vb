@@ -158,6 +158,66 @@ Class MainWindow
     End Sub
 
 
+    Private Sub ServerSync_ServerContextCreated(serverContext As ElnDbContext)
+
+        Me.Cursor = Cursors.Arrow
+        Me.ForceCursor = False
+
+        If serverContext IsNot Nothing Then
+
+            '- handle syncID mismatch
+
+            ServerDBContext = serverContext
+
+            If ServerSync.HasSyncMismatch Then
+
+                mainStatusInfo.DisplayServerError = True
+
+                Dim syncMismatchWarningDlg As New dlgServerSyncIssue
+                With syncMismatchWarningDlg
+                    .Owner = Me
+                    .ShowDialog()
+                    RestoreFromServer()  'restarts app when done
+                End With
+
+                Exit Sub
+
+            End If
+
+            If Not _isRestoring Then
+
+                DBContext.ServerSynchronization = New ServerSync(DBContext, ServerDBContext)
+                mainStatusInfo.DisplayServerError = False
+
+                If ServerSync.DatabaseGUID <> "" Then
+
+                    '- standard case: sync all pending items at startup
+                    WPFToolbox.WaitForPriority(Threading.DispatcherPriority.Background)
+                    DBContext.ServerSynchronization.SynchronizeAsync()
+
+                Else
+
+                    '- connecting existing non-demo database for the first time
+                    FirstTimeConnect()
+
+                End If
+
+            Else
+
+                _isRestoring = False
+
+            End If
+
+        Else
+
+            'e.g. server unavailable
+            Protocol_ConnectedChanged(False)
+
+        End If
+
+    End Sub
+
+
     ''' <summary>
     ''' Performs all data binding between data model and UI.
     ''' </summary>
@@ -240,67 +300,6 @@ Class MainWindow
         Return expItem.DisplayIndex IsNot Nothing
 
     End Function
-
-
-    Private Sub ServerSync_ServerContextCreated(serverContext As ElnDbContext)
-
-        Me.Cursor = Cursors.Arrow
-        Me.ForceCursor = False
-
-        If serverContext IsNot Nothing Then
-
-            '- handle syncID mismatch
-
-            ServerDBContext = serverContext
-
-            If ServerSync.HasSyncMismatch Then
-
-                mainStatusInfo.DisplayServerError = True
-                Dim syncMismatchWarningDlg As New dlgServerSyncIssue
-                With syncMismatchWarningDlg
-                    .Owner = Me
-                    .ShowDialog()
-                    RestoreFromServer()  'restarts app when done
-                End With
-
-                Exit Sub
-
-            End If
-
-            If Not _isRestoring Then
-
-                DBContext.ServerSynchronization = New ServerSync(DBContext, ServerDBContext)
-                mainStatusInfo.DisplayServerError = False
-
-                If ServerSync.DatabaseGUID <> "" Then
-
-                    '- standard case: sync all pending items at startup
-                    WPFToolbox.WaitForPriority(Threading.DispatcherPriority.Background)
-                    DBContext.ServerSynchronization.SynchronizeAsync()
-
-                Else
-
-                    '- connecting existing non-demo database for the first time
-                    FirstTimeConnect()
-
-                End If
-
-            Else
-
-                _isRestoring = False
-
-            End If
-
-        Else
-
-            'e.g. server unavailable
-
-            Dispatcher.Invoke(Sub() ServerWarningDelegate(False))
-            MsgBox("The ELN server is unavailable!" + vbCrLf + "Changes currently are not backed up.", MsgBoxStyle.Information, "Server Sync")
-
-        End If
-
-    End Sub
 
 
     ''' <summary>
@@ -495,20 +494,15 @@ Class MainWindow
     ''' 
     Private Sub Protocol_ConnectedChanged(isConnected As Boolean)
 
-        Dim isInError = mainStatusInfo.DisplayServerError
+        If Not isConnected Then
 
-        If isConnected Then
-            If isInError Then
-                Dispatcher.Invoke(Sub() ServerWarningDelegate(isConnected))
-                MsgBox("Server reconnected!", MsgBoxStyle.Information, "Server Sync")
-                DBContext.ServerSynchronization.SynchronizeAsync()
-            End If
+            Dispatcher.Invoke(Sub() ServerWarningDelegate(isConnected))
+
+            MsgBox("The ELN server is unavailable!" + vbCrLf + "Changes currently are not backed up." + vbCrLf + vbCrLf +
+                   "Try to reconnect manually later ...", MsgBoxStyle.Information, "Server Sync")
+
         Else
-            If Not isInError Then
-                Dispatcher.Invoke(Sub() ServerWarningDelegate(isConnected))
-                MsgBox("The ELN server is unavailable!" + vbCrLf + "Changes currently are not backed up.", MsgBoxStyle.Information, "Server Sync")
-            End If
-
+            'currently no action
         End If
 
     End Sub
@@ -1220,18 +1214,25 @@ Class MainWindow
             If .ShowDialog() Then
 
                 If .NewServerContext IsNot Nothing Then
+
                     '-- apply new server context
                     ServerDBContext = .NewServerContext
                     DBContext.ServerSynchronization = New ServerSync(DBContext, ServerDBContext)
+
                     mainStatusInfo.DisplayServerError = False
+
                     Return True
                 Else
+
                     '-- disconnect
                     If CustomControls.My.MySettings.Default.IsServerSpecified Then
                         If ServerDBContext IsNot Nothing Then
+
                             mainStatusInfo.DisplayServerError = True
+
                             ServerDBContext.Dispose()
                             ServerDBContext = Nothing
+
                         End If
                     End If
                     Return False

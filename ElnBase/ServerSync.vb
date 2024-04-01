@@ -1,5 +1,4 @@
 ﻿Imports System.Data
-Imports System.IO
 Imports ElnBase.ELNEnumerations
 Imports ElnCoreModel
 Imports Microsoft.Data.Sqlite
@@ -73,6 +72,16 @@ Public Class ServerSync
     ''' </summary>
     '''
     Public Shared Property HasSyncMismatch As Boolean = False
+
+
+    ''' <summary>
+    ''' Sets or gets if the server connection was lost and a manual reconnect attempt is required.
+    ''' </summary>
+    ''' <remarks>To save CPU cycles, the application does not constantly try to reconnect after 
+    ''' an ELN server connection loss. The user is presented a reconnect functionality instead, 
+    ''' allowing to try to reconnect manually.</remarks>
+    ''' 
+    Public Shared Property IsServerConnectionLost As Boolean = False
 
 
     ''' <summary>
@@ -500,25 +509,21 @@ Public Class ServerSync
         Dim newSyncGuid = Guid.NewGuid.ToString("D")
 
         Dim serverInfo = (From info In ServerContext.tblDatabaseInfo Where info.GUID = localDbGuid).FirstOrDefault
-            If serverInfo IsNot Nothing Then
+        If serverInfo IsNot Nothing Then
 
-                Dim syncTime = Now.ToString("yyyy-MM-dd HH:mm:ss")
+            Dim syncTime = Now.ToString("yyyy-MM-dd HH:mm:ss")
+            With LocalContext.tblDatabaseInfo.First
+                .LastSyncID = newSyncGuid
+                .LastSyncTime = syncTime
+            End With
+            serverInfo.LastSyncID = newSyncGuid
+            serverInfo.LastSyncTime = syncTime
 
-                With LocalContext.tblDatabaseInfo.First
-                    .LastSyncID = newSyncGuid
-                    .LastSyncTime = syncTime
-                End With
+            DatabaseGUID = serverInfo.GUID
 
-                serverInfo.LastSyncID = newSyncGuid
-                serverInfo.LastSyncTime = syncTime
-
-                DatabaseGUID = serverInfo.GUID
-
-                LocalContext.SaveChangesNoSyncTracking()
-                ServerContext.SaveChangesNoSyncTracking()
-
-            End If
-
+            LocalContext.SaveChangesNoSyncTracking()
+            ServerContext.SaveChangesNoSyncTracking()
+        End If
     End Sub
 
 
