@@ -11,13 +11,13 @@ Imports System.Runtime.InteropServices
 Public Class PhpServices
 
     ''' <summary>
-    ''' Gets the most recent application version.
+    ''' Gets the most recent application version asynchronously.
     ''' </summary>
     ''' <returns>Application version, e.g. 3.2.1.</returns>
     ''' 
-    Public Shared Async Function GetLatestAppVersion() As Task(Of String)
+    Public Shared Async Function GetLatestAppVersionAsync() As Task(Of String)
 
-        Dim res = Await GetPhpResult("https://chembytes.com/products/Phoenix_ELN/CurrentPhoenixVersion.php", Nothing)
+        Dim res = Await GetPhpResultAsync("https://chembytes.com/products/Phoenix_ELN/CurrentPhoenixVersion.php", Nothing)
 
         If res.StartsWith("Error:") Then
             Return ""
@@ -54,7 +54,7 @@ Public Class PhpServices
             .Add("serverEnabled", If(isServerEnabled, 1, 0))
         End With
 
-        Await GetPhpResult("https://chembytes.com/products/Phoenix_ELN/PhoenixUse.php", params)   'upload info
+        Await GetPhpResultAsync("https://chembytes.com/products/Phoenix_ELN/PhoenixUse.php", params)   'upload info
 
     End Sub
 
@@ -64,7 +64,7 @@ Public Class PhpServices
     ''' specified parameters.
     ''' </summary>
     ''' 
-    Friend Shared Async Function GetPhpResult(url As String, params As Dictionary(Of String, String)) As Task(Of String)
+    Friend Shared Async Function GetPhpResultAsync(url As String, params As Dictionary(Of String, String)) As Task(Of String)
 
         Try
 

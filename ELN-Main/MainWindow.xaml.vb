@@ -273,7 +273,7 @@ Class MainWindow
         'IMPORTANT: It may take a few minutes until updates to the publisher version database 
         'actually become available to the PHP service.
 
-        Dim newVersionStr = Await PhpServices.GetLatestAppVersion
+        Dim newVersionStr = Await PhpServices.GetLatestAppVersionAsync
         If newVersionStr = "" Then
             Exit Sub 'server error
         End If
@@ -1208,6 +1208,26 @@ Class MainWindow
             .blkAppVersion.Text = ApplicationVersion.ToString(3)
             .ShowDialog()
         End With
+
+    End Sub
+
+
+    Private Async Sub mnuCheckForUpdates_Click() Handles mnuCheckForUpdates.Click
+
+        Dim newVersionStr = Await PhpServices.GetLatestAppVersionAsync
+        If newVersionStr = "" Then
+            MsgBox("Sorry, can't access version server.", MsgBoxStyle.Information, "Update Check")
+            Exit Sub 'server error
+        End If
+
+        Dim latestVersion = New Version(newVersionStr)
+        If ApplicationVersion < latestVersion Then
+            pnlStatus.ShowAvailableUpdate(newVersionStr)
+            MsgBox("An update is available! See the" + vbCrLf +
+                   "info panel for details ...", MsgBoxStyle.Information, "Update Check")
+        Else
+            MsgBox("Your application is up-to-date!", MsgBoxStyle.Information, "Update Check")
+        End If
 
     End Sub
 

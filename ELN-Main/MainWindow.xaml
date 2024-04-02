@@ -141,6 +141,7 @@
                                     <ContentControl Content="{StaticResource icoInfo}" Height="14"/>
                                 </MenuItem.Icon>
                             </MenuItem>
+                            <MenuItem x:Name="mnuCheckForUpdates" Header="Check for updates ..."/>
                         </MenuItem>
                     </Menu>
 
