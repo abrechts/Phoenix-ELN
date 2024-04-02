@@ -113,6 +113,7 @@ Public Class dlgServerConnection
 
             My.Settings.IsServerOffByUser = True
             DialogResult = True
+            RaiseEvent ServerContextCreated(Nothing)
 
         End If
 

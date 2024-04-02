@@ -123,25 +123,40 @@ Class MainWindow
         AddHandler StepSummary.RequestOpenExperiment, AddressOf ExpList_RequestOpenExperiment
         AddHandler RssItemGroup.RequestOpenExperiment, AddressOf ExpList_RequestOpenExperiment
 
-
         'Connect local database model with UI
         ApplyAllDataBindings()
 
         'create server context async to reduce startup time
         With CustomControls.My.MySettings.Default
+
             If DBContext.tblDatabaseInfo.First.tblUsers.First.UserID <> "demo" Then
                 If .IsServerSpecified Then
-                    ServerSync.CreateServerContextAsync(.ServerName, .ServerDbUserName, .ServerDbPassword, .ServerPort,
-                        DBContext.tblDatabaseInfo.First) 'handled by ServerSync_ServerContextCreated (also sets mainStatusInfo)
+                    If Not .IsServerOffByUser Then
+
+                        If .IsServerQuery Then
+                            'disable search until server conn established
+                            btnSearch.IsEnabled = False
+                        End If
+
+                        ServerSync.CreateServerContextAsync(.ServerName, .ServerDbUserName, .ServerDbPassword, .ServerPort,
+                           DBContext.tblDatabaseInfo.First) 'handled by ServerSync_ServerContextCreated (also sets mainStatusInfo)
+
+                    Else
+                        'manually disconnected by user
+                        mainStatusInfo.DisplayServerError = True
+                    End If
                 End If
             Else
-                .IsServerSpecified = False  'visibility of server status items is data bound to this setting
+                'demo user has no server connection
+                .IsServerSpecified = False 'visibility of server status items is data bound to this setting
             End If
+
         End With
 
         'select experiment tab of current experiment (may be a pinned one)
         Dim currUser = CType(Me.DataContext, tblUsers)
         Dim currExp = (From exp In currUser.tblExperiments Where exp.IsCurrent).FirstOrDefault
+
         If currExp IsNot Nothing Then
             Dim thisTab As TabItem = tabExperiments.ItemContainerGenerator.ContainerFromItem(currExp)
             If thisTab IsNot Nothing Then
@@ -162,6 +177,8 @@ Class MainWindow
 
         Me.Cursor = Cursors.Arrow
         Me.ForceCursor = False
+
+        btnSearch.IsEnabled = True
 
         If serverContext IsNot Nothing Then
 
@@ -499,7 +516,7 @@ Class MainWindow
             Dispatcher.Invoke(Sub() ServerWarningDelegate(isConnected))
 
             MsgBox("The ELN server is unavailable!" + vbCrLf + "Changes currently are not backed up." + vbCrLf + vbCrLf +
-                   "Try to reconnect manually later ...", MsgBoxStyle.Information, "Server Sync")
+                   "Try to reconnect later ...", MsgBoxStyle.Information, "Server Sync")
 
         Else
             'currently no action
@@ -925,6 +942,26 @@ Class MainWindow
             tabExperiments.SelectedIndex = 0
 
         End If
+
+    End Sub
+
+
+    ''' <summary>
+    ''' Tries to reconnect to the server after the connection was lost.
+    ''' </summary>
+    ''' 
+    Private Sub mainStatusInfo_RequestReconnect() Handles mainStatusInfo.RequestReconnect
+
+        Me.Cursor = Cursors.Wait
+        Me.ForceCursor = True
+
+        With CustomControls.My.MySettings.Default
+            If .IsServerSpecified Then
+                .IsServerOffByUser = False
+                ServerSync.CreateServerContextAsync(.ServerName, .ServerDbUserName, .ServerDbPassword, .ServerPort,
+                    DBContext.tblDatabaseInfo.First) 'handled by ServerSync_ServerContextCreated (also sets mainStatusInfo)
+            End If
+        End With
 
     End Sub
 

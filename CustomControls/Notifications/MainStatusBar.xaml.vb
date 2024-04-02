@@ -2,6 +2,10 @@
 
 Public Class MainStatusBar
 
+
+    Public Event RequestReconnect(sender As Object)
+
+
     Public Sub New()
 
         ' This call is required by the designer.
@@ -29,9 +33,9 @@ Public Class MainStatusBar
                 pnlServerError.Visibility = Windows.Visibility.Visible
                 pnlServerOk.Visibility = Windows.Visibility.Collapsed
                 If My.Settings.IsServerOffByUser Then
-                    pnlServerError.ToolTip = "ELN server disconnected by user."
+                    icoServerError.ToolTip = "ELN server disconnected by user."
                 Else
-                    pnlServerError.ToolTip = "The ELN server currently is unavailable!"
+                    icoServerError.ToolTip = "The ELN server currently is unavailable!"
                 End If
 
             Else
@@ -44,6 +48,13 @@ Public Class MainStatusBar
         End Set
 
     End Property
+
+
+    Private Sub lnkReconnect_PreviewMouseUp() Handles lnkReconnects.PreviewMouseUp
+
+        RaiseEvent RequestReconnect(Me)
+
+    End Sub
 
 
     Public Sub AnimateSaveIcon()

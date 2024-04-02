@@ -61,7 +61,7 @@
                      VerticalAlignment="Center" Width="72" IsCancel="True" IsTabStop="False"/>
 
                 <Button x:Name="btnDisconnect" Content="Disconnect" Margin="30,0,0,0" VerticalAlignment="Center" Background="White" HorizontalAlignment="Left"
-                   ToolTip="Remove server connection" Width="88" Padding="2,2,2,3" VerticalContentAlignment="Center" IsTabStop="false"/>
+                   ToolTip="Disconnect from server" Width="88" Padding="2,2,2,3" VerticalContentAlignment="Center" IsTabStop="false"/>
 
             </StackPanel>
 
