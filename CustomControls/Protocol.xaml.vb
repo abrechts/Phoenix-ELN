@@ -169,15 +169,13 @@ Public Class Protocol
     ''' <summary>
     ''' Gets if a server connection currently is present.
     ''' </summary>
-    ''' <remarks>If no server context is present so far (no server available at startup), the creation of a new one is attempted.</remarks>
     ''' 
     Public Shared Function IsServerConnAvailable() As Boolean
 
         If ServerSync.ServerContext IsNot Nothing Then
 
             Try
-                Dim test = ServerSync.ServerContext.tblDatabaseInfo.First.CurrAppVersion 'much faster than .ServerContext.Database.CanConnect
-                Return True
+                Return ServerSync.ServerContext.Database.CanConnect()   'slower than direct db check, but provides necessary sync delay
             Catch ex As Exception
                 Return False
             End Try
