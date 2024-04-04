@@ -35,8 +35,8 @@
             <StackPanel Visibility="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=TreeViewItem}, Path=IsExpanded,
               Converter={StaticResource intToVisibilityConv}}" Orientation="Horizontal" Margin="4,0,0,1">
                 
-                <ContentControl Content="{StaticResource icoAdd}" Margin="-3,2,2,0"  Height="14"/>
-                <TextBlock x:Name="btnAddExp" Text="add experiment" Foreground="blue" TextDecorations="Underline" Cursor="Hand" FontStyle="Italic"/>
+                <ContentControl Content="{StaticResource icoAdd}" Margin="-3,2,0,0"  Height="14"/>
+                <TextBlock x:Name="btnAddExp" Text="add experiment" Foreground="blue" TextDecorations="Underline" Cursor="Hand" FontStyle="Italic" Background="#FFECF8FF" Padding="2,0,3,0"/>
                 
             </StackPanel>
 
