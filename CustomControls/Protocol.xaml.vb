@@ -607,6 +607,7 @@ Public Class Protocol
             .IsAddingNew = True
             .ReferenceReactant = newRefReact
             .SketchInfo = SketchInfo
+            .btnCancel.IsEnabled = currRefReactItem IsNot Nothing
 
             If .ShowDialog() Then
 
@@ -1423,6 +1424,11 @@ Public Class Protocol
     Public Sub UpdateRefReactResinInfo(expEntry As tblExperiments, isResinAttached As Boolean)
 
         Dim refReactItems = From protItem In expEntry.tblProtocolItems Where protItem.ElementType = ProtocolElementType.RefReactant
+
+        'just in case ...
+        If Not refReactItems.Any Then
+            Exit Sub
+        End If
 
         'assumes that all refReact portions were assigned identical resin properties
         Dim firstRefReact = refReactItems.First.tblRefReactants
