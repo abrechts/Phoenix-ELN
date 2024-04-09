@@ -51,6 +51,13 @@ Public Class RichTextBoxHelper
             rtb.Document = New FlowDocument()
         End Try
 
+        'Important: Set font properties at document content level
+        With rtb.Document
+            Dim Range = New TextRange(.ContentStart, .ContentEnd)
+            Range.ApplyPropertyValue(TextElement.FontSizeProperty, 12.5)
+            Range.ApplyPropertyValue(TextElement.FontFamilyProperty, "Segoe UI")
+        End With
+
         ' When the document changes update the source
         AddHandler rtb.TextChanged, AddressOf TextChanged
 
