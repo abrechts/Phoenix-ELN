@@ -1074,10 +1074,10 @@ Class MainWindow
 
                 Else
 
-                    Dim res = MsgBox("Can't pin this experiment, since the maximum " + vbCrLf +
-                                     "number of 4 pinned experiments already is" + vbCrLf +
-                                     "present.",
-                                     MsgBoxStyle.OkCancel + MsgBoxStyle.Information, "Pin Limit")
+                    MsgBox("Can't pin this experiment, since the maximum " + vbCrLf +
+                            "number of 4 pinned experiments already is" + vbCrLf +
+                            "present.",
+                            MsgBoxStyle.OkOnly + MsgBoxStyle.Information, "Pin Limit")
                 End If
 
             Case Else
