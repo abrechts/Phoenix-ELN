@@ -1074,14 +1074,10 @@ Class MainWindow
 
                 Else
 
-                    Dim res = MsgBox("Maximum of 4 pinned experiments reached!" + vbCrLf +
-                                     "Release the rightmost experiment?", MsgBoxStyle.OkCancel + MsgBoxStyle.Information, "Pin Limit")
-                    If res = MsgBoxResult.Ok Then
-                        Dim lastIndex = tabExperiments.Items.Count - 1
-                        CType(tabExperiments.Items(lastIndex), tblExperiments).DisplayIndex = Nothing
-                        targetExp.DisplayIndex = -1 'set first pin
-                    End If
-
+                    Dim res = MsgBox("Can't pin this experiment, since the maximum " + vbCrLf +
+                                     "number of 4 pinned experiments already is" + vbCrLf +
+                                     "present.",
+                                     MsgBoxStyle.OkCancel + MsgBoxStyle.Information, "Pin Limit")
                 End If
 
             Case Else
@@ -1216,8 +1212,8 @@ Class MainWindow
 
         Dim newVersionStr = Await PhpServices.GetLatestAppVersionAsync
         If newVersionStr = "" Then
-            MsgBox("Sorry, can't access version server.", MsgBoxStyle.Information, "Update Check")
-            Exit Sub 'server error
+            MsgBox("Sorry, can 't access version server.", MsgBoxStyle.Information, "Update Check")
+                    Exit Sub 'server error
         End If
 
         Dim latestVersion = New Version(newVersionStr)
