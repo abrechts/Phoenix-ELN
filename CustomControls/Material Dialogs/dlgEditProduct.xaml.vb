@@ -35,7 +35,7 @@ Public Class dlgEditProduct
         ElseIf IsFromPlaceholder Then
             SelectProductButton(ProductEntry.ProductIndex)
         Else
-            rdoProdA_Checked()
+            rdoProdA.IsChecked = True
         End If
 
         If numResinLoad.IsVisible AndAlso ProductEntry.ResinLoad Is Nothing Then
