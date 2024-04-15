@@ -136,10 +136,15 @@
                                     <Path VerticalAlignment="Center" Margin="4,2,0,0" Fill="Black" Data="M 0 0 L 3 3 L 6 0 Z"/>
                                 </StackPanel>
                             </MenuItem.Header>
-                            <MenuItem x:Name="mnuAbout" Header="About Phoenix ELN ..." Margin="0,2,0,1" Background="white">
+                            <MenuItem x:Name="mnuHelp" Header="Help Docs..." Margin="0,2,0,1" Background="white">
                                 <MenuItem.Icon>
                                     <ContentControl Content="{StaticResource icoInfo}" Height="14"/>
                                 </MenuItem.Icon>
+                            </MenuItem>
+                            <MenuItem x:Name="mnuAbout" Header="About Phoenix ELN ..." Margin="0,2,0,1" Background="white">
+                                <!--<MenuItem.Icon>
+                                    <ContentControl Content="{StaticResource icoInfo}" Height="14"/>
+                                </MenuItem.Icon>-->
                             </MenuItem>
                             <MenuItem x:Name="mnuCheckForUpdates" Header="Check for updates ..."/>
                         </MenuItem>

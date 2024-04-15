@@ -154,7 +154,7 @@ Public Class dlgSearch
 
     Private Sub icoInfo_PreviewMouseUp() Handles icoInfo.PreviewMouseUp
 
-        Dim info As New ProcessStartInfo("https://github.com/abrechts/Phoenix-ELN/wiki#find-reactions")
+        Dim info As New ProcessStartInfo("https://abrechts.github.io/phoenix-eln-help.github.io/pages/ReactionSearches.html")
         info.UseShellExecute = True
         Process.Start(info)
 

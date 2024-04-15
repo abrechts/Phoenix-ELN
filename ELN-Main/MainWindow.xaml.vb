@@ -1196,6 +1196,15 @@ Class MainWindow
     End Sub
 
 
+    Private Sub mnuHelp_Click() Handles mnuHelp.Click
+
+        Dim info As New ProcessStartInfo("https://abrechts.github.io/phoenix-eln-help.github.io/pages/1CreateExperiment.html")
+        info.UseShellExecute = True
+        Process.Start(info)
+
+    End Sub
+
+
     Private Sub mnuAbout_Click() Handles mnuAbout.Click
 
         Dim aboutDlg As New dlgAbout
