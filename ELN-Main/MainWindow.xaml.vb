@@ -827,23 +827,12 @@ Class MainWindow
         'in case of some temp file leftovers
         FileContent.CleanupTempFolderDocs()
 
+        'save app window settings
         With CustomControls.My.MySettings.Default
-
             .StartupPosition = New System.Drawing.Point(Left, Top)
             .StartupSize = New System.Drawing.Size(Width, Height)
-
-            'Get ChemBytes Draw settings
-            'Dim prop = mCbDraw.DialogProperties
-            '.CbDialogPosition = prop.DialogPosition
-            '.CbDialogSize = prop.DialogSize
-            '.CbLastOpenPath = prop.LastOpenFilePath
-            '.CbLastSavePath = prop.LastSaveFilePath
-            '.CbSeqPaneHeight = prop.LastSequenceStructPaneHeight
-
             .Save()
-
         End With
-
 
         'final save
         DBContext.SaveChanges()
@@ -859,7 +848,7 @@ Class MainWindow
 
     Private Sub Warning_Delegate()
 
-        MsgBox("The demo experiments limit Is reached." + vbCrLf + vbCrLf +
+        MsgBox("The demo experiments limit is reached." + vbCrLf + vbCrLf +
                "Click the green 'Create User' button" + vbCrLf +
                "to start with a unique user now.", MsgBoxStyle.Information, "Demo Validation")
 

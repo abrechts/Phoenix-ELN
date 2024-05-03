@@ -124,7 +124,6 @@ Public Class SketchArea
             .CbDrawLastSavePath = cbDraw.DialogProperties.LastSaveFilePath
         End With
 
-
         'editor not cancelled?
         If skInfo IsNot Nothing Then
 
