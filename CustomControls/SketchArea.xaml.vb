@@ -102,11 +102,28 @@ Public Class SketchArea
 
         cbDraw.DialogProperties.SketchValidation = EditorOptions.SketchConditions.Reaction
 
-        If Me.DataContext IsNot Nothing Then
-            cbDraw.DialogProperties.IsOkButtonDisabled = CType(Me.DataContext, tblExperiments).WorkflowState = WorkflowStatus.Finalized
-        End If
+        'get editor preferences from settings
+        With cbDraw.DialogProperties
+            .DialogPosition = New Point(My.Settings.CbDrawDialogPosition.X, My.Settings.CbDrawDialogPosition.Y)
+            .DialogSize = New Size(My.Settings.CbDrawDialogSize.Width, My.Settings.CbDrawDialogSize.Height)
+            .LastOpenFilePath = My.Settings.CbDrawLastOpenPath
+            .LastSaveFilePath = My.Settings.CbDrawLastSavePath
+            If Me.DataContext IsNot Nothing Then
+                .IsOkButtonDisabled = CType(Me.DataContext, tblExperiments).WorkflowState = WorkflowStatus.Finalized
+            End If
+        End With
 
+        'display sketch editor
         Dim skInfo = cbDraw.DisplayDialog(currExp.RxnSketch)
+
+        'save editor preferences to settings
+        With My.Settings
+            .CbDrawDialogPosition = New System.Drawing.Point(cbDraw.DialogProperties.DialogPosition.X, cbDraw.DialogProperties.DialogPosition.Y)
+            .CbDrawDialogSize = New System.Drawing.Size(cbDraw.DialogProperties.DialogSize.Width, cbDraw.DialogProperties.DialogSize.Height)
+            .CbDrawLastOpenPath = cbDraw.DialogProperties.LastOpenFilePath
+            .CbDrawLastSavePath = cbDraw.DialogProperties.LastSaveFilePath
+        End With
+
 
         'editor not cancelled?
         If skInfo IsNot Nothing Then

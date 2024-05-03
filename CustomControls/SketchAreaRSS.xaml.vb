@@ -88,10 +88,26 @@ Public Class SketchAreaRSS
 
         If cbDraw IsNot Nothing Then
 
-            cbDraw.DialogProperties.SketchValidation = EditorOptions.SketchConditions.RssQuery
+            'get editor preferences from settings
+            With cbDraw.DialogProperties
+                .DialogPosition = New Point(My.Settings.CbDrawDialogPosition.X, My.Settings.CbDrawDialogPosition.Y)
+                .DialogSize = New Size(My.Settings.CbDrawDialogSize.Width, My.Settings.CbDrawDialogSize.Height)
+                .LastOpenFilePath = My.Settings.CbDrawLastOpenPathRSS
+                .LastSaveFilePath = My.Settings.CbDrawLastSavePathRSS
+                'set to RSS query mode (one reactant, one product)
+                .SketchValidation = EditorOptions.SketchConditions.RssQuery
+            End With
 
             'CORE
             Dim skInfo = cbDraw.DisplayDialog(rxnSketch, Nothing, False)
+
+            'save editor preferences to settings
+            With My.Settings
+                .CbDrawDialogPosition = New System.Drawing.Point(cbDraw.DialogProperties.DialogPosition.X, cbDraw.DialogProperties.DialogPosition.Y)
+                .CbDrawDialogSize = New System.Drawing.Size(cbDraw.DialogProperties.DialogSize.Width, cbDraw.DialogProperties.DialogSize.Height)
+                .CbDrawLastOpenPathRSS = cbDraw.DialogProperties.LastOpenFilePath
+                .CbDrawLastSavePathRSS = cbDraw.DialogProperties.LastSaveFilePath
+            End With
 
             'editor not cancelled?
             If skInfo IsNot Nothing Then

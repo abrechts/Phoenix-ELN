@@ -377,6 +377,78 @@ Namespace My
                 Me("IsServerQuery") = value
             End Set
         End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("0, 0")>  _
+        Public Property CbDrawDialogPosition() As Global.System.Drawing.Point
+            Get
+                Return CType(Me("CbDrawDialogPosition"),Global.System.Drawing.Point)
+            End Get
+            Set
+                Me("CbDrawDialogPosition") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("0, 0")>  _
+        Public Property CbDrawDialogSize() As Global.System.Drawing.Size
+            Get
+                Return CType(Me("CbDrawDialogSize"),Global.System.Drawing.Size)
+            End Get
+            Set
+                Me("CbDrawDialogSize") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("")>  _
+        Public Property CbDrawLastOpenPath() As String
+            Get
+                Return CType(Me("CbDrawLastOpenPath"),String)
+            End Get
+            Set
+                Me("CbDrawLastOpenPath") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("")>  _
+        Public Property CbDrawLastSavePath() As String
+            Get
+                Return CType(Me("CbDrawLastSavePath"),String)
+            End Get
+            Set
+                Me("CbDrawLastSavePath") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("")>  _
+        Public Property CbDrawLastOpenPathRSS() As String
+            Get
+                Return CType(Me("CbDrawLastOpenPathRSS"),String)
+            End Get
+            Set
+                Me("CbDrawLastOpenPathRSS") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("")>  _
+        Public Property CbDrawLastSavePathRSS() As String
+            Get
+                Return CType(Me("CbDrawLastSavePathRSS"),String)
+            End Get
+            Set
+                Me("CbDrawLastSavePathRSS") = value
+            End Set
+        End Property
     End Class
 End Namespace
 
