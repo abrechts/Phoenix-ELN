@@ -28,7 +28,7 @@
 - Supports organic, salt, multi-component, organometallic, peptide, resin and polymer structures.
 - Concise in-place context menus and intelligent next bond proposals prevent constant round-trips to application toolbars while drawing, resulting in a fluent drawing process.
 - The reaction sketch is rendered as high resolution vector graphics.
-- See the [documentation](https://chembytes.com/helpdocs/ChemBytesDraw-2/DrawBonds.html) (-> ChemBytes) for more information
+- See the [documentation](https://abrechts.github.io/ChemBytesDraw-Help.github.io/pages/DrawBonds.html) for more information
 
 <img src="GitHub_Assets/Reaction-Editor.png" alt="drawing" width=500/>
 
