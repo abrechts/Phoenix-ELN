@@ -389,7 +389,7 @@ project Flags=0x20 {
 			str Value: Default="<$shpath(33)=@<ShellFoldersCU>\\Cookies=_LocCookiesFolder>";
 		}
 		var Copyright: Flags=0x204, Type=0, Description="Copyright notice" {
-			str Value: Default="Copyright (c) 2023 <Publisher>";
+			str Value: Default="Copyright (c) 2024 <Publisher>";
 		}
 		var Date: Flags=0x204, Type=0, Description="Session start date formatted according to regional preferences" {
 			str Value: Default="<$sysval(26,2)>";
@@ -636,7 +636,7 @@ project Flags=0x20 {
 			str Value: Default="Phoenix ELN";
 		}
 		var ProductVersion: Flags=0x204, Type=0, Description="Product version" {
-			str Value: Default="1.0.1";
+			str Value: Default="1.0.2";
 		}
 		var ProfileFolder: Flags=0x244, Type=1, Description="Current User profile base folder" {
 			str Value: Default="<$syspath(7)=$shpath(40)=%USERPROFILE=_LocProfileFolder>";
@@ -5710,6 +5710,10 @@ project Flags=0x20 {
 				str DisplayName: Flags=0x40000, Default=Watch_20240415145206;
 				str Description: Flags=0x40000;
 			}
+			component Watch_20240504060935: Flags=0x0, Platforms=0x7FFFFFFF, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
+				str DisplayName: Flags=0x40000, Default=Watch_20240504060935;
+				str Description: Flags=0x40000;
+			}
 		}
 		component Folder1_A8A264769C3704B4: Flags=0x0, Platforms=0x7FFFFFFF, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
 			str DisplayName: Flags=0x40000, Default=Folder1_Files;
@@ -6022,25 +6026,25 @@ project Flags=0x20 {
 			folder INSTALLDIR: Flags=0x0, Traits=0x80000000, InstallAction=0, RemoveAction=1 {
 				str Name: Default="<ProductName>";
 				wlist Watchlist_FF5B2057B5E221F6: Flags=0xE000003F, Path="..\\ELN-Main\\bin\\Release\\Publish", Filter="*.*", Exclude="*.bak;*.tmp;*.lnk;*.log;*.acl;*.gid;*.fts;*.pnf;*.oca;*.scc;*.$*;*.~*;.svn";
-				file bingo_nosql.dll_65A998FB85C35B64: Flags=0x0, Component=Watch_20240415145206, Path="..\\ELN-Main\\bin\\Release\\Publish\\bingo-nosql.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+				file bingo_nosql.dll_65A998FB85C35B64: Flags=0x0, Component=Watch_20240504060935, Path="..\\ELN-Main\\bin\\Release\\Publish\\bingo-nosql.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
 					str Name: Default="bingo-nosql.dll";
 				}
-				file CustomControls.dll.config_00444E05208FE4BB: Flags=0x0, Component=Watch_20240415145206, Path="..\\ELN-Main\\bin\\Release\\Publish\\CustomControls.dll.config", Attributes=0x0, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
+				file CustomControls.dll.config_00444E05208FE4BB: Flags=0x0, Component=Watch_20240504060935, Path="..\\ELN-Main\\bin\\Release\\Publish\\CustomControls.dll.config", Attributes=0x0, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
 					str Name: Default=CustomControls.dll.config;
 				}
-				file CustomControls.pdb_FFB8ABFCA880C1B6: Flags=0x0, Component=Watch_20240415145206, Path="..\\ELN-Main\\bin\\Release\\Publish\\CustomControls.pdb", Attributes=0x0, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
+				file CustomControls.pdb_FFB8ABFCA880C1B6: Flags=0x0, Component=Watch_20240504060935, Path="..\\ELN-Main\\bin\\Release\\Publish\\CustomControls.pdb", Attributes=0x0, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
 					str Name: Default=CustomControls.pdb;
 				}
-				file D3DCompiler_47_cor3.dll_E52B9B636C2272F1: Flags=0x0, Component=Watch_20240415145206, Path="..\\ELN-Main\\bin\\Release\\Publish\\D3DCompiler_47_cor3.dll", Attributes=0x0, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
+				file D3DCompiler_47_cor3.dll_E52B9B636C2272F1: Flags=0x0, Component=Watch_20240504060935, Path="..\\ELN-Main\\bin\\Release\\Publish\\D3DCompiler_47_cor3.dll", Attributes=0x0, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
 					str Name: Default=D3DCompiler_47_cor3.dll;
 				}
-				file e_sqlite3.dll_C5C0B5D547CAA173: Flags=0x0, Component=Watch_20240415145206, Path="..\\ELN-Main\\bin\\Release\\Publish\\e_sqlite3.dll", Attributes=0x0, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+				file e_sqlite3.dll_C5C0B5D547CAA173: Flags=0x0, Component=Watch_20240504060935, Path="..\\ELN-Main\\bin\\Release\\Publish\\e_sqlite3.dll", Attributes=0x0, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
 					str Name: Default=e_sqlite3.dll;
 				}
-				file ElnBase.pdb_39F2C8A9119685D1: Flags=0x0, Component=Watch_20240415145206, Path="..\\ELN-Main\\bin\\Release\\Publish\\ElnBase.pdb", Attributes=0x0, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
+				file ElnBase.pdb_39F2C8A9119685D1: Flags=0x0, Component=Watch_20240504060935, Path="..\\ELN-Main\\bin\\Release\\Publish\\ElnBase.pdb", Attributes=0x0, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
 					str Name: Default=ElnBase.pdb;
 				}
-				file ElnCoreModel.pdb_825DE769278299F4: Flags=0x0, Component=Watch_20240415145206, Path="..\\ELN-Main\\bin\\Release\\Publish\\ElnCoreModel.pdb", Attributes=0x0, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
+				file ElnCoreModel.pdb_825DE769278299F4: Flags=0x0, Component=Watch_20240504060935, Path="..\\ELN-Main\\bin\\Release\\Publish\\ElnCoreModel.pdb", Attributes=0x0, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
 					str Name: Default=ElnCoreModel.pdb;
 				}
 				folder Folder1_40053762E24C7C21: Flags=0x0, Component="Phoenix ELN Install Files", Traits=0x80000000, InstallAction=0, RemoveAction=1 {
@@ -6049,13 +6053,13 @@ project Flags=0x20 {
 						str Name: Default=ElnData.db;
 					}
 				}
-				file indigo.dll_5CEEC51A0798704A: Flags=0x0, Component=Watch_20240415145206, Path="..\\ELN-Main\\bin\\Release\\Publish\\indigo.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+				file indigo.dll_5CEEC51A0798704A: Flags=0x0, Component=Watch_20240504060935, Path="..\\ELN-Main\\bin\\Release\\Publish\\indigo.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
 					str Name: Default=indigo.dll;
 				}
-				file indigo_inchi.dll_2033C9801CD6350B: Flags=0x0, Component=Watch_20240415145206, Path="..\\ELN-Main\\bin\\Release\\Publish\\indigo-inchi.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+				file indigo_inchi.dll_2033C9801CD6350B: Flags=0x0, Component=Watch_20240504060935, Path="..\\ELN-Main\\bin\\Release\\Publish\\indigo-inchi.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
 					str Name: Default="indigo-inchi.dll";
 				}
-				file indigo_renderer.dll_0380A4CD9067D9A9: Flags=0x0, Component=Watch_20240415145206, Path="..\\ELN-Main\\bin\\Release\\Publish\\indigo-renderer.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+				file indigo_renderer.dll_0380A4CD9067D9A9: Flags=0x0, Component=Watch_20240504060935, Path="..\\ELN-Main\\bin\\Release\\Publish\\indigo-renderer.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
 					str Name: Default="indigo-renderer.dll";
 				}
 				folder libinchi_00FF7FEC82A3FACA: Flags=0x0, Component="Phoenix ELN Install Files", Traits=0x80000000, InstallAction=1, RemoveAction=1 {
@@ -6076,31 +6080,31 @@ project Flags=0x20 {
 						str Name: Default=Readme.txt;
 					}
 				}
-				file msvcp140.dll_24633E9DC704A1C4: Flags=0x0, Component=Watch_20240415145206, Path="..\\ELN-Main\\bin\\Release\\Publish\\msvcp140.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
+				file msvcp140.dll_24633E9DC704A1C4: Flags=0x0, Component=Watch_20240504060935, Path="..\\ELN-Main\\bin\\Release\\Publish\\msvcp140.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
 					str Name: Default=msvcp140.dll;
 				}
-				file PenImc_cor3.dll_633D865A844398FD: Flags=0x0, Component=Watch_20240415145206, Path="..\\ELN-Main\\bin\\Release\\Publish\\PenImc_cor3.dll", Attributes=0x0, InstallAction=4, RemoveAction=2, Registration=1, RegOrder=1000, Packaging=0 {
+				file PenImc_cor3.dll_633D865A844398FD: Flags=0x0, Component=Watch_20240504060935, Path="..\\ELN-Main\\bin\\Release\\Publish\\PenImc_cor3.dll", Attributes=0x0, InstallAction=4, RemoveAction=2, Registration=1, RegOrder=1000, Packaging=0 {
 					str Name: Default=PenImc_cor3.dll;
 				}
-				file PhoenixELN.dll.config_A24DEB8BD158AF79: Flags=0x0, Component=Watch_20240415145206, Path="..\\ELN-Main\\bin\\Release\\Publish\\PhoenixELN.dll.config", Attributes=0x0, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
+				file PhoenixELN.dll.config_A24DEB8BD158AF79: Flags=0x0, Component=Watch_20240504060935, Path="..\\ELN-Main\\bin\\Release\\Publish\\PhoenixELN.dll.config", Attributes=0x0, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
 					str Name: Default=PhoenixELN.dll.config;
 				}
-				file PhoenixELN.exe_03B5412C1540DD20: Flags=0x0, Component=Watch_20240415145206, Path="..\\ELN-Main\\bin\\Release\\Publish\\PhoenixELN.exe", Attributes=0x0, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=2000, Packaging=0 {
+				file PhoenixELN.exe_03B5412C1540DD20: Flags=0x0, Component=Watch_20240504060935, Path="..\\ELN-Main\\bin\\Release\\Publish\\PhoenixELN.exe", Attributes=0x0, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=2000, Packaging=0 {
 					str Name: Default=PhoenixELN.exe;
 				}
-				file PhoenixELN.pdb_D6E580F012F75184: Flags=0x0, Component=Watch_20240415145206, Path="..\\ELN-Main\\bin\\Release\\Publish\\PhoenixELN.pdb", Attributes=0x0, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
+				file PhoenixELN.pdb_D6E580F012F75184: Flags=0x0, Component=Watch_20240504060935, Path="..\\ELN-Main\\bin\\Release\\Publish\\PhoenixELN.pdb", Attributes=0x0, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
 					str Name: Default=PhoenixELN.pdb;
 				}
-				file PresentationNative_cor3.dll_D88C1C42A2CCA390: Flags=0x0, Component=Watch_20240415145206, Path="..\\ELN-Main\\bin\\Release\\Publish\\PresentationNative_cor3.dll", Attributes=0x0, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+				file PresentationNative_cor3.dll_D88C1C42A2CCA390: Flags=0x0, Component=Watch_20240504060935, Path="..\\ELN-Main\\bin\\Release\\Publish\\PresentationNative_cor3.dll", Attributes=0x0, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
 					str Name: Default=PresentationNative_cor3.dll;
 				}
-				file vcruntime140.dll_A002DB0C6CD3B039: Flags=0x0, Component=Watch_20240415145206, Path="..\\ELN-Main\\bin\\Release\\Publish\\vcruntime140.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
+				file vcruntime140.dll_A002DB0C6CD3B039: Flags=0x0, Component=Watch_20240504060935, Path="..\\ELN-Main\\bin\\Release\\Publish\\vcruntime140.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
 					str Name: Default=vcruntime140.dll;
 				}
-				file vcruntime140_cor3.dll_0D7E982A9183EE66: Flags=0x0, Component=Watch_20240415145206, Path="..\\ELN-Main\\bin\\Release\\Publish\\vcruntime140_cor3.dll", Attributes=0x0, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
+				file vcruntime140_cor3.dll_0D7E982A9183EE66: Flags=0x0, Component=Watch_20240504060935, Path="..\\ELN-Main\\bin\\Release\\Publish\\vcruntime140_cor3.dll", Attributes=0x0, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
 					str Name: Default=vcruntime140_cor3.dll;
 				}
-				file wpfgfx_cor3.dll_56B33718D73573B6: Flags=0x0, Component=Watch_20240415145206, Path="..\\ELN-Main\\bin\\Release\\Publish\\wpfgfx_cor3.dll", Attributes=0x0, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+				file wpfgfx_cor3.dll_56B33718D73573B6: Flags=0x0, Component=Watch_20240504060935, Path="..\\ELN-Main\\bin\\Release\\Publish\\wpfgfx_cor3.dll", Attributes=0x0, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
 					str Name: Default=wpfgfx_cor3.dll;
 				}
 			}

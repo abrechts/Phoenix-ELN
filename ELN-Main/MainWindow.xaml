@@ -7,7 +7,7 @@
         xmlns:data="clr-namespace:ElnCoreModel;assembly=ElnCoreModel" 
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=data:tblUsers}"
-        Title="Phoenix ELN" Height="900" MinWidth="1280" MinHeight="800" d:Height="900" TextOptions.TextFormattingMode="Display" 
+        Title="Phoenix ELN" Height="900" MinWidth="1320" MinHeight="800" d:Height="900" TextOptions.TextFormattingMode="Display" 
         WindowStartupLocation="CenterScreen">
 
     <Window.Resources>
@@ -28,8 +28,8 @@
 
                     <Button x:Name="btnAddProject" HorizontalAlignment="Left" VerticalAlignment="Top" ToolTip="Add a new project folder" Margin="4,0,0,0">
                         <StackPanel Orientation="Horizontal">
-                            <ContentControl Content="{StaticResource icoNewFolder}" Height="16" Margin="2,-1,4,0"/>
-                            <TextBlock Text="Add Project" Margin="0,0,2,0" VerticalAlignment="Center"/>
+                            <ContentControl Content="{StaticResource icoNewFolder}" Height="16" Margin="2,0,4,0"/>
+                            <TextBlock Text="Add Project" Margin="0,1,2,0" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
 
@@ -38,7 +38,7 @@
                     <Button x:Name="btnPrint" HorizontalAlignment="Left" VerticalAlignment="Top">
                         <StackPanel Orientation="Horizontal">
                             <ContentControl Content="{StaticResource icoPrint}" Height="16" Margin="2,0,4,0" Background="white"/>
-                            <TextBlock Text="Print" Margin="0,0,2,0"/>
+                            <TextBlock Text="Print" Margin="0,1,2,0"/>
                         </StackPanel>
                     </Button>
 
@@ -109,14 +109,17 @@
 
                     <Separator/>
 
-                   <Menu TextBlock.FontFamily="Verdana" Background="White">
+                    <Menu TextBlock.FontFamily="Verdana" Background="White">
                         <MenuItem VerticalAlignment="Center" Padding="4,2">
                             <MenuItem.Header>
-                                <StackPanel Orientation="Horizontal" >
+                                <StackPanel Orientation="Horizontal" Margin="-8,0,0,0" VerticalAlignment="bottom" >
                                     <TextBlock Text="Tools" />
                                     <Path VerticalAlignment="Center" Margin="4,2,0,0" Fill="Black" Data="M 0 0 L 3 3 L 6 0 Z"/>
                                 </StackPanel>
                             </MenuItem.Header>
+                            <MenuItem.Icon>
+                                <ContentControl Content="{StaticResource icoSettings}" Height="14" Opacity="0.7"/>
+                            </MenuItem.Icon>
                             <MenuItem x:Name="btnEditUser" Header="Edit Personal Settings ..." Icon="{StaticResource icoCreateUser}" Background="white"
                               Margin="0,1" />
                             <Separator/>
@@ -128,11 +131,21 @@
                         </MenuItem>
                     </Menu>
 
+                    <Button x:Name="btnSearch" HorizontalAlignment="Left" VerticalAlignment="Top" ToolTip="Find experiments" d:Visibility="Visible"
+                        Visibility="Visible">
+                        <StackPanel Orientation="Horizontal">
+                            <ContentControl Content="{StaticResource icoSearch}" Height="16" Margin="0,1,3,0"/>
+                            <TextBlock Text="Search" Margin="0,0,2,0" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
+
                     <Menu TextBlock.FontFamily="Verdana" Background="White" Padding="1,0,0,0">
-                        <MenuItem VerticalAlignment="Center" Padding="4,2">
+                        <MenuItem VerticalAlignment="Center" Padding="2,2,4,2">
                             <MenuItem.Header>
                                 <StackPanel Orientation="Horizontal" >
-                                    <TextBlock Text="Help" />
+                                    <ContentControl Content="{StaticResource icoHelpMenu}" Height="16" Margin="0,0,2,0"/>
+                                    <TextBlock Text="Help" Margin="0,0,0,0" />
                                     <Path VerticalAlignment="Center" Margin="4,2,0,0" Fill="Black" Data="M 0 0 L 3 3 L 6 0 Z"/>
                                 </StackPanel>
                             </MenuItem.Header>
@@ -149,14 +162,6 @@
                             <MenuItem x:Name="mnuCheckForUpdates" Header="Check for updates ..."/>
                         </MenuItem>
                     </Menu>
-
-                    <Button x:Name="btnSearch" HorizontalAlignment="Left" VerticalAlignment="Top" ToolTip="Find experiments" d:Visibility="Visible"
-                       Visibility="Visible">
-                        <StackPanel Orientation="Horizontal">
-                            <ContentControl Content="{StaticResource icoSearch}" Height="16" Margin="0,0,3,0"/>
-                            <TextBlock Text="Search" Margin="0,0,2,0" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </Button>
 
                 </ToolBar>
 
