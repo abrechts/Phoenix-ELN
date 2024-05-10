@@ -31,6 +31,14 @@
                 <GradientStop Color="LightBlue" Offset="1"/>
             </LinearGradientBrush>
 
+            <!--"Unselected sequence control background"-->
+            <LinearGradientBrush x:Key="LightBlueGradient2"
+                 StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Color="LightBlue" Offset="0.0"/>
+                <GradientStop Color="LightCyan" Offset="0.80"/>
+                <GradientStop Color="WhiteSmoke" Offset="1"/>
+            </LinearGradientBrush>
+
             <!--Global rounded buttons style-->
             <Style TargetType="Button">
                 <Style.Resources>

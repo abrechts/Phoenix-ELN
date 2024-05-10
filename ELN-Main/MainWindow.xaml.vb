@@ -104,6 +104,7 @@ Class MainWindow
         RemainingDemoCountConverter.MaxDemoCount = 15
         RemainingDemoCountConverter.FactoryDemoCount = 6
 
+
     End Sub
 
 
@@ -169,6 +170,16 @@ Class MainWindow
 
         'check for updates async
         CheckForUpdatesAsync()
+
+
+        'TEST
+        Dim refExp = (From exp In DBContext.tblExperiments Where exp.ExperimentID = "seqTest-00006").FirstOrDefault
+        If refExp IsNot Nothing Then
+            Dim testSeq = New ReactionSequence(refExp, DBContext)
+        End If
+
+
+
 
     End Sub
 
@@ -1211,7 +1222,7 @@ Class MainWindow
         Dim newVersionStr = Await PhpServices.GetLatestAppVersionAsync
         If newVersionStr = "" Then
             MsgBox("Sorry, can 't access version server.", MsgBoxStyle.Information, "Update Check")
-                    Exit Sub 'server error
+            Exit Sub 'server error
         End If
 
         Dim latestVersion = New Version(newVersionStr)
