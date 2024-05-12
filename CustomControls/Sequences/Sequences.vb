@@ -3,7 +3,6 @@
 Imports System.Windows.Controls
 Imports ElnBase
 Imports ElnCoreModel
-Imports Microsoft.EntityFrameworkCore
 
 
 Public Class ReactionSequence
@@ -84,8 +83,6 @@ Public Class ReactionSequence
     ''' 
     Friend Sub New(connectingStep As SequenceStep, direction As SequenceDirection)
 
-        '  Dim endReached As Boolean = False
-
         StartInChIKey = connectingStep.ReactantInChIKey
         EndInChIKey = connectingStep.ProductInChIKey
         SequenceTitle = "Sequence"
@@ -140,7 +137,7 @@ Public Class ReactionSequence
                 'TODO: detect groups of converging downstream sequences (each group having identical end InChIKey)
 
                 endReached = True 'end of sequence: no more steps, or branching off
-                End If
+            End If
         End While
 
     End Sub
@@ -172,7 +169,7 @@ Public Class ReactionSequence
                 'TODO: detect groups of converging upstream sequences (each group having identical start InChIKey)
 
                 endReached = True 'start of sequence: no more steps, or branching off
-                End If
+            End If
         End While
 
     End Sub

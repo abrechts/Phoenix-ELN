@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:CustomControls"
              mc:Ignorable="d" 
-             d:DesignHeight="161" d:DesignWidth="340"  TextOptions.TextFormattingMode="Display">
+             d:DesignHeight="161" TextOptions.TextFormattingMode="Display">
     
     <UserControl.Resources>
 
@@ -46,7 +46,7 @@
     <Grid>
         <StackPanel Orientation="Horizontal">
 
-            <StackPanel x:Name="pnlUpstream" Margin="0,0,27,0" VerticalAlignment="Center"/>
+            <StackPanel x:Name="pnlUpstream" Margin="0,0,27,0" d:Width="100" d:Background="whitesmoke"/>
 
             <StackPanel x:Name="pnlMain" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,1" >
 
@@ -73,19 +73,11 @@
 
             </StackPanel>
 
-            <StackPanel Name="pnlDownstream" Orientation="Horizontal" VerticalAlignment="Center" Margin="4,0,2,0" HorizontalAlignment="Left" >
+            <StackPanel Name="pnlDownstream" Orientation="Horizontal"  Margin="27,0,2,0" d:Width="100" d:Background="whitesmoke"/>
 
-                <StackPanel  Margin="0,2" Name="pnlSequences" VerticalAlignment="Center" >
-                    <Button Content="dummy seq 1" Height="20" Margin="4" Width="120" d:Visibility="Visible" Visibility="Collapsed"/>
-                    <Button Content="dummy seq 2" Height="20" Margin="4" Width="120" d:Visibility="Visible" Visibility="Collapsed"/>
-                </StackPanel>
 
-                <StackPanel Name="pnlConvergent" Margin="-2,0,0,0" VerticalAlignment="Center">
-                    <Button Content="C" Height="20" Margin="4" Width="50" d:Visibility="Visible" Visibility="Collapsed"/>
-                </StackPanel>
 
-            </StackPanel>
-          
+
         </StackPanel>
     </Grid>
 </UserControl>
