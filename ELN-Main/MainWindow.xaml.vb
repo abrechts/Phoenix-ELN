@@ -173,9 +173,10 @@ Class MainWindow
 
 
         'TEST
-        Dim refExp = (From exp In DBContext.tblExperiments Where exp.ExperimentID = "seqTest-00006").FirstOrDefault
+        Dim refExp = (From exp In DBContext.tblExperiments Where exp.ExperimentID = "seqTest-00001").FirstOrDefault
         If refExp IsNot Nothing Then
-            Dim testSeq = New ReactionSequence(refExp, DBContext)
+            Dim testSeq = New SequenceControl(refExp, DBContext)
+            Dim x = 1
         End If
 
 

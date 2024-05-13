@@ -73,7 +73,7 @@
 
             </StackPanel>
 
-            <StackPanel Name="pnlDownstream" Orientation="Horizontal"  Margin="27,0,2,0" d:Width="100" d:Background="whitesmoke"/>
+            <StackPanel x:Name="pnlDownstream" Orientation="Horizontal"  Margin="27,0,2,0" d:Width="100" d:Background="whitesmoke"/>
 
 
 
