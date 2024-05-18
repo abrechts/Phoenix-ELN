@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:CustomControls"
              mc:Ignorable="d" 
-             d:DesignHeight="161" TextOptions.TextFormattingMode="Display">
+             d:DesignHeight="140" TextOptions.TextFormattingMode="Display">
     
     <UserControl.Resources>
 
@@ -43,14 +43,28 @@
 
     </UserControl.Resources>
     
-    <Grid>
+    <Grid Margin="0,1">
+        
         <StackPanel Orientation="Horizontal">
 
-            <StackPanel x:Name="pnlUpstream" Margin="0,0,27,0" d:Width="100" d:Background="whitesmoke"/>
+            <!--vertical connector left-->
+            <Grid HorizontalAlignment="right">
+                <StackPanel x:Name="pnlUpstream" Margin="0,0,2,0" d:Width="100" d:Background="whitesmoke" VerticalAlignment="Center"/>
+                <Rectangle x:Name="VerticalConnectorLeft" Width="2" Fill="BlueViolet" Margin="0,12"
+                    d:Visibility="Visible" Visibility="collapsed" HorizontalAlignment="right"/>
+            </Grid>
 
-            <StackPanel x:Name="pnlMain" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,1" >
+            <StackPanel x:Name="pnlMain" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,1,0,1" Orientation="Horizontal" >
 
-                <ToggleButton x:Name="btnMain" Style="{StaticResource FlowSchemeButton}" ToolTipService.ShowOnDisabled="True"  Width="110" FontSize="10" Padding="2,0" IsThreeState="False">
+                <!--upstream connector-->
+                <StackPanel x:Name="upConnector" Orientation="Horizontal" Margin="0,0,1,0" VerticalAlignment="Center" 
+                   d:Visibility="Visible" Visibility="collapsed">
+                    <Rectangle Fill="BlueViolet" Width="14" Height="2" VerticalAlignment="Center" />
+                    <TextBlock Text="&#10148;" FontSize="12" Foreground="BlueViolet" VerticalAlignment="Center" Margin="-3,-2,0,0"/>
+                </StackPanel>
+
+                <ToggleButton x:Name="btnMain" Style="{StaticResource FlowSchemeButton}" ToolTipService.ShowOnDisabled="True" Width="110" FontSize="10" Padding="2,0" IsThreeState="False" MinHeight="20">
+                    
                     <ToggleButton.ContextMenu>
                         <ContextMenu>
                             <MenuItem Name="mnuRename" Template="{StaticResource ContextMenuItem}">
@@ -67,17 +81,25 @@
                         </ContextMenu>
                     </ToggleButton.ContextMenu>
 
-                    <TextBlock x:Name="blkMainTitle" Text="{Binding Path=Title}" TextTrimming="CharacterEllipsis" Margin="0,-1,0,1" Foreground="#FF2B2B2B"/>
+                    <TextBlock x:Name="blkMainTitle" TextTrimming="CharacterEllipsis" Margin="0,-1,0,1" 
+                    Foreground="#FF2B2B2B"/>
 
-                </ToggleButton>
+            </ToggleButton>
+              
+            <!--downstream connector-->
+                <Rectangle x:Name="downConnector" Fill="BlueViolet" Width="12" Height="2" Margin="3,0,0,0" 
+                    d:Visibility="Visible" Visibility="collapsed"/>
 
             </StackPanel>
 
-            <StackPanel x:Name="pnlDownstream" Orientation="Horizontal"  Margin="27,0,2,0" d:Width="100" d:Background="whitesmoke"/>
-
-
-
+            <!--vertical connector right-->
+            <Grid HorizontalAlignment="left">
+                <StackPanel x:Name="pnlDownstream" Margin="0,0,2,0" d:Width="100" d:Background="whitesmoke" VerticalAlignment="Center"/>
+                <Rectangle x:Name="VerticalConnectorRight" Width="2" Fill="BlueViolet" Margin="0,12"
+                   d:Visibility="Visible" Visibility="visible" HorizontalAlignment="Left"/>
+            </Grid>
 
         </StackPanel>
     </Grid>
+    
 </UserControl>

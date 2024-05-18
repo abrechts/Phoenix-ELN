@@ -176,13 +176,17 @@ Class MainWindow
         Dim refExp = (From exp In DBContext.tblExperiments Where exp.ExperimentID = "seqTest-00001").FirstOrDefault
         If refExp IsNot Nothing Then
             Dim testSeq = New SequenceControl(refExp, DBContext)
-            Dim x = 1
+            Dim seqDlg As New dlgSequences
+            With seqDlg
+                .SequenceOverviewGrid.Children.Add(testSeq)
+                .ShowDialog()
+            End With
         End If
 
 
 
-
     End Sub
+
 
 
     Private Sub ServerSync_ServerContextCreated(serverContext As ElnDbContext)
