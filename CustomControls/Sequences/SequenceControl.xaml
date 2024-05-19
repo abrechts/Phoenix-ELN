@@ -50,7 +50,7 @@
             <!--vertical connector left-->
             <Grid HorizontalAlignment="right">
                 <StackPanel x:Name="pnlUpstream" Margin="0,0,2,0" d:Width="100" d:Background="whitesmoke" VerticalAlignment="Center"/>
-                <Rectangle x:Name="VerticalConnectorLeft" Width="2" Fill="BlueViolet" Margin="0,12"
+                <Rectangle x:Name="VerticalConnectorLeft" Width="2" Fill="BlueViolet" Margin="0,11"
                     d:Visibility="Visible" Visibility="collapsed" HorizontalAlignment="right"/>
             </Grid>
 
@@ -59,7 +59,7 @@
                 <!--upstream connector-->
                 <StackPanel x:Name="upConnector" Orientation="Horizontal" Margin="0,0,1,0" VerticalAlignment="Center" 
                    d:Visibility="Visible" Visibility="collapsed">
-                    <Rectangle Fill="BlueViolet" Width="14" Height="2" VerticalAlignment="Center" />
+                    <Rectangle Fill="BlueViolet" Width="12" Height="2" VerticalAlignment="Center" />
                     <TextBlock Text="&#10148;" FontSize="12" Foreground="BlueViolet" VerticalAlignment="Center" Margin="-3,-2,0,0"/>
                 </StackPanel>
 
@@ -94,9 +94,9 @@
 
             <!--vertical connector right-->
             <Grid HorizontalAlignment="left">
-                <StackPanel x:Name="pnlDownstream" Margin="0,0,2,0" d:Width="100" d:Background="whitesmoke" VerticalAlignment="Center"/>
-                <Rectangle x:Name="VerticalConnectorRight" Width="2" Fill="BlueViolet" Margin="0,12"
-                   d:Visibility="Visible" Visibility="visible" HorizontalAlignment="Left"/>
+                <StackPanel x:Name="pnlDownstream" d:Width="100" d:Background="whitesmoke" VerticalAlignment="Center"/>
+                <Rectangle x:Name="VerticalConnectorRight" Width="2" Fill="BlueViolet" Margin="0,11"
+                   d:Visibility="Visible" Visibility="collapsed" HorizontalAlignment="Left"/>
             </Grid>
 
         </StackPanel>

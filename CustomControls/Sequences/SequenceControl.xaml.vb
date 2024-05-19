@@ -112,7 +112,10 @@ Public Class SequenceControl
 
         StartInChIKey = connectingStep.ReactantInChIKey
         EndInChIKey = connectingStep.ProductInChIKey
-        SequenceSteps.Add(connectingStep)
+
+        If Not SequenceSteps.Contains(connectingStep) Then
+            SequenceSteps.Add(connectingStep)
+        End If
 
         If direction = SequenceDirection.Downstream Then
             AddDownstreamElements(connectingStep)
@@ -131,7 +134,6 @@ Public Class SequenceControl
     ''' 
     Private Sub AddDownstreamElements(refStep As SequenceStep)
 
-        '    Dim downStreamConnectSequences As New List(Of SequenceControl)
         Dim endReached As Boolean = False
 
         While Not endReached
@@ -198,7 +200,7 @@ Public Class SequenceControl
                                 'merging to a downstream sequence
 
                                 Dim connStep = finalStep.GetNextSteps.First
-                                Dim convergedSequence As New SequenceControl(connStep, SequenceDirection.Downstream) 'recurs
+                                Dim convergedSequence As New SequenceControl(connStep, SequenceDirection.Downstream) 'recursive
                                 With downStrElement
                                     .pnlConvergingDown.Visibility = Visibility.Visible
                                     .pnlConvergingDown.Children.Add(convergedSequence)
@@ -240,24 +242,100 @@ Public Class SequenceControl
         Dim endReached As Boolean = False
 
         While Not endReached
-            Dim nextConnects = refStep.GetPreviousSteps
-            If nextConnects.Count = 1 Then
-                refStep = nextConnects.First
-                SequenceSteps.Insert(0, refStep)
-                StartInChIKey = refStep.ReactantInChIKey
-            Else
-                If nextConnects.Count > 1 Then
-                    'branch off upstream
-                    For Each connStep In nextConnects
-                        Dim upSequence As New SequenceControl(connStep, SequenceDirection.Upstream)
-                        UpstreamSequences.Add(upSequence)
+
+            'Otherwise get next connects
+            Dim prevConnects = refStep.GetPreviousSteps
+
+            Select Case prevConnects.Count
+
+                Case 0 'no more connecting steps, end of sequence
+
+                    endReached = True
+
+                Case 1  'sequence continues -> add previous step
+
+                    refStep = prevConnects.First
+
+                    'end sequence if refStep has multiple incoming sequences (branch-in situation, with common product of multiple sequences) 
+                    Dim nextConnects = refStep.GetNextSteps
+                    If nextConnects.Count > 1 Then
+                        endReached = True
+                        Exit While
+                    End If
+
+                    SequenceSteps.Insert(0, refStep)
+                    StartInChIKey = refStep.ReactantInChIKey
+
+                Case > 1 'multiple upstream connects -> branch off
+
+                    VerticalConnectorLeft.Visibility = Visibility.Visible
+
+                    'create (recursive) upstream elements 
+                    For Each connStep In prevConnects
+                        Dim upSequence As New SequenceControl(connStep, SequenceDirection.Upstream) 'recursive
+                        upSequence.ShowDownstreamConnector()
+                        UpstreamSequences.Add(upSequence)   'add to list, not UI
                     Next
-                End If
 
-                'TODO: detect groups of converging upstream sequences (each group having identical start InChIKey)
+                    'detect converging upstream sequences
+                    Dim res = From seq In UpstreamSequences Group By seq.StartInChIKey Into convergentGroups = Group
 
-                endReached = True 'start of sequence: no more steps, or branching off
-            End If
+                    For Each result In res
+
+                        Dim upStrElement As New AdjacentSequenceItem
+
+                        If result.convergentGroups.Count = 1 Then
+
+                            'no convergence -> add next connecting sequence to downStream panel
+                            Dim seq = result.convergentGroups.First
+                            upStrElement.pnlConvSequences.Children.Add(seq)
+
+                        Else
+
+                            'convergent sequences -> add converging sequence group
+
+                            For Each seq In result.convergentGroups
+                                seq.ShowUpstreamConnector()
+                                upStrElement.pnlConvSequences.Children.Add(seq)
+                            Next
+
+                            Dim firstStep = result.convergentGroups.First.SequenceSteps.First
+                            If firstStep.GetPreviousSteps.Count > 0 Then
+
+                                'merging to a upstream sequence
+
+                                Dim connStep = firstStep.GetPreviousSteps.First
+                                Dim convergedSequence As New SequenceControl(connStep, SequenceDirection.Upstream) 'recursive
+                                convergedSequence.ShowDownstreamConnector()
+
+                                With upStrElement
+                                    .VerticalConnectorLeft.Visibility = Visibility.Visible
+                                    .pnlConvergingUp.Visibility = Visibility.Visible
+                                    .pnlConvergingUp.Children.Add(convergedSequence)
+                                End With
+
+                            Else
+
+                                'merging to common product without further sequence
+
+                                With upStrElement
+                                    .btnMergeRightCenter.Visibility = Visibility.Visible
+                                    .pnlConvergingDown.Visibility = Visibility.Visible
+                                End With
+
+                            End If
+                        End If
+
+                        pnlUpstream.Children.Add(upStrElement)
+
+                    Next
+
+                    endReached = True
+
+                    ShowUpstreamConnector()
+
+            End Select
+
         End While
 
     End Sub

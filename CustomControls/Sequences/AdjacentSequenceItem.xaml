@@ -6,19 +6,32 @@
              xmlns:local="clr-namespace:CustomControls"
              mc:Ignorable="d">
     <Grid>
-        
+
         <StackPanel x:Name="pnlDownstream" Orientation="Horizontal" VerticalAlignment="Center"  HorizontalAlignment="Left" >
 
-            <!--<StackPanel x:Name="pnlConvergingUp" VerticalAlignment="Center">
-                <Button Content="conv seq 3" Height="20"  Width="120" d:Visibility="Visible" Visibility="Collapsed"/>
-            </StackPanel>-->
+            <StackPanel x:Name="pnlConvergingUp" VerticalAlignment="Center" Orientation="Horizontal" Visibility="collapsed" 
+                d:Visibility="Visible" >
 
-            <StackPanel x:Name="pnlConvSequences" Grid.Column="1"  VerticalAlignment="Center">
+                <!--common product button-->
+                <Button x:Name="btnMergeLeftCenter" Content="C" Height="20" Margin="0,0,0,2" Width="30" Visibility="collapsed" 
+                    d:Visibility="Visible"/>
+
+                <!--upstream connector-->
+                <Rectangle x:Name="downConnector" Fill="BlueViolet" Width="12" Height="2" VerticalAlignment="Center" 
+                    d:Visibility="visible" Visibility="Collapsed" Margin="2,0,-1,0"/>
+
+            </StackPanel>
+
+            <!--vertical connector right-->
+            <Rectangle x:Name="VerticalConnectorLeft" Width="2" Fill="BlueViolet" Margin="0,11,-2,11"
+                Visibility="{Binding ElementName=pnlConvergingDown, Path=Visibility}" HorizontalAlignment="Left"/>
+
+            <StackPanel x:Name="pnlConvSequences" Grid.Column="1"  VerticalAlignment="Center" >
                 <Button Content="dummy seq 1" Height="20" Margin="4" Width="120" d:Visibility="Visible" Visibility="Collapsed"/>
                 <Button Content="dummy seq 2" Height="20" Margin="4" Width="120" d:Visibility="Visible" Visibility="Collapsed"/>
             </StackPanel>
 
-            <!--vertical connector right-->   
+            <!--vertical connector right-->
             <Rectangle x:Name="VerticalConnectorRight" Width="2" Fill="BlueViolet" Margin="-2,12,0,12"
                Visibility="{Binding ElementName=pnlConvergingDown, Path=Visibility}" HorizontalAlignment="Left"/>
 
@@ -32,13 +45,13 @@
                 </StackPanel>
 
                 <!--common product button-->
-                <Button x:Name="btnMergeRightCenter" Content="C" Height="20" Margin="2,0,0,4" Width="30" Visibility="collapsed" 
+                <Button x:Name="btnMergeRightCenter" Content="C" Height="20" Margin="0,0,0,2" Width="30" Visibility="collapsed" 
                   d:Visibility="Visible"/>
-                
+
             </StackPanel>
 
         </StackPanel>
-        
+
     </Grid>
-    
+
 </UserControl>
