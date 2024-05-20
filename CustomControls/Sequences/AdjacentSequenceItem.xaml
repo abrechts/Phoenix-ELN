@@ -23,7 +23,7 @@
             </StackPanel>
 
             <!--vertical connector right-->
-            <Rectangle x:Name="VerticalConnectorLeft" Width="2" Fill="BlueViolet" Margin="0,11,-2,11"
+            <Rectangle x:Name="VerticalConnectorLeft" Width="2" Fill="BlueViolet" Margin="0,15,-2,15"
                 Visibility="{Binding ElementName=pnlConvergingDown, Path=Visibility}" HorizontalAlignment="Left"/>
 
             <StackPanel x:Name="pnlConvSequences" Grid.Column="1"  VerticalAlignment="Center" >
@@ -32,7 +32,7 @@
             </StackPanel>
 
             <!--vertical connector right-->
-            <Rectangle x:Name="VerticalConnectorRight" Width="2" Fill="BlueViolet" Margin="-2,12,0,12"
+            <Rectangle x:Name="VerticalConnectorRight" Width="2" Fill="BlueViolet" Margin="-2,15,0,15"
                Visibility="{Binding ElementName=pnlConvergingDown, Path=Visibility}" HorizontalAlignment="Left"/>
 
             <StackPanel Name="pnlConvergingDown" Margin="0,0,0,0" VerticalAlignment="Center" Orientation="Horizontal" d:Visibility="Visible" 

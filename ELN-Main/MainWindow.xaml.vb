@@ -178,15 +178,13 @@ Class MainWindow
             Dim testSeq = New SequenceControl(refExp, DBContext)
             Dim seqDlg As New dlgSequences
             With seqDlg
-                .SequenceOverviewGrid.Children.Add(testSeq)
+                .ConnectionsPanel.Children.Add(testSeq)
                 .ShowDialog()
             End With
         End If
 
 
-
     End Sub
-
 
 
     Private Sub ServerSync_ServerContextCreated(serverContext As ElnDbContext)

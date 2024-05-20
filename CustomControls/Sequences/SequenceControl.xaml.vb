@@ -7,7 +7,6 @@ Imports ElnCoreModel
 
 Public Class SequenceControl
 
-
     Public Enum SequenceDirection
         Downstream
         Upstream
@@ -50,17 +49,38 @@ Public Class SequenceControl
 
 
     ''' <summary>
+    ''' Sets or gets if the sequence has downstream children
+    ''' </summary>
+    ''' 
+    Public Property HasChildren As Boolean = False
+
+
+    ''' <summary>
+    ''' Sets or gets if the sequence has an upstream parent
+    ''' </summary>
+    ''' 
+    Public Property HasParent As Boolean = False
+
+
+    ''' <summary>
     ''' Sets or gets a list of all directly connected downstream sequences.
     ''' </summary>
     ''' 
-    Public Property DownstreamSequences As New List(Of SequenceControl)
+    Private Property DownstreamSequences As New List(Of SequenceControl)
 
 
     ''' <summary>
     ''' Sets or gets the list of all directly connected upstream sequences.
     ''' </summary>
     ''' <returns></returns>
-    Public Property UpstreamSequences As New List(Of SequenceControl)
+    Private Property UpstreamSequences As New List(Of SequenceControl)
+
+
+    ''' <summary>
+    ''' Raises an event when this sequence is clicked by the user
+    ''' </summary>
+    ''' 
+    Public Shared Event SequenceSelected(sender As Object)
 
 
     ''' <summary>
@@ -94,7 +114,10 @@ Public Class SequenceControl
         AddDownstreamElements(firstStep)
         AddUpstreamElements(firstStep)
 
-        SequenceTitle = StartInChIKey.Substring(0, 4) + "/" + EndInChIKey.Substring(0, 4)
+        SequenceTitle = StartInChIKey.Substring(0, 4) + " " + ChrW("10132") + " " + EndInChIKey.Substring(0, 4) + " (" +
+           SequenceSteps.Count.ToString + " steps)"
+
+        UpdateLayout()
 
     End Sub
 
@@ -123,7 +146,15 @@ Public Class SequenceControl
             AddUpstreamElements(connectingStep)
         End If
 
-        SequenceTitle = StartInChIKey.Substring(0, 4) + "/" + EndInChIKey.Substring(0, 4)
+        SequenceTitle = StartInChIKey.Substring(0, 4) + " " + ChrW("10132") + " " + EndInChIKey.Substring(0, 4) + " (" +
+           SequenceSteps.Count.ToString + " steps)"
+
+    End Sub
+
+
+    Private Sub Me_Loaded() Handles Me.Loaded
+
+        AddHandler dlgSequences.ClearSequenceSelections, AddressOf dlgSequences_ClearSequenceSelections
 
     End Sub
 
@@ -163,6 +194,7 @@ Public Class SequenceControl
 
                 Case > 1 'multiple downstream connects -> branch off
 
+                    HasChildren = True
                     VerticalConnectorRight.Visibility = Visibility.Visible
 
                     'create (recursive) downstream elements 
@@ -191,6 +223,7 @@ Public Class SequenceControl
 
                             For Each seq In result.convergentGroups
                                 seq.ShowDownstreamConnector()
+                                seq.HasChildren = True
                                 downStrElement.pnlConvSequences.Children.Add(seq)
                             Next
 
@@ -268,12 +301,14 @@ Public Class SequenceControl
 
                 Case > 1 'multiple upstream connects -> branch off
 
+                    HasParent = True
                     VerticalConnectorLeft.Visibility = Visibility.Visible
 
                     'create (recursive) upstream elements 
                     For Each connStep In prevConnects
                         Dim upSequence As New SequenceControl(connStep, SequenceDirection.Upstream) 'recursive
                         upSequence.ShowDownstreamConnector()
+                        upSequence.HasChildren = True
                         UpstreamSequences.Add(upSequence)   'add to list, not UI
                     Next
 
@@ -296,6 +331,7 @@ Public Class SequenceControl
 
                             For Each seq In result.convergentGroups
                                 seq.ShowUpstreamConnector()
+                                seq.HasParent = True
                                 upStrElement.pnlConvSequences.Children.Add(seq)
                             Next
 
@@ -307,6 +343,7 @@ Public Class SequenceControl
                                 Dim connStep = firstStep.GetPreviousSteps.First
                                 Dim convergedSequence As New SequenceControl(connStep, SequenceDirection.Upstream) 'recursive
                                 convergedSequence.ShowDownstreamConnector()
+                                convergedSequence.HasChildren = True
 
                                 With upStrElement
                                     .VerticalConnectorLeft.Visibility = Visibility.Visible
@@ -341,14 +378,14 @@ Public Class SequenceControl
     End Sub
 
 
-    Public Sub ShowUpstreamConnector()
+    Private Sub ShowUpstreamConnector()
 
         upConnector.Visibility = Visibility.Visible
 
     End Sub
 
 
-    Public Sub ShowDownstreamConnector()
+    Private Sub ShowDownstreamConnector()
 
         downConnector.Visibility = Visibility.Visible
 
@@ -373,12 +410,8 @@ Public Class SequenceControl
 
     Private Sub btnMain_Click(sender As System.Object, e As System.Windows.RoutedEventArgs) Handles btnMain.Click
 
-        'If Not IsNothing(MainSchemeInfo.SchemeEntry) Then
-        '    btnMain.IsChecked = True
-        '    '      RaiseEvent SequenceLinkClicked(Me, MainSchemeInfo.SchemeEntry)
-        'Else
-        '    UncheckControl()
-        'End If
+        btnMain.IsChecked = True
+        RaiseEvent SequenceSelected(Me)
 
     End Sub
 
@@ -387,14 +420,18 @@ Public Class SequenceControl
     ''' Typically used for unchecking previous button when another one is checked
     ''' </summary>
     '''
-    Public Sub UncheckControl()
+    Public Sub dlgSequences_ClearSequenceSelections(sender As Object)
 
         btnMain.IsChecked = False
 
     End Sub
 
 
-    Public Sub CheckControl()
+    ''' <summary>
+    ''' Highlights and selects this SequenceControl
+    ''' </summary>
+    ''' 
+    Public Sub HighlightControl()
 
         btnMain.IsChecked = True
 

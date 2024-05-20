@@ -1,0 +1,30 @@
+﻿<UserControl x:Class="SequenceStructure"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:CustomControls"
+             mc:Ignorable="d" 
+             d:DesignHeight="80" >
+    <Grid>
+
+        <StackPanel Orientation="Horizontal">
+
+            <StackPanel x:Name="pnlArrowLeft" Orientation="Horizontal" Margin="12,0" VerticalAlignment="Center" 
+               d:Visibility="Visible" Visibility="collapsed">
+                <Rectangle Fill="Black" Width="36" Height="1" VerticalAlignment="Center" />
+                <TextBlock Text="&#10148;" FontSize="11" Foreground="Black" VerticalAlignment="Center" Margin="-3,-2,0,0"/>
+            </StackPanel>
+
+            <Viewbox x:Name="vboxReactantStructure" MinWidth="70" Margin="2,2,2,2"/>
+
+            <StackPanel x:Name="pnlArrowRight" Orientation="Horizontal" Margin="12,0" VerticalAlignment="Center" >
+                <Rectangle Fill="Black" Width="36" Height="1" VerticalAlignment="Center" />
+                <TextBlock Text="&#10148;" FontSize="11" Foreground="Black" VerticalAlignment="Center" Margin="-3,-2,0,0"/>
+            </StackPanel>
+
+        </StackPanel>
+
+    </Grid>
+    
+</UserControl>

@@ -5,10 +5,31 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CustomControls"
         mc:Ignorable="d"
-        Title="Connected Sequences" Height="450" Width="800" WindowStartupLocation="CenterScreen" ShowInTaskbar="False">
-    <Grid HorizontalAlignment="Center" VerticalAlignment="Center" TextOptions.TextFormattingMode="Display">
-        <StackPanel >
-            <Grid x:Name="grdSequenceItems" />
+        Title="Connected Sequences" Height="550" Width="900" WindowStartupLocation="CenterScreen" ShowInTaskbar="False">
+
+    <Grid  VerticalAlignment="top" TextOptions.TextFormattingMode="Display" Margin="16">
+        
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition />
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" HorizontalAlignment="Center" >
+            <TextBlock Text="Connected Sequences" FontWeight="bold" FontSize="16" Margin="0,0,0,12"/>
         </StackPanel>
+        
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" VerticalAlignment="Top" Margin="0,0,0,12" HorizontalScrollBarVisibility="Auto">
+            <Grid x:Name="pnlConnections" MinWidth="120" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        </ScrollViewer>
+
+        <StackPanel Grid.Row="2">
+
+            <Separator Margin="0,2,0,12"/>
+
+            <WrapPanel x:Name="pnlSeqStructures" HorizontalAlignment="Center"/>
+
+        </StackPanel>
+
     </Grid>
 </Window>
