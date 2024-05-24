@@ -171,19 +171,6 @@ Class MainWindow
         'check for updates async
         CheckForUpdatesAsync()
 
-
-        'TEST
-        Dim refExp = (From exp In DBContext.tblExperiments Where exp.ExperimentID = "seqTest-00001").FirstOrDefault
-        If refExp IsNot Nothing Then
-            Dim testSeq = New SequenceControl(refExp, DBContext)
-            Dim seqDlg As New dlgSequences
-            With seqDlg
-                .ConnectionsPanel.Children.Add(testSeq)
-                .ShowDialog()
-            End With
-        End If
-
-
     End Sub
 
 
@@ -1253,6 +1240,21 @@ Class MainWindow
                 .IsServerQuery = dlgSearch.IsServerQuery
             End With
         End With
+
+    End Sub
+
+
+    Private Sub btnSequences_Click() Handles btnSequences.Click
+
+        Dim refExp = CType(SelectedExpContent.DataContext, tblExperiments)
+
+        If refExp IsNot Nothing Then
+            Dim seqDlg As New dlgSequences()
+            With seqDlg
+                .BuildSequences(refExp, DBContext)
+                .ShowDialog()
+            End With
+        End If
 
     End Sub
 

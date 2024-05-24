@@ -5,31 +5,27 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CustomControls"
         mc:Ignorable="d"
-        Title="Connected Sequences" Height="550" Width="900" WindowStartupLocation="CenterScreen" ShowInTaskbar="False">
+        Title="Connected Sequences" Height="550" Width="900" WindowStartupLocation="CenterScreen" ShowInTaskbar="False" 
+        TextOptions.TextFormattingMode="Display">
 
-    <Grid  VerticalAlignment="top" TextOptions.TextFormattingMode="Display" Margin="16">
-        
-        <Grid.RowDefinitions>
-            <RowDefinition/>
-            <RowDefinition />
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-
-        <StackPanel Grid.Row="0" HorizontalAlignment="Center" >
-            <TextBlock Text="Connected Sequences" FontWeight="bold" FontSize="16" Margin="0,0,0,12"/>
+    <DockPanel  VerticalAlignment="top" Margin="16">
+       
+        <StackPanel HorizontalAlignment="Center" DockPanel.Dock="top" >
+            <TextBlock Text="Synthetic Environment" FontWeight="bold" FontSize="16"/>
         </StackPanel>
+
+        <Separator Margin="0,6,0,8" DockPanel.Dock="top"/>
         
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" VerticalAlignment="Top" Margin="0,0,0,12" HorizontalScrollBarVisibility="Auto">
-            <Grid x:Name="pnlConnections" MinWidth="120" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <ScrollViewer DockPanel.Dock="Top" VerticalScrollBarVisibility="Auto" VerticalAlignment="Top" Margin="0,0,0,2" HorizontalScrollBarVisibility="Auto" MaxHeight="130">
+            <Grid x:Name="pnlConnections" d:Width="300" d:Height="130" HorizontalAlignment="Center" VerticalAlignment="Center"/>
         </ScrollViewer>
 
-        <StackPanel Grid.Row="2">
+        <Separator Margin="0,6,0,16" DockPanel.Dock="top"/>
 
-            <Separator Margin="0,2,0,12"/>
-
+        <ScrollViewer DockPanel.Dock="top" VerticalScrollBarVisibility="auto" MaxHeight="300" d:Height="200">
             <WrapPanel x:Name="pnlSeqStructures" HorizontalAlignment="Center"/>
+        </ScrollViewer>
 
-        </StackPanel>
 
-    </Grid>
+    </DockPanel>
 </Window>

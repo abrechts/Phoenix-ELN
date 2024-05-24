@@ -5,25 +5,44 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:CustomControls"
              mc:Ignorable="d" 
-             d:DesignHeight="80" >
+             d:DesignHeight="80" TextOptions.TextFormattingMode="Display" >
     <Grid>
 
         <StackPanel Orientation="Horizontal">
 
-            <StackPanel x:Name="pnlArrowLeft" Orientation="Horizontal" Margin="12,0" VerticalAlignment="Center" 
+            <StackPanel x:Name="pnlArrowLeft" Orientation="Horizontal" Margin="10,0" VerticalAlignment="Center" 
                d:Visibility="Visible" Visibility="collapsed">
                 <Rectangle Fill="Black" Width="36" Height="1" VerticalAlignment="Center" />
                 <TextBlock Text="&#10148;" FontSize="11" Foreground="Black" VerticalAlignment="Center" Margin="-3,-2,0,0"/>
             </StackPanel>
 
-            <Viewbox x:Name="vboxReactantStructure" MinWidth="70" Margin="2,2,2,2"/>
+            <Border x:Name="pnlReactantStructure" CornerRadius="12" BorderThickness="1">
+                <Viewbox x:Name="vboxReactantStructure" MinWidth="70" Margin="2,2,2,2"/>
+            </Border>
 
-            <StackPanel x:Name="pnlArrowRight" Orientation="Horizontal" Margin="12,0" VerticalAlignment="Center" >
-                <Rectangle Fill="Black" Width="36" Height="1" VerticalAlignment="Center" />
-                <TextBlock Text="&#10148;" FontSize="11" Foreground="Black" VerticalAlignment="Center" Margin="-3,-2,0,0"/>
-            </StackPanel>
+            <Border x:Name="pnlArrowRight" BorderThickness="1" CornerRadius="8" Margin="8,12" Height="50" Background="Transparent" >
+
+                <StackPanel VerticalAlignment="Center" Margin="0,0,0,0">
+
+                    <!-- Default arrow -->
+                    <StackPanel x:Name="arrowRight" Orientation="Horizontal" Margin="4,1" >
+                        <Rectangle Fill="Black" Width="36" Height="1" VerticalAlignment="Center" />
+                        <TextBlock Text="&#10148;" FontSize="11" Foreground="Black" VerticalAlignment="Center" Margin="-3,-2,0,0"/>
+                    </StackPanel>
+
+                    <!-- Highlighted arrow -->
+                    <StackPanel x:Name="pnlArrowRightHighlighted" Orientation="Horizontal"  Margin="4,1" Opacity="0.75"
+                        d:Visibility="Visible" Visibility="Collapsed">
+                        <Rectangle Fill="Blue" Width="36" Height="2" VerticalAlignment="Center" />
+                        <TextBlock Text="&#10148;" FontSize="13" Foreground="Blue" VerticalAlignment="Center" Margin="-5,-2,0,0"/>
+                    </StackPanel>
+
+                </StackPanel>
+
+            </Border>
 
         </StackPanel>
+
 
     </Grid>
     

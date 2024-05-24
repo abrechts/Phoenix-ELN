@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:CustomControls"
              mc:Ignorable="d" 
-             d:DesignHeight="140" TextOptions.TextFormattingMode="Display">
+             d:DesignHeight="140" >
     
     <UserControl.Resources>
 
@@ -63,7 +63,7 @@
                     <TextBlock Text="&#10148;" FontSize="12" Foreground="BlueViolet" VerticalAlignment="Center" Margin="-3,-2,0,0"/>
                 </StackPanel>
 
-                <ToggleButton x:Name="btnMain" Style="{StaticResource FlowSchemeButton}" ToolTipService.ShowOnDisabled="True" MinWidth="110" FontSize="10" Padding="2,0" IsThreeState="False" MinHeight="22">
+                <ToggleButton x:Name="btnMain" Style="{StaticResource FlowSchemeButton}" ToolTipService.ShowOnDisabled="True" MinWidth="110" FontSize="10" Padding="2,0" IsThreeState="False" MinHeight="22" FontFamily="Arial">
                     
                     <ToggleButton.ContextMenu>
                         <ContextMenu>
@@ -81,8 +81,8 @@
                         </ContextMenu>
                     </ToggleButton.ContextMenu>
 
-                    <TextBlock x:Name="blkMainTitle" TextTrimming="CharacterEllipsis" Margin="4,-1,4,1" 
-                    Foreground="#FF2B2B2B"/>
+                    <TextBlock x:Name="blkMainTitle" d:Text="Sequence -1" TextTrimming="CharacterEllipsis" Margin="4,0,4,0" 
+                        Foreground="#FF474747" FontWeight="DemiBold" FontSize="10.5" FontFamily="Arial"/>
 
             </ToggleButton>
               

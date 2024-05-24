@@ -14,6 +14,13 @@ Public Class SequenceControl
 
 
     ''' <summary>
+    ''' Sets of gets the step from which the sequence build was initiated. Is nothing for all non-seed sequences.
+    ''' </summary>
+    ''' 
+    Public Property SeedStep As SequenceStep
+
+
+    ''' <summary>
     ''' Sets or gets the title of the sequence
     ''' </summary>
     ''' 
@@ -52,32 +59,18 @@ Public Class SequenceControl
     ''' Sets or gets if the sequence has downstream children
     ''' </summary>
     ''' 
-    Public Property HasChildren As Boolean = False
+    Public Property HasDownstreamConnections As Boolean = False
 
 
     ''' <summary>
     ''' Sets or gets if the sequence has an upstream parent
     ''' </summary>
     ''' 
-    Public Property HasParent As Boolean = False
+    Public Property HasUpstreamConnections As Boolean = False
 
 
     ''' <summary>
-    ''' Sets or gets a list of all directly connected downstream sequences.
-    ''' </summary>
-    ''' 
-    Private Property DownstreamSequences As New List(Of SequenceControl)
-
-
-    ''' <summary>
-    ''' Sets or gets the list of all directly connected upstream sequences.
-    ''' </summary>
-    ''' <returns></returns>
-    Private Property UpstreamSequences As New List(Of SequenceControl)
-
-
-    ''' <summary>
-    ''' Raises an event when this sequence is clicked by the user
+    ''' Occurs when this control is clicked
     ''' </summary>
     ''' 
     Public Shared Event SequenceSelected(sender As Object)
@@ -108,14 +101,18 @@ Public Class SequenceControl
         StartInChIKey = initialExp.ReactantInChIKey
         EndInChIKey = initialExp.ProductInChIKey
 
+        DownstreamSequenceNr = 1
+        UpstreamSequenceNr = 0
+
         Dim firstStep As New SequenceStep(initialExp.ReactantInChIKey, initialExp.ProductInChIKey, dbContext)
+        firstStep.IsSeedStep = True
         SequenceSteps.Add(firstStep)
+        SeedStep = firstStep
 
         AddDownstreamElements(firstStep)
         AddUpstreamElements(firstStep)
 
-        SequenceTitle = StartInChIKey.Substring(0, 4) + " " + ChrW("10132") + " " + EndInChIKey.Substring(0, 4) + " (" +
-           SequenceSteps.Count.ToString + " steps)"
+        SequenceTitle = "Main Sequence"
 
         UpdateLayout()
 
@@ -146,9 +143,6 @@ Public Class SequenceControl
             AddUpstreamElements(connectingStep)
         End If
 
-        SequenceTitle = StartInChIKey.Substring(0, 4) + " " + ChrW("10132") + " " + EndInChIKey.Substring(0, 4) + " (" +
-           SequenceSteps.Count.ToString + " steps)"
-
     End Sub
 
 
@@ -159,12 +153,18 @@ Public Class SequenceControl
     End Sub
 
 
+    Public Shared UpstreamSequenceNr As Integer = 0
+
+    Public Shared DownstreamSequenceNr As Integer = 0
+
+
     ''' <summary>
     ''' Recursively adds downstream steps and sequences relative to the specified step
     ''' </summary>
     ''' 
     Private Sub AddDownstreamElements(refStep As SequenceStep)
 
+        Dim downstreamSequences As New List(Of SequenceControl)
         Dim endReached As Boolean = False
 
         While Not endReached
@@ -178,13 +178,13 @@ Public Class SequenceControl
 
                     endReached = True
 
-                Case 1  'sequence continues -> add next step
+                Case 1  'sequence continues -> add next step, if not upstream converging one
 
                     refStep = nextConnects.First
 
-                    'end sequence if refStep has multiple incoming sequences (branch-in situation, with common product of multiple sequences) 
+                    'complete sequence if refStep has multiple incoming sequences and does not contain seed step
                     Dim prevConnects = refStep.GetPreviousSteps
-                    If prevConnects.Count > 1 Then
+                    If prevConnects.Count > 1 AndAlso Not SequenceSteps.Contains(SeedStep) Then
                         endReached = True
                         Exit While
                     End If
@@ -194,18 +194,19 @@ Public Class SequenceControl
 
                 Case > 1 'multiple downstream connects -> branch off
 
-                    HasChildren = True
+                    HasDownstreamConnections = True
                     VerticalConnectorRight.Visibility = Visibility.Visible
 
                     'create (recursive) downstream elements 
                     For Each connStep In nextConnects
                         Dim downSequence As New SequenceControl(connStep, SequenceDirection.Downstream) 'recursive
                         downSequence.ShowUpstreamConnector()
+                        downSequence.HasUpstreamConnections = True
                         DownstreamSequences.Add(downSequence)   'add to list, not UI
                     Next
 
                     'detect converging downstream sequences
-                    Dim res = From seq In DownstreamSequences Group By seq.EndInChIKey Into convergentGroups = Group
+                    Dim res = From seq In downstreamSequences Group By seq.EndInChIKey Into convergentGroups = Group
 
                     For Each result In res
 
@@ -216,14 +217,21 @@ Public Class SequenceControl
                             'no convergence -> add next connecting sequence to downStream panel
                             Dim seq = result.convergentGroups.First
                             downStrElement.pnlConvSequences.Children.Add(seq)
+                            DownstreamSequenceNr += 1
+                            seq.SequenceTitle = "Sequence " + DownstreamSequenceNr.ToString
 
                         Else
 
                             'convergent sequences -> add converging sequence group
 
+                            DownstreamSequenceNr += 1
+
+                            Dim pos As Integer = 0
                             For Each seq In result.convergentGroups
                                 seq.ShowDownstreamConnector()
-                                seq.HasChildren = True
+                                seq.HasDownstreamConnections = True
+                                seq.SequenceTitle = "Sequence " + DownstreamSequenceNr.ToString + NumberToCharacter(pos)
+                                pos += 1
                                 downStrElement.pnlConvSequences.Children.Add(seq)
                             Next
 
@@ -234,6 +242,12 @@ Public Class SequenceControl
 
                                 Dim connStep = finalStep.GetNextSteps.First
                                 Dim convergedSequence As New SequenceControl(connStep, SequenceDirection.Downstream) 'recursive
+                                With convergedSequence
+                                    DownstreamSequenceNr += 1
+                                    .HasUpstreamConnections = True
+                                    .SequenceTitle = "Sequence " + DownstreamSequenceNr.ToString
+                                End With
+
                                 With downStrElement
                                     .pnlConvergingDown.Visibility = Visibility.Visible
                                     .pnlConvergingDown.Children.Add(convergedSequence)
@@ -267,11 +281,23 @@ Public Class SequenceControl
 
 
     ''' <summary>
+    ''' Converts 1 to 'a', 2 to 'b', etc.
+    ''' </summary>
+    ''' 
+    Private Function NumberToCharacter(val As Integer) As String
+
+        Return ChrW((AscW("a"c) + val))
+
+    End Function
+
+
+    ''' <summary>
     ''' Recursively adds upstream steps and sequences relative to the specified step
     ''' </summary>
     ''' 
     Private Sub AddUpstreamElements(refStep As SequenceStep)
 
+        Dim upstreamSequences As New List(Of SequenceControl)
         Dim endReached As Boolean = False
 
         While Not endReached
@@ -289,9 +315,9 @@ Public Class SequenceControl
 
                     refStep = prevConnects.First
 
-                    'end sequence if refStep has multiple incoming sequences (branch-in situation, with common product of multiple sequences) 
+                    'complete sequence if refStep has multiple incoming sequences and does not contain seed step
                     Dim nextConnects = refStep.GetNextSteps
-                    If nextConnects.Count > 1 Then
+                    If nextConnects.Count > 1 AndAlso Not SequenceSteps.Contains(SeedStep) Then
                         endReached = True
                         Exit While
                     End If
@@ -301,14 +327,14 @@ Public Class SequenceControl
 
                 Case > 1 'multiple upstream connects -> branch off
 
-                    HasParent = True
+                    HasUpstreamConnections = True
                     VerticalConnectorLeft.Visibility = Visibility.Visible
 
                     'create (recursive) upstream elements 
                     For Each connStep In prevConnects
                         Dim upSequence As New SequenceControl(connStep, SequenceDirection.Upstream) 'recursive
                         upSequence.ShowDownstreamConnector()
-                        upSequence.HasChildren = True
+                        upSequence.HasDownstreamConnections = True
                         UpstreamSequences.Add(upSequence)   'add to list, not UI
                     Next
 
@@ -324,14 +350,21 @@ Public Class SequenceControl
                             'no convergence -> add next connecting sequence to downStream panel
                             Dim seq = result.convergentGroups.First
                             upStrElement.pnlConvSequences.Children.Add(seq)
+                            UpstreamSequenceNr -= 1
+                            seq.SequenceTitle = "Sequence " + UpstreamSequenceNr.ToString
 
                         Else
 
                             'convergent sequences -> add converging sequence group
 
+                            UpstreamSequenceNr -= 1
+
+                            Dim pos As Integer = 0
                             For Each seq In result.convergentGroups
                                 seq.ShowUpstreamConnector()
-                                seq.HasParent = True
+                                seq.HasUpstreamConnections = True
+                                seq.SequenceTitle = "Sequence " + UpstreamSequenceNr.ToString + NumberToCharacter(pos)
+                                pos += 1
                                 upStrElement.pnlConvSequences.Children.Add(seq)
                             Next
 
@@ -342,8 +375,12 @@ Public Class SequenceControl
 
                                 Dim connStep = firstStep.GetPreviousSteps.First
                                 Dim convergedSequence As New SequenceControl(connStep, SequenceDirection.Upstream) 'recursive
-                                convergedSequence.ShowDownstreamConnector()
-                                convergedSequence.HasChildren = True
+                                With convergedSequence
+                                    .ShowDownstreamConnector()
+                                    .HasDownstreamConnections = True
+                                    UpstreamSequenceNr -= 1
+                                    .SequenceTitle = "Sequence " + UpstreamSequenceNr.ToString
+                                End With
 
                                 With upStrElement
                                     .VerticalConnectorLeft.Visibility = Visibility.Visible
@@ -456,6 +493,14 @@ Public Class SequenceStep
     Public Property ReactantInChIKey As String
 
     Public Property ProductInChIKey As String
+
+    Public Property IsSelected As Boolean = False
+
+    ''' <summary>
+    ''' Sets or gets if the current sequence scheme is based on this step.
+    ''' </summary>
+    ''' 
+    Public Property IsSeedStep As Boolean = False
 
 
     ''' <summary>

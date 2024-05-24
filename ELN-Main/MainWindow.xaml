@@ -118,7 +118,7 @@
                                 </StackPanel>
                             </MenuItem.Header>
                             <MenuItem.Icon>
-                                <ContentControl Content="{StaticResource icoSettings}" Height="14" Opacity="0.7"/>
+                                <ContentControl Content="{StaticResource icoSettings}" Height="14" Opacity="0.8"/>
                             </MenuItem.Icon>
                             <MenuItem x:Name="btnEditUser" Header="Edit Personal Settings ..." Icon="{StaticResource icoCreateUser}" Background="white"
                               Margin="0,1" />
@@ -139,6 +139,13 @@
                         </StackPanel>
                     </Button>
 
+                    <Button x:Name="btnSequences" HorizontalAlignment="Left" VerticalAlignment="Top" d:Visibility="Visible" Visibility="Visible" 
+                       ToolTip="Show all synthetic steps originating from &#x0a;and leading to the current one.">
+                        <StackPanel Orientation="Horizontal">
+                            <ContentControl Content="{StaticResource icoGraph}" Height="16" Margin="0,1,3,0" Opacity="0.85"/>
+                            <TextBlock Text="Connections" Margin="0,0,2,0" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
 
                     <Menu TextBlock.FontFamily="Verdana" Background="White" Padding="1,0,0,0">
                         <MenuItem VerticalAlignment="Center" Padding="2,2,4,2">
