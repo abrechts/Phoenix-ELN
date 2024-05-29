@@ -123,6 +123,8 @@ Class MainWindow
         AddHandler ExpTabHeader.PinStateChanged, AddressOf expTabHeader_PinStateChanged
         AddHandler StepSummary.RequestOpenExperiment, AddressOf ExpList_RequestOpenExperiment
         AddHandler RssItemGroup.RequestOpenExperiment, AddressOf ExpList_RequestOpenExperiment
+        AddHandler StepExpSelector.RequestOpenExperiment, AddressOf ExpList_RequestOpenExperiment
+
 
         'Connect local database model with UI
         ApplyAllDataBindings()

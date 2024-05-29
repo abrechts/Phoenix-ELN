@@ -37,9 +37,7 @@ Public Class dlgSequences
         seedSequence.HighlightControl()
         PopulateSequenceScheme(seedSequence)
 
-        'If seedSequence.SeedStep IsNot Nothing Then
-        '    'seedSequence.SeedStep.IsSelected = True
-        'End If
+        blkSeedExpId.Text = "➔ " + refExperiment.ExperimentID + " ➔"
 
     End Sub
 
@@ -51,6 +49,7 @@ Public Class dlgSequences
     Private Sub PopulateSequenceScheme(sequence As SequenceControl)
 
         Dim seedStepStruct As SequenceStructure = Nothing
+        Dim stepPos As Integer = 1
 
         pnlSeqStructures.Children.Clear()
 
@@ -66,6 +65,9 @@ Public Class dlgSequences
             End If
 
             seqStruct.StructureCanvas = stp.GetReactantImage
+            '    seqStruct.blkExpCount.Text = "Step 2" 'stp.GetStepExperiments.Count.ToString + " exp"
+            seqStruct.blkStepNr.Text = "Step " + stepPos.ToString
+            stepPos += 1
             pnlSeqStructures.Children.Add(seqStruct)
 
             If stp Is sequence.SeedStep Then
@@ -80,6 +82,8 @@ Public Class dlgSequences
             .StructureCanvas = sequence.SequenceSteps.Last.GetProductImage
             If Not sequence.HasDownstreamConnections Then
                 .HideRightArrow()   'hide arrow if no more downstream sequences
+            Else
+                .ShowDottedRightArrow()
             End If
         End With
 
@@ -88,6 +92,8 @@ Public Class dlgSequences
         'select seed step
         If seedStepStruct IsNot Nothing Then
             seedStepStruct.IsSelected = True
+            stepSelector.DataContext = seedStepStruct.SourceStep
+            lblStepName.Content = seedStepStruct.blkStepNr.Text
         End If
 
     End Sub
@@ -122,6 +128,9 @@ Public Class dlgSequences
 
         Dim struct = CType(sender, SequenceStructure)
         struct.IsSelected = True
+
+        stepSelector.DataContext = struct.SourceStep
+        lblStepName.Content = struct.blkStepNr.Text
 
     End Sub
 

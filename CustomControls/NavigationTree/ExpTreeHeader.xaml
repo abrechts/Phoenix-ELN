@@ -39,7 +39,7 @@
     <Grid>
         <StackPanel Orientation="Horizontal" Margin="0,0,2,0">
 
-            <ContentControl Width="14" Visibility="{Binding DisplayIndex, Converter={StaticResource pinnedToVisConv}}" 
+            <ContentControl x:Name="icoTabOpen"  Width="14" Visibility="{Binding DisplayIndex, Converter={StaticResource pinnedToVisConv}}" 
              Margin="0,0,-3,0" VerticalAlignment="Center" Content="{StaticResource icoArrowRight}" Opacity="0.75"/>
 
             <Border CornerRadius="6" >

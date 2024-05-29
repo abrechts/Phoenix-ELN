@@ -16,7 +16,6 @@
         <CollectionViewSource x:Key="cvsStepExperiments" IsLiveSortingRequested="True" 
           Filter="cvsStepExperiments_Filter">
             <CollectionViewSource.SortDescriptions>
-                <!--<componentModel:SortDescription PropertyName="Yield" Direction="Descending"/>-->
                 <componentModel:SortDescription PropertyName="Scale" Direction="Descending"/>
             </CollectionViewSource.SortDescriptions>
             <CollectionViewSource.LiveSortingProperties>

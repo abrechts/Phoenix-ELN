@@ -19,6 +19,20 @@ Partial Public Class ExpTreeHeader
     End Sub
 
 
+    ''' <summary>
+    ''' Sets or gets if the indicator icon for pinned experiments (right arrow) should be displayed (the default is true). 
+    ''' </summary>
+    ''' 
+    Public Property IsTabIndicatorVisible As Boolean
+        Get
+            Return icoTabOpen.IsVisible
+        End Get
+        Set(value As Boolean)
+            icoTabOpen.Visibility = If(value, Visibility.Visible, Visibility.Collapsed)
+        End Set
+    End Property
+
+
     Private Sub Me_PreviewMouseRightButtonDown(sender As Object, e As RoutedEventArgs) Handles Me.PreviewMouseRightButtonUp
 
         Dim tvItem = WPFToolbox.FindVisualParent(Of TreeViewItem)(Me)

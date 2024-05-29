@@ -5,13 +5,14 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CustomControls"
         mc:Ignorable="d"
-        Title="Connected Sequences" Height="550" Width="900" WindowStartupLocation="CenterScreen" ShowInTaskbar="False" 
-        TextOptions.TextFormattingMode="Display">
+        Title="Connected Sequences" Height="550" Width="900"  MinWidth="730" WindowStartupLocation="CenterScreen" 
+        ShowInTaskbar="False" TextOptions.TextFormattingMode="Display">
 
-    <DockPanel  VerticalAlignment="top" Margin="16">
+    <DockPanel  Margin="16,8,16,8">
        
         <StackPanel HorizontalAlignment="Center" DockPanel.Dock="top" >
-            <TextBlock Text="Synthetic Environment" FontWeight="bold" FontSize="16"/>
+            <TextBlock Text="Synthetic Environment" FontWeight="bold" FontSize="16" HorizontalAlignment="Center"/>
+            <TextBlock x:Name="blkSeedExpId" d:Text="&#10132; demo-00013 &#10132;" HorizontalAlignment="Center"/>
         </StackPanel>
 
         <Separator Margin="0,6,0,8" DockPanel.Dock="top"/>
@@ -20,12 +21,32 @@
             <Grid x:Name="pnlConnections" d:Width="300" d:Height="130" HorizontalAlignment="Center" VerticalAlignment="Center"/>
         </ScrollViewer>
 
-        <Separator Margin="0,6,0,16" DockPanel.Dock="top"/>
+        <Separator Margin="0,6,0,0" DockPanel.Dock="top"/>
 
-        <ScrollViewer DockPanel.Dock="top" VerticalScrollBarVisibility="auto" MaxHeight="300" d:Height="200">
-            <WrapPanel x:Name="pnlSeqStructures" HorizontalAlignment="Center"/>
-        </ScrollViewer>
+        <Grid>
 
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition Width="220"/>
+            </Grid.ColumnDefinitions>
+
+            <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="auto" MaxHeight="300" d:Height="200" VerticalAlignment="Top" Margin="0,12,12,0">
+                <WrapPanel x:Name="pnlSeqStructures" HorizontalAlignment="Center"/>
+            </ScrollViewer>
+
+            <Border Grid.Column="1" BorderThickness="1,0,1,1" BorderBrush="lightgray" MinWidth="100" CornerRadius="0,0,0,0" Margin="0,0,0,0">
+                <DockPanel>
+                    <Label x:Name="lblStepName" d:Content="Step 2" FontWeight="DemiBold" FontSize="11.5" Margin="0,2,0,0" HorizontalContentAlignment="Center" 
+                       Padding="5,0,5,1" DockPanel.Dock="top"/>
+                    <Separator DockPanel.Dock="top"/>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <local:StepExpSelector x:Name="stepSelector" FontSize="11.5" Background="white" MinWidth="160" DockPanel.Dock="top" HorizontalAlignment="Center"/>
+                    </ScrollViewer>
+                </DockPanel>
+            </Border>
+
+        </Grid>
 
     </DockPanel>
+    
 </Window>
