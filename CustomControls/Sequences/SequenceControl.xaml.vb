@@ -429,22 +429,6 @@ Public Class SequenceControl
     End Sub
 
 
-    '''' <summary>
-    '''' Displays tooltip whenever content of blkMainTitle is shortened by ellipsis character
-    '''' </summary>
-    '''' 
-    'Private Sub blkMainTitle_SizeChanged() Handles blkMainTitle.SizeChanged
-
-    '    blkMainTitle.Measure(New Size(Double.PositiveInfinity, Double.PositiveInfinity))
-    '    Dim blkFullWidth = blkMainTitle.DesiredSize.Width
-
-    '    If blkMainTitle.ActualWidth < blkFullWidth Then
-    '        btnMain.ToolTip = blkMainTitle.Text
-    '    End If
-
-    'End Sub
-
-
     Private Sub btnMain_Click(sender As System.Object, e As System.Windows.RoutedEventArgs) Handles btnMain.Click
 
         btnMain.IsChecked = True
@@ -501,6 +485,13 @@ Public Class SequenceStep
     ''' </summary>
     ''' 
     Public Property IsSeedStep As Boolean = False
+
+
+    ''' <summary>
+    ''' Sets or gets the SequenceStructure of this step, which was assigned during scheme population.
+    ''' </summary>
+    ''' 
+    Public Property AssignedSequenceStructure As SequenceStructure
 
 
     ''' <summary>

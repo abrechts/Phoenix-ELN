@@ -51,41 +51,34 @@ Public Class SequenceStructure
 
             _IsSelected = value
 
-            IsStructureSelected = value
-
-            Dim parentPanel = WPFToolbox.FindVisualParent(Of WrapPanel)(Me)
-            If parentPanel IsNot Nothing Then
-
-                Dim currIndex = parentPanel.Children.IndexOf(Me)
-                If currIndex < parentPanel.Children.Count - 1 Then
-                    Dim nextStepStruct = CType(parentPanel.Children(currIndex + 1), SequenceStructure)
-                    nextStepStruct.IsStructureSelected = True
-                End If
-
-            End If
-
-        End Set
-
-    End Property
-
-
-    ''' <summary>
-    ''' Sets if the reactant structure are is selected (highlighted)
-    ''' </summary>
-    '''
-    Public WriteOnly Property IsStructureSelected As Boolean
-
-        Set(value As Boolean)
             If value = True Then
-                pnlReactantStructure.Background = CType(New BrushConverter().ConvertFrom("#FFF9F9F9"), SolidColorBrush)
-                pnlReactantStructure.BorderBrush = CType(New BrushConverter().ConvertFrom("#FF7CA8FD"), SolidColorBrush)
+                pnlArrowRight.BorderBrush = CType(New BrushConverter().ConvertFrom("#FF7DDEFF"), SolidColorBrush)
+                pnlArrowRight.Background = CType(New BrushConverter().ConvertFrom("#FFD8F5FF"), SolidColorBrush)
             Else
-                pnlReactantStructure.Background = Brushes.Transparent
-                pnlReactantStructure.BorderBrush = Brushes.Transparent
+                pnlArrowRight.BorderBrush = Brushes.Transparent
+                pnlArrowRight.Background = Brushes.Transparent
             End If
+
         End Set
 
     End Property
+
+
+    Private Sub pnlArrowRight_MouseEnter() Handles pnlArrowRight.MouseEnter
+
+        pnlArrowRight.Background = CType(New BrushConverter().ConvertFrom("#FFD8F5FF"), SolidColorBrush)
+
+    End Sub
+
+
+    Private Sub pnlArrowRight_MouseLeave() Handles pnlArrowRight.MouseLeave
+
+        If Not IsSelected Then
+            pnlArrowRight.Background = Brushes.Transparent
+        End If
+
+    End Sub
+
 
 
     ''' <summary>
@@ -113,7 +106,7 @@ Public Class SequenceStructure
 
     Public Sub ShowLeftArrow()
 
-        pnlArrowLeft.Visibility = Visibility.Visible
+        arrowLeftDotted.Visibility = Visibility.Visible
 
     End Sub
 
@@ -153,21 +146,6 @@ Public Class SequenceStructure
 
     End Function
 
-
-    'Private Sub pnlArrowRight_MouseEnter() Handles pnlArrowRight.MouseEnter
-
-    '    If Not IsTrailingRightArrow() Then
-    '        pnlArrowRight.BorderBrush = Brushes.Blue
-    '    End If
-
-    'End Sub
-
-
-    'Private Sub pnlArrowRight_MouseLeave() Handles pnlArrowRight.MouseLeave
-
-    '    pnlArrowRight.BorderBrush = Brushes.Transparent
-
-    'End Sub
 
 
     Private Sub pnlArrowRight_PreviewMouseDown() Handles pnlArrowRight.PreviewMouseDown

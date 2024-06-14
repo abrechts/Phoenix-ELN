@@ -1,9 +1,7 @@
-﻿Imports System.Text.RegularExpressions
+﻿
 Imports System.Windows
-Imports System.Windows.Controls
 Imports ElnBase
 Imports ElnCoreModel
-Imports Microsoft.EntityFrameworkCore.Metadata.Internal
 
 Public Class dlgSequences
 
@@ -37,7 +35,7 @@ Public Class dlgSequences
         seedSequence.HighlightControl()
         PopulateSequenceScheme(seedSequence)
 
-        blkSeedExpId.Text = "➔ " + refExperiment.ExperimentID + " ➔"
+        blkSeedExpId.Text = " ➔ " + refExperiment.ExperimentID + " ➔ "
 
     End Sub
 
@@ -57,6 +55,7 @@ Public Class dlgSequences
 
             Dim seqStruct As New SequenceStructure
             seqStruct.SourceStep = stp
+            stp.AssignedSequenceStructure = seqStruct
 
             If stp Is sequence.SequenceSteps.First Then
                 If sequence.HasUpstreamConnections Then
@@ -64,9 +63,12 @@ Public Class dlgSequences
                 End If
             End If
 
-            seqStruct.StructureCanvas = stp.GetReactantImage
-            '    seqStruct.blkExpCount.Text = "Step 2" 'stp.GetStepExperiments.Count.ToString + " exp"
-            seqStruct.blkStepNr.Text = "Step " + stepPos.ToString
+            With seqStruct
+                .StructureCanvas = stp.GetReactantImage
+                .blkStepNr.Text = "Step " + stepPos.ToString
+                .blkExpCount.Text = stp.GetStepExperiments.Count.ToString + " exp"
+            End With
+
             stepPos += 1
             pnlSeqStructures.Children.Add(seqStruct)
 
@@ -89,12 +91,30 @@ Public Class dlgSequences
 
         pnlSeqStructures.Children.Add(prodSeqStruct)
 
+        CurrentSequence = sequence
+
         'select seed step
         If seedStepStruct IsNot Nothing Then
-            seedStepStruct.IsSelected = True
-            stepSelector.DataContext = seedStepStruct.SourceStep
-            lblStepName.Content = seedStepStruct.blkStepNr.Text
+            SelectStep(seedStepStruct.SourceStep)
         End If
+
+    End Sub
+
+
+    ''' <summary>
+    ''' Selects the specified sequence step.
+    ''' </summary>
+    ''' 
+    Private Sub SelectStep(targetStep As SequenceStep)
+
+        UnselectAllSteps()
+
+        With targetStep.AssignedSequenceStructure
+            stepSelector.DataContext = .SourceStep
+            blkSeqTitle.Text = CurrentSequence.SequenceTitle
+            lblStepName.Text = .blkStepNr.Text
+            .IsSelected = True
+        End With
 
     End Sub
 
@@ -109,7 +129,6 @@ Public Class dlgSequences
             If TypeOf struct Is SequenceStructure Then
                 CType(struct, SequenceStructure).IsSelected = False
             End If
-
         Next
 
     End Sub
@@ -117,20 +136,21 @@ Public Class dlgSequences
 
     Private Sub SequenceControl_SequenceClicked(sender As Object)
 
-        PopulateSequenceScheme(CType(sender, SequenceControl))
+        Dim seq = CType(sender, SequenceControl)
+        PopulateSequenceScheme(seq)
+
+        SelectStep(seq.SequenceSteps.First)
 
     End Sub
 
 
+    Public Property CurrentSequence As SequenceControl
+
+
     Private Sub SequenceStructure_StepArrowSelected(sender As Object)
 
-        UnselectAllSteps()
-
         Dim struct = CType(sender, SequenceStructure)
-        struct.IsSelected = True
-
-        stepSelector.DataContext = struct.SourceStep
-        lblStepName.Content = struct.blkStepNr.Text
+        SelectStep(struct.SourceStep)
 
     End Sub
 
