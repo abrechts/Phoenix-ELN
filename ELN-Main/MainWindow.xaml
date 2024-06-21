@@ -109,6 +109,24 @@
 
                     <Separator/>
 
+                    <Button x:Name="btnSearch" HorizontalAlignment="Left" VerticalAlignment="Top" ToolTip="Find experiments" d:Visibility="Visible"
+                        Visibility="Visible">
+                        <StackPanel Orientation="Horizontal">
+                            <ContentControl Content="{StaticResource icoSearch}" Height="16" Margin="0,1,3,0"/>
+                            <TextBlock Text="Search" Margin="0,0,2,0" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button x:Name="btnSequences" HorizontalAlignment="Left" VerticalAlignment="Top" d:Visibility="Visible" Visibility="Visible" 
+                       ToolTip="Displays all synthetic steps originating from &#x0a;and leading to the current conversion.">
+                        <StackPanel Orientation="Horizontal">
+                            <ContentControl Content="{StaticResource icoGraph}" Height="16" Margin="1,1,2,0" Opacity="0.85"/>
+                            <TextBlock Text="Connects" Margin="0,0,2,0" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Separator/>
+
                     <Menu TextBlock.FontFamily="Verdana" Background="White">
                         <MenuItem VerticalAlignment="Center" Padding="4,2">
                             <MenuItem.Header>
@@ -130,23 +148,7 @@
                                     Converter={StaticResource demoToBoolConv},ConverterParameter=invert}"/>
                         </MenuItem>
                     </Menu>
-
-                    <Button x:Name="btnSearch" HorizontalAlignment="Left" VerticalAlignment="Top" ToolTip="Find experiments" d:Visibility="Visible"
-                        Visibility="Visible">
-                        <StackPanel Orientation="Horizontal">
-                            <ContentControl Content="{StaticResource icoSearch}" Height="16" Margin="0,1,3,0"/>
-                            <TextBlock Text="Search" Margin="0,0,2,0" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </Button>
-
-                    <Button x:Name="btnSequences" HorizontalAlignment="Left" VerticalAlignment="Top" d:Visibility="Visible" Visibility="Visible" 
-                       ToolTip="Displays all synthetic steps originating from &#x0a;and leading to the current conversion.">
-                        <StackPanel Orientation="Horizontal">
-                            <ContentControl Content="{StaticResource icoGraph}" Height="16" Margin="1,1,2,0" Opacity="0.85"/>
-                            <TextBlock Text="Connects" Margin="0,0,2,0" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </Button>
-
+                    
                     <Menu TextBlock.FontFamily="Verdana" Background="White" Padding="1,0,0,0">
                         <MenuItem VerticalAlignment="Center" Padding="2,2,4,2">
                             <MenuItem.Header>
@@ -161,14 +163,12 @@
                                     <ContentControl Content="{StaticResource icoInfo}" Height="14"/>
                                 </MenuItem.Icon>
                             </MenuItem>
-                            <MenuItem x:Name="mnuAbout" Header="About Phoenix ELN ..." Margin="0,2,0,1" Background="white">
-                                <!--<MenuItem.Icon>
-                                    <ContentControl Content="{StaticResource icoInfo}" Height="14"/>
-                                </MenuItem.Icon>-->
-                            </MenuItem>
+                            <MenuItem x:Name="mnuAbout" Header="About Phoenix ELN ..." Margin="0,2,0,1" Background="white"/>
                             <MenuItem x:Name="mnuCheckForUpdates" Header="Check for updates ..."/>
                         </MenuItem>
                     </Menu>
+
+                    <Separator/>
 
                 </ToolBar>
 
