@@ -80,6 +80,7 @@ Public Class SequenceStructure
     End Sub
 
 
+    Private mSourceStep As SequenceStep
 
     ''' <summary>
     ''' Sets or gets the underlying SequenceStep
@@ -87,6 +88,19 @@ Public Class SequenceStructure
     ''' 
     Public Property SourceStep As SequenceStep
 
+        Get
+            Return mSourceStep
+        End Get
+
+        Set(value As SequenceStep)
+            mSourceStep = value
+            If value.IsSeedStep Then
+                blkStepNr.FontWeight = FontWeights.DemiBold
+                blkStepNr.FontStyle = FontStyles.Italic
+            End If
+        End Set
+
+    End Property
 
 
     Public Sub HideRightArrow()

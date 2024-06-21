@@ -347,7 +347,7 @@ Public Class SequenceControl
 
                         If result.convergentGroups.Count = 1 Then
 
-                            'no convergence -> add next connecting sequence to downStream panel
+                            'no convergence -> add next connecting sequence to downstream panel
                             Dim seq = result.convergentGroups.First
                             upStrElement.pnlConvSequences.Children.Add(seq)
                             UpstreamSequenceNr -= 1

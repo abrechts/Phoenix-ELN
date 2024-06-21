@@ -12,9 +12,12 @@
             <StackPanel x:Name="pnlConvergingUp" VerticalAlignment="Center" Orientation="Horizontal" Visibility="collapsed" 
                 d:Visibility="Visible" >
 
-                <!--common product button-->
-                <Button x:Name="btnMergeLeftCenter" Content="C" Height="20" Margin="0,0,0,2" Width="30" Visibility="collapsed" 
-                    d:Visibility="Visible"/>
+                <!--common product/intermediate button-->
+                <Border x:Name="btnMergeLeftCenter" Height="20" Margin="2,0,2,2" Visibility="collapsed" CornerRadius="6" d:Visibility="Visible"
+                    Padding="4,0,4,1" BorderBrush="gray" BorderThickness="1" Background="{StaticResource LightBlueGradient}"
+                    ToolTip="Common intermediate/product" ToolTipService.InitialShowDelay="500">
+                    <TextBlock Text="●" Foreground="#FF656464"/>
+                </Border>
 
                 <!--upstream connector-->
                 <Rectangle x:Name="downConnector" Fill="BlueViolet" Width="12" Height="2" VerticalAlignment="Center" 
@@ -44,9 +47,12 @@
                     <TextBlock Text="&#10148;" FontSize="12" Foreground="BlueViolet" VerticalAlignment="Center" Margin="-3,-2,0,0"/>
                 </StackPanel>
 
-                <!--common product button-->
-                <Button x:Name="btnMergeRightCenter" Content="C" Height="20" Margin="0,0,0,2" Width="30" Visibility="collapsed" 
-                  d:Visibility="Visible"/>
+                <!--common product/intermediate button-->
+                <Border x:Name="btnMergeRightCenter" Height="20" Margin="2,0,2,2" Visibility="collapsed" CornerRadius="6" d:Visibility="Visible"
+                   Padding="4,0,4,1" BorderBrush="gray" BorderThickness="1" Background="{StaticResource LightBlueGradient}"
+                   ToolTip="Common intermediate/product" ToolTipService.InitialShowDelay="500">
+                    <TextBlock Text="●" Foreground="#FF656464"/>
+                </Border>
 
             </StackPanel>
 

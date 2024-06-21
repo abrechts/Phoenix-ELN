@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:CustomControls"
              mc:Ignorable="d" 
-             d:DesignHeight="140" >
+             d:DesignHeight="140">
     
     <UserControl.Resources>
 
@@ -16,11 +16,11 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type ToggleButton}">
                         <Border 
-                                x:Name="Border"  
-                                BorderThickness="1"
-                                CornerRadius="3,3,3,3"
-                                Background="{StaticResource LightBlueGradient2}"
-                                BorderBrush="DimGray">
+                            x:Name="Border"  
+                            BorderThickness="1"
+                            CornerRadius="3,3,3,3"
+                            Background="{StaticResource LightBlueGradient2}"
+                            BorderBrush="DimGray">
                             <ContentPresenter 
                                      Name="MyPresenter"
                                       Margin="2"

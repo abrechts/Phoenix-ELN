@@ -49,6 +49,8 @@ Public Class dlgSequences
         Dim seedStepStruct As SequenceStructure = Nothing
         Dim stepPos As Integer = 1
 
+        blkSequenceTitle.Text = sequence.SequenceTitle
+
         pnlSeqStructures.Children.Clear()
 
         For Each stp In sequence.SequenceSteps
@@ -160,6 +162,15 @@ Public Class dlgSequences
         If TypeOf e.Source Is SequenceControl Then
             RaiseEvent ClearSequenceSelections(Me)
         End If
+
+    End Sub
+
+
+    Private Sub icoInfo_PreviewMouseUp() Handles icoInfo.PreviewMouseUp
+
+        Dim info As New ProcessStartInfo("https://abrechts.github.io/phoenix-eln-help.github.io/pages/SyntheticConnections.html")
+        info.UseShellExecute = True
+        Process.Start(info)
 
     End Sub
 
