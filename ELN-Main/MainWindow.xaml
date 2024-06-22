@@ -118,7 +118,7 @@
                     </Button>
 
                     <Button x:Name="btnSequences" HorizontalAlignment="Left" VerticalAlignment="Top" d:Visibility="Visible" Visibility="Visible" 
-                       ToolTip="Displays all synthetic steps originating from &#x0a;and leading to the current conversion.">
+                       ToolTip="Displays all synthetic routes connected &#x0a;to the step of the current experiment.">
                         <StackPanel Orientation="Horizontal">
                             <ContentControl Content="{StaticResource icoGraph}" Height="16" Margin="1,1,2,0" Opacity="0.85"/>
                             <TextBlock Text="Connects" Margin="0,0,2,0" VerticalAlignment="Center"/>
