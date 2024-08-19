@@ -20,95 +20,112 @@ Class MainWindow
     Private Property ExpDisplayList As ObservableCollection(Of tblExperiments)
 
     Private _IsVersionUpgrade As Boolean = False
+    Private _StartupError As Boolean = False
 
 
     Public Sub New()
 
         InitializeComponent()
 
-        'Prevent another instance of the application to be run
-        If (Process.GetProcessesByName(Process.GetCurrentProcess().ProcessName).Length > 1) Then
-            Me.Hide()
-            MsgBox("Phoenix ELN is already running! ", MsgBoxStyle.Information, "Phoenix ELN")
-            Me.Close()
-            Application.Current.Shutdown()
-        End If
+        Try
 
-        SQLiteDbPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\Phoenix ELN Data\ElnData.db"
-
-        'Replace local database by demo database, if missing for some reason
-        If Not File.Exists(SQLiteDbPath) Then
-            File.Copy("DB-Seed\ElnData.db", SQLiteDbPath)
-            DbUpgradeLocal.Upgrade(SQLiteDbPath)
-        End If
-
-        With CustomControls.My.MySettings.Default
-
-            'Upgrade settings
-            If .SettingIsNew Then
-                .Upgrade()
-                .SettingIsNew = False
-                .Save()
-                _IsVersionUpgrade = True
+            'Prevent another instance of the application to be run
+            If (Process.GetProcessesByName(Process.GetCurrentProcess().ProcessName).Length > 1) Then
+                Me.Hide()
+                MsgBox("Phoenix ELN is already running! ", MsgBoxStyle.Information, "Phoenix ELN")
+                Me.Close()
+                Application.Current.Shutdown()
             End If
 
-            'Apply settings
-            If .StartupSize.Width > -1 Then
-                WindowStartupLocation = WindowStartupLocation.Manual
-                Left = .StartupPosition.X
-                Top = .StartupPosition.Y
-                Width = .StartupSize.Width
-                Height = .StartupSize.Height
+            SQLiteDbPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\Phoenix ELN Data\ElnData.db"
+
+            'Replace local database by demo database, if missing for some reason
+            If Not File.Exists(SQLiteDbPath) Then
+                File.Copy("DB-Seed\ElnData.db", SQLiteDbPath)
+                DbUpgradeLocal.Upgrade(SQLiteDbPath)
             End If
 
-            'Check for pending restore
-            If .RestoreFromServer = True Then
-                Threading.Thread.Sleep(50)  'allow previous instance to close
-                Dim tempPath = IO.Path.GetDirectoryName(SQLiteDbPath) + "\ElnData.tmp"
-                Try
-                    File.Move(tempPath, SQLiteDbPath, True)    'overwrite current working db
-                Catch ex As Exception
-                    MsgBox("Can't replace current experiments database for " + vbCrLf +
+            With CustomControls.My.MySettings.Default
+
+                'Upgrade settings
+                If .SettingIsNew Then
+                    .Upgrade()
+                    .SettingIsNew = False
+                    .Save()
+                    _IsVersionUpgrade = True
+                End If
+
+                'Apply settings
+                If .StartupSize.Width > -1 Then
+                    WindowStartupLocation = WindowStartupLocation.Manual
+                    Left = .StartupPosition.X
+                    Top = .StartupPosition.Y
+                    Width = .StartupSize.Width
+                    Height = .StartupSize.Height
+                End If
+
+                'Check for pending restore
+                If .RestoreFromServer = True Then
+                    Threading.Thread.Sleep(50)  'allow previous instance to close
+                    Dim tempPath = IO.Path.GetDirectoryName(SQLiteDbPath) + "\ElnData.tmp"
+                    Try
+                        File.Move(tempPath, SQLiteDbPath, True)    'overwrite current working db
+                    Catch ex As Exception
+                        MsgBox("Can't replace current experiments database for " + vbCrLf +
                            "restore, since locked by another application!", MsgBoxStyle.Information, "Restore Error")
-                End Try
-                .RestoreFromServer = False
-                .Save()
+                    End Try
+                    .RestoreFromServer = False
+                    .Save()
+                End If
+
+            End With
+
+            'Apply database upgrades for new version if required
+            If _IsVersionUpgrade Then
+                DbUpgradeServer.IsNewAppVersion = True
+                DbUpgradeLocal.Upgrade(SQLiteDbPath)
             End If
 
-        End With
+            'Create local SqliteContext
+            DBContext = New SQLiteContext(SQLiteDbPath).ElnContext
 
-        'Apply database upgrades for new version if required
-        If _IsVersionUpgrade Then
-            DbUpgradeServer.IsNewAppVersion = True
-            DbUpgradeLocal.Upgrade(SQLiteDbPath)
-        End If
+            'Check for legacy Rss backlog registration (--> can be removed later!)
+            If New Version(DBContext.tblDatabaseInfo.First.CurrAppVersion) < New Version("0.9.5") Then
+                Dim rss As New RxnSubstructure
+                rss.RegisterRssBacklog(DBContext.tblDatabaseInfo.First.tblUsers.First)
+                DBContext.SaveChanges()
+            End If
 
-        'Create local SqliteContext
-        DBContext = New SQLiteContext(SQLiteDbPath).ElnContext
+            ApplicationVersion = GetType(MainWindow).Assembly.GetName().Version
+            DBContext.tblDatabaseInfo.First.CurrAppVersion = ApplicationVersion.ToString
 
-        'Check for legacy Rss backlog registration (--> can be removed later!)
-        If New Version(DBContext.tblDatabaseInfo.First.CurrAppVersion) < New Version("0.9.5") Then
-            Dim rss As New RxnSubstructure
-            rss.RegisterRssBacklog(DBContext.tblDatabaseInfo.First.tblUsers.First)
-            DBContext.SaveChanges()
-        End If
+            'Version update: Send install statistics
+            If _IsVersionUpgrade Then
+                PhpServices.SendInstallInfo(ApplicationVersion.ToString(3), DBContext, CustomControls.My.MySettings.Default.IsServerSpecified)
+            End If
 
-        ApplicationVersion = GetType(MainWindow).Assembly.GetName().Version
-        DBContext.tblDatabaseInfo.First.CurrAppVersion = ApplicationVersion.ToString
+            RemainingDemoCountConverter.MaxDemoCount = 15
+            RemainingDemoCountConverter.FactoryDemoCount = 6
 
-        'Version update: Send install statistics
-        If _IsVersionUpgrade Then
-            PhpServices.SendInstallInfo(ApplicationVersion.ToString(3), DBContext, CustomControls.My.MySettings.Default.IsServerSpecified)
-        End If
+        Catch ex As Exception
 
-        RemainingDemoCountConverter.MaxDemoCount = 15
-        RemainingDemoCountConverter.FactoryDemoCount = 6
+            'catch design time error when opening this window in the XAML editor
+            _StartupError = True
+
+        End Try
 
 
     End Sub
 
 
     Private Sub Me_Loaded() Handles Me.Loaded
+
+        'check for startup error
+        If _StartupError Then
+            MsgBox("Sorry, a startup error occurred. The application " + vbCrLf +
+              "will quit now.", MsgBoxStyle.Exclamation, "Phoenix ELN")
+            Application.Current.Shutdown()
+        End If
 
         'register shared events
         AddHandler Protocol.RequestSaveIcon, AddressOf Protocol_RequestSaveIcon
