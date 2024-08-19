@@ -107,8 +107,15 @@ Public Class TabStatusIconConverter
     Public Function Convert(value() As Object, targetType As Type, parameter As Object, culture As CultureInfo) As Object _
     Implements IMultiValueConverter.Convert
 
-        Dim workFlowState As WorkflowStatus = value(0)
-        Dim displayIndex As Integer = value(1)
+        Dim workFlowState As WorkflowStatus
+        Dim displayIndex As Integer
+
+        Try
+            workFlowState = value(0)
+            displayIndex = value(1)
+        Catch ex As Exception
+            Return Nothing
+        End Try
 
         Dim imgSrc As Viewbox
 
