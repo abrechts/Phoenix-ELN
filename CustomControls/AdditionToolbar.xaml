@@ -16,18 +16,18 @@
 
     </Control.Resources>
 
-    <Border BorderThickness="1" BorderBrush="#FF84A0C4" Background="whitesmoke" Padding="4" CornerRadius="8" >
+    <Border BorderThickness="0" BorderBrush="#FF84A0C4" Background="#FFE9E9E9" Padding="4" CornerRadius="8" >
 
         <StackPanel Orientation="Horizontal">
-          
+
             <local:ComboPlus x:Name="cboAddMat" DropDownDirection="Up" Margin="2,0,4,0" IsEditable="False" SelectedIndex="0"
-               CboBackground="{StaticResource ButtonGradient}" CboBorderBrush="lightgray"
+               CboBackground="white" CboBorderBrush="#FFC6C6C6"
                Grid.IsSharedSizeScope="true" Padding="3,3" >
 
                 <ComboBoxItem IsEnabled="False" Background="{StaticResource ButtonGradient}" >
                     <StackPanel Orientation="Horizontal">
                         <ContentControl Content="{StaticResource icoAddElement}" Height="16" Margin="0,0,3,0" VerticalAlignment="Center"/>
-                        <TextBlock x:Name="blkAddMat" Text="Add Material" FontWeight="Demibold" Foreground="#FF171717"
+                        <TextBlock x:Name="blkAddMat" Text="Add Material"  Foreground="#FF171717"
                                 VerticalAlignment="Center" Margin="0,0,1,0"  />
                     </StackPanel>
                 </ComboBoxItem>
@@ -98,25 +98,25 @@
                 </ComboBoxItem>
 
             </local:ComboPlus>
-            
 
-            <Button x:Name="btnAddComment" Margin="2,0,2,0" Background="{StaticResource ButtonGradient}" BorderBrush="lightgray"
+
+            <Button x:Name="btnAddComment" Margin="2,0,2,0" Background="white" BorderBrush="#FFC6C6C6"
                     BorderThickness="1">
                 <StackPanel Orientation="Horizontal">
                     <ContentControl Content="{StaticResource icoMessageBubble}" Margin="4,0,4,0" Height="16"/>
-                    <TextBlock Text="Add Comment" Margin="0,0,4,0" FontWeight="DemiBold" Foreground="#FF171717"/>
+                    <TextBlock Text="Add Comment" Margin="0,0,4,0"  Foreground="#FF171717"/>
                 </StackPanel>
             </Button>
             
 
             <local:ComboPlus x:Name="cboAddOther" DropDownDirection="Up" Margin="4,0,4,0" IsEditable="False" SelectedIndex="0"
-              CboBackground="{StaticResource ButtonGradient}" CboBorderBrush="lightgray"
+              CboBackground="white" CboBorderBrush="#FFC6C6C6"
               Grid.IsSharedSizeScope="true" Padding="3,3" >
 
                 <ComboBoxItem IsEnabled="False" Background="{StaticResource ButtonGradient}" >
                     <StackPanel Orientation="Horizontal">
                         <ContentControl Content="{StaticResource icoAddElement}" Height="16" Margin="0,0,3,0" VerticalAlignment="Center"/>
-                        <TextBlock x:Name="blkAddOther" Text="Add Other" FontWeight="DemiBold"
+                        <TextBlock x:Name="blkAddOther" Text="Add Other" 
                                VerticalAlignment="Center" Margin="0,0,1,0" Foreground="#FF171717"  />
                     </StackPanel>
                 </ComboBoxItem>
@@ -149,9 +149,8 @@
 
             </local:ComboPlus>
 
-            <CheckBox x:Name="chkInsert" VerticalAlignment="Center" Content="Insert" Margin="2,0,2,0" ToolTipService.InitialShowDelay="500"
-                ToolTip="If checked, a new protocol item &#x0a;will be inserted below the currently &#x0a;selected one, instead of appended."
-                FontWeight="demibold"/>
+            <CheckBox x:Name="chkInsert" VerticalAlignment="Center" Content="Insert" Margin="2,0,4,0" ToolTipService.InitialShowDelay="500"
+                ToolTip="If checked, a new protocol item &#x0a;will be inserted below the currently &#x0a;selected one, instead of appended."/>
 
         </StackPanel>
 

@@ -83,12 +83,24 @@
 
     <Grid>
 
-        <DockPanel x:Name="pnlDock" Margin="0,0,0,16">
+        <DockPanel x:Name="pnlDock" Margin="0,0,0,0">
 
             <Border x:Name="pnlProtocol" DockPanel.Dock="top" BorderBrush="#FFD4D4D4" BorderThickness="1" CornerRadius="0,0,8,8" 
               Background="#FFF6F6F6">
                 
-                <ScrollViewer x:Name="scrlProtocol" VerticalScrollBarVisibility="auto" Margin="0,4,0,20" >
+                <ScrollViewer x:Name="scrlProtocol" VerticalScrollBarVisibility="auto">
+
+                    <ScrollViewer.Style>
+                        <Style TargetType="ScrollViewer">
+                            <Setter Property="Margin" Value="0,4,0,20"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding WorkflowState}" Value="1">
+                                    <Setter Property="Margin" Value="0,4,0,0"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ScrollViewer.Style>
+
 
                     <ListBox x:Name="lstProtocol"
                         
@@ -116,7 +128,7 @@
 
         </DockPanel>
 
-        <Grid  Margin="0,0,0,-2" d:Visibility="visible" VerticalAlignment="bottom">
+        <Grid d:Visibility="visible" VerticalAlignment="bottom" Margin="0,0,0,-14">
 
             <Grid.Style>
                 <Style TargetType="Grid">
