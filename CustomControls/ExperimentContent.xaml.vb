@@ -192,8 +192,10 @@ Public Class ExperimentContent
             If expEntry.tblProtocolItems.Count = 0 Then
                 'new experiment
                 With pnlProtocol
-                    .AddSeparator("Reaction", False)
+                    .addToolbar.SetCurrentValue(VisibilityProperty, Visibility.Collapsed) 'does not break current binding
                     .AddRefReactant()
+                    .AddSeparator("Reaction", activateEdit:=False, insertPos:=-1)
+                    .addToolbar.SetCurrentValue(VisibilityProperty, Visibility.Visible)
                     .RecalculateExperiment(False)
                 End With
             Else
@@ -296,8 +298,10 @@ Public Class ExperimentContent
                         If .CloneMethod = CloneType.SketchOnly Then
 
                             With newExpContent
-                                .pnlProtocol.AddSeparator("Reaction", activateEdit:=False)
+                                .pnlProtocol.addToolbar.SetCurrentValue(VisibilityProperty, Visibility.Collapsed) 'does not break current binding
                                 .pnlProtocol.AddRefReactant()
+                                .pnlProtocol.AddSeparator("Reaction", activateEdit:=False, insertPos:=-1)
+                                .pnlProtocol.addToolbar.SetCurrentValue(VisibilityProperty, Visibility.Visible)
                             End With
 
                         ElseIf .CloneMethod = CloneType.NextStepSketch Then
@@ -310,8 +314,10 @@ Public Class ExperimentContent
                                 skArea.EditSketch(clonedExp)
 
                                 With newExpContent
-                                    .pnlProtocol.AddSeparator("Reaction", activateEdit:=False)
+                                    .pnlProtocol.addToolbar.SetCurrentValue(VisibilityProperty, Visibility.Collapsed) 'does not break current binding
                                     .pnlProtocol.AddRefReactant()
+                                    .pnlProtocol.AddSeparator("Reaction", activateEdit:=False, insertPos:=-1)
+                                    .pnlProtocol.addToolbar.SetCurrentValue(VisibilityProperty, Visibility.Visible)
                                 End With
 
                             End If

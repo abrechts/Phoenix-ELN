@@ -594,7 +594,7 @@ Public Class Protocol
             .GUID = Guid.NewGuid.ToString("D")
             .ProtocolItem = newProtocolEntry
             .Name = If(currRefReactItem Is Nothing, "Reactant", currRefReactItem.tblRefReactants.Name)   'ensure consistent name if multiple portions
-            .ResinLoad = currRefReactItem?.tblRefReactants.ResinLoad    'dito for resin load
+            .ResinLoad = currRefReactItem?.tblRefReactants.ResinLoad    'ditto for resin load
             .Source = currRefReactItem?.tblRefReactants.Source
         End With
 
@@ -752,10 +752,13 @@ Public Class Protocol
 
 
     ''' <summary>
-    ''' Add a new workflow separator
+    ''' Adds a new workflow separator
     ''' </summary>
+    ''' <param name="title">The title of the separator.</param>
+    ''' <param name="activateEdit">True, if the title textbox is to be selected for edit after addition.</param>
+    ''' <param name="insertPos">The item index, after which the separator is to inserted, or nothing.</param>
     ''' 
-    Public Sub AddSeparator(Optional title As String = "Title", Optional activateEdit As Boolean = True)
+    Public Sub AddSeparator(Optional title As String = "Title", Optional activateEdit As Boolean = True, Optional insertPos As Integer? = Nothing)
 
         Dim newProtocolEntry = CreateProtocolItem(ProtocolElementType.Separator)
         Dim newSeparator = New tblSeparators
@@ -768,7 +771,7 @@ Public Class Protocol
         End With
         newProtocolEntry.tblSeparators = newSeparator
 
-        Dim newLbItem = AddProtocolItem(newProtocolEntry)
+        Dim newLbItem = AddProtocolItem(newProtocolEntry, insertPos)
         If Not IsNothing(newLbItem) Then
             Dim currSeparator = WPFToolbox.FindVisualChild(Of WorkflowSeparator)(newLbItem)
             If activateEdit Then
@@ -1574,7 +1577,7 @@ Public Class ProtocolDropHandler
 
     ''' <summary>
     ''' Rearranges the the sequence numbers of the experiment ProtocolElement collection to reflect the 
-    ''' sequence oder of the elements after the DragDrop move operation.
+    ''' sequence order of the elements after the DragDrop move operation.
     ''' </summary>
     ''' <param name="dropInfo">DropInfo obtained from the IDropTarget.DropTarget event.</param>
     ''' 

@@ -5,7 +5,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
         xmlns:local="clr-namespace:CustomControls"
         mc:Ignorable="d"
-             FontSize="12.5">
+        FontSize="12.5">
 
     <Control.Resources>
 
@@ -16,7 +16,7 @@
 
     </Control.Resources>
 
-    <Border BorderThickness="0" BorderBrush="#FF84A0C4" Background="#FFE9E9E9" Padding="4" CornerRadius="8" >
+    <Border BorderThickness="0" BorderBrush="#FF84A0C4" Background="#FFE4E4E4" Padding="4" CornerRadius="8" >
 
         <StackPanel Orientation="Horizontal">
 
