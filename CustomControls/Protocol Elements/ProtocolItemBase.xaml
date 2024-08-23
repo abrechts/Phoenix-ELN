@@ -13,22 +13,40 @@
       
         <local:ProtocolTypeSelector x:Key="protocolTypeSel"/>
 
-        <Grid x:Key="icoDrag" Width="14" Height="16" >
+        <Grid x:Key="icoDrag" Cursor="Hand" Background="#FFE9F7F9" >
             <Grid.Style>
                 <Style TargetType="Grid">
                     <Setter Property="Visibility" Value="Visible"/>
+                    <Setter Property="ToolTip" Value="Drag to move element up/down."/>
                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding Experiment.WorkflowState}" Value="1">
-                            <Setter Property="Visibility" Value="Collapsed"/>
-                        </DataTrigger>
                         <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem},Path=IsSelected}" Value="false">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Setter Property="ToolTip" Value="Select element"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem},Path=IsMouseOver}" Value="true">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Experiment.WorkflowState}" Value="1">
                             <Setter Property="Visibility" Value="Collapsed"/>
                         </DataTrigger>
                     </Style.Triggers>
                 </Style>
             </Grid.Style>
 
-            <TextBlock Text="&lt;" FontSize="16" Margin="0,-2,-2,0" Foreground="#FF8C8C8C"/>
+            <TextBlock  VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="#FF1B1B1B" >
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Text" Value="&lt;"/>
+                        <Setter Property="FontSize" Value="15"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem},Path=IsSelected}" Value="true">
+                                <Setter Property="Text" Value="☰"/>
+                                <Setter Property="FontSize" Value="13"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
 
         </Grid>
 
@@ -70,8 +88,8 @@
 
     </UserControl.Resources>
 
-    <Border x:Name="mainBorder" Background="white" TextBlock.Foreground="black" 
-       BorderBrush="{StaticResource ProtocolItemBorder}" BorderThickness="1" CornerRadius="6" Padding="0,1,4,2" >
+    <Border x:Name="mainBorder" Background="white" TextBlock.Foreground="black" Padding="0,1,4,2" 
+       BorderBrush="{StaticResource ProtocolItemBorder}" BorderThickness="1" CornerRadius="6" >
 
         <Border.ContextMenu>
             <ContextMenu>
@@ -79,19 +97,17 @@
             </ContextMenu>
         </Border.ContextMenu>
 
-        <Grid>
+        <Grid Background="Transparent" >
             
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="18" />
+                <ColumnDefinition Width="20"/>
             </Grid.ColumnDefinitions>
 
             <ContentControl x:Name="itemContent" Grid.Column="0" Content="{Binding}" ContentTemplateSelector="{StaticResource protocolTypeSel}"
                Margin="10,1,0,1"/>
 
-            <ContentControl Grid.Column="1" Content="{StaticResource icoDrag}" Cursor="Hand" 
-               ToolTip="Drag to move element up/down." HorizontalAlignment="Right">
-            </ContentControl>   
+            <ContentControl Grid.Column="1" Content="{StaticResource icoDrag}" />
 
             <!--for drag/drop debug only-->
             <!--<TextBlock Grid.Column="0" d:Text="-3-" Text="{Binding SequenceNr,StringFormat={}-{0}-}" Margin="8,0,0,0" HorizontalAlignment="Right"/>-->

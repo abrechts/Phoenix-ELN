@@ -39,8 +39,9 @@
                     <ControlTemplate TargetType="ListBoxItem">
                         <Border Name="_Border"
                                 Margin="0"
+                                BorderBrush="transparent"
                                 Padding="4,0,4,0"
-                                BorderThickness="2,0"
+                                BorderThickness="4,0,0,0"
                                 SnapsToDevicePixels="true">
                             <ContentPresenter />
                         </Border>
@@ -49,7 +50,6 @@
                                 <Setter TargetName="_Border" Property="Background" Value="#FFDEDEDE"/>
                             </Trigger>
                             <Trigger Property="IsSelected" Value="true">
-                                <Setter TargetName="_Border" Property="Background" Value="#FFBCD9E7"/>
                                 <Setter TargetName="_Border" Property="BorderBrush" Value="#FF8BBED6"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
