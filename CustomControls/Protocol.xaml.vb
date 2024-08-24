@@ -443,7 +443,7 @@ Public Class Protocol
     ''' Clear current protocol item selection when clicking into empty protocol area.
     ''' </summary>
     ''' 
-    Private Sub lstProtocol_PreviewMouseDown(sender As Object, e As RoutedEventArgs) Handles lstProtocol.PreviewMouseDown
+    Private Sub lstProtocol_PreviewMouseDown(sender As Object, e As RoutedEventArgs) Handles scrlProtocol.PreviewMouseDown
 
         If TypeOf e.OriginalSource Is ScrollViewer Then
             UnselectAll()
@@ -456,7 +456,7 @@ Public Class Protocol
     ''' Handles opening the target protocol item to initiate edit operations.
     ''' </summary>
     ''' 
-    Private Sub ProtocolItem_PreviewMouseLeftButtonUp(sender As Object, e As RoutedEventArgs)
+    Private Sub ProtocolItem_PreviewMouseLeftButtonDown(sender As Object, e As RoutedEventArgs)
 
         'don't allow editing protocol elements of finalized experiments
         If CType(Me.DataContext, tblExperiments).WorkflowState = WorkflowStatus.Finalized Then
@@ -470,6 +470,12 @@ Public Class Protocol
         If Not childItem.ProtocolItemContent.IsMouseOver Then
             Exit Sub
         End If
+
+        'select the affected ProtocolItem
+        With thisLbItem
+            .IsSelected = True
+            .Focus() 'ends pending text edits
+        End With
 
         Dim protocolItemEntry = CType(sender.Content, tblProtocolItems)
 

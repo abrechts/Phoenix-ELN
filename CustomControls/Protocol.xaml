@@ -47,18 +47,18 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="true">
-                                <Setter TargetName="_Border" Property="Background" Value="#FFDEDEDE"/>
+                                <Setter TargetName="_Border" Property="Background" Value="#FFDBDBDB"/>
                             </Trigger>
                             <Trigger Property="IsSelected" Value="true">
-                                <Setter TargetName="_Border" Property="BorderBrush" Value="#FF8BBED6"/>
+                                <Setter TargetName="_Border" Property="BorderBrush" Value="#FFD36EFF"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
             
-            <EventSetter Event="PreviewMouseLeftButtonDown" Handler="ProtocolItem_PreviewMouseLeftButtonUp" />
-            
+            <EventSetter Event="PreviewMouseLeftButtonDown" Handler="ProtocolItem_PreviewMouseLeftButtonDown" />
+       
         </Style>
 
         <Style x:Key="ProtocolFinalizedListBoxItemStyle" TargetType="ListBoxItem">

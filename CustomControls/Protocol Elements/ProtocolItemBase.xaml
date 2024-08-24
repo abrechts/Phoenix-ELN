@@ -10,45 +10,8 @@
              d:DataContext="{d:DesignInstance Type=data:tblProtocolItems}" >
 
     <UserControl.Resources>
-      
+
         <local:ProtocolTypeSelector x:Key="protocolTypeSel"/>
-
-        <Grid x:Key="icoDrag" Cursor="Hand" Background="#FFE9F7F9" >
-            <Grid.Style>
-                <Style TargetType="Grid">
-                    <Setter Property="Visibility" Value="Visible"/>
-                    <Setter Property="ToolTip" Value="Drag to move element up/down."/>
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem},Path=IsSelected}" Value="false">
-                            <Setter Property="Visibility" Value="Collapsed"/>
-                            <Setter Property="ToolTip" Value="Select element"/>
-                        </DataTrigger>
-                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem},Path=IsMouseOver}" Value="true">
-                            <Setter Property="Visibility" Value="Visible"/>
-                        </DataTrigger>
-                        <DataTrigger Binding="{Binding Experiment.WorkflowState}" Value="1">
-                            <Setter Property="Visibility" Value="Collapsed"/>
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </Grid.Style>
-
-            <TextBlock  VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="#FF1B1B1B" >
-                <TextBlock.Style>
-                    <Style TargetType="TextBlock">
-                        <Setter Property="Text" Value="&lt;"/>
-                        <Setter Property="FontSize" Value="15"/>
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem},Path=IsSelected}" Value="true">
-                                <Setter Property="Text" Value="☰"/>
-                                <Setter Property="FontSize" Value="13"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </TextBlock.Style>
-            </TextBlock>
-
-        </Grid>
 
         <DataTemplate x:Key="RefReactantItem">
             <local:RefReactantContent/>
@@ -88,7 +51,7 @@
 
     </UserControl.Resources>
 
-    <Border x:Name="mainBorder" Background="white" TextBlock.Foreground="black" Padding="0,1,4,2" 
+    <Border x:Name="mainBorder" Background="white" TextBlock.Foreground="black" Padding="0,0,0,0" 
        BorderBrush="{StaticResource ProtocolItemBorder}" BorderThickness="1" CornerRadius="6" >
 
         <Border.ContextMenu>
@@ -105,9 +68,29 @@
             </Grid.ColumnDefinitions>
 
             <ContentControl x:Name="itemContent" Grid.Column="0" Content="{Binding}" ContentTemplateSelector="{StaticResource protocolTypeSel}"
-               Margin="10,1,0,1"/>
+               Margin="10,1,0,1" Padding="0,0,0,2"/>
 
-            <ContentControl Grid.Column="1" Content="{StaticResource icoDrag}" />
+            <Border Grid.Column="1" CornerRadius="0,6,6,0" Background="#FFE9F7F9">
+
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="Visibility" Value="Visible"/>
+                        <Setter Property="ToolTip" Value="Drag to move element up/down.&#x0a;Right-click to remove item."/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem},Path=IsSelected}" Value="false">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Setter Property="ToolTip" Value="Select element"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Experiment.WorkflowState}" Value="1">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+
+                <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="#FF313131" FontSize="12" Text="☰"/>
+
+            </Border>
 
             <!--for drag/drop debug only-->
             <!--<TextBlock Grid.Column="0" d:Text="-3-" Text="{Binding SequenceNr,StringFormat={}-{0}-}" Margin="8,0,0,0" HorizontalAlignment="Right"/>-->
