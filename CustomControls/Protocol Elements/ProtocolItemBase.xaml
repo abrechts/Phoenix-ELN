@@ -70,7 +70,7 @@
             <ContentControl x:Name="itemContent" Grid.Column="0" Content="{Binding}" ContentTemplateSelector="{StaticResource protocolTypeSel}"
                Margin="10,1,0,1" Padding="0,0,0,2"/>
 
-            <Border Grid.Column="1" CornerRadius="0,6,6,0" Background="#FFE9F7F9">
+            <Border Grid.Column="1" CornerRadius="0,6,6,0" Background="#FFE9F7F9" Cursor="Hand">
 
                 <Border.Style>
                     <Style TargetType="Border">
@@ -79,7 +79,6 @@
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem},Path=IsSelected}" Value="false">
                                 <Setter Property="Visibility" Value="Collapsed"/>
-                                <Setter Property="ToolTip" Value="Select element"/>
                             </DataTrigger>
                             <DataTrigger Binding="{Binding Experiment.WorkflowState}" Value="1">
                                 <Setter Property="Visibility" Value="Collapsed"/>
