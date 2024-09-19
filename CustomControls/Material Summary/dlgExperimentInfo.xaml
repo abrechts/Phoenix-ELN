@@ -1,0 +1,43 @@
+﻿<Window x:Class="dlgExperimentInfo"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CustomControls"
+        mc:Ignorable="d"
+        Title="dlgExperimentInfo" Height="250" Width="300" ShowInTaskbar="False" WindowStartupLocation="CenterOwner" TextOptions.TextFormattingMode="Display" >
+
+    <Grid Margin="10">
+
+        <StackPanel Grid.IsSharedSizeScope="True">
+
+            <TextBlock Text="Reagents" FontWeight="DemiBold" Margin="0,4,0,2"/>
+            <TreeView x:Name="tvReagentsSummary">
+                <TreeView.Resources>
+                    <!--<HierarchicalDataTemplate DataType="{x:Type local:MaterialTotal}" ItemsSource="{Binding MaterialEntries}">
+                        <local:MatSummaryEntry/>
+                    </HierarchicalDataTemplate>-->
+                    <DataTemplate DataType="{x:Type local:MaterialTotal}">
+                        <local:MatSummaryEntry FontStyle="Italic"/>
+                    </DataTemplate>
+                </TreeView.Resources>
+            </TreeView>
+
+            <TextBlock Text="Solvents" FontWeight="DemiBold" Margin="0,4,0,2"/>
+            <TreeView x:Name="tvSolventsSummary" Foreground="blue">
+                <TreeView.Resources>
+                    <HierarchicalDataTemplate DataType="{x:Type local:MaterialTotal}" ItemsSource="{Binding MaterialEntries}">
+                        <local:MatSummaryEntry/>
+                    </HierarchicalDataTemplate>
+                    <DataTemplate DataType="{x:Type local:MaterialEntry}">
+                        <local:MatSummaryEntry FontStyle="Italic"/>
+                    </DataTemplate>
+                </TreeView.Resources>
+            </TreeView>
+
+        </StackPanel>
+
+
+    </Grid>
+    
+</Window>

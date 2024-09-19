@@ -47,6 +47,9 @@
     <Compile Update="Material Dialogs\dlgEditReagent.xaml.vb">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Material Summary\MatSummaryEntry.xaml.vb">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="My Project\Resources.Designer.vb">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>

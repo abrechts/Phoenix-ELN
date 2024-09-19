@@ -1,0 +1,42 @@
+﻿<UserControl x:Class="MatSummaryEntry"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CustomControls"
+        xmlns:model="clr-namespace:ElnBase;assembly=ElnBase"
+        xmlns:data="clr-namespace:ElnCoreModel;assembly=ElnCoreModel"
+        d:DataContext="{d:DesignInstance Type=local:MaterialEntry}"
+        mc:Ignorable="d"
+        Cursor="Hand" HorizontalAlignment="Left">
+
+    <UserControl.Resources>
+        <local:StringToVisibilityConverter x:Key="stringToVisConv"/>
+        <local:SignificantDigitsConverter x:Key="sigDigConv"/>
+    </UserControl.Resources>
+
+    <Grid>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition SharedSizeGroup="amountCol" MinWidth="20"/>
+            <ColumnDefinition SharedSizeGroup="unitCol" MinWidth="12"/>
+            <ColumnDefinition MinWidth="110"/>
+        </Grid.ColumnDefinitions>
+
+        <!--amount-->
+        <TextBlock Grid.Column="0" d:Text="3.84" Text="{Binding Amount,Converter={StaticResource sigDigConv},ConverterParameter=3}" 
+         HorizontalAlignment="right" Margin="0,0,1,0" />
+       
+        <!--unit-->
+        <TextBlock Grid.Column="1" d:Text="ml" Text="{Binding Unit}" Margin="2,0,4,0" HorizontalAlignment="left"/>
+
+        <!--name-->
+        <StackPanel Orientation="Horizontal" Grid.Column="2" >
+            <TextBlock d:Text="Triethylamine" Text="{Binding MaterialName}" FontWeight="DemiBold"/>
+            <TextBlock d:Text=" (Merck 543216)" Text="{Binding Source,StringFormat=' ({0})'}"
+               Visibility="{Binding Source,Converter={StaticResource stringToVisConv}}"/>
+        </StackPanel>
+
+    </Grid>
+
+</UserControl>
