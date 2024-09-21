@@ -34,7 +34,7 @@
         <!--Ref.Reactant-->
         <StackPanel DockPanel.Dock="Top" Margin="0,2,0,8">
 
-            <TextBlock Text="Reactant" DockPanel.Dock="top" VerticalAlignment="Center" Foreground="{StaticResource DialogTitleForeground}"
+            <TextBlock Text="Ref. Reactant" DockPanel.Dock="top" VerticalAlignment="Center" Foreground="{StaticResource DialogTitleForeground}"
                 Background="transparent"  FontStyle="Italic" FontWeight="demibold" Padding="1,0" Margin="0,0,0,2" FontFamily="Verdana" 
                 FontSize="11" HorizontalAlignment="Center"/>
 
@@ -79,7 +79,7 @@
         <!--Ref.Product-->
         <StackPanel DockPanel.Dock="Top" >
 
-            <TextBlock Text="Product" DockPanel.Dock="top" VerticalAlignment="Center" Foreground="{StaticResource DialogTitleForeground}"
+            <TextBlock Text="Ref. Product" DockPanel.Dock="top" VerticalAlignment="Center" Foreground="{StaticResource DialogTitleForeground}"
                 Background="transparent" FontStyle="Italic" FontWeight="demibold" Padding="1,0" Margin="0,0,0,2" FontFamily="Verdana" 
                 FontSize="11" HorizontalAlignment="Center"/>
 

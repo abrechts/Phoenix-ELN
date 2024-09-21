@@ -6,7 +6,7 @@ Imports ElnBase.ELNCalculations
 Imports ElnBase.ELNEnumerations
 Imports ElnCoreModel
 
-Public Class MatSummaryEntry
+Public Class MatSummaryDetail
 
     Public Sub New()
 

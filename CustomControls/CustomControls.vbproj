@@ -47,7 +47,7 @@
     <Compile Update="Material Dialogs\dlgEditReagent.xaml.vb">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="Material Summary\MatSummaryEntry.xaml.vb">
+    <Compile Update="Material Summary\MatSummaryTotal.xaml.vb">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="My Project\Resources.Designer.vb">

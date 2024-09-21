@@ -5,39 +5,72 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CustomControls"
         mc:Ignorable="d"
-        Title="dlgExperimentInfo" Height="250" Width="300" ShowInTaskbar="False" WindowStartupLocation="CenterOwner" TextOptions.TextFormattingMode="Display" >
+        Title="Materials Summary" Height="250" MinWidth="300" ShowInTaskbar="False" WindowStartupLocation="CenterOwner" FontFamily="Arial" SizeToContent="Width">
 
-    <Grid Margin="10">
+    <Grid Margin="10,10,0,10">
 
-        <StackPanel Grid.IsSharedSizeScope="True">
+        <ScrollViewer Padding="6,6,12,0" VerticalScrollBarVisibility="Auto">
 
-            <TextBlock Text="Reagents" FontWeight="DemiBold" Margin="0,4,0,2"/>
-            <TreeView x:Name="tvReagentsSummary">
-                <TreeView.Resources>
-                    <!--<HierarchicalDataTemplate DataType="{x:Type local:MaterialTotal}" ItemsSource="{Binding MaterialEntries}">
-                        <local:MatSummaryEntry/>
-                    </HierarchicalDataTemplate>-->
-                    <DataTemplate DataType="{x:Type local:MaterialTotal}">
-                        <local:MatSummaryEntry FontStyle="Italic"/>
-                    </DataTemplate>
-                </TreeView.Resources>
-            </TreeView>
+            <StackPanel Grid.IsSharedSizeScope="True">
 
-            <TextBlock Text="Solvents" FontWeight="DemiBold" Margin="0,4,0,2"/>
-            <TreeView x:Name="tvSolventsSummary" Foreground="blue">
-                <TreeView.Resources>
-                    <HierarchicalDataTemplate DataType="{x:Type local:MaterialTotal}" ItemsSource="{Binding MaterialEntries}">
-                        <local:MatSummaryEntry/>
-                    </HierarchicalDataTemplate>
-                    <DataTemplate DataType="{x:Type local:MaterialEntry}">
-                        <local:MatSummaryEntry FontStyle="Italic"/>
-                    </DataTemplate>
-                </TreeView.Resources>
-            </TreeView>
+                <TextBlock Text="Reactant" FontWeight="DemiBold" Margin="0,6,0,2"/>
+                
+                <TreeView x:Name="tvReactantSummary" BorderThickness="0,1,0,0" Padding="0,4,0,0">
+                    <!--Background="#FFFFFFAA"-->
+                    <TreeView.Resources>
+                        <HierarchicalDataTemplate DataType="{x:Type local:MaterialTotal}" ItemsSource="{Binding MaterialEntries}">
+                            <local:MatSummaryTotal Background="#FFFFFFAA"/>
+                        </HierarchicalDataTemplate>
+                        <DataTemplate DataType="{x:Type local:MaterialEntry}">
+                            <local:MatSummaryDetail FontStyle="Italic"/>
+                        </DataTemplate>
+                    </TreeView.Resources>
+                    
+                </TreeView>
 
-        </StackPanel>
+                <TextBlock Text="Reagents" FontWeight="DemiBold" Margin="0,6,0,2"/>
 
+                <TreeView x:Name="tvReagentsSummary" BorderThickness="0,1,0,0" Padding="0,4,0,0">
+                    <TreeView.Resources>
+                        <HierarchicalDataTemplate DataType="{x:Type local:MaterialTotal}" ItemsSource="{Binding MaterialEntries}">
+                            <local:MatSummaryTotal/>
+                        </HierarchicalDataTemplate>
+                        <DataTemplate DataType="{x:Type local:MaterialEntry}">
+                            <local:MatSummaryDetail FontStyle="Italic"/>
+                        </DataTemplate>
+                    </TreeView.Resources>
+                </TreeView>
 
+                <TextBlock Text="Solvents" FontWeight="DemiBold" Margin="0,6,0,2" Foreground="blue"/>
+
+                <TreeView x:Name="tvSolventsSummary" BorderThickness="0,1,0,0" Padding="0,4,0,0">
+                    <TreeView.Resources>
+                        <HierarchicalDataTemplate DataType="{x:Type local:MaterialTotal}" ItemsSource="{Binding MaterialEntries}">
+                            <local:MatSummaryTotal TextBlock.Foreground="blue"/>
+                        </HierarchicalDataTemplate>
+                        <DataTemplate DataType="{x:Type local:MaterialEntry}">
+                            <local:MatSummaryDetail FontStyle="Italic" TextBlock.Foreground="blue"/>
+                        </DataTemplate>
+                    </TreeView.Resources>
+                </TreeView>
+
+                <TextBlock Text="Auxiliaries" FontWeight="DemiBold" Margin="0,6,0,2" Foreground="#FF860707"/>
+
+                <TreeView x:Name="tvAuxiliariesSummary" BorderThickness="0,1,0,0" Padding="0,4,0,0">
+                    <TreeView.Resources>
+                        <HierarchicalDataTemplate DataType="{x:Type local:MaterialTotal}" ItemsSource="{Binding MaterialEntries}">
+                            <local:MatSummaryTotal TextBlock.Foreground="#FF860707"/>
+                        </HierarchicalDataTemplate>
+                        <DataTemplate DataType="{x:Type local:MaterialEntry}">
+                            <local:MatSummaryDetail FontStyle="Italic" TextBlock.Foreground="#FF860707"/>
+                        </DataTemplate>
+                    </TreeView.Resources>
+                </TreeView>
+
+            </StackPanel>
+
+        </ScrollViewer>
+        
     </Grid>
     
 </Window>

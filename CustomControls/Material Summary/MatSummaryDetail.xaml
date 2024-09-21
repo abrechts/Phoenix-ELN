@@ -1,0 +1,56 @@
+﻿<UserControl x:Class="MatSummaryDetail"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CustomControls"
+        xmlns:model="clr-namespace:ElnBase;assembly=ElnBase"
+        xmlns:data="clr-namespace:ElnCoreModel;assembly=ElnCoreModel"
+        d:DataContext="{d:DesignInstance Type=local:MaterialEntry}"
+        mc:Ignorable="d"
+        Cursor="Hand" >
+
+    <UserControl.Resources>
+        <local:StringToVisibilityConverter x:Key="stringToVisConv"/>
+        <local:SignificantDigitsConverter x:Key="sigDigConv"/>
+
+        <Style TargetType="local:MatSummaryDetail">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type TreeViewItem}}, Path=Parent}" Value="{x:Null}">
+                    <Setter Property="Margin" Value="30,0,0,0"/>
+                    <Setter Property="Background" Value="WhiteSmoke"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+    </UserControl.Resources>
+
+    <Grid Margin="2,0">
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition SharedSizeGroup="TitleCol" MinWidth="10"/>
+            <ColumnDefinition SharedSizeGroup="amountCol" MinWidth="20"/>
+            <ColumnDefinition SharedSizeGroup="unitCol" MinWidth="12"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!--Title-->
+        <TextBlock Grid.Column="0" d:Text="1:" Text="{Binding Position, StringFormat='{}{0}:'}" Margin="0,0,4,0" FontWeight="demibold"/>
+
+        <!--amount-->
+        <TextBlock Grid.Column="1" d:Text="3.84" Text="{Binding Amount,Converter={StaticResource sigDigConv},ConverterParameter=3}" 
+         HorizontalAlignment="right" Margin="0,0,1,0" />
+       
+        <!--unit-->
+        <TextBlock Grid.Column="2" d:Text="ml" Text="{Binding Unit}" Margin="2,0,4,0" HorizontalAlignment="left"/>
+
+        <!--name-->
+        <!--<StackPanel Orientation="Horizontal" Grid.Column="2" >
+            <TextBlock d:Text="Triethylamine" Text="{Binding MaterialName}" FontWeight="DemiBold"/>
+            <TextBlock d:Text=" (Merck 543216)" Text="{Binding Source,StringFormat=' ({0})'}"
+               Visibility="{Binding Source,Converter={StaticResource stringToVisConv}}"/>
+        </StackPanel>-->
+
+    </Grid>
+
+</UserControl>
