@@ -1,11 +1,4 @@
-﻿Imports System.Globalization
-Imports System.Windows.Controls
-Imports System.Windows.Data
-Imports ElnBase
-Imports ElnBase.ELNCalculations
-Imports ElnBase.ELNEnumerations
-Imports ElnCoreModel
-
+﻿
 Public Class MatSummaryDetail
 
     Public Sub New()

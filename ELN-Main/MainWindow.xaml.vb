@@ -1272,8 +1272,6 @@ Class MainWindow
     End Sub
 
 
-
-
     ''' <summary>
     ''' Displays server connect dialog and return true if the connection succeeded
     ''' </summary>

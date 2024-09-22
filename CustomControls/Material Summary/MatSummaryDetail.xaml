@@ -8,24 +8,16 @@
         xmlns:data="clr-namespace:ElnCoreModel;assembly=ElnCoreModel"
         d:DataContext="{d:DesignInstance Type=local:MaterialEntry}"
         mc:Ignorable="d"
-        Cursor="Hand" >
+        Cursor="Hand" Background="White" Margin="-1,0,0,0">
 
     <UserControl.Resources>
+        
         <local:StringToVisibilityConverter x:Key="stringToVisConv"/>
         <local:SignificantDigitsConverter x:Key="sigDigConv"/>
 
-        <Style TargetType="local:MatSummaryDetail">
-            <Style.Triggers>
-                <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type TreeViewItem}}, Path=Parent}" Value="{x:Null}">
-                    <Setter Property="Margin" Value="30,0,0,0"/>
-                    <Setter Property="Background" Value="WhiteSmoke"/>
-                </DataTrigger>
-            </Style.Triggers>
-        </Style>
-
     </UserControl.Resources>
 
-    <Grid Margin="2,0">
+    <Grid Margin="30,0,0,0">
 
         <Grid.ColumnDefinitions>
             <ColumnDefinition SharedSizeGroup="TitleCol" MinWidth="10"/>
@@ -34,8 +26,20 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
+        <Grid.Style>
+            <Style TargetType="Grid">
+                <Setter Property="Background" Value="WhiteSmoke"/>
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type TreeViewItem}}, Path=IsSelected}" Value="true">
+                        <Setter Property="Background" Value="LightCyan"/>
+                        <Setter Property="TextBlock.Foreground" Value="Black"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </Grid.Style>
+
         <!--Title-->
-        <TextBlock Grid.Column="0" d:Text="1:" Text="{Binding Position, StringFormat='{}{0}:'}" Margin="0,0,4,0" FontWeight="demibold"/>
+        <TextBlock Grid.Column="0" d:Text="1:" Text="{Binding Position, StringFormat='{}{0}:'}" Margin="2,0,4,0" FontWeight="demibold"/>
 
         <!--amount-->
         <TextBlock Grid.Column="1" d:Text="3.84" Text="{Binding Amount,Converter={StaticResource sigDigConv},ConverterParameter=3}" 

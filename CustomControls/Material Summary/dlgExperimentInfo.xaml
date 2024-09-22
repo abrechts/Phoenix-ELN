@@ -14,9 +14,8 @@
             <StackPanel Grid.IsSharedSizeScope="True">
 
                 <TextBlock Text="Reactant" FontWeight="DemiBold" Margin="0,6,0,2"/>
-                
+
                 <TreeView x:Name="tvReactantSummary" BorderThickness="0,1,0,0" Padding="0,4,0,0">
-                    <!--Background="#FFFFFFAA"-->
                     <TreeView.Resources>
                         <HierarchicalDataTemplate DataType="{x:Type local:MaterialTotal}" ItemsSource="{Binding MaterialEntries}">
                             <local:MatSummaryTotal Background="#FFFFFFAA"/>
@@ -25,9 +24,9 @@
                             <local:MatSummaryDetail FontStyle="Italic"/>
                         </DataTemplate>
                     </TreeView.Resources>
-                    
                 </TreeView>
 
+                
                 <TextBlock Text="Reagents" FontWeight="DemiBold" Margin="0,6,0,2"/>
 
                 <TreeView x:Name="tvReagentsSummary" BorderThickness="0,1,0,0" Padding="0,4,0,0">
@@ -41,6 +40,7 @@
                     </TreeView.Resources>
                 </TreeView>
 
+                
                 <TextBlock Text="Solvents" FontWeight="DemiBold" Margin="0,6,0,2" Foreground="blue"/>
 
                 <TreeView x:Name="tvSolventsSummary" BorderThickness="0,1,0,0" Padding="0,4,0,0">
@@ -54,6 +54,7 @@
                     </TreeView.Resources>
                 </TreeView>
 
+                
                 <TextBlock Text="Auxiliaries" FontWeight="DemiBold" Margin="0,6,0,2" Foreground="#FF860707"/>
 
                 <TreeView x:Name="tvAuxiliariesSummary" BorderThickness="0,1,0,0" Padding="0,4,0,0">
