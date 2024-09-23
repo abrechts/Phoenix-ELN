@@ -15,7 +15,7 @@
         <local:SignificantDigitsConverter x:Key="sigDigConv"/>
     </UserControl.Resources>
 
-    <Grid>
+    <Grid Margin="-1,0,0,0">
 
         <Grid.Style>
             <Style TargetType="Grid">
@@ -36,13 +36,13 @@
 
         <!--amount-->
         <TextBlock Grid.Column="0" d:Text="3.84" Text="{Binding Amount,Converter={StaticResource sigDigConv},ConverterParameter=3}" 
-         HorizontalAlignment="right" Margin="0,0,1,0"/>
+         HorizontalAlignment="right" Margin="3,0,1,0"/>
        
         <!--unit-->
         <TextBlock Grid.Column="1" d:Text="ml" Text="{Binding Unit}" Margin="2,0,4,0" HorizontalAlignment="left"/>
 
         <!--name-->
-        <StackPanel Orientation="Horizontal" Grid.Column="2" >
+        <StackPanel Orientation="Horizontal" Grid.Column="2" Margin="0,0,3,0" >
             <TextBlock d:Text="Triethylamine" Text="{Binding MaterialName}"/>
             <TextBlock d:Text=" (Merck 543216)" Text="{Binding Source,StringFormat=' ({0})'}"
                Visibility="{Binding Source,Converter={StaticResource stringToVisConv}}"/>

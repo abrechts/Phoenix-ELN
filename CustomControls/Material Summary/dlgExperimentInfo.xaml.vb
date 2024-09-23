@@ -1,6 +1,7 @@
 ﻿
 Imports System.Windows.Controls
 Imports System.Windows.Input
+Imports ElnCoreModel
 
 Public Class dlgExperimentInfo
 
@@ -20,6 +21,8 @@ Public Class dlgExperimentInfo
         tvReagentsSummary.ItemsSource = MaterialsSummary.GetReagentGroups(Me.DataContext)
         tvSolventsSummary.ItemsSource = MaterialsSummary.GetSolventGroups(Me.DataContext)
         tvAuxiliariesSummary.ItemsSource = MaterialsSummary.GetAuxiliariesGroups(Me.DataContext)
+
+        Me.Title = "Material Totals - " + CType(Me.DataContext, tblExperiments).ExperimentID
 
     End Sub
 
