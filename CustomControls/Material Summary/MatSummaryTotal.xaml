@@ -8,7 +8,7 @@
         xmlns:data="clr-namespace:ElnCoreModel;assembly=ElnCoreModel"
         d:DataContext="{d:DesignInstance Type=local:MaterialEntry}"
         mc:Ignorable="d"
-        Cursor="Hand" HorizontalAlignment="Left">
+        HorizontalAlignment="Left">
 
     <UserControl.Resources>
         <local:StringToVisibilityConverter x:Key="stringToVisConv"/>
@@ -21,7 +21,7 @@
             <Style TargetType="Grid">
                 <Style.Triggers>
                     <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type TreeViewItem}}, Path=IsSelected}" Value="true">
-                        <Setter Property="Background" Value="LightCyan"/>
+                        <Setter Property="Background" Value="#FFBAFFFF"/>
                         <Setter Property="TextBlock.Foreground" Value="Black"/>
                     </DataTrigger>
                 </Style.Triggers>

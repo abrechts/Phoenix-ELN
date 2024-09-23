@@ -1260,18 +1260,6 @@ Class MainWindow
     End Sub
 
 
-    Private Sub btnExpInfo_Click() Handles btnExpInfo.Click
-
-        Dim expInfoDlg As New dlgExperimentInfo
-        With expInfoDlg
-            .Owner = Me
-            .DataContext = tabExperiments.SelectedContent
-            .ShowDialog()
-        End With
-
-    End Sub
-
-
     ''' <summary>
     ''' Displays server connect dialog and return true if the connection succeeded
     ''' </summary>

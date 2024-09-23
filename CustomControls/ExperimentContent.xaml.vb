@@ -23,6 +23,14 @@ Public Class ExperimentContent
     'Interface for providing VisualPaginator with correct page break locations within the control
     Implements PrintPageTemplate.VisualPaginator.IVisualPaginator
 
+
+    ''' <summary>
+    ''' Fires whenever the ExperimentContent is assigned a different experiment
+    ''' </summary>
+    '''
+    Public Shared Event ExperimentContextChanged(sender As Object, newExpEntry As tblExperiments)
+
+
     Public Sub New()
 
         ' This call is required by the designer.
@@ -75,6 +83,8 @@ Public Class ExperimentContent
                 End With
 
             End If
+
+            RaiseEvent ExperimentContextChanged(Me, Me.DataContext)
 
         End If
 

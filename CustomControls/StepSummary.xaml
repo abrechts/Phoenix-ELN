@@ -9,7 +9,7 @@
              xmlns:base="clr-namespace:ElnCoreModel;assembly=ElnCoreModel"      
              d:DataContext="{d:DesignInstance Type=base:tblUsers}"
              mc:Ignorable="d" 
-            d:DesignWidth="250">
+            d:DesignWidth="250" d:FontSize="12">
 
     <UserControl.Resources>
 
@@ -36,7 +36,7 @@
 
             <TextBlock Text="Ref. Reactant" DockPanel.Dock="top" VerticalAlignment="Center" Foreground="{StaticResource DialogTitleForeground}"
                 Background="transparent"  FontStyle="Italic" FontWeight="demibold" Padding="1,0" Margin="0,0,0,2" FontFamily="Verdana" 
-                FontSize="11" HorizontalAlignment="Center"/>
+                FontSize="11.5" HorizontalAlignment="Center"/>
 
             <Separator Margin="0,0,0,0" Background="#FF4D84D7"/>
 
@@ -67,7 +67,7 @@
                 <StackPanel Orientation="Horizontal" Margin="6,0,0,5" >
                     <TextBlock HorizontalAlignment="Left" Text="InChIKey:" FontWeight="Demibold" VerticalAlignment="Center" Width="70"/>
                     <TextBox x:Name="blkInChIKeyReact" d:Text="CATMAVIUJSKTCV-UHFFFAOYSA-N" IsReadOnly="true" BorderThickness="0" 
-                            Margin="-2,4,0,0" FontSize="11" VerticalAlignment="Center" FontFamily="Calibri" Background="transparent"/>
+                            Margin="-2,4,0,0" FontSize="11.5" VerticalAlignment="Center" FontFamily="Calibri" Background="transparent"/>
                 </StackPanel>
 
             </StackPanel>
@@ -81,7 +81,7 @@
 
             <TextBlock Text="Ref. Product" DockPanel.Dock="top" VerticalAlignment="Center" Foreground="{StaticResource DialogTitleForeground}"
                 Background="transparent" FontStyle="Italic" FontWeight="demibold" Padding="1,0" Margin="0,0,0,2" FontFamily="Verdana" 
-                FontSize="11" HorizontalAlignment="Center"/>
+                FontSize="11.5" HorizontalAlignment="Center"/>
 
             <Separator Margin="0,0,0,2" Background="#FF4D84D7"/>
 
@@ -112,7 +112,7 @@
                 <StackPanel Orientation="Horizontal" Margin="6,0,0,4">
                     <TextBlock HorizontalAlignment="Left" Text="InChIKey:" FontWeight="Demibold" VerticalAlignment="Center" Width="70"/>
                     <TextBox x:Name="blkInChIKeyProd" d:Text="CATMAVIUJSKTCV-UHFFFAOYSA-N" IsReadOnly="true" BorderThickness="0" 
-                            Margin="-2,3,0,0" FontSize="11" VerticalAlignment="Center" FontFamily="Calibri" Background="transparent"/>
+                            Margin="-2,3,0,0" FontSize="11.5" VerticalAlignment="Center" FontFamily="Calibri" Background="transparent"/>
                 </StackPanel>
 
             </StackPanel>
@@ -121,12 +121,33 @@
 
         </StackPanel>
 
+        <StackPanel DockPanel.Dock="Top">
+
+            <TextBlock Text="Exp. Info" DockPanel.Dock="top" VerticalAlignment="Center" Foreground="{StaticResource DialogTitleForeground}"
+                Background="transparent" FontStyle="Italic" FontWeight="demibold" Padding="1,0" Margin="0,12,0,2" FontFamily="Verdana" 
+                FontSize="11.5" HorizontalAlignment="Center"/>
+            
+            <Separator Margin="0,0,0,2" Background="#FF4D84D7"/>
+
+            <StackPanel Margin="0,0,0,0" Background="whitesmoke">
+
+                <StackPanel Orientation="Horizontal" Margin="6,5,0,6" >
+                    <TextBlock Text="Materials:" Width="70" FontWeight="DemiBold" VerticalAlignment="Center" Margin="0,-2,0,0"/>
+                    <Button x:Name="btnMatTotals" Content="Required Materials" Padding="8,0,8,1" Background="White" Margin="0,4"/>
+                </StackPanel>
+
+                <Separator Margin="0,0,0,0" DockPanel.Dock="top" Background="#FF4D84D7"/>
+
+            </StackPanel>
+
+        </StackPanel>
+
 
         <DockPanel Margin="0,10,0,0" >
 
             <TextBlock Text="Same Step" DockPanel.Dock="top" VerticalAlignment="Center" Foreground="{StaticResource DialogTitleForeground}"
                 Background="transparent" FontStyle="Italic" FontWeight="demibold" Padding="1,0" Margin="0,0,0,2" FontFamily="Verdana" 
-                FontSize="11" HorizontalAlignment="Center"/>
+                FontSize="11.5" HorizontalAlignment="Center"/>
 
             <DockPanel Background="WhiteSmoke" DockPanel.Dock="top">
 

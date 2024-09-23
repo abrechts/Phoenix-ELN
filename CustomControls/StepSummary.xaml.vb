@@ -1,4 +1,5 @@
 ﻿Imports System.ComponentModel
+Imports System.Windows
 Imports System.Windows.Data
 Imports System.Windows.Input
 Imports ElnCoreModel
@@ -64,6 +65,8 @@ Public Class StepSummary
                 blkProdEM.Text = Format(.ExactMass, "0.00")
             End With
 
+            btnMatTotals.IsEnabled = True
+
         Else
 
             pnlReactLinks.IsEnabled = False
@@ -84,6 +87,8 @@ Public Class StepSummary
             blkProdEf.Text = " --- "
             blkProdMw.Text = " --- "
             blkProdEM.Text = " --- "
+
+            btnMatTotals.IsEnabled = False
 
         End If
 
@@ -126,7 +131,17 @@ Public Class StepSummary
     End Sub
 
 
+    Private Sub btnMatTotals_PreviewMouseUp() Handles btnMatTotals.PreviewMouseUp
 
+        Dim mainWdw = WPFToolbox.FindVisualParent(Of Window)(Me)
+        Dim totalsDlg As New dlgExperimentInfo
+        With totalsDlg
+            .Owner = mainWdw
+            .DataContext = ExperimentContent.TabExperimentsPresenter.DataContext
+            .ShowDialog()
+        End With
+
+    End Sub
 
 
     Private Sub cvsStepExperiments_Filter(sender As Object, e As FilterEventArgs) 'XAML event
