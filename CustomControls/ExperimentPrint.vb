@@ -2,6 +2,7 @@
 Imports ElnCoreModel
 Imports Microsoft.Win32
 Imports Spire.Pdf
+Imports System.Drawing.Printing
 Imports System.Globalization
 Imports System.IO
 Imports System.IO.Packaging
@@ -23,17 +24,9 @@ Public Class ExperimentPrint
 
         Dim expEntry = expContent.DataContext
         Dim origSketchArea = expContent.SketchPanel
-
-        Dim printDlg As New PrintDialog
         Dim pdfPath As String = ""
 
-        If Not printAsPDF Then
-
-            If Not printDlg.ShowDialog Then
-                Exit Sub
-            End If
-
-        Else
+        If printAsPDF Then
 
             Dim saveFileDlg As New SaveFileDialog
             With saveFileDlg
@@ -75,7 +68,10 @@ Public Class ExperimentPrint
             .SketchPanel.SetComponentLabels(origSketchArea.ComponentFontSize, origSketchArea.BottomOffset)
         End With
 
-        Dim stackPrintTempl As New PrintPageTemplate(printStack, printDlg.PrintTicket, 0.95)
+
+        Dim printDoc = New PrintDocument()
+        Dim paperSize = printDoc.DefaultPageSettings.PaperSize
+        Dim stackPrintTempl As New PrintPageTemplate(printStack, paperSize, 0.95)
 
         With stackPrintTempl
             .ShowConfidentialMarker = False
@@ -99,6 +95,11 @@ Public Class ExperimentPrint
                 Process.Start(info)
 
             Else
+
+                Dim printDlg As New PrintDialog
+                If Not printDlg.ShowDialog Then
+                    Exit Sub
+                End If
 
                 printDlg.PrintDocument(stackPrintTempl.Paginator, "Printing " + expEntry.ExperimentID)
 
@@ -165,9 +166,9 @@ Public Class ExperimentPrint
 
             'define its display settings
             With .ViewerPreferences
-                If convertedPdf.Attachments.Count > 0 Then
+                If convertedPDF.Attachments.Count > 0 Then
                     .PageMode = PdfPageMode.UseAttachments
-                ElseIf convertedPdf.Pages.Count > 1 Then
+                ElseIf convertedPDF.Pages.Count > 1 Then
                     .PageMode = PdfPageMode.UseOutlines
                 End If
                 .PageLayout = PdfPageLayout.SinglePage
@@ -175,7 +176,7 @@ Public Class ExperimentPrint
 
             'save document
             Try
-                convertedPdf.SaveToFile(convPDFPath)
+                convertedPDF.SaveToFile(convPDFPath)
             Catch ex As Exception
                 MsgBox("Could Not write PDF, since a document with the same" + vbCrLf +
                "name is currently open in a PDF viewer. ", MsgBoxStyle.Information, "PDF Export")

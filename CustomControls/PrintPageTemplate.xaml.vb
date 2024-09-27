@@ -6,6 +6,7 @@
 '' Important: The content to be paginated is expected to be contained in a StackPanel.
 '' </summary>
 
+Imports System.Drawing.Printing
 Imports System.Windows
 Imports System.Windows.Controls
 Imports System.Windows.Documents
@@ -14,23 +15,18 @@ Imports System.Windows.Media.Imaging
 
 Public Class PrintPageTemplate
 
+    Public Property PageSize As Size
+
     Private mShrinkFactor As Double
 
-    Public Sub New(printPanel As Panel, printTicket As Printing.PrintTicket, shrinkFactor As Double)
+    Public Sub New(printPanel As Panel, printPageSize As PaperSize, shrinkFactor As Double)
 
         ' This call is required by the designer.
         InitializeComponent()
 
         mShrinkFactor = shrinkFactor
 
-        With printTicket
-            If .PageOrientation = Printing.PageOrientation.Portrait Then
-                PageSize = New Size(.PageMediaSize.Width, .PageMediaSize.Height)
-            Else
-                PageSize = New Size(.PageMediaSize.Height, .PageMediaSize.Width)
-            End If
-        End With
-
+        PageSize = New Size(printPageSize.Width, printPageSize.Height)  'assuming portrait mode
         PrintScroller.Content = printPanel
 
         blkFooterLeft.Text = ""
@@ -57,9 +53,6 @@ Public Class PrintPageTemplate
             End If
         End Set
     End Property
-
-
-    Public Property PageSize As Size
 
 
     ''' <summary>
