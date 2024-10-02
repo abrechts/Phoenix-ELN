@@ -71,6 +71,16 @@
                         </StackPanel>
                     </ToggleButton>
 
+                    <Button x:Name="btnClear" HorizontalAlignment="Left" VerticalAlignment="Top" 
+                        ToolTip="Deletes all protocol entries, except the reference reactant.">
+                        <StackPanel Orientation="Horizontal">
+                            <ContentControl Content="{StaticResource icoDeleteListItem}" Height="16" Margin="0,0,3,0"/>
+                            <TextBlock Text="Clear" Margin="0,0,2,0" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Separator/>
+
                     <Button x:Name="btnUndo" HorizontalAlignment="Left" IsEnabled="false" ToolTip="Undo">
                         <StackPanel Orientation="Horizontal">
                             <ContentControl Content="{StaticResource icoUndo}" Height="14" Margin="0,0,2,0">

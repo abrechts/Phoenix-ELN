@@ -1,5 +1,4 @@
-﻿Imports System.ComponentModel
-Imports System.Globalization
+﻿Imports System.Globalization
 Imports System.IO
 Imports System.Windows
 Imports System.Windows.Controls
@@ -10,8 +9,8 @@ Imports ElnBase
 Imports ElnBase.ELNEnumerations
 Imports ElnCoreModel
 Imports GongSolutions.Wpf.DragDrop
-Imports Microsoft.EntityFrameworkCore
 Imports Microsoft.Win32
+
 
 Public Class Protocol
 
@@ -955,8 +954,6 @@ Public Class Protocol
 
         End If
 
-        '    lstProtocol.Focus()
-
     End Sub
 
 
@@ -1269,6 +1266,26 @@ Public Class Protocol
             End If
 
         End If
+
+    End Sub
+
+
+    ''' <summary>
+    ''' Clears all protocol items except all occurrences of the reference reactant.
+    ''' </summary>
+    ''' 
+    Public Sub ClearItems()
+
+        For Each item As tblProtocolItems In lstProtocol.Items
+            If item.tblRefReactants Is Nothing Then
+                item.Experiment.tblProtocolItems.Remove(item)
+            End If
+        Next
+
+        ProtocolItemsViewSrc.View.Refresh()
+        RecalculateExperiment(True)
+
+        AutoSave()
 
     End Sub
 

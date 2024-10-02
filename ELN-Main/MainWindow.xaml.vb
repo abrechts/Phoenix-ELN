@@ -1120,6 +1120,20 @@ Class MainWindow
     End Sub
 
 
+    Private Sub btnClear_Click() Handles btnClear.Click
+
+
+        Dim res = MsgBox("Do you really want to delete all protocol" + vbCrLf +
+                         "entries, except the reference reactant?",
+                        MsgBoxStyle.OkCancel + MsgBoxStyle.DefaultButton2 + MsgBoxStyle.Exclamation, "Clear Protocol")
+
+        If res = MsgBoxResult.Ok Then
+            SelectedExpContent.ExpProtocol.ClearItems()
+        End If
+
+    End Sub
+
+
     Private Sub btnExport_Click() Handles btnExport.Click
 
         Dim currExp = CType(SelectedExpContent.DataContext, tblExperiments)
