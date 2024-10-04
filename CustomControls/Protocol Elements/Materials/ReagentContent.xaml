@@ -81,7 +81,7 @@
 
             <TextBlock d:Text="Reactant A" Text="{Binding Name}" FontWeight="DemiBold"/>
             <TextBlock Text="(" Margin="2,0,1,0"/>
-            <TextBlock d:Text="2.50" Text="{Binding Molarity, StringFormat={}0.00}" 
+            <TextBlock d:Text="2.50" Text="{Binding Molarity, Converter={StaticResource sigDigConv},ConverterParameter=3}" 
             Visibility="{Binding IsMolarity,Converter={StaticResource integerToVisConv}}"/>
             <TextBlock Text="M;" Visibility="{Binding IsMolarity,Converter={StaticResource integerToVisConv}}" Margin="2,0,2,0"/>
             <TextBlock d:Text="Merck 12345" Text="{Binding Source}"/>
