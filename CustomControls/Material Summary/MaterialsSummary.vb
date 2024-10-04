@@ -61,38 +61,68 @@ Public Class MaterialsSummary
     Public Shared Function GetReagentGroups(expEntry As tblExperiments) As List(Of MaterialTotal)
 
         Dim groupRes = From protEntry In expEntry.tblProtocolItems Where protEntry.tblReagents IsNot Nothing
-                       Group By matName = protEntry.tblReagents.Name, matSource = protEntry.tblReagents.Source Into Group,
-                              totalGrams = Sum(protEntry.tblReagents.Grams)
+                       Group By matName = protEntry.tblReagents.Name, matSource = protEntry.tblReagents.Source,
+                          matMolarity = protEntry.tblReagents.Molarity Into Group, totalAmount = Sum(protEntry.tblReagents.Grams)
                        Order By matName Ascending
 
         Dim materialGroups As New List(Of MaterialTotal)
 
         For Each matGroup In groupRes
 
+            'create totals node
+
             Dim matTotal As New MaterialTotal
-            Dim scaledTotal = ELNCalculations.ScaleWeight(matGroup.totalGrams)
+            Dim scaledTotal As ELNCalculations.ScaleResult
+            Dim molarPart As String
+
+            If matGroup.matMolarity Is Nothing Then
+                'reagent (solid)
+                scaledTotal = ELNCalculations.ScaleWeight(matGroup.totalAmount)
+                molarPart = ""
+            Else
+                'molar solution
+                scaledTotal = ELNCalculations.ScaleVolume(matGroup.totalAmount)
+                molarPart = ELNCalculations.SignificantDigitsString(matGroup.matMolarity, 3) + " M" +
+                    If(Not String.IsNullOrEmpty(matGroup.matSource), "; ", "")
+            End If
+
             With matTotal
                 .Amount = scaledTotal.Amount
                 .Unit = scaledTotal.Unit
                 .MaterialName = matGroup.matName
-                .Source = matGroup.matSource
+                .Source = molarPart + matGroup.matSource
             End With
 
             If matGroup.Group.Count > 1 Then
-                'only create sub-node if more then one entry
+
+                'only create individual entries sub-node if more then one entry
+
                 Dim pos As Integer = 0
                 For Each protItem In matGroup.Group
+
                     Dim matEntry As New MaterialEntry
-                    Dim scaledVol = ELNCalculations.ScaleWeight(protItem.tblReagents.Grams)
+                    Dim reagentEntry = protItem.tblReagents
+                    Dim scaledAmount As ELNCalculations.ScaleResult
                     pos += 1
+
+                    If matGroup.matMolarity Is Nothing Then
+                        'reagent (solid)
+                        scaledAmount = ELNCalculations.ScaleWeight(reagentEntry.Grams)
+                    Else
+                        'molar solution
+                        scaledAmount = ELNCalculations.ScaleVolume(reagentEntry.Grams) 'for molar solutions, grams actually holds mL!
+                    End If
+
                     With matEntry
-                        .Amount = scaledVol.Amount
-                        .Unit = scaledVol.Unit
-                        .MaterialName = protItem.tblReagents.Name
-                        .Source = protItem.tblReagents.Source
+                        .Amount = scaledAmount.Amount
+                        .Unit = scaledAmount.Unit
+                        .MaterialName = reagentEntry.Name
+                        .Source = reagentEntry.Source
                         .Position = pos
                     End With
+
                     matTotal.MaterialEntries.Add(matEntry)
+
                 Next
             End If
 
