@@ -144,9 +144,11 @@ Public Class dlgEditReagent
             If .SelectedIndex = 0 Then
                 chkConvertVolWeight.Content = "Display As Volume"
                 pnlResinLoad.Visibility = Visibility.Visible
+                sepResinLoad.Visibility = Visibility.Visible
             Else
                 chkConvertVolWeight.Content = "Display As Weight"
                 pnlResinLoad.Visibility = Visibility.Collapsed
+                sepResinLoad.Visibility = Visibility.Collapsed
                 numResinLoad.Value = Nothing
             End If
 
