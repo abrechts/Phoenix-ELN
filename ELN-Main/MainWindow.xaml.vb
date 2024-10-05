@@ -123,7 +123,7 @@ Class MainWindow
         AddHandler StepSummary.RequestOpenExperiment, AddressOf ExpList_RequestOpenExperiment
         AddHandler RssItemGroup.RequestOpenExperiment, AddressOf ExpList_RequestOpenExperiment
         AddHandler StepExpSelector.RequestOpenExperiment, AddressOf ExpList_RequestOpenExperiment
-
+        AddHandler ExperimentContent.ExperimentContextChanged, AddressOf ExperimentContent_ContextChanged
 
         'Connect local database model with UI
         ApplyAllDataBindings()
@@ -562,6 +562,11 @@ Class MainWindow
 
     Private Sub UndoRedo_CanRedoChanged(sender As Object, isAvailable As Boolean)
         btnRedo.IsEnabled = isAvailable
+    End Sub
+
+
+    Private Sub ExperimentContent_ContextChanged(sender As Object, newExpEntry As tblExperiments)
+        btnClear.IsEnabled = (newExpEntry.WorkflowState <> WorkflowStatus.Finalized)
     End Sub
 
 
@@ -1122,13 +1127,16 @@ Class MainWindow
 
     Private Sub btnClear_Click() Handles btnClear.Click
 
+        If CType(SelectedExpContent.DataContext, tblExperiments).WorkflowState <> WorkflowStatus.Finalized Then
 
-        Dim res = MsgBox("Do you really want to delete all protocol" + vbCrLf +
+            Dim res = MsgBox("Do you really want to delete all protocol" + vbCrLf +
                          "entries, except the reference reactant?",
                         MsgBoxStyle.OkCancel + MsgBoxStyle.DefaultButton2 + MsgBoxStyle.Exclamation, "Clear Protocol")
 
-        If res = MsgBoxResult.Ok Then
-            SelectedExpContent.ExpProtocol.ClearItems()
+            If res = MsgBoxResult.Ok Then
+                SelectedExpContent.ExpProtocol.ClearItems()
+            End If
+
         End If
 
     End Sub

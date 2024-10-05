@@ -74,7 +74,17 @@
                     <Button x:Name="btnClear" HorizontalAlignment="Left" VerticalAlignment="Top" 
                         ToolTip="Deletes all protocol entries, except the reference reactant.">
                         <StackPanel Orientation="Horizontal">
-                            <ContentControl Content="{StaticResource icoDeleteListItem}" Height="16" Margin="0,0,3,0"/>
+                            <ContentControl Content="{StaticResource icoDeleteListItem}" Height="16" Margin="0,0,3,0">
+                                <ContentControl.Style>
+                                    <Style TargetType="ContentControl">
+                                        <Style.Triggers>
+                                            <Trigger Property="IsEnabled" Value="false">
+                                                <Setter Property="Opacity" Value="0.5"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ContentControl.Style>
+                            </ContentControl>
                             <TextBlock Text="Clear" Margin="0,0,2,0" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
@@ -90,7 +100,6 @@
                                             <Trigger Property="IsEnabled" Value="false">
                                                 <Setter Property="Opacity" Value="0.5"/>
                                             </Trigger>
-
                                         </Style.Triggers>
                                     </Style>
                                 </ContentControl.Style>
