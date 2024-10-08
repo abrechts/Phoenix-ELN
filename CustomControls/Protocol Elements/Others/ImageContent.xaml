@@ -35,7 +35,7 @@
             </Grid.ColumnDefinitions>
 
             <Grid Grid.Column="0" >
-                
+                      
                 <Image x:Name="displayImg" MinWidth="100" MinHeight="50" MaxHeight="140" Margin="0,0,0,0" Cursor="Hand"
                   ToolTip="Click for full screen view.">
                     <Image.Source>
@@ -44,6 +44,11 @@
                             <Binding Path="IsRotated"/>
                         </MultiBinding>
                     </Image.Source>
+                    <Image.ContextMenu>
+                        <ContextMenu HasDropShadow="true">
+                            <MenuItem x:Name="mnuSaveAs" Icon="{StaticResource icoOpenFolder}" Header="Save Image ..."/>
+                        </ContextMenu>
+                    </Image.ContextMenu>
                 </Image>
 
                 <Border x:Name="pnlControls" BorderBrush="lightgray" BorderThickness="1,1,1,0" Background="whitesmoke"

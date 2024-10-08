@@ -100,7 +100,7 @@
 
                         <!--Header area-->
                         <ContentPresenter Name="HeaderHost" 
-                     Grid.Column="1" ContentSource="Header" 
+                     Grid.Column="1" ContentSource="Header"
                      Margin="6,1,10,0" RecognizesAccessKey="True">
                         </ContentPresenter>
 
