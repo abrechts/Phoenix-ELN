@@ -36,8 +36,7 @@
 
             <Grid Grid.Column="0" >
                       
-                <Image x:Name="displayImg" MinWidth="100" MinHeight="50" MaxHeight="140" Margin="0,0,0,0" Cursor="Hand"
-                  ToolTip="Click for full screen view.">
+                <Image x:Name="displayImg" MinWidth="100" MinHeight="50" MaxHeight="140" Margin="0,0,0,0" Cursor="Hand">
                     <Image.Source>
                         <MultiBinding Converter="{StaticResource bytesToBitmapImgRotateConv}">
                             <Binding Path="FileBytes"/>
@@ -46,7 +45,19 @@
                     </Image.Source>
                     <Image.ContextMenu>
                         <ContextMenu HasDropShadow="true">
-                            <MenuItem x:Name="mnuSaveAs" Icon="{StaticResource icoOpenFolder}" Header="Save Image ..."/>
+                            <!--context menu title-->
+                            <Separator>
+                                <Separator.Template>
+                                    <ControlTemplate TargetType="Separator">
+                                        <TextBlock Text="Embedded Image" Background="DimGray" Foreground="white" Padding="4,2,4,3"/>
+                                    </ControlTemplate>
+                                </Separator.Template>
+                            </Separator>
+                            <!--menu items-->
+                            <MenuItem x:Name="mnuExpand" Icon="{StaticResource icoExpandView}" Header="Show Full Screen ..."/>
+                            <MenuItem x:Name="mnuSaveAs" Icon="{StaticResource icoOpenFolder}" Header="Save To ..."/>
+                            <Separator/>
+                            <MenuItem x:Name="mnuDelete" Icon="{StaticResource icoDeleteListItem}" Header="Remove"/>
                         </ContextMenu>
                     </Image.ContextMenu>
                 </Image>

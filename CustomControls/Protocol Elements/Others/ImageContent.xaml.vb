@@ -49,6 +49,26 @@ Public Class ImageContent
     End Sub
 
 
+    Private Sub mnuFullScreen_Click() Handles mnuExpand.Click
+
+        displayImg_MouseLeftButtonUp()
+
+    End Sub
+
+    Private Sub mnuSaveAs_Click() Handles mnuSaveAs.Click
+
+        ExportImage()
+
+    End Sub
+
+    Private Sub mnuDelete_Click() Handles mnuDelete.Click
+
+        Dim parentProtocol = CType(WPFToolbox.FindVisualParent(Of Protocol)(Me), Protocol)
+        parentProtocol.DeleteSelectedProtocolItems()
+
+    End Sub
+
+
     ''' <summary>
     ''' Displays a SaveFile dialog for exporting the embedded image to a file location. The image format dropdown menu 
     ''' allows to export the image in JPEG, PNG or TIF format. If the original image was stored in one 
@@ -126,15 +146,6 @@ Public Class ImageContent
                 End Using
             End If
         End With
-
-
-
-    End Sub
-
-
-    Private Sub mnuSaveAs_Click() Handles mnuSaveAs.Click
-
-        ExportImage()
 
     End Sub
 

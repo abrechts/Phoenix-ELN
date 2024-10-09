@@ -24,8 +24,25 @@
         <StackPanel Orientation="Horizontal" Grid.Column="2">
 
             <Border x:Name="iconImage" Cursor="Hand" BorderThickness="0" Padding="1" Margin="2,0,0,0">
-                <Image Width="22" Height="22" ToolTip="Click to view embedded file"
-                    Source="{Binding IconImage, Converter={StaticResource BytesToBitmapConv}}"/>
+                <Image Width="22" Height="22" ToolTipService.InitialShowDelay="350"
+                    Source="{Binding IconImage, Converter={StaticResource BytesToBitmapConv}}">
+                    <Image.ContextMenu>
+                        <ContextMenu HasDropShadow="true">
+                            <!--context menu title-->
+                            <Separator>
+                                <Separator.Template>
+                                    <ControlTemplate TargetType="Separator">
+                                        <TextBlock Text="Embedded Document" Background="DimGray" Foreground="white" Padding="4,2,4,3"/>
+                                    </ControlTemplate>
+                                </Separator.Template>
+                            </Separator>
+                            <MenuItem x:Name="mnuOpen" Icon="{StaticResource icoEdit}" Header="Open Document ..."/>
+                            <MenuItem x:Name="mnuSaveAs" Icon="{StaticResource icoOpenFolder}" Header="Save To ..."/>
+                            <Separator/>
+                            <MenuItem x:Name="mnuDelete" Icon="{StaticResource icoDeleteListItem}" Header="Remove"/>
+                        </ContextMenu>
+                    </Image.ContextMenu>
+                </Image>
             </Border>
 
             <TextBox x:Name="txtFileTitle" Text="{Binding FileComment}" d:Text="Title" BorderThickness="0"

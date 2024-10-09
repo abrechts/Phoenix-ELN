@@ -1,5 +1,6 @@
 ﻿Imports ElnBase.ELNEnumerations
 Imports ElnCoreModel
+Imports Microsoft.Win32
 Imports System.IO
 Imports System.Windows.Input
 Imports System.Windows.Media.Imaging
@@ -48,6 +49,49 @@ Public Class FileContent
     Private Sub iconImage_MouseLeftButtonUp(sender As Object, e As MouseButtonEventArgs) Handles iconImage.MouseLeftButtonUp
 
         OpenFile(Me.DataContext)
+
+    End Sub
+
+
+    Private Sub mnuOpen_Click() Handles mnuOpen.Click
+
+        OpenFile(Me.DataContext)
+
+    End Sub
+
+
+    Private Sub mnuSaveAs_Click() Handles mnuSaveAs.Click
+
+        ExportDocument()
+
+    End Sub
+
+
+    Private Sub mnuDelete_Click() Handles mnuDelete.Click
+
+        Dim parentProtocol = CType(WPFToolbox.FindVisualParent(Of Protocol)(Me), Protocol)
+        parentProtocol.DeleteSelectedProtocolItems()
+
+    End Sub
+
+
+    Private Sub ExportDocument()
+
+        Dim saveDialog As New SaveFileDialog
+        With saveDialog
+
+            Dim fileEntry = CType(Me.DataContext, tblEmbeddedFiles)
+
+            .InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop)
+            .Title = "Export embedded document to file location"
+            .FileName = fileEntry.FileName
+
+            If .ShowDialog Then
+                File.WriteAllBytes(.FileName, fileEntry.FileBytes)
+                MsgBox("Document successfully saved.", MsgBoxStyle.Information, "File Export")
+            End If
+
+        End With
 
     End Sub
 

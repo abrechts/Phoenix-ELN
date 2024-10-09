@@ -56,6 +56,14 @@
 
         <Border.ContextMenu>
             <ContextMenu>
+                <!--context menu title-->
+                <Separator>
+                    <Separator.Template>
+                        <ControlTemplate TargetType="Separator">
+                            <TextBlock Text="Protocol Entry" Background="DimGray" Foreground="white" Padding="4,2,4,3"/>
+                        </ControlTemplate>
+                    </Separator.Template>
+                </Separator>
                 <MenuItem x:Name="mnuDelete" Icon="{StaticResource icoDeleteListItem}" Header="Remove" InputGestureText="DEL" />
             </ContextMenu>
         </Border.ContextMenu>
