@@ -39,7 +39,7 @@
                             <MenuItem x:Name="mnuOpen" Icon="{StaticResource icoEdit}" Header="Open Document ..."/>
                             <MenuItem x:Name="mnuSaveAs" Icon="{StaticResource icoOpenFolder}" Header="Save To ..."/>
                             <Separator/>
-                            <MenuItem x:Name="mnuDelete" Icon="{StaticResource icoDeleteListItem}" Header="Remove"/>
+                            <MenuItem x:Name="mnuDelete" Icon="{StaticResource icoDeleteListItem}" Header="Remove Entry"/>
                         </ContextMenu>
                     </Image.ContextMenu>
                 </Image>
