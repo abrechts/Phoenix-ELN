@@ -1228,6 +1228,10 @@ Public Class Protocol
     End Sub
 
 
+    ''' <summary>
+    ''' Places a copy of the specified protocol item below the original one.
+    ''' </summary>
+    ''' 
     Public Sub DuplicateProtocolItem(protocolEntry As tblProtocolItems)
 
         Dim expEntry = protocolEntry.Experiment
@@ -1294,9 +1298,9 @@ Public Class Protocol
             RecalculateExperiment(True)
         End If
 
-        AutoSave()
-
         UnselectAll()
+        SelectProtocolItem(protocolItemCopy)
+        AutoSave()
 
     End Sub
 
