@@ -56,7 +56,6 @@
 
         <Border.ContextMenu>
             <ContextMenu>
-                <!--context menu title-->
                 <Separator>
                     <Separator.Template>
                         <ControlTemplate TargetType="Separator">
@@ -65,6 +64,8 @@
                     </Separator.Template>
                 </Separator>
                 <MenuItem x:Name="mnuDelete" Icon="{StaticResource icoDeleteListItem}" Header="Remove" InputGestureText="DEL" />
+                <Separator/>
+                <MenuItem x:Name="mnuDuplicate" Icon="{StaticResource icoCopy}" Header="Duplicate"/>
             </ContextMenu>
         </Border.ContextMenu>
 

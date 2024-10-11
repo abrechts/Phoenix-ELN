@@ -1,4 +1,5 @@
-﻿Imports System.Globalization
+﻿Imports System.Formats
+Imports System.Globalization
 Imports System.IO
 Imports System.Windows
 Imports System.Windows.Controls
@@ -9,6 +10,9 @@ Imports ElnBase
 Imports ElnBase.ELNEnumerations
 Imports ElnCoreModel
 Imports GongSolutions.Wpf.DragDrop
+Imports Microsoft.EntityFrameworkCore
+Imports Microsoft.EntityFrameworkCore.Metadata.Internal
+Imports Microsoft.EntityFrameworkCore.Proxies.Internal
 Imports Microsoft.Win32
 
 
@@ -1220,6 +1224,79 @@ Public Class Protocol
 
         UpdateElementSequenceNumbers()
         ProtocolItemsViewSrc.View.Refresh()
+
+    End Sub
+
+
+    Public Sub DuplicateProtocolItem(protocolEntry As tblProtocolItems)
+
+        Dim expEntry = protocolEntry.Experiment
+        Dim dbContext = ExperimentContent.DbContext     ' --> is this always non-server context?
+        Dim isRefReactant As Boolean = False
+        Dim isProduct As Boolean = False
+
+        're-assign downstream sequence numbers for subsequent insertion
+
+        For Each protItem In expEntry.tblProtocolItems
+            If protItem.SequenceNr > protocolEntry.SequenceNr Then
+                protItem.SequenceNr += 1
+            End If
+        Next
+
+        'duplicate protocol entry
+
+        Dim protocolItemCopy = CType(dbContext.Entry(protocolEntry).CurrentValues.ToObject, tblProtocolItems)
+        With protocolItemCopy
+            .GUID = Guid.NewGuid.ToString("d")
+            .Experiment = expEntry
+            .SequenceNr = protocolEntry.SequenceNr + 1
+        End With
+        expEntry.tblProtocolItems.Add(protocolItemCopy)
+
+
+        'clone downstream *navigation* properties of protocolEntry (i.e. tblReagents, etc)
+
+        Dim navPropertyList = From nav In dbContext.Entry(New tblProtocolItems).Navigations Select nav.Metadata.PropertyInfo
+
+        For Each navProperty In navPropertyList
+
+            If navProperty.Name <> "Experiment" Then    'skip the upstream nav property
+
+                Dim navTable = navProperty.GetValue(protocolEntry)
+                If navTable IsNot Nothing Then
+
+                    Dim navTblCopy = dbContext.Entry(navTable).CurrentValues.ToObject
+                    With navTblCopy
+                        .GUID = Guid.NewGuid.ToString("d")
+                        .ProtocolItem = protocolItemCopy
+                    End With
+
+                    navProperty.SetValue(protocolItemCopy, navTblCopy)
+
+                    If navProperty.Name = "tblRefReactants" Then
+                        isRefReactant = True
+                    ElseIf navProperty.Name = "tblProducts" Then
+                        isProduct = True
+                    End If
+
+                    Exit For  'this is a 1:1 relationship, so there's just one table to process
+
+                End If
+            End If
+        Next
+
+        ProtocolItemsViewSrc.View.Refresh()
+
+        If isRefReactant Then
+            UpdateRefReactants()
+            RecalculateExperiment(False)
+        ElseIf isProduct Then
+            RecalculateExperiment(True)
+        End If
+
+        AutoSave()
+
+        UnselectAll()
 
     End Sub
 

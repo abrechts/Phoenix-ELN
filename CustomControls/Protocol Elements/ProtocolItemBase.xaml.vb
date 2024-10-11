@@ -73,6 +73,35 @@ Public Class ProtocolItemBase
 
 
     ''' <summary>
+    ''' Disables mnuDuplicate according to protocol element type.
+    ''' </summary>
+    ''' 
+    Private Sub ContextMnu_ContextMenuOpening() Handles Me.ContextMenuOpening
+
+        '  Dim protItem = CType(itemContent.Content, tblProtocolItems)
+
+        'With protItem
+        '    If .tblEmbeddedFiles IsNot Nothing OrElse .tblProducts IsNot Nothing OrElse .tblSeparators IsNot Nothing Then
+        '        mnuDuplicate.IsEnabled = False
+        '    End If
+        'End With
+
+    End Sub
+
+
+    ''' <summary>
+    ''' Duplicate the selected protocol item by inserting a copy below it.
+    ''' </summary>
+    ''' 
+    Private Sub mnuDuplicate_Click() Handles mnuDuplicate.Click
+
+        Dim parentProtocol = CType(WPFToolbox.FindVisualParent(Of Protocol)(ParentListBoxItem), Protocol)
+        parentProtocol.DuplicateProtocolItem(CType(itemContent.Content, tblProtocolItems))
+
+    End Sub
+
+
+    ''' <summary>
     ''' Delete this protocol item.
     ''' </summary>
     ''' 
