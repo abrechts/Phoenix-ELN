@@ -56,8 +56,6 @@
                             <!--menu items-->
                             <MenuItem x:Name="mnuExpand" Icon="{StaticResource icoExpandView}" Header="Show Full Screen ..."/>
                             <MenuItem x:Name="mnuSaveAs" Icon="{StaticResource icoOpenFolder}" Header="Save To ..."/>
-                            <Separator/>
-                            <MenuItem x:Name="mnuDelete" Icon="{StaticResource icoDeleteListItem}" Header="Remove Entry"/>
                         </ContextMenu>
                     </Image.ContextMenu>
                 </Image>

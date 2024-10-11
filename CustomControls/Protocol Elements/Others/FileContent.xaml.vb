@@ -67,14 +67,6 @@ Public Class FileContent
     End Sub
 
 
-    Private Sub mnuDelete_Click() Handles mnuDelete.Click
-
-        Dim parentProtocol = CType(WPFToolbox.FindVisualParent(Of Protocol)(Me), Protocol)
-        parentProtocol.DeleteSelectedProtocolItems()
-
-    End Sub
-
-
     Private Sub ExportDocument()
 
         Dim saveDialog As New SaveFileDialog

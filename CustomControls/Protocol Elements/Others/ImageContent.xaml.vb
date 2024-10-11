@@ -61,13 +61,6 @@ Public Class ImageContent
 
     End Sub
 
-    Private Sub mnuDelete_Click() Handles mnuDelete.Click
-
-        Dim parentProtocol = CType(WPFToolbox.FindVisualParent(Of Protocol)(Me), Protocol)
-        parentProtocol.DeleteSelectedProtocolItems()
-
-    End Sub
-
 
     ''' <summary>
     ''' Displays a SaveFile dialog for exporting the embedded image to a file location. The image format dropdown menu 
