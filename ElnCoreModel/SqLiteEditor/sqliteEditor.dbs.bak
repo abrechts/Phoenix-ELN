@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<project name="Sqlite" id="Project-1621" database="Sqlite" >
+<project name="Sqlite" database="Sqlite" id="Project-1621" >
 	<schema name="Default" >
 		<table name="sync_Tombstone" >
 			<comment><![CDATA[Contains a list of deleted items, to be removed during next sync.]]></comment>
@@ -7,7 +7,7 @@
 			<column name="DatabaseInfoID" prior="DatabaseID" type="VARCHAR" length="36" jt="12" mandatory="y" />
 			<column name="TableName" type="VARCHAR" length="50" jt="12" mandatory="y" />
 			<column name="PrimaryKeyVal" type="VARCHAR" length="50" jt="12" mandatory="y" />
-			<column name="SyncState" type="TINYINT" jt="-6" >
+			<column name="SyncState" type="INTEGER" jt="4" >
 				<defo><![CDATA[0]]></defo>
 			</column>
 			<index name="pk_sync_Tombstone" unique="PRIMARY_KEY" >
@@ -21,7 +21,7 @@
 			<column name="GUID" type="VARCHAR" length="36" jt="12" mandatory="y" />
 			<column name="ProtocolItemID" type="VARCHAR" length="36" jt="12" mandatory="y" />
 			<column name="SpecifiedUnitType" type="INTEGER" jt="4" mandatory="y" />
-			<column name="IsDisplayAsVolume" type="TINYINT" jt="-6" mandatory="y" >
+			<column name="IsDisplayAsVolume" type="INTEGER" jt="4" mandatory="y" >
 				<defo><![CDATA[0]]></defo>
 			</column>
 			<column name="Name" type="VARCHAR" length="50" jt="12" mandatory="y" />
@@ -29,7 +29,7 @@
 			<column name="Grams" type="REAL" jt="8" mandatory="y" />
 			<column name="Equivalents" type="REAL" jt="8" mandatory="y" />
 			<column name="Density" type="REAL" jt="8" />
-			<column name="SyncState" type="TINYINT" jt="-6" >
+			<column name="SyncState" type="INTEGER" jt="4" >
 				<defo><![CDATA[0]]></defo>
 			</column>
 			<index name="pk_tblAuxiliaries" unique="PRIMARY_KEY" >
@@ -46,7 +46,7 @@
 			<column name="GUID" type="VARCHAR" length="36" jt="12" mandatory="y" />
 			<column name="ProtocolItemID" type="VARCHAR" length="36" jt="12" mandatory="y" />
 			<column name="CommentFlowDoc" type="MEDIUMTEXT" jt="-1" />
-			<column name="SyncState" type="TINYINT" jt="-6" >
+			<column name="SyncState" type="INTEGER" jt="4" >
 				<defo><![CDATA[0]]></defo>
 			</column>
 			<index name="pk_tblComments" unique="PRIMARY_KEY" >
@@ -65,7 +65,7 @@
 			<column name="CompanyLogo" type="BLOB" jt="2004" />
 			<column name="LastSyncID" type="VARCHAR" length="36" jt="12" />
 			<column name="LastSyncTime" type="VARCHAR" length="30" jt="12" />
-			<column name="SyncState" type="TINYINT" jt="-6" >
+			<column name="SyncState" type="INTEGER" jt="4" >
 				<defo><![CDATA[0]]></defo>
 			</column>
 			<index name="pk_tblDatabaseInfo" unique="PRIMARY_KEY" >
@@ -85,13 +85,13 @@
 			<column name="FileComment" prior="FileTitle" type="TEXT" jt="-1" mandatory="y" />
 			<column name="SHA256Hash" type="VARCHAR" length="64" jt="12" />
 			<column name="IconImage" type="BLOB" jt="2004" />
-			<column name="IsPortraitMode" prior="IsImageVertical" type="TINYINT" jt="-6" >
+			<column name="IsPortraitMode" prior="IsImageVertical" type="INTEGER" jt="4" >
 				<defo><![CDATA[0]]></defo>
 			</column>
-			<column name="IsRotated" type="TINYINT" jt="-6" >
+			<column name="IsRotated" type="INTEGER" jt="4" >
 				<defo><![CDATA[0]]></defo>
 			</column>
-			<column name="SyncState" type="TINYINT" jt="-6" >
+			<column name="SyncState" type="INTEGER" jt="4" >
 				<defo><![CDATA[0]]></defo>
 			</column>
 			<index name="pk_tblEmbeddedFiles" unique="PRIMARY_KEY" >
@@ -111,20 +111,20 @@
 			<column name="ExperimentID" type="VARCHAR" length="25" jt="12" mandatory="y" />
 			<column name="UserID" type="VARCHAR" length="25" jt="12" mandatory="y" />
 			<column name="ProjectID" type="VARCHAR" length="36" jt="12" mandatory="y" />
-			<column name="IsDesignView" type="TINYINT" jt="-6" mandatory="y" >
+			<column name="IsDesignView" type="INTEGER" jt="4" mandatory="y" >
 				<defo><![CDATA[0]]></defo>
 			</column>
-			<column name="IsCurrent" type="TINYINT" jt="-6" mandatory="y" >
+			<column name="IsCurrent" type="INTEGER" jt="4" mandatory="y" >
 				<defo><![CDATA[0]]></defo>
 			</column>
 			<column name="RxnSketch" type="LONGTEXT" jt="-1" />
 			<column name="MDLRxnFileString" type="LONGTEXT" jt="-1" />
 			<column name="ReactantInChIKey" type="VARCHAR" length="27" jt="12" />
 			<column name="ProductInChIKey" type="VARCHAR" length="27" jt="12" />
-			<column name="WorkflowState" type="SMALLINT" jt="5" >
+			<column name="WorkflowState" type="INTEGER" jt="4" >
 				<defo><![CDATA[0]]></defo>
 			</column>
-			<column name="UserTag" type="SMALLINT" jt="5" >
+			<column name="UserTag" type="INTEGER" jt="4" >
 				<defo><![CDATA[0]]></defo>
 			</column>
 			<column name="Yield" type="REAL" jt="8" />
@@ -137,14 +137,16 @@
 			</column>
 			<column name="CreationDate" type="VARCHAR" length="20" jt="12" />
 			<column name="FinalizeDate" type="VARCHAR" length="20" jt="12" />
-			<column name="DisplayIndex" type="SMALLINT" jt="5" />
-			<column name="IsNodeExpanded" type="TINYINT" jt="-6" >
+			<column name="DisplayIndex" type="INTEGER" jt="4" />
+			<column name="IsNodeExpanded" type="INTEGER" jt="4" >
 				<defo><![CDATA[0]]></defo>
 				<comment><![CDATA[Dummy field for preventing XAML binding errors.]]></comment>
 			</column>
-			<column name="SyncState" type="TINYINT" jt="-6" >
+			<column name="SyncState" type="INTEGER" jt="4" >
 				<defo><![CDATA[0]]></defo>
 			</column>
+			<column name="RxnIndigoObj" type="VARCHAR" jt="12" />
+			<column name="RxnFingerprint" type="BLOB" jt="2004" />
 			<index name="pk_tblExperiments" unique="PRIMARY_KEY" >
 				<column name="ExperimentID" />
 			</index>
@@ -160,7 +162,7 @@
 			<column name="DatabaseID" type="VARCHAR" length="36" jt="12" mandatory="y" />
 			<column name="MatName" type="VARCHAR" length="150" jt="12" mandatory="y" />
 			<column name="MatSource" type="VARCHAR" length="100" jt="12" />
-			<column name="MatType" type="SMALLINT" jt="5" mandatory="y" />
+			<column name="MatType" type="INTEGER" jt="4" mandatory="y" />
 			<column name="Molweight" type="REAL" jt="8" >
 				<defo><![CDATA[(NULL)]]></defo>
 			</column>
@@ -174,10 +176,10 @@
 				<defo><![CDATA[(NULL)]]></defo>
 			</column>
 			<column name="InChIKey" prior="InchiKey" type="VARCHAR" length="30" jt="12" />
-			<column name="IsValidated" type="TINYINT" jt="-6" >
+			<column name="IsValidated" type="INTEGER" jt="4" >
 				<defo><![CDATA[0]]></defo>
 			</column>
-			<column name="SyncState" type="TINYINT" jt="-6" >
+			<column name="SyncState" type="INTEGER" jt="4" >
 				<defo><![CDATA[0]]></defo>
 			</column>
 			<index name="pk_tblMaterials" unique="PRIMARY_KEY" >
@@ -199,7 +201,7 @@
 		<table name="tblProducts" spec="" >
 			<column name="GUID" type="VARCHAR" length="36" jt="12" mandatory="y" />
 			<column name="ProtocolItemID" type="VARCHAR" length="36" jt="12" mandatory="y" />
-			<column name="ProductIndex" type="SMALLINT" jt="5" mandatory="y" >
+			<column name="ProductIndex" type="INTEGER" jt="4" mandatory="y" >
 				<defo><![CDATA[0]]></defo>
 			</column>
 			<column name="Name" type="VARCHAR" length="50" jt="12" mandatory="y" />
@@ -212,7 +214,7 @@
 			<column name="ResinLoad" type="REAL" jt="8" />
 			<column name="BatchID" type="VARCHAR" length="40" jt="12" />
 			<column name="InChIKey" type="VARCHAR" length="27" jt="12" />
-			<column name="SyncState" type="TINYINT" jt="-6" >
+			<column name="SyncState" type="INTEGER" jt="4" >
 				<defo><![CDATA[0]]></defo>
 			</column>
 			<index name="pk_tblProducts" unique="PRIMARY_KEY" >
@@ -230,16 +232,16 @@
 			<column name="UserID" type="VARCHAR" length="25" jt="12" mandatory="y" />
 			<column name="Title" type="VARCHAR" length="100" jt="12" />
 			<column name="SequenceNr" type="INTEGER" jt="4" />
-			<column name="IsNodeExpanded" type="TINYINT" jt="-6" mandatory="y" >
+			<column name="IsNodeExpanded" type="INTEGER" jt="4" mandatory="y" >
 				<defo><![CDATA[0]]></defo>
 			</column>
-			<column name="SyncState" type="TINYINT" jt="-6" >
+			<column name="SyncState" type="INTEGER" jt="4" >
 				<defo><![CDATA[0]]></defo>
 			</column>
 			<index name="pk_tblProjects" unique="PRIMARY_KEY" >
 				<column name="GUID" />
 			</index>
-			<index name="pk_tblProjects_2" unique="UNIQUE_INDEX" >
+			<index name="pk_tblProjects_2" unique="PRIMARY_KEY" >
 				<column name="GUID" />
 			</index>
 			<fk name="FK_tblProjects tblUsers" to_schema="Default" to_table="tblUsers" delete_action="cascade" >
@@ -249,13 +251,13 @@
 		<table name="tblProtocolItems" spec="" >
 			<column name="GUID" type="VARCHAR" length="36" jt="12" mandatory="y" />
 			<column name="ExperimentID" type="VARCHAR" length="25" jt="12" mandatory="y" />
-			<column name="ElementType" type="SMALLINT" jt="5" mandatory="y" />
-			<column name="SequenceNr" type="SMALLINT" jt="5" />
+			<column name="ElementType" type="INTEGER" jt="4" mandatory="y" />
+			<column name="SequenceNr" type="INTEGER" jt="4" />
 			<column name="TempInfo" type="TEXT" jt="-1" />
-			<column name="IsSelected" type="TINYINT" jt="-6" mandatory="y" >
+			<column name="IsSelected" type="INTEGER" jt="4" mandatory="y" >
 				<defo><![CDATA[0]]></defo>
 			</column>
-			<column name="SyncState" type="TINYINT" jt="-6" >
+			<column name="SyncState" type="INTEGER" jt="4" >
 				<defo><![CDATA[0]]></defo>
 			</column>
 			<index name="pk_tblProtocolItems" unique="PRIMARY_KEY" >
@@ -274,7 +276,7 @@
 			<column name="SpecifiedUnitType" type="INTEGER" jt="4" mandatory="y" >
 				<defo><![CDATA[0]]></defo>
 			</column>
-			<column name="IsDisplayAsVolume" type="TINYINT" jt="-6" mandatory="y" >
+			<column name="IsDisplayAsVolume" type="INTEGER" jt="4" mandatory="y" >
 				<defo><![CDATA[0]]></defo>
 			</column>
 			<column name="MolecularWeight" type="REAL" jt="8" />
@@ -286,11 +288,11 @@
 			<column name="Density" type="REAL" jt="8" />
 			<column name="Purity" type="REAL" jt="8" />
 			<column name="Molarity" type="REAL" jt="8" />
-			<column name="IsMolarity" type="TINYINT" jt="-6" mandatory="y" >
+			<column name="IsMolarity" type="INTEGER" jt="4" mandatory="y" >
 				<defo><![CDATA[0]]></defo>
 			</column>
 			<column name="ResinLoad" type="REAL" jt="8" />
-			<column name="SyncState" type="TINYINT" jt="-6" >
+			<column name="SyncState" type="INTEGER" jt="4" >
 				<defo><![CDATA[0]]></defo>
 			</column>
 			<index name="pk_tblReagents" unique="PRIMARY_KEY" >
@@ -309,7 +311,7 @@
 			<column name="SpecifiedUnitType" type="INTEGER" jt="4" mandatory="y" >
 				<defo><![CDATA[0]]></defo>
 			</column>
-			<column name="IsDisplayAsVolume" type="TINYINT" jt="-6" mandatory="y" >
+			<column name="IsDisplayAsVolume" type="INTEGER" jt="4" mandatory="y" >
 				<defo><![CDATA[0]]></defo>
 			</column>
 			<column name="Name" type="VARCHAR" length="50" jt="12" mandatory="y" />
@@ -322,7 +324,7 @@
 			<column name="Purity" type="REAL" jt="8" />
 			<column name="ResinLoad" type="REAL" jt="8" />
 			<column name="InChIKey" type="VARCHAR" length="27" jt="12" />
-			<column name="SyncState" type="TINYINT" jt="-6" >
+			<column name="SyncState" type="INTEGER" jt="4" >
 				<defo><![CDATA[0]]></defo>
 			</column>
 			<index name="pk_tblRefReactants" unique="PRIMARY_KEY" >
@@ -338,14 +340,14 @@
 		<table name="tblSeparators" spec="" >
 			<column name="GUID" type="VARCHAR" length="36" jt="12" mandatory="y" />
 			<column name="ProtocolItemID" type="VARCHAR" length="36" jt="12" mandatory="y" />
-			<column name="ElementType" type="SMALLINT" jt="5" mandatory="y" >
+			<column name="ElementType" type="INTEGER" jt="4" mandatory="y" >
 				<defo><![CDATA[0]]></defo>
 			</column>
-			<column name="DisplayType" type="SMALLINT" jt="5" mandatory="y" >
+			<column name="DisplayType" type="INTEGER" jt="4" mandatory="y" >
 				<defo><![CDATA[0]]></defo>
 			</column>
 			<column name="Title" type="VARCHAR" length="80" jt="12" />
-			<column name="SyncState" type="TINYINT" jt="-6" >
+			<column name="SyncState" type="INTEGER" jt="4" >
 				<defo><![CDATA[0]]></defo>
 			</column>
 			<index name="pk_tblSeparators" unique="PRIMARY_KEY" >
@@ -364,18 +366,18 @@
 			<column name="SpecifiedUnitType" type="INTEGER" jt="4" mandatory="y" >
 				<defo><![CDATA[1]]></defo>
 			</column>
-			<column name="IsDisplayAsWeight" type="TINYINT" jt="-6" mandatory="y" >
+			<column name="IsDisplayAsWeight" type="INTEGER" jt="4" mandatory="y" >
 				<defo><![CDATA[0]]></defo>
 			</column>
 			<column name="Name" type="VARCHAR" length="50" jt="12" mandatory="y" />
 			<column name="Source" type="VARCHAR" length="40" jt="12" />
 			<column name="Milliliters" type="REAL" jt="8" mandatory="y" />
 			<column name="Density" type="REAL" jt="8" />
-			<column name="IsMolEquivalents" type="TINYINT" jt="-6" mandatory="y" >
+			<column name="IsMolEquivalents" type="INTEGER" jt="4" mandatory="y" >
 				<defo><![CDATA[0]]></defo>
 			</column>
 			<column name="Equivalents" type="REAL" jt="8" mandatory="y" />
-			<column name="SyncState" type="TINYINT" jt="-6" >
+			<column name="SyncState" type="INTEGER" jt="4" >
 				<defo><![CDATA[0]]></defo>
 			</column>
 			<index name="pk_tblSolvents" unique="PRIMARY_KEY" >
@@ -398,10 +400,10 @@
 			<column name="City" type="VARCHAR" length="50" jt="12" />
 			<column name="PWHash" type="VARCHAR" length="64" jt="12" />
 			<column name="PWHint" type="VARCHAR" length="80" jt="12" />
-			<column name="IsSpellCheckEnabled" type="TINYINT" jt="-6" mandatory="y" >
+			<column name="IsSpellCheckEnabled" type="INTEGER" jt="4" mandatory="y" >
 				<defo><![CDATA[0]]></defo>
 			</column>
-			<column name="SyncState" type="TINYINT" jt="-6" >
+			<column name="SyncState" type="INTEGER" jt="4" >
 				<defo><![CDATA[0]]></defo>
 			</column>
 			<index name="pk_tblUsers" unique="PRIMARY_KEY" >
@@ -418,7 +420,7 @@
 		<entity schema="Default" name="tblExperiments" color="3986C1" x="960" y="48" />
 		<entity schema="Default" name="tblMaterials" color="3986C1" x="80" y="336" />
 		<entity schema="Default" name="tblProjects" color="3986C1" x="672" y="48" />
-		<entity schema="Default" name="tblProtocolItems" color="3986C1" x="1008" y="464" />
+		<entity schema="Default" name="tblProtocolItems" color="3986C1" x="992" y="496" />
 		<entity schema="Default" name="tblSeparators" color="3986C1" x="672" y="496" />
 		<entity schema="Default" name="tblUsers" color="3986C1" x="368" y="48" />
 	</layout>

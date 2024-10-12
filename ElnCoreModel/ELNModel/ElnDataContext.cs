@@ -146,7 +146,7 @@ public partial class ElnDataContext : DbContext
             entity.Property(e => e.ProjectID).HasColumnType("VARCHAR(36)");
             entity.Property(e => e.ReactantInChIKey).HasColumnType("VARCHAR(27)");
             entity.Property(e => e.RefYieldFactor).HasDefaultValue(1.0);
-            entity.Property(e => e.RxnIndigoObj).HasColumnType("LONGBLOB");
+            entity.Property(e => e.RxnIndigoObj).HasColumnType("longblob");
             entity.Property(e => e.RxnSketch).HasColumnType("LONGTEXT");
             entity.Property(e => e.SyncState)
                 .HasDefaultValue((byte)0)

@@ -3,3 +3,5 @@
 //the current Sqlite database data structure (i.e. database first)
 
 Scaffold-DbContext 'Data Source=F:\Benutzer\Stefan\Documents\Phoenix ELN Data\ElnData.db' Microsoft.EntityFrameworkCore.Sqlite -OutputDir ELNModel -ContextDir ElnModel -Project ElnCoreModel -NoPluralize -Namespace ElnCoreModel -Force -UseDatabaseNames -NoOnConfiguring
+
+Note: The yellow warnings about GUID type can be ignored.

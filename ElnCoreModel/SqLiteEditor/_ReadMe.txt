@@ -7,6 +7,5 @@ The ELN Sqlite database was designed with the 'DbSchema' tool (https://dbschema.
 The files in this folder relate to this application. However, any other SqLite tool 
 alternatively can be used for modifying the database structure.
 
-The EF Core Model then is built from the Sqlite database using the 'EF Core Power Tools'
-extension for Visual Studio 2022 from ErikJ, using the 'Reverse Engineer' command.
-https://marketplace.visualstudio.com/items?itemName=ErikEJ.EFCorePowerTools&ssr=false#review-details
+Note: For converting the SQLite database into the EFCore model, see the document 
+'ScaffoldFromSqlite.txt' in the parent ElnCoreModel project root folder.
