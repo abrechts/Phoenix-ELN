@@ -78,13 +78,15 @@ Public Class ProtocolItemBase
     ''' 
     Private Sub ContextMnu_ContextMenuOpening() Handles Me.ContextMenuOpening
 
-        '  Dim protItem = CType(itemContent.Content, tblProtocolItems)
+        Dim protItem = CType(itemContent.Content, tblProtocolItems)
 
-        'With protItem
-        '    If .tblEmbeddedFiles IsNot Nothing OrElse .tblProducts IsNot Nothing OrElse .tblSeparators IsNot Nothing Then
-        '        mnuDuplicate.IsEnabled = False
-        '    End If
-        'End With
+        With protItem
+            If Not (.tblRefReactants IsNot Nothing OrElse .tblReagents IsNot Nothing OrElse .tblSolvents IsNot Nothing _
+             OrElse .tblAuxiliaries IsNot Nothing OrElse .tblProducts IsNot Nothing) Then
+                mnuDuplicate.Visibility = Visibility.Collapsed
+                sepDuplicate.Visibility = Visibility.Collapsed
+            End If
+        End With
 
     End Sub
 

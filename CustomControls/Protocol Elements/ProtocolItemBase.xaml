@@ -64,7 +64,7 @@
                     </Separator.Template>
                 </Separator>
                 <MenuItem x:Name="mnuDuplicate" Icon="{StaticResource icoCopy}" Header="Duplicate"/>
-                <Separator/>
+                <Separator x:Name="sepDuplicate"/>
                 <MenuItem x:Name="mnuDelete" Icon="{StaticResource icoDeleteListItem}" Header="Remove" InputGestureText="DEL" />
             </ContextMenu>
         </Border.ContextMenu>

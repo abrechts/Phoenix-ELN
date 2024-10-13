@@ -6,7 +6,7 @@
     <FileVersion>0.9.0.0</FileVersion>
 
     <RootNamespace>CustomControls</RootNamespace>
-    <TargetFramework>net8.0-windows7.0</TargetFramework>
+    <TargetFramework>net8.0-windows8.0</TargetFramework>
     <RootNamespace>CustomControls</RootNamespace>
     <UseWPF>true</UseWPF>
     <ImportedNamespaces>ChemBytes.ChemBytesDraw=False,Microsoft.VisualBasic=True,System=True,System.Collections=True,System.Collections.Generic=True,System.Diagnostics=True,System.Linq=True,System.Xml.Linq=True,System.Threading.Tasks=True,CustomControls=True</ImportedNamespaces>
