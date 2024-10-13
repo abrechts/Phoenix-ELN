@@ -254,28 +254,6 @@ Public Class FileContent
 
 
     ''' <summary>
-    ''' Saves the specified embedded file to a selected file location.
-    ''' </summary>
-    '''
-    Friend Sub ExportFile(embeddedFilesEntry As tblEmbeddedFiles)
-
-        Dim saveDlg = New Microsoft.Win32.SaveFileDialog()
-        With saveDlg
-            .FileName = embeddedFilesEntry.FileName
-            .InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop)
-            If .ShowDialog = True Then
-                Try
-                    File.Copy(TempDocsPath, .FileName)
-                Catch ex3 As Exception
-                    MsgBox(ex3.Message, MsgBoxStyle.Exclamation, "Document Export")
-                End Try
-            End If
-        End With
-
-    End Sub
-
-
-    ''' <summary>
     ''' Track save operations for current file in temp folder
     ''' </summary>
     ''' <remarks>Often, but not always fires the Changed event, but also the Renamed event, e.g. for Office 
