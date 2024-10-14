@@ -17,34 +17,37 @@ Public Class DbUpgradeLocal
 
             'apply changes sequentially from initial ones to most recent ones
 
-            'introduced in version 0.9.4 (RSS queries)
+            ' -- introduced in version 0.9.4 (RSS queries)
+
             If Not DbColumnExists("tblExperiments", "RxnIndigoObj", sqliteConn) Then
                 DbAddColumn("tblExperiments", "RxnIndigoObj", "longblob", "", sqliteConn)
                 DbAddColumn("tblExperiments", "RxnFingerprint", "blob", "", sqliteConn)
             End If
 
-            'example:
-            '    'introduced in version 1.3.0
-            '    If Not DbColumnExists("tblUsers", "Test", sqliteConn) Then
+            ' -- introduced in version 2.3.0
 
-            '        DbAddColumn("tblUsers", "Test", "varchar(20)", "", sqliteConn)
+            Dim tblStr =
+               "CREATE TABLE IF NOT EXISTS tblDbMaterialFiles (
+                GUID VARCHAR(36) PRIMARY KEY NOT NULL, 
+                DbMaterialID VARCHAR(36) NOT NULL REFERENCES tblMaterials(GUID) ON DELETE CASCADE, 
+                FileName VARCHAR NOT NULL, 
+                FileBytes BLOB NOT NULL, 
+                FileSizeMB REAL, 
+                IconImage BLOB, 
+                SyncState INTEGER DEFAULT 0);
 
-            '        Dim tblStr =
-            '            "CREATE TABLE IF NOT EXISTS tblDummy (
-            '             ID Guid PRIMARY KEY Not NULL ,
-            '                ProjectID Guid Not NULL ,
-            '                DocBytes blob,
-            '                IconImage blob,
-            '                Title varchar(100),
-            '                Comments varchar 
-            '            ,
-            '                FOREIGN KEY([ProjectID])
-            '                    REFERENCES [tblProjects]([ID]) 
-            '                    On UPDATE CASCADE ON DELETE CASCADE
-            '            );"
-            '        DbExecuteCmd(tblStr, sqliteConn)
+                CREATE INDEX IF NOT EXISTS idx_DbMaterialID ON tblDbMaterialFiles(DbMaterialID);"
 
-            '    End If
+            DbExecuteCmd(tblStr, sqliteConn)
+
+            'add so far missing indices
+            DbExecuteCmd("CREATE INDEX IF NOT EXISTS idx_DatabaseID ON tblUsers(DatabaseID);", sqliteConn)
+            DbExecuteCmd("CREATE INDEX IF NOT EXISTS idx_ProjUserID ON tblProjects(UserID);", sqliteConn)
+            DbExecuteCmd("CREATE INDEX IF NOT EXISTS idx_UserID ON tblExperiments(UserID);", sqliteConn)
+            DbExecuteCmd("CREATE INDEX IF NOT EXISTS idx_ProjectID ON tblExperiments(ProjectID);", sqliteConn)
+            DbExecuteCmd("CREATE INDEX IF NOT EXISTS idx_MatName ON tblMaterials(MatName);", sqliteConn)
+            DbExecuteCmd("CREATE INDEX IF NOT EXISTS idx_DatabaseInfoID ON sync_Tombstone(DatabaseInfoID);", sqliteConn)
+            DbExecuteCmd("CREATE UNIQUE INDEX IF NOT EXISTS unq_tblSeparators ON tblSeparators(ProtocolItemID);", sqliteConn)
 
         End Using
 

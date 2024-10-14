@@ -19,6 +19,8 @@ public partial class ElnDataContext : DbContext
 
     public virtual DbSet<tblDatabaseInfo> tblDatabaseInfo { get; set; }
 
+    public virtual DbSet<tblDbMaterialFiles> tblDbMaterialFiles { get; set; }
+
     public virtual DbSet<tblEmbeddedFiles> tblEmbeddedFiles { get; set; }
 
     public virtual DbSet<tblExperiments> tblExperiments { get; set; }
@@ -46,6 +48,8 @@ public partial class ElnDataContext : DbContext
         modelBuilder.Entity<sync_Tombstone>(entity =>
         {
             entity.HasKey(e => e.GUID);
+
+            entity.HasIndex(e => e.DatabaseInfoID, "idx_DatabaseInfoID");
 
             entity.Property(e => e.GUID).HasColumnType("VARCHAR(36)");
             entity.Property(e => e.DatabaseInfoID).HasColumnType("VARCHAR(36)");
@@ -105,6 +109,20 @@ public partial class ElnDataContext : DbContext
                 .HasColumnType("TINYINT");
         });
 
+        modelBuilder.Entity<tblDbMaterialFiles>(entity =>
+        {
+            entity.HasKey(e => e.GUID);
+
+            entity.HasIndex(e => e.DbMaterialID, "idx_DbMaterialID");
+
+            entity.Property(e => e.GUID).HasColumnType("VARCHAR(36)");
+            entity.Property(e => e.DbMaterialID).HasColumnType("VARCHAR(36)");
+            entity.Property(e => e.FileName).HasColumnType("VARCHAR");
+            entity.Property(e => e.SyncState).HasDefaultValue(0);
+
+            entity.HasOne(d => d.DbMaterial).WithMany(p => p.tblDbMaterialFiles).HasForeignKey(d => d.DbMaterialID);
+        });
+
         modelBuilder.Entity<tblEmbeddedFiles>(entity =>
         {
             entity.HasKey(e => e.GUID);
@@ -131,6 +149,10 @@ public partial class ElnDataContext : DbContext
         modelBuilder.Entity<tblExperiments>(entity =>
         {
             entity.HasKey(e => e.ExperimentID);
+
+            entity.HasIndex(e => e.ProjectID, "idx_ProjectID");
+
+            entity.HasIndex(e => e.UserID, "idx_UserID");
 
             entity.Property(e => e.ExperimentID).HasColumnType("VARCHAR(25)");
             entity.Property(e => e.CreationDate).HasColumnType("VARCHAR(20)");
@@ -167,6 +189,8 @@ public partial class ElnDataContext : DbContext
         modelBuilder.Entity<tblMaterials>(entity =>
         {
             entity.HasKey(e => e.GUID);
+
+            entity.HasIndex(e => e.MatName, "idx_MatName");
 
             entity.Property(e => e.GUID).HasColumnType("VARCHAR(36)");
             entity.Property(e => e.DatabaseID).HasColumnType("VARCHAR(36)");
@@ -211,6 +235,8 @@ public partial class ElnDataContext : DbContext
         modelBuilder.Entity<tblProjects>(entity =>
         {
             entity.HasKey(e => e.GUID);
+
+            entity.HasIndex(e => e.UserID, "idx_ProjUserID");
 
             entity.HasIndex(e => e.GUID, "pk_tblProjects_2").IsUnique();
 
@@ -287,6 +313,8 @@ public partial class ElnDataContext : DbContext
 
             entity.HasIndex(e => e.ProtocolItemID, "IX_tblSeparators_ProtocolItemID").IsUnique();
 
+            entity.HasIndex(e => e.ProtocolItemID, "unq_tblSeparators").IsUnique();
+
             entity.Property(e => e.GUID).HasColumnType("VARCHAR(36)");
             entity.Property(e => e.DisplayType).HasColumnType("SMALLINT");
             entity.Property(e => e.ElementType).HasColumnType("SMALLINT");
@@ -322,6 +350,8 @@ public partial class ElnDataContext : DbContext
         modelBuilder.Entity<tblUsers>(entity =>
         {
             entity.HasKey(e => e.UserID);
+
+            entity.HasIndex(e => e.DatabaseID, "idx_DatabaseID");
 
             entity.Property(e => e.UserID).HasColumnType("VARCHAR(25)");
             entity.Property(e => e.City).HasColumnType("VARCHAR(50)");

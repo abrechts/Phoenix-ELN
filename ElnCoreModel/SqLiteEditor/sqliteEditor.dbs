@@ -13,6 +13,9 @@
 			<index name="pk_sync_Tombstone" unique="PRIMARY_KEY" >
 				<column name="GUID" />
 			</index>
+			<index name="idx_DatabaseInfoID" unique="NORMAL" >
+				<column name="DatabaseInfoID" />
+			</index>
 			<fk name="fk_sync_tombstone" to_schema="Default" to_table="tblDatabaseInfo" delete_action="cascade" >
 				<fk_column name="DatabaseInfoID" pk="GUID" />
 			</fk>
@@ -71,6 +74,26 @@
 			<index name="pk_tblDatabaseInfo" unique="PRIMARY_KEY" >
 				<column name="GUID" />
 			</index>
+		</table>
+		<table name="tblDbMaterialFiles" spec="" >
+			<column name="GUID" type="VARCHAR" length="36" jt="12" mandatory="y" />
+			<column name="DbMaterialID" type="VARCHAR" length="36" jt="12" mandatory="y" />
+			<column name="FileName" type="VARCHAR" jt="12" mandatory="y" />
+			<column name="FileBytes" type="BLOB" jt="2004" mandatory="y" />
+			<column name="FileSizeMB" type="REAL" jt="8" />
+			<column name="IconImage" type="BLOB" jt="2004" />
+			<column name="SyncState" type="INTEGER" jt="4" >
+				<defo><![CDATA[0]]></defo>
+			</column>
+			<index name="pk_tblDbMaterialFiles" unique="PRIMARY_KEY" >
+				<column name="GUID" />
+			</index>
+			<index name="idx_DbMaterialID" unique="NORMAL" >
+				<column name="DbMaterialID" />
+			</index>
+			<fk name="Fk_6" to_schema="Default" to_table="tblMaterials" delete_action="cascade" >
+				<fk_column name="DbMaterialID" pk="GUID" />
+			</fk>
 		</table>
 		<table name="tblEmbeddedFiles" >
 			<column name="GUID" type="VARCHAR" length="36" jt="12" mandatory="y" />
@@ -150,6 +173,12 @@
 			<index name="pk_tblExperiments" unique="PRIMARY_KEY" >
 				<column name="ExperimentID" />
 			</index>
+			<index name="idx_ProjectID" unique="NORMAL" >
+				<column name="ProjectID" />
+			</index>
+			<index name="idx_UserID" unique="NORMAL" >
+				<column name="UserID" />
+			</index>
 			<fk name="Fk_0" to_schema="Default" to_table="tblUsers" >
 				<fk_column name="UserID" pk="UserID" />
 			</fk>
@@ -193,6 +222,9 @@
 			</index>
 			<index name="pk_tblMaterials" unique="PRIMARY_KEY" >
 				<column name="GUID" />
+			</index>
+			<index name="idx_MatName" unique="NORMAL" >
+				<column name="MatName" />
 			</index>
 			<fk name="FK_tblMaterials tblDatabaseInfo" to_schema="Default" to_table="tblDatabaseInfo" delete_action="cascade" options="" >
 				<fk_column name="DatabaseID" pk="GUID" />
@@ -243,6 +275,9 @@
 			</index>
 			<index name="pk_tblProjects" unique="PRIMARY_KEY" >
 				<column name="GUID" />
+			</index>
+			<index name="idx_ProjUserID" unique="NORMAL" >
+				<column name="UserID" />
 			</index>
 			<fk name="FK_tblProjects tblUsers" to_schema="Default" to_table="tblUsers" delete_action="cascade" >
 				<fk_column name="UserID" pk="UserID" />
@@ -353,7 +388,7 @@
 			<index name="pk_tblSeparators" unique="PRIMARY_KEY" >
 				<column name="GUID" />
 			</index>
-			<index name="unq_tblSeparators_ProtocolItemID" unique="UNIQUE_KEY" >
+			<index name="unq_tblSeparators" unique="UNIQUE_INDEX" >
 				<column name="ProtocolItemID" />
 			</index>
 			<fk name="Fk_5" to_schema="Default" to_table="tblProtocolItems" delete_action="cascade" >
@@ -409,23 +444,27 @@
 			<index name="pk_tblUsers" unique="PRIMARY_KEY" >
 				<column name="UserID" />
 			</index>
+			<index name="idx_DatabaseID" unique="NORMAL" >
+				<column name="DatabaseID" />
+			</index>
 			<fk name="FK_tblUsers tblDatabaseInfo_001" to_schema="Default" to_table="tblDatabaseInfo" delete_action="cascade" options="" >
 				<fk_column name="DatabaseID" pk="GUID" />
 			</fk>
 		</table>
 	</schema>
 	<layout name="Infrastructure" id="Layout-4c1" show_column_type="y" show_relation="cascade" >
-		<entity schema="Default" name="sync_Tombstone" color="3986C1" x="400" y="400" />
+		<entity schema="Default" name="sync_Tombstone" color="3986C1" x="672" y="368" />
 		<entity schema="Default" name="tblDatabaseInfo" color="3986C1" x="48" y="48" />
+		<entity schema="Default" name="tblDbMaterialFiles" color="3986C1" x="432" y="464" />
 		<entity schema="Default" name="tblExperiments" color="3986C1" x="960" y="48" />
 		<entity schema="Default" name="tblMaterials" color="3986C1" x="80" y="336" />
 		<entity schema="Default" name="tblProjects" color="3986C1" x="672" y="48" />
-		<entity schema="Default" name="tblProtocolItems" color="3986C1" x="992" y="496" />
+		<entity schema="Default" name="tblProtocolItems" color="3986C1" x="992" y="512" />
 		<entity schema="Default" name="tblUsers" color="3986C1" x="368" y="48" />
 	</layout>
 	<layout name="Protocol Elements" id="Layout-16d" show_column_type="y" show_relation="cascade" >
-		<entity schema="Default" name="tblAuxiliaries" color="3986C1" x="592" y="368" />
-		<entity schema="Default" name="tblComments" color="3986C1" x="320" y="368" />
+		<entity schema="Default" name="tblAuxiliaries" color="3986C1" x="592" y="384" />
+		<entity schema="Default" name="tblComments" color="3986C1" x="320" y="384" />
 		<entity schema="Default" name="tblEmbeddedFiles" color="C1D8EE" x="336" y="576" />
 		<entity schema="Default" name="tblProducts" color="3986C1" x="848" y="320" />
 		<entity schema="Default" name="tblProtocolItems" color="3986C1" x="48" y="256" />

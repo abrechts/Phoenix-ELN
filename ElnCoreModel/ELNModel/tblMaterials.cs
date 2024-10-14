@@ -30,4 +30,6 @@ public partial class tblMaterials
     public byte? SyncState { get; set; }
 
     public virtual tblDatabaseInfo Database { get; set; } = null!;
+
+    public virtual ICollection<tblDbMaterialFiles> tblDbMaterialFiles { get; set; } = new List<tblDbMaterialFiles>();
 }
