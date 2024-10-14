@@ -17,26 +17,26 @@ Public Class DbUpgradeServer
 
         Using serverConn = New MySqlConnection(serverConnStr)
 
-            'introduced in version 0.9.4 (RSS queries)
+            ' --> introduced in version 0.9.4 (RSS queries)
+
             If Not DbColumnExists("tblExperiments", "RxnIndigoObj", serverConn) Then
                 DbAddColumn("tblExperiments", "RxnIndigoObj", "LONGBLOB", "IsNodeExpanded", serverConn)
                 DbAddColumn("tblExperiments", "RxnFingerprint", "BLOB", "RxnIndigoObj", serverConn)
             End If
 
-            'example:
-            'table introduced in e.g. version 7.5.0 (exists check already included in command)
-            'Dim cmd = "CREATE TABLE IF NOT EXISTS tblDummy (
-            '    ID varchar(36) PRIMARY KEY Not NULL,
-            '    ProjectID varchar(36) Not NULL, 
-            '    Title varchar(100),
-            '    DocBytes LONGBLOB,
-            '    IconImage blob,
-            '    Comments text,
-            '    FOREIGN KEY(ProjectID)
-            '        REFERENCES tblProjects(GUID) 
-            '        On UPDATE CASCADE ON DELETE CASCADE
-            '    ) engine=innodb;"
-            'DbExecuteCmd(cmd, serverConn)
+            ' --> introduced in version 2.3.0 -- sqlite!
+
+            Dim tblStr =
+               "CREATE TABLE IF NOT EXISTS tblDbMaterialFiles (
+                GUID VARCHAR(36) PRIMARY KEY NOT NULL, 
+                DbMaterialID VARCHAR(36) NOT NULL REFERENCES tblMaterials(GUID) ON DELETE CASCADE, 
+                FileName VARCHAR(50) NOT NULL, 
+                FileBytes LONGBLOB NOT NULL, 
+                FileSizeMB REAL, 
+                IconImage BLOB, 
+                SyncState INTEGER DEFAULT 0);"
+
+            DbExecuteCmd(tblStr, serverConn)
 
         End Using
 

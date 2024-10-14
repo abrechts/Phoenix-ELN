@@ -11,26 +11,24 @@ Public Class DbUpgradeLocal
     ''' 
     Public Shared Function Upgrade(sqlitePath As String) As Boolean
 
-        '---> examples
+        'apply changes sequentially from initial ones to most recent ones
 
         Using sqliteConn = New SqliteConnection("DataSource = " + sqlitePath + "; foreign keys=FALSE")
 
-            'apply changes sequentially from initial ones to most recent ones
-
-            ' -- introduced in version 0.9.4 (RSS queries)
+            ' --> introduced in version 0.9.4 (RSS queries)
 
             If Not DbColumnExists("tblExperiments", "RxnIndigoObj", sqliteConn) Then
                 DbAddColumn("tblExperiments", "RxnIndigoObj", "longblob", "", sqliteConn)
                 DbAddColumn("tblExperiments", "RxnFingerprint", "blob", "", sqliteConn)
             End If
 
-            ' -- introduced in version 2.3.0
+            ' --> introduced in version 2.3.0
 
             Dim tblStr =
                "CREATE TABLE IF NOT EXISTS tblDbMaterialFiles (
                 GUID VARCHAR(36) PRIMARY KEY NOT NULL, 
                 DbMaterialID VARCHAR(36) NOT NULL REFERENCES tblMaterials(GUID) ON DELETE CASCADE, 
-                FileName VARCHAR NOT NULL, 
+                FileName VARCHAR(50) NOT NULL, 
                 FileBytes BLOB NOT NULL, 
                 FileSizeMB REAL, 
                 IconImage BLOB, 
@@ -40,7 +38,7 @@ Public Class DbUpgradeLocal
 
             DbExecuteCmd(tblStr, sqliteConn)
 
-            'add so far missing indices
+            'add so far missing indices (SQLite only)
             DbExecuteCmd("CREATE INDEX IF NOT EXISTS idx_DatabaseID ON tblUsers(DatabaseID);", sqliteConn)
             DbExecuteCmd("CREATE INDEX IF NOT EXISTS idx_ProjUserID ON tblProjects(UserID);", sqliteConn)
             DbExecuteCmd("CREATE INDEX IF NOT EXISTS idx_UserID ON tblExperiments(UserID);", sqliteConn)

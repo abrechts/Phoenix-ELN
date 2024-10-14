@@ -117,7 +117,7 @@ public partial class ElnDataContext : DbContext
 
             entity.Property(e => e.GUID).HasColumnType("VARCHAR(36)");
             entity.Property(e => e.DbMaterialID).HasColumnType("VARCHAR(36)");
-            entity.Property(e => e.FileName).HasColumnType("VARCHAR");
+            entity.Property(e => e.FileName).HasColumnType("VARCHAR(50)");
             entity.Property(e => e.SyncState).HasDefaultValue(0);
 
             entity.HasOne(d => d.DbMaterial).WithMany(p => p.tblDbMaterialFiles).HasForeignKey(d => d.DbMaterialID);
