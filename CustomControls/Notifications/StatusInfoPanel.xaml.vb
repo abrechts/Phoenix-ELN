@@ -32,8 +32,8 @@ Public Class StatusInfoPanel
     Public Sub ShowAvailableUpdate(newVersion As String)
 
         pnlUpdateInfo.Visibility = Visibility.Visible
-        icoNoUpdateAvailable.Visibility = Visibility.Visible
-        icoUpdateAvailable.Visibility = Visibility.Collapsed
+        icoUpdateAvailable.Visibility = Visibility.Visible
+        icoNoUpdateAvailable.Visibility = Visibility.Collapsed
         blkNewVersion.Text = newVersion
 
     End Sub
