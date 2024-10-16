@@ -54,11 +54,12 @@
 
                         <Border Margin="0,4,2,0" CornerRadius="4" Background="#FFEBEBEB">
                             <TextBlock Text="{Binding Database.CurrAppVersion,Converter={StaticResource appVersionConv}}" d:Text="2.12.3" 
-                               FontWeight="demibold"  Padding="2,0,2,0"/>
+                               FontWeight="demibold" Padding="2,0,2,0"/>
                         </Border>
                     
                         <ContentControl x:Name="icoNoUpdateAvailable" Content="{StaticResource icoOkCheckmark}" Height="12" VerticalAlignment="center" 
-                            Margin="0,4,0,0" ToolTip="The application is up to date!" d:Visibility="Visible" Visibility="visible"/>
+                            Margin="0,4,0,0" ToolTip="The application is up to date!" d:Visibility="Visible" Visibility="visible"
+                            ToolTipService.InitialShowDelay="250"/>
 
                         <ContentControl x:Name="icoUpdateAvailable" Content="{StaticResource icoWarning}" Height="14" VerticalAlignment="center" 
                              Visibility="Collapsed" d:Visibility="visible" Margin="0,2,0,0"/>
