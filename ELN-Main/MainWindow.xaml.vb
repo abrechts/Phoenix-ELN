@@ -52,8 +52,6 @@ Class MainWindow
                 _IsVersionUpgrade = True
             End If
 
-            _IsVersionUpgrade = True
-
             'Apply settings
             If .StartupSize.Width > -1 Then
                 WindowStartupLocation = WindowStartupLocation.Manual
