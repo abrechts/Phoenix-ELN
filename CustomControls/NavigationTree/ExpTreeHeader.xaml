@@ -29,6 +29,14 @@
         <ContextMenu>
             <!--<MenuItem x:Name="mnuBookmark" Icon="{StaticResource icoArrowRight}" Header="Bookmark"/>-->     
             <!--<Separator Visibility="{Binding WorkflowState, Converter={StaticResource expStateVisConv}}"/>-->
+            <Separator>
+                <Separator.Template>
+                    <ControlTemplate TargetType="Separator">
+                        <TextBlock Text="{Binding ExperimentID}" Background="DimGray" Foreground="white" Padding="6,2,6,3"/>
+                    </ControlTemplate>
+                </Separator.Template>
+            </Separator>
+
             <MenuItem x:Name="mnuFinalize" Icon="{StaticResource icoOkBullet}" Header="Finalize Experiment" Opacity="0.8"
                 Visibility="{Binding WorkflowState, Converter={StaticResource expStateVisConv},ConverterParameter=invert}"/>
             <MenuItem x:Name="mnuUnlock" Icon="{StaticResource icoReopened}" Header="Unlock Experiment" Opacity="0.8"

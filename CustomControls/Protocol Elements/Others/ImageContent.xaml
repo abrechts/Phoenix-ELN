@@ -49,7 +49,7 @@
                             <Separator>
                                 <Separator.Template>
                                     <ControlTemplate TargetType="Separator">
-                                        <TextBlock Text="Embedded Image" Background="DimGray" Foreground="white" Padding="4,2,4,3"/>
+                                        <TextBlock Text="Embedded Image" Background="DimGray" Foreground="white" Padding="6,2,4,3"/>
                                     </ControlTemplate>
                                 </Separator.Template>
                             </Separator>
