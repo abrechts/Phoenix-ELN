@@ -93,11 +93,11 @@
                     <StackPanel>
 
                         <ListBox x:Name="lstProtocol" VerticalAlignment="Top"
-                        
+                            
                             SelectionMode="Single" Background="transparent" BorderThickness="0" FocusVisualStyle="{x:Null}"              
                             Grid.IsSharedSizeScope="true" HorizontalContentAlignment="stretch" AllowDrop="true"
                             ScrollViewer.HorizontalScrollBarVisibility="Disabled" Padding="0,0,0,4"
-                            VirtualizingStackPanel.IsVirtualizing="False" MinHeight="20" d:Visibility="visible"
+                            VirtualizingStackPanel.IsVirtualizing="True"  MinHeight="20" d:Visibility="visible"
                             Visibility="{Binding ElementName=lstProtocol, Path=Items.Count,Converter={StaticResource intToVisConv}}"
                              
                             ItemsSource="{Binding Source={StaticResource ProtocolItemsView}}"                       
