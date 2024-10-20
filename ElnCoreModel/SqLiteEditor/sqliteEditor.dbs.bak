@@ -13,6 +13,9 @@
 			<index name="pk_sync_Tombstone" unique="PRIMARY_KEY" >
 				<column name="GUID" />
 			</index>
+			<index name="idx_DatabaseInfoID" unique="NORMAL" >
+				<column name="DatabaseInfoID" />
+			</index>
 			<fk name="fk_sync_tombstone" to_schema="Default" to_table="tblDatabaseInfo" delete_action="cascade" >
 				<fk_column name="DatabaseInfoID" pk="GUID" />
 			</fk>
@@ -273,6 +276,9 @@
 			<index name="pk_tblProjects" unique="PRIMARY_KEY" >
 				<column name="GUID" />
 			</index>
+			<index name="idx_ProjUserID" unique="NORMAL" >
+				<column name="UserID" />
+			</index>
 			<fk name="FK_tblProjects tblUsers" to_schema="Default" to_table="tblUsers" delete_action="cascade" >
 				<fk_column name="UserID" pk="UserID" />
 			</fk>
@@ -382,7 +388,7 @@
 			<index name="pk_tblSeparators" unique="PRIMARY_KEY" >
 				<column name="GUID" />
 			</index>
-			<index name="unq_tblSeparators_ProtocolItemID" unique="UNIQUE_INDEX" >
+			<index name="unq_tblSeparators" unique="UNIQUE_INDEX" >
 				<column name="ProtocolItemID" />
 			</index>
 			<fk name="Fk_5" to_schema="Default" to_table="tblProtocolItems" delete_action="cascade" >
@@ -437,6 +443,9 @@
 			</column>
 			<index name="pk_tblUsers" unique="PRIMARY_KEY" >
 				<column name="UserID" />
+			</index>
+			<index name="idx_DatabaseID" unique="NORMAL" >
+				<column name="DatabaseID" />
 			</index>
 			<fk name="FK_tblUsers tblDatabaseInfo_001" to_schema="Default" to_table="tblDatabaseInfo" delete_action="cascade" options="" >
 				<fk_column name="DatabaseID" pk="GUID" />
