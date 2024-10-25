@@ -49,12 +49,26 @@ Public Class dlgEditReagent
             PopulateData()
             SetValidationInfo()
 
+            matDbDocsCtrl.DataContext = GetMatchingDbReagent()  'displays mat safety docs if present
+
         End If
 
         numMatAmount.Focus()
         numMatAmount.Select(255, 0)
 
     End Sub
+
+
+    Private Function GetMatchingDbReagent() As tblMaterials
+
+        Dim reagentHit = (From mat In ProtocolItemBase.DbInfo.tblMaterials Where mat.MatType = MaterialType.Reagent _
+                          AndAlso mat.MatName.Equals(ReagentEntry.Name, StringComparison.CurrentCultureIgnoreCase)).FirstOrDefault
+
+        Return reagentHit
+
+        'TODO: Use this to simplify SetValidationInfo() below
+
+    End Function
 
 
     ''' <summary>

@@ -1,0 +1,56 @@
+﻿<UserControl x:Class="MatDocControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:CustomControls"
+             xmlns:data="clr-namespace:ElnCoreModel;assembly=ElnCoreModel"
+             d:DataContext="{d:DesignInstance Type=data:tblMaterials}"       
+             mc:Ignorable="d" d:DesignWidth="300" d:Height="26">
+    
+    <UserControl.Resources>
+
+        <local:BytesToBitmapImgConverter x:Key="BytesToBitmapConv"/>
+     
+        <DataTemplate x:Key="matDocTemplate">
+            
+            <DockPanel>
+                
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="left" PreviewMouseDown="matDocItem_PreviewMouseDown">
+                
+                    <Image Width="16" Height="16" ToolTipService.InitialShowDelay="350" Margin="-2,0,2,0"
+                       Source="{Binding IconImage, Converter={StaticResource BytesToBitmapConv}}"/>
+
+                    <TextBlock Text="{Binding FileName}" TextTrimming="CharacterEllipsis"/>
+
+                </StackPanel>
+
+                <Button DockPanel.Dock="left"  Background="transparent" Padding="0" BorderThickness="0" HorizontalAlignment="right"
+                  PreviewMouseDown="cboItem_DelClick" Content="X" Foreground="dimgray" FontSize="10" ToolTip="Remove this item"/>
+
+            </DockPanel>
+            
+        </DataTemplate>
+        
+    </UserControl.Resources>
+    
+    <Grid>
+
+        <StackPanel Orientation="Horizontal">
+            
+            <local:ComboPlus x:Name="cboDocs" MinWidth="80" ItemTemplate="{StaticResource matDocTemplate}" 
+               CboBackground="white"/>
+            
+            <Button x:Name="btnAdd" Background="white" BorderThickness="0" Margin="2,0,0,0" ToolTip="Add document ...">
+                <ContentControl Content="{StaticResource icoAdd}" Height="16" />
+            </Button>
+
+            <Button x:Name="btnDelete" Background="white" BorderThickness="0" Margin="0,0,0,0" ToolTip="Remove Document">
+                <ContentControl Content="{StaticResource icoDelete}" Height="14" />
+            </Button>
+            
+        </StackPanel>
+        
+    </Grid>
+    
+</UserControl>

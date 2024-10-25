@@ -58,3 +58,7 @@ public partial class tblMaterials : INotifyPropertyChanged
 public partial class tblSeparators : INotifyPropertyChanged
 {
 }
+
+public partial class tblDbMaterialFiles: INotifyPropertyChanged
+{
+}

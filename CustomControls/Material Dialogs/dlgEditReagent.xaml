@@ -145,9 +145,7 @@
 
             </StackPanel>
 
-          
-            
-               
+            <custom:MatDocControl x:Name="matDbDocsCtrl" Margin="10,0,0,0"/>
 
             <Rectangle HorizontalAlignment="Stretch" Fill="White" Height="1" Margin="0,6,0,18"/>
 
