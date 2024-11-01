@@ -1,10 +1,10 @@
 ﻿2024-09-04 10:11:30|   9.121.7449.9014|      545272|-R-S|C:\Program Files\InstallMate 9\Stubs80\Tsu32u.dll
-2024-11-01 08:24:23|                  |       81607|-R-S|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\Deployment\Phoenix ELN\Phoenix-ELN\Phoenix ELN-2.3.0-Setup.dat
-2024-11-01 08:24:23|                  |      235008|-R-S|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\Deployment\Phoenix ELN\Phoenix-ELN\Phoenix ELN-2.3.0-Setup32.dll
+2024-11-01 14:31:49|                  |       81751|-R-S|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\Deployment\Phoenix ELN\Phoenix-ELN\Phoenix ELN-2.3.0-Setup.dat
+2024-11-01 14:31:49|                  |      235008|-R-S|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\Deployment\Phoenix ELN\Phoenix-ELN\Phoenix ELN-2.3.0-Setup32.dll
 2015-09-08 13:36:32|                  |       23558|-R-S|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\Deployment\blankcd.ico
-2024-11-01 08:24:23|                  |        2060|-R-S|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\Deployment\Phoenix ELN\Phoenix-ELN\Readme.txt
-2024-11-01 08:24:23|           2.3.0.0|       46528|-R-S|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\Deployment\Phoenix ELN\Phoenix-ELN\_Setup.exe
-2024-11-01 08:15:57|                  |     1859584|----|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\References\DB-Seed\ElnData.db
+2024-11-01 14:31:49|                  |        2060|-R-S|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\Deployment\Phoenix ELN\Phoenix-ELN\Readme.txt
+2024-11-01 14:31:49|           2.3.0.0|       46528|-R-S|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\Deployment\Phoenix ELN\Phoenix-ELN\_Setup.exe
+2024-11-01 14:31:01|                  |     1859584|----|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\References\DB-Seed\ElnData.db
 2024-11-01 08:22:37|                  |      252256|----|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\ELN-Main\bin\Release\Publish\CustomControls.pdb
 2024-11-01 08:22:44|                  |       47220|----|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\ELN-Main\bin\Release\Publish\PhoenixELN.pdb
 2024-11-01 08:22:36|                  |       37412|----|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\ELN-Main\bin\Release\Publish\ElnBase.pdb
