@@ -4,6 +4,7 @@ Imports ElnBase.ELNCalculations
 Imports ElnCoreModel
 Imports System.Windows.Input
 Imports System.Windows
+Imports System.Collections.ObjectModel
 
 Public Class dlgEditAuxiliary
 
@@ -24,6 +25,14 @@ Public Class dlgEditAuxiliary
 
 
     ''' <summary>
+    ''' Sets or gets the materials DB entry corresponding to the current AuxiliaryEntry. For new 
+    ''' or unknown materials, this entry contains db infrastructure without mat properties.
+    ''' </summary>
+    '''
+    Private Property MatDbEntry As tblMaterials
+
+
+    ''' <summary>
     ''' Sets or gets if a new material is being added.
     ''' </summary>
     ''' 
@@ -39,12 +48,20 @@ Public Class dlgEditAuxiliary
                                       Order By mat.MatName.ToLower).ToList
 
         If IsAddingNew Then
+
+            MatDbEntry = ProtocolItemBase.CreateNewMatDBEntry(MaterialType.Auxiliary)
             cboMatUnit.Text = My.Settings.LastAuxiliaryUnit
             AuxiliaryEntry.SpecifiedUnitType = GetMaterialUnitType(cboMatUnit.Text)
+
         Else
+
             PopulateData()
-            SetValidationInfo()
+            MatDbEntry = GetMatchingDbAuxiliary()
+
         End If
+
+        SetValidationLockState(MatDbEntry)     'handles the 'validated' label visibility
+        matDbDocsCtrl.Documents = New ObservableCollection(Of tblDbMaterialFiles)(MatDbEntry.tblDbMaterialFiles)
 
         numMatAmount.Focus()
         numMatAmount.Select(255, 0)
@@ -53,28 +70,22 @@ Public Class dlgEditAuxiliary
 
 
     ''' <summary>
-    ''' Determines if the current material corresponds to a validated material in the materials list 
-    ''' and updates the dialog UI accordingly.
+    ''' Gets the materials database entry matching the name of the current auxiliary. Returns nothing if not present.
     ''' </summary>
     ''' 
-    Private Sub SetValidationInfo()
+    Private Function GetMatchingDbAuxiliary() As tblMaterials
 
-        With AuxiliaryEntry
+        Dim auxiliaryHit = (From mat In ProtocolItemBase.DbInfo.tblMaterials Where mat.MatType = MaterialType.Auxiliary _
+                          AndAlso mat.MatName.Equals(AuxiliaryEntry.Name, StringComparison.CurrentCultureIgnoreCase)).FirstOrDefault
 
-            Dim matHit = (From mat In ProtocolItemBase.DbInfo.tblMaterials Where mat.MatType = MaterialType.Auxiliary _
-                           AndAlso mat.MatName.Equals(.Name, StringComparison.CurrentCultureIgnoreCase) _
-                           AndAlso mat.Density.Equals(.Density)).FirstOrDefault
+        Return auxiliaryHit
 
-            SetValidationLockState(matHit)
-
-        End With
-
-    End Sub
+    End Function
 
 
     Private Sub SetValidationLockState(matHit As tblMaterials)
 
-        If matHit Is Nothing OrElse matHit.IsValidated = MaterialValidation.None Then
+        If matHit Is Nothing OrElse matHit.IsValidated Is Nothing OrElse matHit.IsValidated = MaterialValidation.None Then
 
             pnlValidated.Visibility = Visibility.Hidden
             numDensity.IsEnabled = True
@@ -117,16 +128,23 @@ Public Class dlgEditAuxiliary
 
     Private Sub cboSearch_MaterialSelected(sender As Object, selItem As tblMaterials) Handles cboSearch.MaterialSelected
 
+        ClearMatProperties()
+
         If selItem IsNot Nothing Then
 
             PopulateMatProperties(selItem)
+
+            MatDbEntry = selItem
+            matDbDocsCtrl.Documents = New ObservableCollection(Of tblDbMaterialFiles)(MatDbEntry.tblDbMaterialFiles)
+
             If Keyboard.Modifiers And ModifierKeys.Control = ModifierKeys.Control Then
                 btnOK_Click()  'shortcut for immediately committing database entry and closing dialog
             End If
 
         Else
 
-            ClearMatProperties()
+            MatDbEntry = ProtocolItemBase.CreateNewMatDBEntry(MaterialType.Auxiliary)
+            matDbDocsCtrl.Documents = New ObservableCollection(Of tblDbMaterialFiles)(MatDbEntry.tblDbMaterialFiles)
 
         End If
 
@@ -165,6 +183,8 @@ Public Class dlgEditAuxiliary
         txtSupplier.Text = ""
         numDensity.Text = Nothing
         txtSupplier.Text = ""
+
+        matDbDocsCtrl.Documents.Clear()
 
         SetValidationLockState(Nothing)
 
@@ -282,7 +302,8 @@ Public Class dlgEditAuxiliary
 
             'add/update materials database
             With AuxiliaryEntry
-                ProtocolItemBase.UpdateMaterialsDB(MaterialType.Auxiliary, .Name, .Source, .Density, Nothing, Nothing, Nothing)
+                ProtocolItemBase.UpdateMaterialsDB(MatDbEntry, matDbDocsCtrl.Documents.ToList, MaterialType.Auxiliary, .Name,
+                   .Source, .Density, Nothing, Nothing, Nothing)
             End With
 
             DialogResult = True

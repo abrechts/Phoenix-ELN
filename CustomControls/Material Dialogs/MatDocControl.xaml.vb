@@ -1,7 +1,9 @@
-﻿Imports System.Globalization
+﻿Imports System.Collections.ObjectModel
+Imports System.Globalization
 Imports System.IO
 Imports System.Windows
 Imports System.Windows.Controls
+Imports System.Windows.Data
 Imports System.Windows.Input
 Imports ElnBase.ELNEnumerations
 Imports ElnCoreModel
@@ -28,34 +30,45 @@ Public Class MatDocControl
     ''' Sets or gets the maximum number of documents per db material.
     ''' </summary>
     '''
-    Public Shared Property MaxFileCount As Integer = 2
+    Public Shared Property MaxFileCount As Integer = 5
 
 
-    Private Sub Me_DataContextChanged() Handles Me.DataContextChanged
+    ''' <summary>
+    ''' Sets or gets if the current protocol material entry is not yet assigned to a specific db material.
+    ''' </summary>
+    ''' 
+    Public Property Documents As ObservableCollection(Of tblDbMaterialFiles)
+        Get
+            Return _documents
+        End Get
+        Set(value As ObservableCollection(Of tblDbMaterialFiles))
+            _documents = value
+            cboDocs.ItemsSource = value
+            SetAppearance()
+        End Set
+    End Property
 
-        If Me.DataContext IsNot Nothing Then
+    Private _documents As New ObservableCollection(Of tblDbMaterialFiles)
 
-            Dim docCount = CType(Me.DataContext, tblMaterials).tblDbMaterialFiles.Count
 
-            If docCount > 0 Then
-                cboDocs.Visibility = Visibility.Visible
-                cboDocs.ItemsSource = CType(Me.DataContext, tblMaterials).tblDbMaterialFiles    
-                cboDocs.SelectedIndex = 0
-                If docCount = 1 Then
-                    cboDocs.Cursor = Cursors.Hand
-                Else
-                    cboDocs.Cursor = Cursors.Arrow
-                End If
+
+    Private Sub SetAppearance()
+
+        If Documents.Count > 0 Then
+            With cboDocs
+                .SelectedIndex = 0
+                .Visibility = Visibility.Visible
+            End With
+            btnAdd.IsEnabled = True
+            btnAdd.Opacity = 1
+            If Documents.Count = 1 Then
+                cboDocs.Cursor = Cursors.Hand
             Else
-                cboDocs.Visibility = Visibility.Collapsed
+                cboDocs.Cursor = Cursors.Arrow
             End If
-
+        Else
+            cboDocs.Visibility = Visibility.Collapsed
         End If
-
-    End Sub
-
-
-    Private Sub cboItem_DelClick()  'XAML defined event
 
     End Sub
 
@@ -80,7 +93,7 @@ Public Class MatDocControl
 
         If mousePosition.X < comboBox.ActualWidth - arrowWidth Then
             ' Mouse click is outside the dropdown arrow area
-            If CType(Me.DataContext, tblMaterials).tblDbMaterialFiles.Count = 1 Then
+            If Documents.Count = 1 Then
                 OpenDocument(CType(cboDocs.SelectedItem, tblDbMaterialFiles))
                 e.Handled = True
             End If
@@ -89,13 +102,11 @@ Public Class MatDocControl
     End Sub
 
 
-    Private Sub btnAdd_Click() Handles btnAdd.Click
+    Private Sub btnAdd_Click() Handles btnAdd.PreviewMouseUp
 
-        Dim matDbEntry = CType(Me.DataContext, tblMaterials)
-
-        If matDbEntry.tblDbMaterialFiles.Count >= MaxFileCount Then
+        If Documents.Count >= MaxFileCount Then
             MsgBox("Sorry, the maximum limit of " + MaxFileCount.ToString + " documents " + vbCrLf +
-              "per material already is present!", MsgBoxStyle.OkOnly + MsgBoxStyle.Exclamation, "Documents Limit")
+               "per material already is present!", MsgBoxStyle.OkOnly + MsgBoxStyle.Exclamation, "Documents Limit")
             Exit Sub
         End If
 
@@ -129,18 +140,15 @@ Public Class MatDocControl
                         'continue
                 End Select
 
-                With cboDocs
-                    .ItemsSource = Nothing
-                    .ItemsSource = matDbEntry.tblDbMaterialFiles
-                    .SelectedIndex = .Items.Count - 1
-                End With
+                cboDocs.SelectedIndex = Documents.Count - 1
 
-                Dim docCount = matDbEntry.tblDbMaterialFiles.Count
+                Dim docCount = Documents.Count ' matDbEntry.tblDbMaterialFiles.Count
                 If docCount = 1 Then
                     cboDocs.Cursor = Cursors.Hand
                 Else
                     cboDocs.Cursor = Cursors.Arrow
                 End If
+                cboDocs.Visibility = If(docCount = 0, Visibility.Collapsed, Visibility.Visible)
 
                 My.Settings.LastMatDocDir = Path.GetDirectoryName(.FileName)
 
@@ -151,26 +159,26 @@ Public Class MatDocControl
     End Sub
 
 
-    Private Sub btnDelete_Click() Handles btnDelete.Click
+    Private Sub cboItem_DelClick(sender As Object, e As MouseButtonEventArgs) 'XAML specified event
 
-        Dim currDoc As tblDbMaterialFiles = cboDocs.SelectedItem
-        Dim matDbEntry = CType(Me.DataContext, tblMaterials)
+        Dim res = MsgBox("Do you really want to remove this document?", MsgBoxStyle.OkCancel + MsgBoxStyle.DefaultButton2 + MsgBoxStyle.Question,
+          "Delete Document")
+        If res = MsgBoxResult.Cancel Then
+            Exit Sub
+        End If
 
-        matDbEntry.tblDbMaterialFiles.Remove(currDoc)
-        ExperimentContent.DbContext.SaveChanges()
+        Dim currDoc As tblDbMaterialFiles = sender.DataContext
+        Documents.Remove(currDoc)
 
-        Dim docCount = matDbEntry.tblDbMaterialFiles.Count
+        Dim docCount = Documents.Count
         If docCount = 1 Then
             cboDocs.Cursor = Cursors.Hand
         Else
             cboDocs.Cursor = Cursors.Arrow
         End If
+        cboDocs.Visibility = If(docCount = 0, Visibility.Collapsed, Visibility.Visible)
 
-        With cboDocs
-            .ItemsSource = Nothing
-            .ItemsSource = matDbEntry.tblDbMaterialFiles
-            .SelectedIndex = docCount - 1
-        End With
+        cboDocs.SelectedIndex = Documents.Count - 1
 
     End Sub
 
@@ -242,11 +250,8 @@ Public Class MatDocControl
 
         If info.Exists Then
 
-            Dim currDbMat = CType(Me.DataContext, tblMaterials)
-
-            'check for duplicate docs
             Dim fileName = Path.GetFileName(filePath)
-            Dim res = From mat In currDbMat.tblDbMaterialFiles Where mat.FileName = fileName
+            Dim res = From doc In Documents Where doc.FileName = fileName
             If res.Any Then
                 Return EmbeddingResult.FileNotFound 'used as synonym for duplicate here ...
             End If
@@ -269,9 +274,8 @@ Public Class MatDocControl
                 .IconImage = FileContent.GetFileIconBytes(filePath)
             End With
 
-            'save new file
-            currDbMat.tblDbMaterialFiles.Add(newFileEntry)
-            ExperimentContent.DbContext.SaveChanges()
+            ' currDbMat.tblDbMaterialFiles.Add(newFileEntry)
+            Documents.Add(newFileEntry)
 
             Return EmbeddingResult.Succeeded
 
@@ -314,4 +318,25 @@ Public Class MatDocControl
 
     End Function
 
+End Class
+
+
+Friend Class FileNameConverter
+
+    Implements IValueConverter
+
+    ''' <summary>
+    ''' Removes the file name extension
+    ''' </summary>
+    ''' 
+    Public Function Convert(value As Object, targetType As Type, parameter As Object, culture As CultureInfo) As Object Implements IValueConverter.Convert
+
+        Dim fullName As String = value
+        Return Path.GetFileNameWithoutExtension(fullName)
+
+    End Function
+
+    Public Function ConvertBack(value As Object, targetType As Type, parameter As Object, culture As CultureInfo) As Object Implements IValueConverter.ConvertBack
+        Throw New NotImplementedException()
+    End Function
 End Class

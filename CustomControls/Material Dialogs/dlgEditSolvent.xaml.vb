@@ -4,6 +4,7 @@ Imports ElnBase.ELNCalculations
 Imports ElnCoreModel
 Imports System.Windows.Input
 Imports System.Windows
+Imports System.Collections.ObjectModel
 
 Public Class dlgEditSolvent
 
@@ -23,6 +24,14 @@ Public Class dlgEditSolvent
 
 
     ''' <summary>
+    ''' Sets or gets the materials DB entry corresponding to the current SolventEntry. For new 
+    ''' or unknown materials, this entry contains db infrastructure without mat properties.
+    ''' </summary>
+    '''
+    Private Property MatDbEntry As tblMaterials
+
+
+    ''' <summary>
     ''' Sets or gets if a new material is being added.
     ''' </summary>
     ''' 
@@ -38,12 +47,21 @@ Public Class dlgEditSolvent
                                       Order By mat.MatName.ToLower).ToList
 
         If IsAddingNew Then
+
+            MatDbEntry = ProtocolItemBase.CreateNewMatDBEntry(MaterialType.Solvent)
+
             cboMatUnit.Text = My.Settings.LastSolventUnit
             SolventEntry.SpecifiedUnitType = GetMaterialUnitType(cboMatUnit.Text)
+
         Else
+
             PopulateData()
-            SetValidationInfo()
+            MatDbEntry = GetMatchingDbSolvent()
+
         End If
+
+        SetValidationLockState(MatDbEntry)     'handles the 'validated' label visibility
+        matDbDocsCtrl.Documents = New ObservableCollection(Of tblDbMaterialFiles)(MatDbEntry.tblDbMaterialFiles)
 
         numMatAmount.Focus()
         numMatAmount.Select(255, 0)
@@ -52,28 +70,22 @@ Public Class dlgEditSolvent
 
 
     ''' <summary>
-    ''' Determines if the current material corresponds to a validated material in the materials list 
-    ''' and updates the dialog UI accordingly.
+    ''' Gets the materials database entry matching the name of the current solvent. Returns nothing if not present.
     ''' </summary>
     ''' 
-    Private Sub SetValidationInfo()
+    Private Function GetMatchingDbSolvent() As tblMaterials
 
-        With SolventEntry
+        Dim solventHit = (From mat In ProtocolItemBase.DbInfo.tblMaterials Where mat.MatType = MaterialType.Solvent _
+                          AndAlso mat.MatName.Equals(SolventEntry.Name, StringComparison.CurrentCultureIgnoreCase)).FirstOrDefault
 
-            Dim matHit = (From mat In ProtocolItemBase.DbInfo.tblMaterials Where mat.MatType = MaterialType.Solvent _
-                           AndAlso mat.MatName.Equals(.Name, StringComparison.CurrentCultureIgnoreCase) _
-                           AndAlso mat.Density.Equals(.Density)).FirstOrDefault
+        Return solventHit
 
-            SetValidationLockState(matHit)
-
-        End With
-
-    End Sub
+    End Function
 
 
     Private Sub SetValidationLockState(matHit As tblMaterials)
 
-        If matHit Is Nothing OrElse matHit.IsValidated = MaterialValidation.None Then
+        If matHit Is Nothing OrElse matHit.IsValidated Is Nothing OrElse matHit.IsValidated = MaterialValidation.None Then
 
             pnlValidated.Visibility = Visibility.Hidden
             numDensity.IsEnabled = True
@@ -116,16 +128,23 @@ Public Class dlgEditSolvent
 
     Private Sub cboSearch_MaterialSelected(sender As Object, selItem As tblMaterials) Handles cboSearch.MaterialSelected
 
+        ClearMatProperties()
+
         If selItem IsNot Nothing Then
 
             PopulateMatProperties(selItem)
+
+            MatDbEntry = selItem
+            matDbDocsCtrl.Documents = New ObservableCollection(Of tblDbMaterialFiles)(MatDbEntry.tblDbMaterialFiles)
+
             If Keyboard.Modifiers And ModifierKeys.Control = ModifierKeys.Control Then
                 btnOK_Click()  'shortcut for immediately committing database entry and closing dialog
             End If
 
         Else
 
-            ClearMatProperties()
+            MatDbEntry = ProtocolItemBase.CreateNewMatDBEntry(MaterialType.Solvent)
+            matDbDocsCtrl.Documents = New ObservableCollection(Of tblDbMaterialFiles)(MatDbEntry.tblDbMaterialFiles)
 
         End If
 
@@ -165,6 +184,8 @@ Public Class dlgEditSolvent
         txtSupplier.Text = ""
         numDensity.Text = Nothing
         txtSupplier.Text = ""
+
+        matDbDocsCtrl.Documents.Clear()
 
         SetValidationLockState(Nothing)
 
@@ -288,11 +309,13 @@ Public Class dlgEditSolvent
 
             'add/update materials database
             With SolventEntry
-                ProtocolItemBase.UpdateMaterialsDB(MaterialType.Solvent, .Name, .Source, .Density, Nothing, Nothing, Nothing)
+                ProtocolItemBase.UpdateMaterialsDB(MatDbEntry, matDbDocsCtrl.Documents.ToList, MaterialType.Solvent, .Name,
+                   .Source, .Density, Nothing, Nothing, Nothing)
             End With
 
             DialogResult = True
             Me.Close()
+
         End If
 
     End Sub

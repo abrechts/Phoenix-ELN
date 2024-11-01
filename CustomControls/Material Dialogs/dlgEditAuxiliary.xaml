@@ -111,11 +111,18 @@
                         FontFamily="Comic Sans MS" d:Text="Merck 234'5643" HorizontalAlignment="Left" TabIndex="4" />
                 </StackPanel>
      
-                </StackPanel>
+            </StackPanel>
 
-                <Rectangle HorizontalAlignment="Stretch" Fill="White" Height="1" Margin="0,6,0,18"/>
+            <Rectangle HorizontalAlignment="Stretch" Fill="White" Height="1" Margin="0,4,0,10"/>
 
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,0" HorizontalAlignment="Left">
+                <TextBlock Text="Safety Docs:" VerticalAlignment="Center" Margin="0,0,6,2"/>
+                <custom:MatDocControl x:Name="matDbDocsCtrl" MinHeight="24" />
+            </StackPanel>
+
+            <Rectangle HorizontalAlignment="Stretch" Fill="White" Height="1" Margin="0,10,0,18"/>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                     <Button x:Name="btnOk" Content="OK" HorizontalAlignment="Left" VerticalAlignment="Top" Width="70" 
                            Padding="0,3" Margin="0,0,16,0"/>
                     <Button x:Name="btnCancel" Content="Cancel" HorizontalAlignment="Left" VerticalAlignment="Top" 
