@@ -61,6 +61,10 @@ Public Class dlgEditReagent
 
             PopulateData()
             MatDbEntry = GetMatchingDbReagent()
+            If MatDbEntry Is Nothing Then
+                'rare case where material was not stored in matDB for some reason
+                MatDbEntry = ProtocolItemBase.CreateNewMatDBEntry(MaterialType.Reagent)
+            End If
 
         End If
 

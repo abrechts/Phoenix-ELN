@@ -85,13 +85,18 @@ Public Class MatDocControl
 
     Private Sub cboMat_PreviewMouseDown(sender As Object, e As MouseButtonEventArgs) Handles cboDocs.PreviewMouseDown
 
-        Dim comboBox As ComboBox = TryCast(sender, ComboBox)
-        Dim mousePosition As Point = e.GetPosition(comboBox)
+        'If only one doc present, opens it on mouse click on cboDocs directly and without dropdown.
+
+        If cboDocs.IsDropDownOpen Then
+            Exit Sub
+        End If
+
+        Dim mousePosition As Point = e.GetPosition(cboDocs)
 
         ' Assuming the dropdown arrow is on the right side and has a fixed width
         Dim arrowWidth As Double = SystemParameters.VerticalScrollBarWidth
 
-        If mousePosition.X < comboBox.ActualWidth - arrowWidth Then
+        If mousePosition.X < cboDocs.ActualWidth - arrowWidth Then
             ' Mouse click is outside the dropdown arrow area
             If Documents.Count = 1 Then
                 OpenDocument(CType(cboDocs.SelectedItem, tblDbMaterialFiles))
@@ -339,4 +344,5 @@ Friend Class FileNameConverter
     Public Function ConvertBack(value As Object, targetType As Type, parameter As Object, culture As CultureInfo) As Object Implements IValueConverter.ConvertBack
         Throw New NotImplementedException()
     End Function
+
 End Class

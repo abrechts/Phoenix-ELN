@@ -57,6 +57,10 @@ Public Class dlgEditAuxiliary
 
             PopulateData()
             MatDbEntry = GetMatchingDbAuxiliary()
+            If MatDbEntry Is Nothing Then
+                'rare case where material was not stored in matDB for some reason
+                MatDbEntry = ProtocolItemBase.CreateNewMatDBEntry(MaterialType.Auxiliary)
+            End If
 
         End If
 

@@ -11,23 +11,25 @@
 
         <local:BytesToBitmapImgConverter x:Key="BytesToBitmapConv"/>
         <local:FileNameConverter x:Key="FileNameConv"/>
-
-        <Style x:Key="lbItemStyle" TargetType="ComboBoxItem">
+ 
+        <Style x:Key="cboItemStyle" TargetType="ComboBoxItem">
             <Setter Property="Template">
                 <Setter.Value>
                     
                     <ControlTemplate TargetType="ComboBoxItem">
 
-                        <Border Margin="2,1" Padding="3,0"
+                        <Border Margin="2,1" Padding="3,0,0,1"
+                                
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
                             Background="{TemplateBinding Background}">
+                            
                             <Grid>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="auto"/>
                                     <ColumnDefinition Width="16"/>
                                 </Grid.ColumnDefinitions>
-                                
+
                                 <ContentPresenter Grid.Column="0" Margin="0,0,0,0"/>
                                 
                                 <Button Grid.Column="1" Background="transparent" Padding="0" BorderThickness="0" FontSize="10"  
@@ -35,6 +37,7 @@
                                    ToolTip="Remove this document" ToolTipService.InitialShowDelay="250" />
                                 
                             </Grid>
+                            
                         </Border>
 
                         <ControlTemplate.Triggers>
@@ -59,12 +62,23 @@
         </Style>
 
         <DataTemplate x:Key="matDocTemplate">
-            
-            <StackPanel Orientation="Horizontal" PreviewMouseDown="matDocItem_PreviewMouseDown">
+
+            <StackPanel Orientation="Horizontal" PreviewMouseDown="matDocItem_PreviewMouseDown" >
+
                 <Image Width="16" Height="16" ToolTipService.InitialShowDelay="350" Margin="-4,0,3,0"
-                       Source="{Binding IconImage, Converter={StaticResource BytesToBitmapConv}}"/>
-                <TextBlock Text="{Binding FileName,Converter={StaticResource FileNameConv}}" TextTrimming="CharacterEllipsis" 
-                       Margin="0,0,6,0" MaxWidth="190"/>
+                   Source="{Binding IconImage, Converter={StaticResource BytesToBitmapConv}}"/>
+
+                <TextBlock Text="{Binding FileName,Converter={StaticResource FileNameConv}}" 
+                   TextTrimming="CharacterEllipsis" Margin="0,0,6,0" MaxWidth="190" >
+                    <!--<TextBlock.ToolTip>
+                        <ToolTip>
+                            <ToolTip.Content>
+                                <TextBlock Text="{Binding FileName,Converter={StaticResource FileNameConv}}" Foreground="white"/>
+                            </ToolTip.Content>
+                        </ToolTip>
+                    </TextBlock.ToolTip>-->
+                </TextBlock>
+
             </StackPanel>
             
         </DataTemplate>
@@ -79,9 +93,9 @@
             <ColumnDefinition Width="20"/>
         </Grid.ColumnDefinitions>
 
-        <local:ComboPlus x:Name="cboDocs" Grid.Column="0" MinWidth="140" ItemContainerStyle="{StaticResource lbItemStyle}"  
+        <local:ComboPlus x:Name="cboDocs" Grid.Column="0" MinWidth="140" ItemContainerStyle="{StaticResource cboItemStyle}"  
            CboBackground="white" Margin="0,0,2,0" Visibility="Collapsed" d:Visibility="visible" 
-           ItemTemplate="{StaticResource matDocTemplate}" HorizontalAlignment="Left" Padding="8,4,0,3" />
+           ItemTemplate="{StaticResource matDocTemplate}" Padding="8,4,0,3" />
 
         <Grid x:Name="btnAdd" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,4,0"
            ToolTip="Add a material safety document (PDF)">

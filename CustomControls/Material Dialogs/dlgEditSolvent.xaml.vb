@@ -57,6 +57,10 @@ Public Class dlgEditSolvent
 
             PopulateData()
             MatDbEntry = GetMatchingDbSolvent()
+            If MatDbEntry Is Nothing Then
+                'rare case where material was not stored in matDB for some reason
+                MatDbEntry = ProtocolItemBase.CreateNewMatDBEntry(MaterialType.Solvent)
+            End If
 
         End If
 
