@@ -11,7 +11,8 @@
 
         <local:BytesToBitmapImgConverter x:Key="BytesToBitmapConv"/>
         <local:FileNameConverter x:Key="FileNameConv"/>
- 
+        <local:ToolTipVisibilityConverter x:Key="ToolTipVisConv"/>
+
         <Style x:Key="cboItemStyle" TargetType="ComboBoxItem">
             <Setter Property="Template">
                 <Setter.Value>
@@ -26,12 +27,12 @@
                             
                             <Grid>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="auto"/>
+                                    <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="16"/>
                                 </Grid.ColumnDefinitions>
 
                                 <ContentPresenter Grid.Column="0" Margin="0,0,0,0"/>
-                                
+
                                 <Button Grid.Column="1" Background="transparent" Padding="0" BorderThickness="0" FontSize="10"  
                                    PreviewMouseUp="cboItem_DelClick" Content="X" Foreground="#FF2D2C2C" Margin="0,0,-2,0"
                                    ToolTip="Remove this document" ToolTipService.InitialShowDelay="250" />
@@ -68,15 +69,24 @@
                 <Image Width="16" Height="16" ToolTipService.InitialShowDelay="350" Margin="-4,0,3,0"
                    Source="{Binding IconImage, Converter={StaticResource BytesToBitmapConv}}"/>
 
-                <TextBlock Text="{Binding FileName,Converter={StaticResource FileNameConv}}" 
-                   TextTrimming="CharacterEllipsis" Margin="0,0,6,0" MaxWidth="190" >
-                    <!--<TextBlock.ToolTip>
-                        <ToolTip>
-                            <ToolTip.Content>
-                                <TextBlock Text="{Binding FileName,Converter={StaticResource FileNameConv}}" Foreground="white"/>
-                            </ToolTip.Content>
+                <TextBlock Text="{Binding FileName,Converter={StaticResource FileNameConv}}" ToolTipService.InitialShowDelay="750"
+                   TextTrimming="CharacterEllipsis" Margin="0,0,6,0" MaxWidth="190">
+
+                    <TextBlock.ToolTip>
+                        <ToolTip            
+                          DataContext="{Binding Path=PlacementTarget, RelativeSource={x:Static RelativeSource.Self}}">
+                            <ToolTip.Visibility>
+                                <MultiBinding Converter="{StaticResource ToolTipVisConv}">
+                                    <Binding/>
+                                    <Binding Path="ActualWidth"/>
+                                </MultiBinding>
+                            </ToolTip.Visibility>
+
+                            <TextBlock Text="{Binding Text}" Foreground="white"/>
+                            
                         </ToolTip>
-                    </TextBlock.ToolTip>-->
+                    </TextBlock.ToolTip>
+                    
                 </TextBlock>
 
             </StackPanel>

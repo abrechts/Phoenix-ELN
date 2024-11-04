@@ -279,7 +279,6 @@ Public Class MatDocControl
                 .IconImage = FileContent.GetFileIconBytes(filePath)
             End With
 
-            ' currDbMat.tblDbMaterialFiles.Add(newFileEntry)
             Documents.Add(newFileEntry)
 
             Return EmbeddingResult.Succeeded
@@ -346,3 +345,31 @@ Friend Class FileNameConverter
     End Function
 
 End Class
+
+
+Friend Class ToolTipVisibilityConverter
+
+    Implements IMultiValueConverter
+
+    Public Function Convert(values() As Object, targetType As Type, parameter As Object, culture As CultureInfo) As Object Implements IMultiValueConverter.Convert
+
+        If values(0) Is DependencyProperty.UnsetValue OrElse values(0) Is Nothing Then
+            Return Nothing
+        End If
+
+        Dim txtBlock As TextBlock = values(0)
+        Dim parentCboItem = WPFToolbox.FindVisualParent(Of ComboBoxItem)(txtBlock)
+
+        Dim textBlkWidth As Double = values(1)
+        Return If(textBlkWidth < parentCboItem.ActualWidth - 47, Visibility.Collapsed, Visibility.Visible)
+
+    End Function
+
+    Public Function ConvertBack(value As Object, targetTypes() As Type, parameter As Object, culture As CultureInfo) As Object() Implements IMultiValueConverter.ConvertBack
+        Throw New NotImplementedException()
+    End Function
+
+End Class
+
+
+
