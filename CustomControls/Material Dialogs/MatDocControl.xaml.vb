@@ -19,6 +19,21 @@ Public Class MatDocControl
     End Sub
 
 
+    Private Sub Me_Loaded() Handles Me.Loaded
+
+        'workaround for rendering initially selected item to allow conditional tooltip display of full name
+
+        WPFToolbox.WaitForPriority(Threading.DispatcherPriority.ContextIdle)
+        With cboDocs
+            .IsDropDownOpen = True
+            .IsDropDownOpen = False
+        End With
+
+        cboDocs_SelectionChanged()
+
+    End Sub
+
+
     ''' <summary>
     ''' Sets or gets the maximum allowed individual document size in MB.
     ''' </summary>
@@ -31,6 +46,20 @@ Public Class MatDocControl
     ''' </summary>
     '''
     Public Shared Property MaxFileCount As Integer = 5
+
+
+    ''' <summary>
+    ''' Sets or gets the maximum width of the documents ComboBox (default=160)
+    ''' </summary>
+    '''
+    Public Property MaxComboBoxWidth As Double
+        Get
+            Return cboDocs.MaxWidth
+        End Get
+        Set(value As Double)
+            cboDocs.MaxWidth = value
+        End Set
+    End Property
 
 
     ''' <summary>
@@ -51,13 +80,12 @@ Public Class MatDocControl
     Private _documents As New ObservableCollection(Of tblDbMaterialFiles)
 
 
-
     Private Sub SetAppearance()
 
         If Documents.Count > 0 Then
             With cboDocs
-                .SelectedIndex = 0
                 .Visibility = Visibility.Visible
+                .SelectedIndex = 0
             End With
             btnAdd.IsEnabled = True
             btnAdd.Opacity = 1
@@ -73,7 +101,31 @@ Public Class MatDocControl
     End Sub
 
 
-    Private Sub matDocItem_PreviewMouseDown(sender As Object, e As RoutedEventArgs) 'XAML defined event
+    ''' <summary>
+    ''' Displays fileName ToolTip on ComboBox if its SelectedItem is truncated.
+    ''' </summary>
+    ''' 
+    Private Sub cboDocs_SelectionChanged() Handles cboDocs.SelectionChanged
+
+        Dim cboItem As ComboBoxItem = cboDocs.ItemContainerGenerator.ContainerFromItem(cboDocs.SelectedItem)
+        If cboItem IsNot Nothing Then
+
+            Dim cboItemDesiredWidth = cboItem.DesiredSize.Width
+            Dim cboActualWidth = cboDocs.ActualWidth
+
+            If cboActualWidth < cboItemDesiredWidth Then
+                Dim fileName = CType(cboDocs.SelectedItem, tblDbMaterialFiles).FileName
+                cboDocs.ToolTip = Path.GetFileNameWithoutExtension(fileName)
+            Else
+                cboDocs.ToolTip = Nothing
+            End If
+
+        End If
+
+    End Sub
+
+
+    Private Sub matDocItem_PreviewMouseLeftButtonUp(sender As Object, e As RoutedEventArgs) 'XAML defined event
 
         Dim currDocEntry = CType(sender.DataContext, tblDbMaterialFiles)
         OpenDocument(currDocEntry)
@@ -347,29 +399,10 @@ Friend Class FileNameConverter
 End Class
 
 
-Friend Class ToolTipVisibilityConverter
 
-    Implements IMultiValueConverter
 
-    Public Function Convert(values() As Object, targetType As Type, parameter As Object, culture As CultureInfo) As Object Implements IMultiValueConverter.Convert
 
-        If values(0) Is DependencyProperty.UnsetValue OrElse values(0) Is Nothing Then
-            Return Nothing
-        End If
 
-        Dim txtBlock As TextBlock = values(0)
-        Dim parentCboItem = WPFToolbox.FindVisualParent(Of ComboBoxItem)(txtBlock)
-
-        Dim textBlkWidth As Double = values(1)
-        Return If(textBlkWidth < parentCboItem.ActualWidth - 47, Visibility.Collapsed, Visibility.Visible)
-
-    End Function
-
-    Public Function ConvertBack(value As Object, targetTypes() As Type, parameter As Object, culture As CultureInfo) As Object() Implements IMultiValueConverter.ConvertBack
-        Throw New NotImplementedException()
-    End Function
-
-End Class
 
 
 
