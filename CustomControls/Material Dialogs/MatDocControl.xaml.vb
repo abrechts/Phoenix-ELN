@@ -154,8 +154,6 @@ Public Class MatDocControl
         Dim currDocEntry = CType(sender.DataContext, tblDbMaterialFiles)
         OpenDocument(currDocEntry)
 
-        e.Handled = True
-
     End Sub
 
 
