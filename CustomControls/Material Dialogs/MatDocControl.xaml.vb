@@ -21,14 +21,7 @@ Public Class MatDocControl
 
     Private Sub Me_Loaded() Handles Me.Loaded
 
-        'workaround for rendering initially selected item to allow conditional tooltip display of full name
-
-        WPFToolbox.WaitForPriority(Threading.DispatcherPriority.ContextIdle)
-        With cboDocs
-            .IsDropDownOpen = True
-            .IsDropDownOpen = False
-        End With
-
+        UpdateDropDownLayout()
         cboDocs_SelectionChanged()
 
     End Sub
@@ -77,7 +70,22 @@ Public Class MatDocControl
         End Set
     End Property
 
-    Private _documents As New ObservableCollection(Of tblDbMaterialFiles)
+    Private _documents As ObservableCollection(Of tblDbMaterialFiles)
+
+
+    ''' <summary>
+    ''' Gets the index of the currently selected material safety doc. Returns nothing if no doc is present.
+    ''' </summary>
+    ''' 
+    Public ReadOnly Property SelectedDocIndex As Integer?
+        Get
+            If cboDocs.SelectedIndex >= 0 Then
+                Return cboDocs.SelectedIndex
+            Else
+                Return Nothing
+            End If
+        End Get
+    End Property
 
 
     Private Sub SetAppearance()
@@ -85,7 +93,7 @@ Public Class MatDocControl
         If Documents.Count > 0 Then
             With cboDocs
                 .Visibility = Visibility.Visible
-                .SelectedIndex = 0
+                .SelectedIndex = If(Documents.First.DbMaterial.CurrDocIndex, 0)
             End With
             btnAdd.IsEnabled = True
             btnAdd.Opacity = 1
@@ -97,6 +105,22 @@ Public Class MatDocControl
         Else
             cboDocs.Visibility = Visibility.Collapsed
         End If
+
+    End Sub
+
+
+    ''' <summary>
+    ''' Workaround to allow tooltip for truncated text in ComboBoxItem in so far unrendered ComboBox 
+    '''' dropdown. 
+    ''' </summary>
+    ''' 
+    Private Sub UpdateDropDownLayout()
+
+        WPFToolbox.WaitForPriority(Threading.DispatcherPriority.ContextIdle)
+        With cboDocs
+            .IsDropDownOpen = True
+            .IsDropDownOpen = False
+        End With
 
     End Sub
 
@@ -186,17 +210,20 @@ Public Class MatDocControl
 
                 Select Case res
                     Case EmbeddingResult.SizeExceeded
-                        MsgBox("File too large (" + MaxFileMB.ToString + " MB max)!", MsgBoxStyle.OkOnly + MsgBoxStyle.Exclamation, "File Size Limitation")
+                        MsgBox("File too large (" + MaxFileMB.ToString + " MB max)!", MsgBoxStyle.OkOnly + MsgBoxStyle.Exclamation,
+                               "File Size Limitation")
                         Exit Sub
                     Case EmbeddingResult.FileNotFound
                         'this return value is a synonym for duplicate entry here ...
                         MsgBox("Sorry, a document with the same name " + vbCrLf +
-                          "is already present for this material!", MsgBoxStyle.OkOnly + MsgBoxStyle.Exclamation, "Duplicate Document")
+                                "is already present for this material!", MsgBoxStyle.OkOnly + MsgBoxStyle.Exclamation,
+                                "Duplicate Document")
                         Exit Sub
                     Case Else
                         'continue
                 End Select
 
+                UpdateDropDownLayout()
                 cboDocs.SelectedIndex = Documents.Count - 1
 
                 Dim docCount = Documents.Count ' matDbEntry.tblDbMaterialFiles.Count

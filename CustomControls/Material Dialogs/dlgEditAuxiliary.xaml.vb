@@ -279,6 +279,8 @@ Public Class dlgEditAuxiliary
 
         End With
 
+        MatDbEntry.CurrDocIndex = matDbDocsCtrl.SelectedDocIndex
+
         RecalculateAuxiliary(AuxiliaryEntry)
 
     End Sub

@@ -256,6 +256,8 @@ Public Class dlgEditSolvent
 
         End With
 
+        MatDbEntry.CurrDocIndex = matDbDocsCtrl.SelectedDocIndex
+
         RecalculateSolvent(SolventEntry)
 
     End Sub

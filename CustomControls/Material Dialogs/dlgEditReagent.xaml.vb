@@ -394,6 +394,8 @@ Public Class dlgEditReagent
 
         End With
 
+        MatDbEntry.CurrDocIndex = matDbDocsCtrl.SelectedDocIndex
+
         RecalculateReagent(ReagentEntry)
 
     End Sub
