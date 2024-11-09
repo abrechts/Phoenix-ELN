@@ -135,9 +135,9 @@ Public Class MatDocControl
         If cboItem IsNot Nothing Then
 
             Dim cboItemDesiredWidth = cboItem.DesiredSize.Width
-            Dim cboActualWidth = cboDocs.ActualWidth
+            Dim cboMaxWidth = cboDocs.MaxWidth
 
-            If cboActualWidth < cboItemDesiredWidth Then
+            If cboMaxWidth < cboItemDesiredWidth Then
                 Dim fileName = CType(cboDocs.SelectedItem, tblDbMaterialFiles).FileName
                 cboDocs.ToolTip = Path.GetFileNameWithoutExtension(fileName)
             Else
