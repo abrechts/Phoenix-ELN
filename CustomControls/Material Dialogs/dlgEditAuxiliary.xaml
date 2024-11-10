@@ -113,14 +113,14 @@
      
             </StackPanel>
 
-            <Rectangle HorizontalAlignment="Stretch" Fill="White" Height="1" Margin="0,4,0,10"/>
+            <Rectangle HorizontalAlignment="Stretch" Fill="White" Height="1" Margin="0,4,0,8"/>
 
             <StackPanel Orientation="Horizontal" Margin="0,0,0,0" HorizontalAlignment="Left">
                 <TextBlock Text="Safety Docs:" VerticalAlignment="Center" Margin="0,0,6,2"/>
-                <custom:MatDocControl x:Name="matDbDocsCtrl" MaxComboBoxWidth="240" MinHeight="24" FontSize="11.5" />
+                <custom:MatDocControl x:Name="matDbDocsCtrl" MaxComboBoxWidth="240" FontSize="11.5" />
             </StackPanel>
 
-            <Rectangle HorizontalAlignment="Stretch" Fill="White" Height="1" Margin="0,10,0,18"/>
+            <Rectangle HorizontalAlignment="Stretch" Fill="White" Height="1" Margin="0,8,0,18"/>
 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                 <Button x:Name="btnOk" Content="OK" HorizontalAlignment="Left" VerticalAlignment="Top" Width="70" 

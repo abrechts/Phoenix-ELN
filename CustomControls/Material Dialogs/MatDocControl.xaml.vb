@@ -38,7 +38,7 @@ Public Class MatDocControl
     ''' Sets or gets the maximum number of documents per db material.
     ''' </summary>
     '''
-    Public Shared Property MaxFileCount As Integer = 5
+    Public Shared Property MaxFileCount As Integer = 3
 
 
     ''' <summary>
