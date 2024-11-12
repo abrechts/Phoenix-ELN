@@ -193,6 +193,7 @@ public partial class ElnDataContext : DbContext
             entity.HasIndex(e => e.MatName, "idx_MatName");
 
             entity.Property(e => e.GUID).HasColumnType("VARCHAR(36)");
+            entity.Property(e => e.CurrDocIndex).HasColumnType("SMALLINT");
             entity.Property(e => e.DatabaseID).HasColumnType("VARCHAR(36)");
             entity.Property(e => e.Density).HasDefaultValueSql("NULL");
             entity.Property(e => e.InChIKey).HasColumnType("VARCHAR(30)");

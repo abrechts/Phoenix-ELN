@@ -6,6 +6,8 @@ Imports ElnCoreModel
 Imports Microsoft.EntityFrameworkCore
 Imports System.Windows
 Imports Key = System.Windows.Input.Key
+Imports System.Collections.ObjectModel
+Imports System.Windows.Controls
 
 Public Class dlgEditReagent
 
@@ -25,6 +27,14 @@ Public Class dlgEditReagent
 
 
     ''' <summary>
+    ''' Sets or gets the materials DB entry corresponding to the current ReagentEntry. For new 
+    ''' or unknown materials, this entry contains db infrastructure without mat properties.
+    ''' </summary>
+    '''
+    Private Property MatDbEntry As tblMaterials
+
+
+    ''' <summary>
     ''' Sets or gets if a new material is being added.
     ''' </summary>
     ''' 
@@ -38,7 +48,10 @@ Public Class dlgEditReagent
         cboSearch.QueryItemsSource = (From mat In ProtocolItemBase.DbInfo.tblMaterials
                                       Where mat.MatType = MaterialType.Reagent
                                       Order By mat.MatName.ToLower).ToList
+
         If IsAddingNew Then
+
+            MatDbEntry = ProtocolItemBase.CreateNewMatDBEntry(MaterialType.Reagent)
 
             cboMwMolarity.SelectedIndex = 0
             cboMatUnit.Text = My.Settings.LastReagentUnit
@@ -47,9 +60,16 @@ Public Class dlgEditReagent
         Else
 
             PopulateData()
-            SetValidationInfo()
+            MatDbEntry = GetMatchingDbReagent()
+            If MatDbEntry Is Nothing Then
+                'rare case where material was not stored in matDB for some reason
+                MatDbEntry = ProtocolItemBase.CreateNewMatDBEntry(MaterialType.Reagent)
+            End If
 
         End If
+
+        SetValidationLockState(MatDbEntry)     'handles the 'validated' label visibility
+        matDbDocsCtrl.Documents = New ObservableCollection(Of tblDbMaterialFiles)(MatDbEntry.tblDbMaterialFiles)
 
         numMatAmount.Focus()
         numMatAmount.Select(255, 0)
@@ -58,30 +78,22 @@ Public Class dlgEditReagent
 
 
     ''' <summary>
-    ''' Determines if the current material corresponds to a validated material in the materials list 
-    ''' and updates the dialog UI accordingly.
+    ''' Gets the materials database entry matching the name of the current reagent. Returns nothing if not present.
     ''' </summary>
     ''' 
-    Private Sub SetValidationInfo()
+    Private Function GetMatchingDbReagent() As tblMaterials
 
-        With ReagentEntry
+        Dim reagentHit = (From mat In ProtocolItemBase.DbInfo.tblMaterials Where mat.MatType = MaterialType.Reagent _
+                          AndAlso mat.MatName.Equals(ReagentEntry.Name, StringComparison.CurrentCultureIgnoreCase)).FirstOrDefault
 
-            Dim matHit = (From mat In ProtocolItemBase.DbInfo.tblMaterials Where mat.MatType = MaterialType.Reagent _
-                           AndAlso mat.MatName.Equals(.Name, StringComparison.CurrentCultureIgnoreCase) _
-                           AndAlso mat.Molweight.Equals(.MolecularWeight) _
-                           AndAlso mat.Molarity.Equals(.Molarity) _
-                           AndAlso mat.Density.Equals(.Density)).FirstOrDefault
+        Return reagentHit
 
-            SetValidationLockState(matHit)
-
-        End With
-
-    End Sub
+    End Function
 
 
     Private Sub SetValidationLockState(matHit As tblMaterials)
 
-        If matHit Is Nothing OrElse matHit.IsValidated = MaterialValidation.None Then
+        If matHit Is Nothing OrElse matHit.IsValidated Is Nothing OrElse matHit.IsValidated = MaterialValidation.None Then
 
             pnlValidated.Visibility = Visibility.Hidden
             numMwMolar.IsEnabled = True
@@ -158,9 +170,15 @@ Public Class dlgEditReagent
 
 
     Private Sub cboSearch_MaterialSelected(sender As Object, selItem As tblMaterials) Handles cboSearch.MaterialSelected
+
+        ClearMatProperties()
+
         If selItem IsNot Nothing Then
 
             PopulateMatProperties(selItem)
+
+            MatDbEntry = selItem
+            matDbDocsCtrl.Documents = New ObservableCollection(Of tblDbMaterialFiles)(MatDbEntry.tblDbMaterialFiles)
 
             If Keyboard.Modifiers And ModifierKeys.Control = ModifierKeys.Control Then
                 btnOK_Click()  'shortcut for immediately committing database entry and closing dialog
@@ -168,7 +186,8 @@ Public Class dlgEditReagent
 
         Else
 
-            ClearMatProperties()
+            MatDbEntry = ProtocolItemBase.CreateNewMatDBEntry(MaterialType.Reagent)
+            matDbDocsCtrl.Documents = New ObservableCollection(Of tblDbMaterialFiles)(MatDbEntry.tblDbMaterialFiles)
 
         End If
 
@@ -202,7 +221,6 @@ Public Class dlgEditReagent
         If materialEntry IsNot Nothing Then
 
             With materialEntry
-
                 cboSearch.Text = .MatName
                 txtSupplier.Text = .MatSource
                 numMwMolar.Value = If(.Molarity Is Nothing, Format(.Molweight, "0.00"), Format(.Molarity, "0.00"))
@@ -210,7 +228,6 @@ Public Class dlgEditReagent
                 numDensity.Text = If(Format(.Density, "0.00"), "")
                 txtSupplier.Text = .MatSource
                 numPurity.Text = If(Format(.Purity, "0.0"), "")
-
             End With
 
         End If
@@ -228,6 +245,9 @@ Public Class dlgEditReagent
         numDensity.Text = Nothing
         txtSupplier.Text = ""
         numPurity.Text = ""
+        numResinLoad.Text = ""
+
+        matDbDocsCtrl.Documents.Clear()
 
         SetValidationLockState(Nothing)
 
@@ -374,6 +394,8 @@ Public Class dlgEditReagent
 
         End With
 
+        MatDbEntry.CurrDocIndex = matDbDocsCtrl.SelectedDocIndex
+
         RecalculateReagent(ReagentEntry)
 
     End Sub
@@ -387,8 +409,8 @@ Public Class dlgEditReagent
 
             'add/update materials database
             With ReagentEntry
-                ProtocolItemBase.UpdateMaterialsDB(MaterialType.Reagent, .Name, .Source, .Density, .Purity,
-                  .MolecularWeight, .Molarity)
+                ProtocolItemBase.UpdateMaterialsDB(MatDbEntry, matDbDocsCtrl.Documents.ToList, MaterialType.Reagent, .Name,
+                   .Source, .Density, .Purity, .MolecularWeight, .Molarity)
             End With
 
             DialogResult = True

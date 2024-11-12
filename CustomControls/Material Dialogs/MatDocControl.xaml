@@ -1,0 +1,109 @@
+﻿<UserControl x:Class="MatDocControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:CustomControls"
+             xmlns:data="clr-namespace:ElnCoreModel;assembly=ElnCoreModel"    
+             mc:Ignorable="d" d:DesignWidth="160" d:Height="22">
+    
+    <UserControl.Resources>
+
+        <local:BytesToBitmapImgConverter x:Key="BytesToBitmapConv"/>
+        <local:FileNameConverter x:Key="FileNameConv"/>
+    
+        <Style x:Key="cboItemStyle" TargetType="ComboBoxItem">
+            <Setter Property="Template">
+                <Setter.Value>
+                    
+                    <ControlTemplate TargetType="ComboBoxItem" >
+
+                        <Border Margin="2,1" Padding="3,0,0,1"
+                                
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            Background="{TemplateBinding Background}">
+
+                            <Grid >
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="16"/>
+                                </Grid.ColumnDefinitions>
+
+                                <ContentPresenter Grid.Column="0"/>
+
+                                <Button Grid.Column="1" Background="transparent" Padding="0" BorderThickness="0" FontSize="10"  
+                                   PreviewMouseUp="cboItem_DelClick" Content="X" Foreground="#FF2D2C2C" Margin="0,0,2,0"
+                                   ToolTip="Remove this document" ToolTipService.InitialShowDelay="250" />
+                                
+                            </Grid>
+
+                        </Border>
+
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#FFE4F6FF" />
+                                <Setter Property="BorderBrush" Value="#FF9FDEFF"/>
+                            </Trigger>
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="IsSelected" Value="true" />
+                                    <Condition Property="IsMouseOver" Value="false" />
+                                    <Condition Property="Selector.IsSelectionActive" Value="false" />
+                                </MultiTrigger.Conditions>
+                                <Setter Property="Background" Value="#FFB7E6FF" />
+                                <Setter Property="BorderBrush" Value="#FF96DBFF"/>
+                            </MultiTrigger>
+                        </ControlTemplate.Triggers>
+
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <DataTemplate x:Key="matDocTemplate">
+
+            <DockPanel PreviewMouseLeftButtonUp="matDocItem_PreviewMouseLeftButtonUp" >
+
+                <Image Width="16" Height="16" ToolTipService.InitialShowDelay="350" Margin="-4,0,3,0"
+                   Source="{Binding IconImage, Converter={StaticResource BytesToBitmapConv}}"/>
+
+                <TextBlock Text="{Binding FileName,Converter={StaticResource FileNameConv}}" ToolTipService.InitialShowDelay="750"
+                   TextTrimming="CharacterEllipsis" Margin="0,0,6,0" MaxWidth="350"/>
+
+            </DockPanel>
+            
+        </DataTemplate>
+        
+    </UserControl.Resources>
+    
+    
+    <Grid>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="20"/>
+        </Grid.ColumnDefinitions>
+
+        <local:ComboPlus x:Name="cboDocs" Grid.Column="0" d:MinWidth="120" ItemContainerStyle="{StaticResource cboItemStyle}"  
+           CboBackground="white" Margin="0,0,2,0" Visibility="Collapsed" d:Visibility="visible" IsReadOnly="true"
+           ItemTemplate="{StaticResource matDocTemplate}" Padding="8,4,0,3" ToolTipService.InitialShowDelay="750"/>
+
+        <Grid x:Name="btnAdd" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,4,0"
+           ToolTip="Add a material safety document (PDF)">
+            <Grid.Style>
+                <Style TargetType="Grid">
+                    <Setter Property="Background" Value="DimGray" />
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="#FF0886A7" />
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Style>
+            <ContentControl Content="{StaticResource icoAddDarkBG}" Height="16" Margin="1,1,0,1"/>
+        </Grid>
+
+    </Grid>
+    
+</UserControl>

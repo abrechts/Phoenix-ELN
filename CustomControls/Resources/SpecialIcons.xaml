@@ -978,6 +978,31 @@
         </Rectangle>
     </Viewbox>
 
+    <Viewbox x:Key="icoAddDarkBG" x:Shared="false">
+        <Rectangle Width="16 " Height="16">
+            <Rectangle.Resources>
+                <SolidColorBrush x:Key="canvas" Opacity="0" />
+                <SolidColorBrush x:Key="light-defaultgrey" Color="white" Opacity="1" />
+                <SolidColorBrush x:Key="light-green" Color="white" Opacity="1" />
+            </Rectangle.Resources>
+            <Rectangle.Fill>
+                <DrawingBrush Stretch="None">
+                    <DrawingBrush.Drawing>
+                        <DrawingGroup>
+                            <DrawingGroup>
+                                <GeometryDrawing Brush="{DynamicResource canvas}" Geometry="F1M16,16H0V0H16Z" />
+                            </DrawingGroup>
+                            <DrawingGroup >
+                                <GeometryDrawing Brush="{DynamicResource light-defaultgrey}" Geometry="F1M7.5,15A7.5,7.5,0,1,1,15,7.5,7.508,7.508,0,0,1,7.5,15Zm0-14A6.5,6.5,0,1,0,14,7.5,6.508,6.508,0,0,0,7.5,1Z" />
+                                <GeometryDrawing Brush="{DynamicResource light-green}" Geometry="F1M11,8H8v3H7V8H4V7H7V4H8V7h3Z" />
+                            </DrawingGroup>
+                        </DrawingGroup>
+                    </DrawingBrush.Drawing>
+                </DrawingBrush>
+            </Rectangle.Fill>
+        </Rectangle>
+    </Viewbox>
+
     <Viewbox x:Key="icoDatabase" x:Shared="false">
         <Rectangle Width="16 " Height="16">
             <Rectangle.Resources>

@@ -1,5 +1,6 @@
-﻿Imports MySqlConnector
-Imports System.Security
+﻿
+Imports MySqlConnector
+
 
 Public Class DbUpgradeServer
 
@@ -24,7 +25,7 @@ Public Class DbUpgradeServer
                 DbAddColumn("tblExperiments", "RxnFingerprint", "BLOB", "RxnIndigoObj", serverConn)
             End If
 
-            ' --> introduced in version 2.3.0 -- sqlite!
+            ' --> introduced in version 2.3.0
 
             Dim tblStr =
                "CREATE TABLE IF NOT EXISTS tblDbMaterialFiles (
@@ -37,6 +38,12 @@ Public Class DbUpgradeServer
                 SyncState INTEGER DEFAULT 0);"
 
             DbExecuteCmd(tblStr, serverConn)
+
+            ' --> introduced in version 2.4.0 
+
+            If Not DbColumnExists("tblMaterials", "CurrDocIndex", serverConn) Then
+                DbAddColumn("tblMaterials", "CurrDocIndex", "SMALLINT", "IsValidated", serverConn)
+            End If
 
         End Using
 
@@ -116,14 +123,14 @@ Public Class DbUpgradeServer
 
         Dim sqlCommand = "Select COLUMN_TYPE From information_schema.COLUMNS Where TABLE_Name = '" + tableName + "' And COLUMN_NAME = '" + colName + "'"
         Try
-            Using command As New MySqlCommand(sqlCommand, serverConn)
-                serverConn.Open()
-                Dim res = command.ExecuteScalar()
-                serverConn.Close()
-                Return res
-            End Using
-        Catch ex As Exception
-            'this command will cause an exception when executed, if table and/or column don't exist
+Using command As New MySqlCommand(sqlCommand, serverConn)
+serverConn.Open()
+Dim res = command.ExecuteScalar()
+serverConn.Close()
+Return res
+End Using
+Catch ex As Exception
+'this command will cause an exception when executed, if table and/or column don't exist
             serverConn.Close()
             Return ""
         End Try
