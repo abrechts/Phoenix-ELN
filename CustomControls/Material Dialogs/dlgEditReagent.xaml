@@ -148,7 +148,7 @@
 
             <Rectangle HorizontalAlignment="Stretch" Fill="White" Height="1" Margin="0,2,0,8"/>
 
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" MinHeight="24">
 
                 <TextBlock Text="Safety Docs:" VerticalAlignment="Center" Margin="0,0,6,2"/>
                 <custom:MatDocControl x:Name="matDbDocsCtrl"  MaxComboBoxWidth="270" FontSize="11.5"/>
