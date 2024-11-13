@@ -37,7 +37,10 @@ Public Class dlgServerConnection
 
         _LocalContext = localContext
 
-        btnDisconnect.IsEnabled = (My.Settings.IsServerSpecified AndAlso currServerContext IsNot Nothing)
+        btnDisconnect.IsEnabled = currServerContext IsNot Nothing OrElse
+                                  (currServerContext Is Nothing AndAlso My.Settings.IsServerSpecified AndAlso
+                                   Not My.Settings.IsServerOffByUser)
+
         If Not btnDisconnect.IsEnabled Then
             btnDisconnect.Opacity = 0.7
         End If
