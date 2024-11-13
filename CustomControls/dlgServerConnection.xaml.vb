@@ -29,13 +29,15 @@ Public Class dlgServerConnection
             txtServerPath.Text = .ServerName
             txtUserID.Text = .ServerDbUserName
             txtCustomPort.Text = .ServerPort.ToString
-            '  txtPassword.Password = .ServerDbPassword
+            txtPassword.Password = .ServerDbPassword
             If .ServerPort <> 3306 Then
                 rdoCustomPort.IsChecked = True
             End If
         End With
 
         _LocalContext = localContext
+
+        btnConnect.IsEnabled = currServerContext Is Nothing
 
         btnDisconnect.IsEnabled = currServerContext IsNot Nothing OrElse
                                   (currServerContext Is Nothing AndAlso My.Settings.IsServerSpecified AndAlso
@@ -123,7 +125,7 @@ Public Class dlgServerConnection
     End Sub
 
 
-    Private Sub btnOK_Click() Handles btnOK.Click
+    Private Sub btnConnect_Click() Handles btnConnect.Click
 
         'in case of replacing an already established server sync:
         If ServerSync.IsSynchronizing Then
