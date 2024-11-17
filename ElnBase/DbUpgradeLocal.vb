@@ -47,6 +47,13 @@ Public Class DbUpgradeLocal
             DbExecuteCmd("CREATE INDEX IF NOT EXISTS idx_DatabaseInfoID ON sync_Tombstone(DatabaseInfoID);", sqliteConn)
             DbExecuteCmd("CREATE UNIQUE INDEX IF NOT EXISTS unq_tblSeparators ON tblSeparators(ProtocolItemID);", sqliteConn)
 
+            ' --> introduced in version 2.4.0
+
+            If Not DbColumnExists("tblMaterials", "CurrDocIndex", sqliteConn) Then
+                DbAddColumn("tblMaterials", "CurrDocIndex", "SMALLINT", "", sqliteConn)
+            End If
+
+
         End Using
 
         Upgrade = True

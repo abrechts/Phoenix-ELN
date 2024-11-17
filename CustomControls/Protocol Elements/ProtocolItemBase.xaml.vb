@@ -4,6 +4,7 @@ Imports System.Windows.Controls
 Imports System.Windows.Data
 Imports ElnBase.ELNEnumerations
 Imports ElnCoreModel
+Imports Microsoft.EntityFrameworkCore
 
 Public Class ProtocolItemBase
 
@@ -123,65 +124,99 @@ Public Class ProtocolItemBase
 
 
     ''' <summary>
+    ''' Creates a new tblMaterials entry.
+    ''' </summary>
+    ''' <param name="matType">The material type of the new entry.</param>
+    ''' 
+    Public Shared Function CreateNewMatDBEntry(matType As MaterialType) As tblMaterials
+
+        Dim newDBMat As New tblMaterials
+
+        With newDBMat
+            .GUID = Guid.NewGuid.ToString("D")
+            .MatType = matType
+            .DatabaseID = DbInfo.GUID
+            .Database = DbInfo
+        End With
+
+        Return newDBMat
+
+    End Function
+
+
+    ''' <summary>
     ''' Adds the specified material to the user materials database, if not present so far, or 
     ''' updates its properties in the DB if differing.
     ''' </summary>
-    ''' <returns>True, if the material was updated, or added to the database.</returns>
+    ''' <param name="tempMatDBEntry">The originally matching matDBEntry with possibly modified material properties, 
+    ''' or a new matDBEntry without properties. In both cases attached material safety docs are present.</param> />
     ''' 
-    Public Shared Function UpdateMaterialsDB(matType As MaterialType, matName As String, source As String, density As Double?,
-      purity As Double?, molweight As Double?, molarity As Double?) As Boolean
+    Public Shared Sub UpdateMaterialsDB(tempMatDBEntry As tblMaterials, currDocList As List(Of tblDbMaterialFiles),
+        matType As MaterialType, matName As String, source As String, density As Double?, purity As Double?,
+        molweight As Double?, molarity As Double?)
 
-        Dim matches = From dbMat In DbInfo.tblMaterials Where dbMat.MatType = matType AndAlso
-                      dbMat.MatName.ToLower = matName.ToLower
+        If tempMatDBEntry IsNot Nothing Then
 
-        If Not matches.Any Then
+            With tempMatDBEntry
 
-            Dim tempMat As New tblMaterials
-            With tempMat
-                .GUID = Guid.NewGuid.ToString("D")
-                .MatType = matType
-                .MatName = matName
-                .MatSource = source
-                .Density = density
-                'below for reagent only (nothing otherwise):
-                .Molweight = molweight
-                .Molarity = molarity
-                .DatabaseID = DbInfo.GUID
-                .Database = DbInfo
-            End With
+                Dim materialHit = (From mat In ProtocolItemBase.DbInfo.tblMaterials Where mat.MatType = matType _
+                  AndAlso mat.MatName.Equals(matName, StringComparison.CurrentCultureIgnoreCase)).FirstOrDefault
 
-            DbInfo.tblMaterials.Add(tempMat)
-
-            Return True
-
-        Else
-
-            'update entry in case of property changes
-
-            Dim dbMat = matches.First
-
-            If Not CompareNullableDoubles(molarity, dbMat.Molarity, "0.00") OrElse
-               Not CompareNullableDoubles(molweight, dbMat.Molweight, "0.00") OrElse
-               Not CompareNullableDoubles(density, dbMat.Density, "0.00") OrElse
-               Not CompareNullableDoubles(purity, dbMat.Purity, "0.0") OrElse
-                dbMat.MatSource <> source Then
-                With dbMat
+                If materialHit Is Nothing Then
+                    'add new material
+                    .MatName = matName
                     .MatSource = source
                     .Density = density
-                    .Purity = purity
                     .Molweight = molweight
                     .Molarity = molarity
-                End With
+                    DbInfo.tblMaterials.Add(tempMatDBEntry)
+                Else
+                    'update existing material
+                    If Not CompareNullableDoubles(molarity, .Molarity, "0.00") OrElse
+                       Not CompareNullableDoubles(molweight, .Molweight, "0.00") OrElse
+                       Not CompareNullableDoubles(density, .Density, "0.00") OrElse
+                       Not CompareNullableDoubles(purity, .Purity, "0.0") OrElse .MatSource <> source Then
+                        .MatSource = source
+                        .Density = density
+                        .Purity = purity
+                        .Molweight = molweight
+                        .Molarity = molarity
+                    End If
 
-                Return True
+                End If
 
-            End If
+            End With
+
+            UpdateAttachedDocs(tempMatDBEntry, currDocList)
 
         End If
 
-        Return False
+    End Sub
 
-    End Function
+
+    Private Shared Sub UpdateAttachedDocs(matEntry As tblMaterials, currDocs As List(Of tblDbMaterialFiles))
+
+        'Update attached materials DB documents. Simply replacing the docs collection 
+        'would place a huge strain on server sync, since all entries would be marked 
+        'for sync by doing so.
+
+        '- remove deleted docs
+        For i = matEntry.tblDbMaterialFiles.Count - 1 To 0 Step -1
+            Dim origDoc = matEntry.tblDbMaterialFiles(i)
+            If Not currDocs.Contains(origDoc) Then
+                matEntry.tblDbMaterialFiles.Remove(origDoc)
+            End If
+        Next
+
+        '- add added docs
+        For Each doc In currDocs
+            If Not matEntry.tblDbMaterialFiles.Contains(doc) Then
+                matEntry.tblDbMaterialFiles.Add(doc)
+            End If
+        Next
+
+
+    End Sub
 
 
     ''' <summary>

@@ -3,10 +3,10 @@
 	<schema name="Default" >
 		<table name="sync_Tombstone" >
 			<comment><![CDATA[Contains a list of deleted items, to be removed during next sync.]]></comment>
-			<column name="GUID" type="VARCHAR" length="36" jt="12" mandatory="y" />
-			<column name="DatabaseInfoID" prior="DatabaseID" type="VARCHAR" length="36" jt="12" mandatory="y" />
-			<column name="TableName" type="VARCHAR" length="50" jt="12" mandatory="y" />
-			<column name="PrimaryKeyVal" type="VARCHAR" length="50" jt="12" mandatory="y" />
+			<column name="GUID" type="TEXT" length="36" jt="-1" mandatory="y" />
+			<column name="DatabaseInfoID" prior="DatabaseID" type="TEXT" length="36" jt="-1" mandatory="y" />
+			<column name="TableName" type="TEXT" length="50" jt="-1" mandatory="y" />
+			<column name="PrimaryKeyVal" type="TEXT" length="50" jt="-1" mandatory="y" />
 			<column name="SyncState" type="INTEGER" jt="4" >
 				<defo><![CDATA[0]]></defo>
 			</column>
@@ -21,14 +21,14 @@
 			</fk>
 		</table>
 		<table name="tblAuxiliaries" spec="" >
-			<column name="GUID" type="VARCHAR" length="36" jt="12" mandatory="y" />
-			<column name="ProtocolItemID" type="VARCHAR" length="36" jt="12" mandatory="y" />
+			<column name="GUID" type="TEXT" length="36" jt="-1" mandatory="y" />
+			<column name="ProtocolItemID" type="TEXT" length="36" jt="-1" mandatory="y" />
 			<column name="SpecifiedUnitType" type="INTEGER" jt="4" mandatory="y" />
 			<column name="IsDisplayAsVolume" type="INTEGER" jt="4" mandatory="y" >
 				<defo><![CDATA[0]]></defo>
 			</column>
-			<column name="Name" type="VARCHAR" length="50" jt="12" mandatory="y" />
-			<column name="Source" type="VARCHAR" length="40" jt="12" />
+			<column name="Name" type="TEXT" length="50" jt="-1" mandatory="y" />
+			<column name="Source" type="TEXT" length="40" jt="-1" />
 			<column name="Grams" type="REAL" jt="8" mandatory="y" />
 			<column name="Equivalents" type="REAL" jt="8" mandatory="y" />
 			<column name="Density" type="REAL" jt="8" />
@@ -46,8 +46,8 @@
 			</fk>
 		</table>
 		<table name="tblComments" spec="" >
-			<column name="GUID" type="VARCHAR" length="36" jt="12" mandatory="y" />
-			<column name="ProtocolItemID" type="VARCHAR" length="36" jt="12" mandatory="y" />
+			<column name="GUID" type="TEXT" length="36" jt="-1" mandatory="y" />
+			<column name="ProtocolItemID" type="TEXT" length="36" jt="-1" mandatory="y" />
 			<column name="CommentFlowDoc" type="MEDIUMTEXT" jt="-1" />
 			<column name="SyncState" type="INTEGER" jt="4" >
 				<defo><![CDATA[0]]></defo>
@@ -63,11 +63,11 @@
 			</fk>
 		</table>
 		<table name="tblDatabaseInfo" spec="" >
-			<column name="GUID" type="VARCHAR" length="36" jt="12" mandatory="y" />
-			<column name="CurrAppVersion" type="VARCHAR" length="16" jt="12" />
+			<column name="GUID" type="TEXT" length="36" jt="-1" mandatory="y" />
+			<column name="CurrAppVersion" type="TEXT" length="16" jt="-1" />
 			<column name="CompanyLogo" type="BLOB" jt="2004" />
-			<column name="LastSyncID" type="VARCHAR" length="36" jt="12" />
-			<column name="LastSyncTime" type="VARCHAR" length="30" jt="12" />
+			<column name="LastSyncID" type="TEXT" length="36" jt="-1" />
+			<column name="LastSyncTime" type="TEXT" length="30" jt="-1" />
 			<column name="SyncState" type="INTEGER" jt="4" >
 				<defo><![CDATA[0]]></defo>
 			</column>
@@ -76,9 +76,9 @@
 			</index>
 		</table>
 		<table name="tblDbMaterialFiles" spec="" >
-			<column name="GUID" type="VARCHAR" length="36" jt="12" mandatory="y" />
-			<column name="DbMaterialID" type="VARCHAR" length="36" jt="12" mandatory="y" />
-			<column name="FileName" type="VARCHAR" jt="12" mandatory="y" />
+			<column name="GUID" type="TEXT" length="36" jt="-1" mandatory="y" />
+			<column name="DbMaterialID" type="TEXT" length="36" jt="-1" mandatory="y" />
+			<column name="FileName" type="TEXT" jt="-1" mandatory="y" />
 			<column name="FileBytes" type="BLOB" jt="2004" mandatory="y" />
 			<column name="FileSizeMB" type="REAL" jt="8" />
 			<column name="IconImage" type="BLOB" jt="2004" />
@@ -96,17 +96,17 @@
 			</fk>
 		</table>
 		<table name="tblEmbeddedFiles" >
-			<column name="GUID" type="VARCHAR" length="36" jt="12" mandatory="y" />
-			<column name="ProtocolItemID" type="VARCHAR" length="36" jt="12" mandatory="y" />
+			<column name="GUID" type="TEXT" length="36" jt="-1" mandatory="y" />
+			<column name="ProtocolItemID" type="TEXT" length="36" jt="-1" mandatory="y" />
 			<column name="FileType" type="INTEGER" jt="4" mandatory="y" >
 				<comment><![CDATA[0: Document
 1: Image]]></comment>
 			</column>
-			<column name="FileName" type="VARCHAR" length="50" jt="12" mandatory="y" />
+			<column name="FileName" type="TEXT" length="50" jt="-1" mandatory="y" />
 			<column name="FileBytes" type="BLOB" jt="2004" mandatory="y" />
 			<column name="FileSizeMB" type="REAL" jt="8" />
 			<column name="FileComment" prior="FileTitle" type="TEXT" jt="-1" mandatory="y" />
-			<column name="SHA256Hash" type="VARCHAR" length="64" jt="12" />
+			<column name="SHA256Hash" type="TEXT" length="64" jt="-1" />
 			<column name="IconImage" type="BLOB" jt="2004" />
 			<column name="IsPortraitMode" prior="IsImageVertical" type="INTEGER" jt="4" >
 				<defo><![CDATA[0]]></defo>
@@ -131,9 +131,9 @@
 			</fk>
 		</table>
 		<table name="tblExperiments" spec="" >
-			<column name="ExperimentID" type="VARCHAR" length="25" jt="12" mandatory="y" />
-			<column name="UserID" type="VARCHAR" length="25" jt="12" mandatory="y" />
-			<column name="ProjectID" type="VARCHAR" length="36" jt="12" mandatory="y" />
+			<column name="ExperimentID" type="TEXT" length="25" jt="-1" mandatory="y" />
+			<column name="UserID" type="TEXT" length="25" jt="-1" mandatory="y" />
+			<column name="ProjectID" type="TEXT" length="36" jt="-1" mandatory="y" />
 			<column name="IsDesignView" type="INTEGER" jt="4" mandatory="y" >
 				<defo><![CDATA[0]]></defo>
 			</column>
@@ -142,8 +142,8 @@
 			</column>
 			<column name="RxnSketch" type="LONGTEXT" jt="-1" />
 			<column name="MDLRxnFileString" type="LONGTEXT" jt="-1" />
-			<column name="ReactantInChIKey" type="VARCHAR" length="27" jt="12" />
-			<column name="ProductInChIKey" type="VARCHAR" length="27" jt="12" />
+			<column name="ReactantInChIKey" type="TEXT" length="27" jt="-1" />
+			<column name="ProductInChIKey" type="TEXT" length="27" jt="-1" />
 			<column name="WorkflowState" type="INTEGER" jt="4" >
 				<defo><![CDATA[0]]></defo>
 			</column>
@@ -158,8 +158,8 @@
 				<defo><![CDATA[1]]></defo>
 				<comment><![CDATA[Defines the yield correction factor by stoichiometry. Default=1. For e.g. a dimerization the value is 0.5, for the monomerization of e.g. a trimer the value is 3.]]></comment>
 			</column>
-			<column name="CreationDate" type="VARCHAR" length="20" jt="12" />
-			<column name="FinalizeDate" type="VARCHAR" length="20" jt="12" />
+			<column name="CreationDate" type="TEXT" length="20" jt="-1" />
+			<column name="FinalizeDate" type="TEXT" length="20" jt="-1" />
 			<column name="DisplayIndex" type="INTEGER" jt="4" />
 			<column name="IsNodeExpanded" type="INTEGER" jt="4" >
 				<defo><![CDATA[0]]></defo>
@@ -168,7 +168,7 @@
 			<column name="SyncState" type="INTEGER" jt="4" >
 				<defo><![CDATA[0]]></defo>
 			</column>
-			<column name="RxnIndigoObj" type="VARCHAR" jt="12" />
+			<column name="RxnIndigoObj" type="TEXT" jt="-1" />
 			<column name="RxnFingerprint" type="BLOB" jt="2004" />
 			<index name="pk_tblExperiments" unique="PRIMARY_KEY" >
 				<column name="ExperimentID" />
@@ -187,10 +187,10 @@
 			</fk>
 		</table>
 		<table name="tblMaterials" spec="" >
-			<column name="GUID" type="VARCHAR" length="36" jt="12" mandatory="y" />
-			<column name="DatabaseID" type="VARCHAR" length="36" jt="12" mandatory="y" />
-			<column name="MatName" type="VARCHAR" length="150" jt="12" mandatory="y" />
-			<column name="MatSource" type="VARCHAR" length="100" jt="12" />
+			<column name="GUID" type="TEXT" length="36" jt="-1" mandatory="y" />
+			<column name="DatabaseID" type="TEXT" length="36" jt="-1" mandatory="y" />
+			<column name="MatName" type="TEXT" length="150" jt="-1" mandatory="y" />
+			<column name="MatSource" type="TEXT" length="100" jt="-1" />
 			<column name="MatType" type="INTEGER" jt="4" mandatory="y" />
 			<column name="Molweight" type="REAL" jt="8" >
 				<defo><![CDATA[(NULL)]]></defo>
@@ -204,7 +204,7 @@
 			<column name="Molarity" type="REAL" jt="8" >
 				<defo><![CDATA[(NULL)]]></defo>
 			</column>
-			<column name="InChIKey" prior="InchiKey" type="VARCHAR" length="30" jt="12" />
+			<column name="InChIKey" prior="InchiKey" type="TEXT" length="30" jt="-1" />
 			<column name="IsValidated" type="INTEGER" jt="4" >
 				<defo><![CDATA[0]]></defo>
 			</column>
@@ -231,21 +231,21 @@
 			</fk>
 		</table>
 		<table name="tblProducts" spec="" >
-			<column name="GUID" type="VARCHAR" length="36" jt="12" mandatory="y" />
-			<column name="ProtocolItemID" type="VARCHAR" length="36" jt="12" mandatory="y" />
+			<column name="GUID" type="TEXT" length="36" jt="-1" mandatory="y" />
+			<column name="ProtocolItemID" type="TEXT" length="36" jt="-1" mandatory="y" />
 			<column name="ProductIndex" type="INTEGER" jt="4" mandatory="y" >
 				<defo><![CDATA[0]]></defo>
 			</column>
-			<column name="Name" type="VARCHAR" length="50" jt="12" mandatory="y" />
+			<column name="Name" type="TEXT" length="50" jt="-1" mandatory="y" />
 			<column name="Grams" type="REAL" jt="8" mandatory="y" />
 			<column name="MolecularWeight" type="REAL" jt="8" mandatory="y" />
 			<column name="Yield" type="REAL" jt="8" mandatory="y" />
 			<column name="ExactMass" type="REAL" jt="8" />
-			<column name="ElementalFormula" type="VARCHAR" length="50" jt="12" />
+			<column name="ElementalFormula" type="TEXT" length="50" jt="-1" />
 			<column name="Purity" type="REAL" jt="8" />
 			<column name="ResinLoad" type="REAL" jt="8" />
-			<column name="BatchID" type="VARCHAR" length="40" jt="12" />
-			<column name="InChIKey" type="VARCHAR" length="27" jt="12" />
+			<column name="BatchID" type="TEXT" length="40" jt="-1" />
+			<column name="InChIKey" type="TEXT" length="27" jt="-1" />
 			<column name="SyncState" type="INTEGER" jt="4" >
 				<defo><![CDATA[0]]></defo>
 			</column>
@@ -260,9 +260,9 @@
 			</fk>
 		</table>
 		<table name="tblProjects" spec="" >
-			<column name="GUID" type="VARCHAR" length="36" jt="12" mandatory="y" />
-			<column name="UserID" type="VARCHAR" length="25" jt="12" mandatory="y" />
-			<column name="Title" type="VARCHAR" length="100" jt="12" />
+			<column name="GUID" type="TEXT" length="36" jt="-1" mandatory="y" />
+			<column name="UserID" type="TEXT" length="25" jt="-1" mandatory="y" />
+			<column name="Title" type="TEXT" length="100" jt="-1" />
 			<column name="SequenceNr" type="INTEGER" jt="4" />
 			<column name="IsNodeExpanded" type="INTEGER" jt="4" mandatory="y" >
 				<defo><![CDATA[0]]></defo>
@@ -284,8 +284,8 @@
 			</fk>
 		</table>
 		<table name="tblProtocolItems" spec="" >
-			<column name="GUID" type="VARCHAR" length="36" jt="12" mandatory="y" />
-			<column name="ExperimentID" type="VARCHAR" length="25" jt="12" mandatory="y" />
+			<column name="GUID" type="TEXT" length="36" jt="-1" mandatory="y" />
+			<column name="ExperimentID" type="TEXT" length="25" jt="-1" mandatory="y" />
 			<column name="ElementType" type="INTEGER" jt="4" mandatory="y" />
 			<column name="SequenceNr" type="INTEGER" jt="4" />
 			<column name="TempInfo" type="TEXT" jt="-1" />
@@ -306,8 +306,8 @@
 			</fk>
 		</table>
 		<table name="tblReagents" spec="" >
-			<column name="GUID" type="VARCHAR" length="36" jt="12" mandatory="y" />
-			<column name="ProtocolItemID" type="VARCHAR" length="36" jt="12" mandatory="y" />
+			<column name="GUID" type="TEXT" length="36" jt="-1" mandatory="y" />
+			<column name="ProtocolItemID" type="TEXT" length="36" jt="-1" mandatory="y" />
 			<column name="SpecifiedUnitType" type="INTEGER" jt="4" mandatory="y" >
 				<defo><![CDATA[0]]></defo>
 			</column>
@@ -315,8 +315,8 @@
 				<defo><![CDATA[0]]></defo>
 			</column>
 			<column name="MolecularWeight" type="REAL" jt="8" />
-			<column name="Name" type="VARCHAR" length="50" jt="12" mandatory="y" />
-			<column name="Source" type="VARCHAR" length="50" jt="12" />
+			<column name="Name" type="TEXT" length="50" jt="-1" mandatory="y" />
+			<column name="Source" type="TEXT" length="50" jt="-1" />
 			<column name="Grams" type="REAL" jt="8" mandatory="y" />
 			<column name="MMols" type="REAL" jt="8" mandatory="y" />
 			<column name="Equivalents" type="REAL" jt="8" mandatory="y" />
@@ -341,16 +341,16 @@
 			</fk>
 		</table>
 		<table name="tblRefReactants" spec="" >
-			<column name="GUID" type="VARCHAR" length="36" jt="12" mandatory="y" />
-			<column name="ProtocolItemID" type="VARCHAR" length="36" jt="12" mandatory="y" />
+			<column name="GUID" type="TEXT" length="36" jt="-1" mandatory="y" />
+			<column name="ProtocolItemID" type="TEXT" length="36" jt="-1" mandatory="y" />
 			<column name="SpecifiedUnitType" type="INTEGER" jt="4" mandatory="y" >
 				<defo><![CDATA[0]]></defo>
 			</column>
 			<column name="IsDisplayAsVolume" type="INTEGER" jt="4" mandatory="y" >
 				<defo><![CDATA[0]]></defo>
 			</column>
-			<column name="Name" type="VARCHAR" length="50" jt="12" mandatory="y" />
-			<column name="Source" type="VARCHAR" length="40" jt="12" />
+			<column name="Name" type="TEXT" length="50" jt="-1" mandatory="y" />
+			<column name="Source" type="TEXT" length="40" jt="-1" />
 			<column name="MolecularWeight" type="REAL" jt="8" mandatory="y" />
 			<column name="Grams" type="REAL" jt="8" mandatory="y" />
 			<column name="MMols" type="REAL" jt="8" mandatory="y" />
@@ -358,7 +358,7 @@
 			<column name="Density" type="REAL" jt="8" />
 			<column name="Purity" type="REAL" jt="8" />
 			<column name="ResinLoad" type="REAL" jt="8" />
-			<column name="InChIKey" type="VARCHAR" length="27" jt="12" />
+			<column name="InChIKey" type="TEXT" length="27" jt="-1" />
 			<column name="SyncState" type="INTEGER" jt="4" >
 				<defo><![CDATA[0]]></defo>
 			</column>
@@ -373,15 +373,15 @@
 			</fk>
 		</table>
 		<table name="tblSeparators" spec="" >
-			<column name="GUID" type="VARCHAR" length="36" jt="12" mandatory="y" />
-			<column name="ProtocolItemID" type="VARCHAR" length="36" jt="12" mandatory="y" />
+			<column name="GUID" type="TEXT" length="36" jt="-1" mandatory="y" />
+			<column name="ProtocolItemID" type="TEXT" length="36" jt="-1" mandatory="y" />
 			<column name="ElementType" type="INTEGER" jt="4" mandatory="y" >
 				<defo><![CDATA[0]]></defo>
 			</column>
 			<column name="DisplayType" type="INTEGER" jt="4" mandatory="y" >
 				<defo><![CDATA[0]]></defo>
 			</column>
-			<column name="Title" type="VARCHAR" length="80" jt="12" />
+			<column name="Title" type="TEXT" length="80" jt="-1" />
 			<column name="SyncState" type="INTEGER" jt="4" >
 				<defo><![CDATA[0]]></defo>
 			</column>
@@ -396,16 +396,16 @@
 			</fk>
 		</table>
 		<table name="tblSolvents" spec="" >
-			<column name="GUID" type="VARCHAR" length="36" jt="12" mandatory="y" />
-			<column name="ProtocolItemID" type="VARCHAR" length="36" jt="12" mandatory="y" />
+			<column name="GUID" type="TEXT" length="36" jt="-1" mandatory="y" />
+			<column name="ProtocolItemID" type="TEXT" length="36" jt="-1" mandatory="y" />
 			<column name="SpecifiedUnitType" type="INTEGER" jt="4" mandatory="y" >
 				<defo><![CDATA[1]]></defo>
 			</column>
 			<column name="IsDisplayAsWeight" type="INTEGER" jt="4" mandatory="y" >
 				<defo><![CDATA[0]]></defo>
 			</column>
-			<column name="Name" type="VARCHAR" length="50" jt="12" mandatory="y" />
-			<column name="Source" type="VARCHAR" length="40" jt="12" />
+			<column name="Name" type="TEXT" length="50" jt="-1" mandatory="y" />
+			<column name="Source" type="TEXT" length="40" jt="-1" />
 			<column name="Milliliters" type="REAL" jt="8" mandatory="y" />
 			<column name="Density" type="REAL" jt="8" />
 			<column name="IsMolEquivalents" type="INTEGER" jt="4" mandatory="y" >
@@ -426,15 +426,15 @@
 			</fk>
 		</table>
 		<table name="tblUsers" spec="" >
-			<column name="UserID" type="VARCHAR" length="25" jt="12" mandatory="y" />
-			<column name="DatabaseID" type="VARCHAR" length="36" jt="12" mandatory="y" />
-			<column name="FirstName" type="VARCHAR" length="50" jt="12" />
-			<column name="LastName" type="VARCHAR" length="50" jt="12" />
-			<column name="CompanyName" type="VARCHAR" length="100" jt="12" />
-			<column name="DepartmentName" type="VARCHAR" length="100" jt="12" />
-			<column name="City" type="VARCHAR" length="50" jt="12" />
-			<column name="PWHash" type="VARCHAR" length="64" jt="12" />
-			<column name="PWHint" type="VARCHAR" length="80" jt="12" />
+			<column name="UserID" type="TEXT" length="25" jt="-1" mandatory="y" />
+			<column name="DatabaseID" type="TEXT" length="36" jt="-1" mandatory="y" />
+			<column name="FirstName" type="TEXT" length="50" jt="-1" />
+			<column name="LastName" type="TEXT" length="50" jt="-1" />
+			<column name="CompanyName" type="TEXT" length="100" jt="-1" />
+			<column name="DepartmentName" type="TEXT" length="100" jt="-1" />
+			<column name="City" type="TEXT" length="50" jt="-1" />
+			<column name="PWHash" type="TEXT" length="64" jt="-1" />
+			<column name="PWHint" type="TEXT" length="80" jt="-1" />
 			<column name="IsSpellCheckEnabled" type="INTEGER" jt="4" mandatory="y" >
 				<defo><![CDATA[0]]></defo>
 			</column>
@@ -453,9 +453,9 @@
 		</table>
 	</schema>
 	<layout name="Infrastructure" id="Layout-4c1" show_column_type="y" show_relation="cascade" >
-		<entity schema="Default" name="sync_Tombstone" color="3986C1" x="672" y="368" />
+		<entity schema="Default" name="sync_Tombstone" color="3986C1" x="368" y="320" />
 		<entity schema="Default" name="tblDatabaseInfo" color="3986C1" x="48" y="48" />
-		<entity schema="Default" name="tblDbMaterialFiles" color="3986C1" x="432" y="464" />
+		<entity schema="Default" name="tblDbMaterialFiles" color="3986C1" x="368" y="496" />
 		<entity schema="Default" name="tblExperiments" color="3986C1" x="960" y="48" />
 		<entity schema="Default" name="tblMaterials" color="3986C1" x="80" y="336" />
 		<entity schema="Default" name="tblProjects" color="3986C1" x="672" y="48" />

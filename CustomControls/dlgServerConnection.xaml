@@ -55,7 +55,7 @@
 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="center" Margin="-16,0,0,0">
 
-                <Button x:Name="btnOK" Content="Connect" Padding="2" VerticalAlignment="Center" Width="74" IsDefault="True" IsTabStop="False"/>
+                <Button x:Name="btnConnect" Content="Connect" Padding="2" VerticalAlignment="Center" Width="74" IsDefault="True" IsTabStop="False"/>
 
                 <Button x:Name="btnCancel" Content="Cancel" Padding="2" HorizontalAlignment="Left" IsDefault="False" Margin="30,0,0,0"
                      VerticalAlignment="Center" Width="72" IsCancel="True" IsTabStop="False"/>
