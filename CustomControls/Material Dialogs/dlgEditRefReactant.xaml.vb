@@ -35,6 +35,8 @@ Public Class dlgEditRefReactant
             ReferenceReactant.SpecifiedUnitType = GetMaterialUnitType(cboMatUnit.Text)
             txtMatName.Text = ReferenceReactant.Name
             txtSupplier.Text = ReferenceReactant.Source
+            numDensity.Value = ReferenceReactant.Density
+            numPurity.Value = ReferenceReactant.Purity
             numResinLoad.Value = ReferenceReactant.ResinLoad
 
         Else
@@ -89,6 +91,20 @@ Public Class dlgEditRefReactant
     Public Property IsAddingNew As Boolean
 
 
+    ''' <summary>
+    ''' Sets or gets if the original reference reactant amount was modified, requiring protocol recalculation
+    ''' </summary>
+    ''' 
+    Public Property IsRecalcRequired As Boolean
+
+
+    ''' <summary>
+    ''' Sets or gets the initially specified purity
+    ''' </summary>
+    ''' 
+    Private Property PrevPurity As Double?
+
+
     Private Sub PopulateData()
 
         'populates the UI from code 
@@ -119,6 +135,8 @@ Public Class dlgEditRefReactant
 
             End Select
 
+            PrevPurity = .Purity
+
         End With
 
     End Sub
@@ -136,7 +154,7 @@ Public Class dlgEditRefReactant
             txtMatName.Focus()
             Return False
 
-        ElseIf SketchInfo.Reactants.First.IsAttachedToResin AndAlso val(numResinLoad.Text) = 0 Then
+        ElseIf SketchInfo.Reactants.First.IsAttachedToResin AndAlso Val(numResinLoad.Text) = 0 Then
             MsgBox("Please specify a valid resin load.", MsgBoxStyle.OkOnly + MsgBoxStyle.Information, "Data Validation")
             numResinLoad.Focus()
             Return False
@@ -181,6 +199,9 @@ Public Class dlgEditRefReactant
 
             .SpecifiedUnitType = GetMaterialUnitType(cboMatUnit.Text)
 
+            Dim prevGrams = .Grams
+            Dim prevMMols = .MMols
+
             Select Case .SpecifiedUnitType
 
                 Case MaterialUnitType.Weight
@@ -192,6 +213,8 @@ Public Class dlgEditRefReactant
                     .MMols = ConvertToMMol(numMatAmount.Value, molUnit)
 
             End Select
+
+            IsRecalcRequired = (prevGrams <> .Grams OrElse .MMols <> prevMMols OrElse Not PrevPurity.Equals(.Purity))
 
             My.Settings.LastRefReactUnit = cboMatUnit.Text
 

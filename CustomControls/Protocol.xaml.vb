@@ -495,8 +495,10 @@ Public Class Protocol
                     .ReferenceReactant = protocolItemEntry.tblRefReactants
                     If .ShowDialog() Then
                         AlignRefReactantProperties(protocolItemEntry.tblRefReactants)
-                        UpdateRefReactants()
-                        RecalculateExperiment()
+                        If .IsRecalcRequired Then
+                            UpdateRefReactantTotals()
+                            RecalculateExperiment()
+                        End If
                         RaiseEvent RequestUpdateSketchComponentLabels(Me)
                         AutoSave()
                     End If
@@ -605,6 +607,8 @@ Public Class Protocol
             .Name = If(currRefReactItem Is Nothing, "Reactant", currRefReactItem.tblRefReactants.Name)   'ensure consistent name if multiple portions
             .ResinLoad = currRefReactItem?.tblRefReactants.ResinLoad    'ditto for resin load
             .Source = currRefReactItem?.tblRefReactants.Source
+            .Density = currRefReactItem?.tblRefReactants.Density
+            .Purity = currRefReactItem?.tblRefReactants.Purity
         End With
 
         newProtocolEntry.tblRefReactants = newRefReact
@@ -622,7 +626,7 @@ Public Class Protocol
 
                 AddProtocolItem(newProtocolEntry)
                 AlignRefReactantProperties(newRefReact)
-                UpdateRefReactants()
+                UpdateRefReactantTotals()
                 RecalculateExperiment()
 
                 RaiseEvent RequestUpdateSketchComponentLabels(Me)
@@ -1292,7 +1296,7 @@ Public Class Protocol
         ProtocolItemsViewSrc.View.Refresh()
 
         If isRefReactant Then
-            UpdateRefReactants()
+            UpdateRefReactantTotals()
             RecalculateExperiment(False)
         ElseIf isProduct Then
             RecalculateExperiment(True)
@@ -1326,7 +1330,7 @@ Public Class Protocol
                     item.Experiment.tblProtocolItems.Remove(item)
                 Next
 
-                UpdateRefReactants()
+                UpdateRefReactantTotals()
 
                 Dim skipRecalcDlg = (selectedRefReactCount = 0)
                 RecalculateExperiment(skipRecalcDlg)
@@ -1434,7 +1438,7 @@ Public Class Protocol
     ''' <param name="expEntry">Optional: The affected experiment. If nothing is specified, 
     ''' then the affected experiment is the source.</param>
     ''' 
-    Public Sub UpdateRefReactants(Optional expEntry As tblExperiments = Nothing)
+    Public Sub UpdateRefReactantTotals(Optional expEntry As tblExperiments = Nothing)
 
         If expEntry Is Nothing Then
             expEntry = CType(DataContext, tblExperiments)
@@ -1506,7 +1510,7 @@ Public Class Protocol
 
     ''' <summary>
     ''' Assigns assigns the specified material name and resin load to all reference reactant entries 
-    ''' already present in the protocol (if any), towards consistent properties.
+    ''' already present in the protocol (if any) for consistent core properties.
     ''' </summary>
     ''' <param name="newName">The reference reactant name to apply to all of its protocol occurrences.</param>
     ''' 
@@ -1518,6 +1522,7 @@ Public Class Protocol
         For Each ref In refSiblings
             ref.tblRefReactants.Name = newReactEntry.Name
             ref.tblRefReactants.ResinLoad = newReactEntry.ResinLoad
+            ref.tblRefReactants.Density = newReactEntry.Density
         Next
 
     End Sub
@@ -1559,7 +1564,7 @@ Public Class Protocol
                     .ShowDialog()
 
                     AlignRefReactantProperties(.ReferenceReactant)
-                    UpdateRefReactants()
+                    UpdateRefReactantTotals()
 
                 End With
 

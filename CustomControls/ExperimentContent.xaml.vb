@@ -341,7 +341,7 @@ Public Class ExperimentContent
                                 protItem.tblRefReactants.Grams *= scaleFactor
                             Next
 
-                            newExpContent.pnlProtocol.UpdateRefReactants(clonedExp)
+                            newExpContent.pnlProtocol.UpdateRefReactantTotals(clonedExp)
                             ELNCalculations.RecalculateMaterials(clonedExp, RecalculationMode.KeepEquivalents)
 
                             ELNCalculations.UpdateExperimentTotals(clonedExp)
