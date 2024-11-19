@@ -23,6 +23,28 @@ Public Class dlgEditRefReactant
     Public Property SketchInfo As SketchResults
 
 
+    ''' <summary>
+    ''' Sets or gets the original, data bound entity.
+    ''' </summary>
+    ''' 
+    Public Property ReferenceReactant As tblRefReactants
+
+
+    ''' <summary>
+    ''' Sets or gets if a new material is being added.
+    ''' </summary>
+    ''' 
+    Public Property IsAddingNew As Boolean
+
+
+    ''' <summary>
+    ''' Sets or gets if the original reference reactant amount was modified, requiring protocol recalculation
+    ''' </summary>
+    ''' 
+    Public Property IsRecalcRequired As Boolean
+
+
+
     Public Sub Me_Loaded() Handles Me.Loaded
 
         blkMW.Text = SketchInfo.Reactants.First.Molweight.ToString("0.00")
@@ -31,13 +53,15 @@ Public Class dlgEditRefReactant
 
         If IsAddingNew Then
 
-            cboMatUnit.Text = My.Settings.LastRefReactUnit
-            ReferenceReactant.SpecifiedUnitType = GetMaterialUnitType(cboMatUnit.Text)
-            txtMatName.Text = ReferenceReactant.Name
-            txtSupplier.Text = ReferenceReactant.Source
-            numDensity.Value = ReferenceReactant.Density
-            numPurity.Value = ReferenceReactant.Purity
-            numResinLoad.Value = ReferenceReactant.ResinLoad
+            With ReferenceReactant
+                cboMatUnit.Text = My.Settings.LastRefReactUnit
+                txtMatName.Text = .Name
+                txtSupplier.Text = .Source
+                numDensity.Value = .Density
+                numPurity.Value = .Purity
+                numResinLoad.Value = .ResinLoad
+                chkConvertVolWeight.IsChecked = .IsDisplayAsVolume
+            End With
 
         Else
 
@@ -77,34 +101,6 @@ Public Class dlgEditRefReactant
     End Sub
 
 
-    ''' <summary>
-    ''' Sets or gets the original, data bound entity.
-    ''' </summary>
-    ''' 
-    Public Property ReferenceReactant As tblRefReactants
-
-
-    ''' <summary>
-    ''' Sets or gets if a new material is being added.
-    ''' </summary>
-    ''' 
-    Public Property IsAddingNew As Boolean
-
-
-    ''' <summary>
-    ''' Sets or gets if the original reference reactant amount was modified, requiring protocol recalculation
-    ''' </summary>
-    ''' 
-    Public Property IsRecalcRequired As Boolean
-
-
-    ''' <summary>
-    ''' Sets or gets the initially specified purity
-    ''' </summary>
-    ''' 
-    Private Property PrevPurity As Double?
-
-
     Private Sub PopulateData()
 
         'populates the UI from code 
@@ -134,8 +130,6 @@ Public Class dlgEditRefReactant
                     cboMatUnit.Text = scaled.Unit
 
             End Select
-
-            PrevPurity = .Purity
 
         End With
 
@@ -188,6 +182,11 @@ Public Class dlgEditRefReactant
 
         With ReferenceReactant
 
+            Dim prevGrams = .Grams
+            Dim prevMMols = .MMols
+            Dim prevPurity = .Purity
+            Dim prevResinLoad = .ResinLoad
+
             .Name = txtMatName.Text
             .Source = txtSupplier.Text
             .IsDisplayAsVolume = chkConvertVolWeight.IsChecked
@@ -198,9 +197,6 @@ Public Class dlgEditRefReactant
             .ResinLoad = numResinLoad.Value
 
             .SpecifiedUnitType = GetMaterialUnitType(cboMatUnit.Text)
-
-            Dim prevGrams = .Grams
-            Dim prevMMols = .MMols
 
             Select Case .SpecifiedUnitType
 
@@ -214,7 +210,10 @@ Public Class dlgEditRefReactant
 
             End Select
 
-            IsRecalcRequired = (prevGrams <> .Grams OrElse .MMols <> prevMMols OrElse Not PrevPurity.Equals(.Purity))
+            IsRecalcRequired = (prevGrams <> .Grams OrElse
+                                .MMols <> prevMMols OrElse
+                                 Not prevPurity.Equals(.Purity) OrElse
+                                 Not prevResinLoad.Equals(.ResinLoad))
 
             My.Settings.LastRefReactUnit = cboMatUnit.Text
 

@@ -604,7 +604,8 @@ Public Class Protocol
         With newRefReact
             .GUID = Guid.NewGuid.ToString("D")
             .ProtocolItem = newProtocolEntry
-            .Name = If(currRefReactItem Is Nothing, "Reactant", currRefReactItem.tblRefReactants.Name)   'ensure consistent name if multiple portions
+            .Name = If(currRefReactItem Is Nothing, "Reactant", currRefReactItem.tblRefReactants.Name)
+            .IsDisplayAsVolume = If(currRefReactItem?.tblRefReactants.IsDisplayAsVolume, 0)
             .ResinLoad = currRefReactItem?.tblRefReactants.ResinLoad    'ditto for resin load
             .Source = currRefReactItem?.tblRefReactants.Source
             .Density = currRefReactItem?.tblRefReactants.Density
