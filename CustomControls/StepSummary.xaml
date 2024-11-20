@@ -161,7 +161,7 @@
 
                 <Grid>
 
-                    <TextBlock Text="no items present so far ..." Foreground="#FF6C6C6C" Margin="0,2,0,0" VerticalAlignment="Top" 
+                    <TextBlock Text="- no items present so far -" Foreground="#FF6C6C6C" Margin="0,2,0,0" VerticalAlignment="Top" 
                                 HorizontalAlignment="Center"/>
 
                     <ListBox x:Name="lstStepExperiments" SelectionMode="Single" Background="transparent" BorderThickness="0"
@@ -170,7 +170,7 @@
                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                                 VirtualizingStackPanel.IsVirtualizing="False" MinHeight="25"
                                 ItemsSource="{Binding Source={StaticResource cvsStepExperiments}}"
-                                ItemTemplate="{StaticResource expTreeItem}" />
+                                ItemTemplate="{StaticResource expTreeItem}" HorizontalAlignment="Center" />
                 </Grid>
 
             </DockPanel>
