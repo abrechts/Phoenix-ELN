@@ -41,8 +41,8 @@ Public Class RxnSubstructure
     ''' </summary>
     ''' <param name="queryRxnStr">MDL reaction file string of the query substructure reaction to subMatch.</param>
     ''' <param name="dbContext">Database context for query.</param>
-    ''' <param Name="fpOnly">Optional: The reaction fingerprints are not confirmed by subsequent reaction substructure tests. 
-    ''' This is an extremely fast search, but most likely will contain some false positives. E.g. chiral query centers are 
+    ''' <param Name="fpOnly">Optional: If set to true, the reaction fingerprints are not confirmed by subsequent reaction substructure  
+    ''' tests. This is an extremely fast search, but most likely will contain some false positives. E.g. chiral query centers are 
     ''' ignored in this mode.</param>
     ''' <returns>Query hits as IEnumerable of tblExperiments, or empty IEnumerable if not hits found.</returns>
     ''' 
