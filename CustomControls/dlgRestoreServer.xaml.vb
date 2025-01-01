@@ -31,7 +31,7 @@ Partial Public Class dlgRestoreServer
     Private Sub btnContinue_Click() Handles btnContinue.Click
 
         generalTab.SelectedItem = tabBrowse
-        WPFToolbox.WaitForPriority(Windows.Threading.DispatcherPriority.Background)
+        WPFToolbox.WaitForPriority(Threading.DispatcherPriority.Background)
         txtUserID.SelectAll()
         txtUserID.Focus()
 

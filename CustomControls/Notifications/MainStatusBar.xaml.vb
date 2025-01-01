@@ -1,4 +1,5 @@
 ﻿Imports ElnBase
+Imports System.Windows
 
 Public Class MainStatusBar
 
@@ -30,8 +31,8 @@ Public Class MainStatusBar
 
             If value = True Then
 
-                pnlServerError.Visibility = Windows.Visibility.Visible
-                pnlServerOk.Visibility = Windows.Visibility.Collapsed
+                pnlServerError.Visibility = Visibility.Visible
+                pnlServerOk.Visibility = Visibility.Collapsed
                 If My.Settings.IsServerOffByUser Then
                     icoServerError.ToolTip = "ELN server disconnected by user."
                 Else
@@ -40,8 +41,8 @@ Public Class MainStatusBar
 
             Else
 
-                pnlServerError.Visibility = Windows.Visibility.Collapsed
-                pnlServerOk.Visibility = Windows.Visibility.Visible
+                pnlServerError.Visibility = Visibility.Collapsed
+                pnlServerOk.Visibility = Visibility.Visible
 
             End If
 

@@ -117,12 +117,12 @@ Public Class dlgEditSolvent
             If .IsInitialized Then
                 If .SelectedItem.Tag <> "" Then
                     Dim info = .SelectedItem.Tag.split("/")
-                    icoInfo.Visibility = Windows.Visibility.Visible
+                    icoInfo.Visibility = Visibility.Visible
                     blkUnitInfo.Text = info(0)
                     icoInfo.ToolTip = info(1)
                 Else
                     blkUnitInfo.Text = ""
-                    icoInfo.Visibility = Windows.Visibility.Collapsed
+                    icoInfo.Visibility = Visibility.Collapsed
                 End If
             End If
         End With

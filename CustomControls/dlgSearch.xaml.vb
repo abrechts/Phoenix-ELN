@@ -1,5 +1,6 @@
 ﻿Imports System.Windows.Controls
 Imports System.Windows.Input
+Imports System.Windows
 Imports ElnBase
 Imports ElnCoreModel
 
@@ -107,9 +108,9 @@ Public Class dlgSearch
 
         Me.UpdateLayout()
 
-        blkResultsTitle.Visibility = Windows.Visibility.Visible
-        lstRssHitGroups.Visibility = Windows.Visibility.Visible
-        pnlNoHits.Visibility = If(rssGroups.Count > 0, Windows.Visibility.Collapsed, Windows.Visibility.Visible)
+        blkResultsTitle.Visibility = Visibility.Visible
+        lstRssHitGroups.Visibility = Visibility.Visible
+        pnlNoHits.Visibility = If(rssGroups.Count > 0, Visibility.Collapsed, Visibility.Visible)
 
         lstRssHitGroups.DataContext = rssGroups
 
@@ -124,7 +125,7 @@ Public Class dlgSearch
 
             IsServerQuery = Not rdoLocal.IsChecked
 
-            blkFinalizedInfo.Visibility = If(IsServerQuery, Windows.Visibility.Visible, Windows.Visibility.Collapsed)
+            blkFinalizedInfo.Visibility = If(IsServerQuery, Visibility.Visible, Visibility.Collapsed)
 
             If QueryRxnFileString <> "" Then
                 PerformQuery(QueryRxnFileString)

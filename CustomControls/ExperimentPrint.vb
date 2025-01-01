@@ -63,7 +63,7 @@ Public Class ExperimentPrint
         printExpContent.SetPrintUI()
 
         With printExpContent
-            .Measure(New Windows.Size)
+            .Measure(New Size)
             .Arrange(New Rect)
             .SketchPanel.SetComponentLabels(origSketchArea.ComponentFontSize, origSketchArea.BottomOffset)
         End With

@@ -453,7 +453,7 @@ Public Class ExperimentContent
         If Not IsNothing(lstProtocol.ItemsSource) Then
 
             With Me  'important!!
-                .Measure(New Windows.Size)
+                .Measure(New Size)
                 .Arrange(New Rect)
             End With
 
@@ -461,7 +461,7 @@ Public Class ExperimentContent
 
             For Each item In lstProtocol.ItemsSource
                 Dim protocolItem = CType(lstProtocol.ItemContainerGenerator.ContainerFromItem(item), ListBoxItem)
-                Dim itemPos = protocolItem.TranslatePoint(New Windows.Point(0, 0), Me)   'bottom part below page break?
+                Dim itemPos = protocolItem.TranslatePoint(New Point(0, 0), Me)   'bottom part below page break?
                 Dim bottomY = itemPos.Y + protocolItem.ActualHeight + protocolItem.Margin.Top + protocolItem.Margin.Bottom
                 If bottomY > proposedPageBreakY Then
                     Dim diff = itemPos.Y - proposedPageBreakY + 1

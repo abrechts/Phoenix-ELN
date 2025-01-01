@@ -48,7 +48,7 @@ Public Class PinnedEnabledConverter
     Public Function Convert(value As Object, targetType As Type, parameter As Object, culture As CultureInfo) As Object Implements IValueConverter.Convert
 
         Dim displayIndex As Integer = value
-        Return If(displayIndex = -1 OrElse displayIndex > 0, Windows.Visibility.Visible, Windows.Visibility.Collapsed)
+        Return If(displayIndex = -1 OrElse displayIndex > 0, Visibility.Visible, Visibility.Collapsed)
 
     End Function
 
