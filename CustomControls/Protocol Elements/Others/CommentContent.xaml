@@ -24,6 +24,32 @@
             <Setter Property="Padding" Value="0"/>
         </Style>
 
+        <SolidColorBrush x:Key="HighlightBlueBrush" Color="LightBlue"/>
+        <SolidColorBrush x:Key="HighlightGreenBrush" Color="LightGreen"/>
+        <SolidColorBrush x:Key="HighlightPinkBrush" Color="Pink"/>
+
+        <!-- Custom Button Style to prevent hover background change -->
+        <Style x:Key="NoHoverButtonStyle" TargetType="Button">
+            <Setter Property="BorderBrush" Value="gray"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" 
+                           BorderThickness="{TemplateBinding BorderThickness}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{Binding Background, RelativeSource={RelativeSource Self}}"/>
+                    <Setter Property="BorderBrush" Value="black"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
     </UserControl.Resources>
 
     <Grid x:Name="sharedSizeGrid">
@@ -45,20 +71,50 @@
             </RichTextBox.Resources>
 
             <RichTextBox.ContextMenu>
-                <ContextMenu>
+                <ContextMenu x:Name="mnuContext">
+                    
                     <MenuItem x:Name="mnuBullets" Icon="{StaticResource icoBulletList}" Header="Bullet List" 
                         Command="EditingCommands.ToggleBullets" InputGestureText="Ctrl+L"/>
+                    
                     <Separator/>
+                    
                     <MenuItem x:Name="mnuBold" Icon="{StaticResource icoBold}" Header="Bold" Command="EditingCommands.ToggleBold"
                         InputGestureText="Ctrl+B"/>
                     <MenuItem x:Name="mnuItalic" Icon="{StaticResource icoItalic}" Header="Italic" Command="EditingCommands.ToggleItalic"
                         InputGestureText="Ctrl+I"/>
                     <MenuItem x:Name="mnuUnderline" Icon="{StaticResource icoUnderline}" Header="Underline" 
                          Command="EditingCommands.ToggleUnderline" InputGestureText="Ctrl+U"/>
+                    
                     <Separator/>
+
+                    <MenuItem x:Name="mnuMarkerGroup" Icon="{StaticResource icoEditInput}" Padding="0,2">
+                        <MenuItem.Header>
+                            <StackPanel Orientation="Horizontal">
+                                <Button x:Name="mnuBlue" Width="18" Height="18" Background="{StaticResource HighlightBlueBrush}" 
+                                        Click="HighlightBlue_Click" Margin="2" ToolTip="Blue text marker"
+                                        Style="{StaticResource NoHoverButtonStyle}"/>
+                                <Button x:Name="mnuGreen" Width="18" Height="18" Background="{StaticResource HighlightGreenBrush}" 
+                                        Click="HighlightGreen_Click" Margin="2" ToolTip="Green text marker"
+                                        Style="{StaticResource NoHoverButtonStyle}"/>
+                                <Button x:Name="mnuPink" Width="18" Height="18" Background="{StaticResource HighlightPinkBrush}" 
+                                        Click="HighlightPink_Click" Margin="2" ToolTip="Pink text marker"
+                                        Style="{StaticResource NoHoverButtonStyle}"/>
+                            </StackPanel>
+                        </MenuItem.Header>
+                    </MenuItem>
+
+                    <MenuItem x:Name="mnuClear" Header="Clear All" Click="HighlightsClear_Click" ToolTip="Removes all selected markers">
+                        <MenuItem.Icon>
+                            <ContentControl Content="{StaticResource icoEraser}" Width="14" Height="14"/>
+                        </MenuItem.Icon>
+                    </MenuItem>
+
+                    <Separator/>
+                    
                     <MenuItem Icon="{StaticResource icoCut}" Command="ApplicationCommands.Cut" InputGestureText="Ctrl+X"/>
                     <MenuItem Icon="{StaticResource icoCopy}" Command="ApplicationCommands.Copy" InputGestureText="Ctrl+C"/>
                     <MenuItem Icon="{StaticResource icoPaste}" Command="ApplicationCommands.Paste" InputGestureText="Ctrl+P"/>
+
                 </ContextMenu>
             </RichTextBox.ContextMenu>
 

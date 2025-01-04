@@ -1,6 +1,7 @@
 ﻿Imports System.Windows
 Imports System.Windows.Documents
 Imports System.Windows.Input
+Imports System.Windows.Media
 
 Public Class CommentContent
 
@@ -11,14 +12,12 @@ Public Class CommentContent
 
     End Sub
 
-
     ''' <summary>
     ''' The maximum allowed characters for user input. The default value 
     ''' of zero means no restriction.
     ''' </summary>
     ''' 
     Private Const MaxCharacters As Integer = 5000
-
 
     ''' <summary>
     ''' Brings the control into active edit mode.
@@ -32,7 +31,6 @@ Public Class CommentContent
 
     End Sub
 
-
     Private Function GetTextLength() As Integer
 
         Dim tr = New TextRange(rtbComments.Document.ContentStart, rtbComments.Document.ContentEnd)
@@ -40,6 +38,33 @@ Public Class CommentContent
 
     End Function
 
+    ''' <summary>
+    ''' Disables all menu items that require text selection.
+    ''' </summary>
+    ''' 
+    Private Sub mnuContext_Opened(sender As Object, e As RoutedEventArgs) Handles mnuContext.Opened
+
+        Dim selectedText As TextRange = rtbComments.Selection
+
+        If selectedText.IsEmpty Then
+            mnuBold.IsEnabled = False
+            mnuItalic.IsEnabled = False
+            mnuUnderline.IsEnabled = False
+            mnuMarkerGroup.IsEnabled = False
+            mnuClear.IsEnabled = False
+        Else
+            mnuBold.IsEnabled = True
+            mnuItalic.IsEnabled = True
+            mnuUnderline.IsEnabled = True
+            mnuMarkerGroup.IsEnabled = True
+            If HasUniformBackground(selectedText) AndAlso selectedText.GetPropertyValue(TextElement.BackgroundProperty) Is Nothing Then
+                mnuClear.IsEnabled = False  'no highlight present in selection
+            Else
+                mnuClear.IsEnabled = True
+            End If
+        End If
+
+    End Sub
 
     ''' <summary>
     ''' Validates the content to be pasted
@@ -66,7 +91,6 @@ Public Class CommentContent
 
     End Sub
 
-
     Private Sub rtbComments_PreviewKeyDown(sender As Object, e As KeyEventArgs) Handles rtbComments.PreviewKeyDown
 
         If Keyboard.Modifiers = ModifierKeys.Control Then
@@ -88,7 +112,6 @@ Public Class CommentContent
 
     End Sub
 
-
     Private Sub rtbComments_LostFocus() Handles rtbComments.LostFocus
 
         With rtbComments
@@ -101,6 +124,98 @@ Public Class CommentContent
         End With
 
     End Sub
+
+
+    Friend Sub HighlightBlue_Click(sender As Object, e As RoutedEventArgs)
+        ApplyHighlight(TryFindResource("HighlightBlueBrush"))
+        mnuContext.IsOpen = False
+    End Sub
+
+    Friend Sub HighlightGreen_Click(sender As Object, e As RoutedEventArgs)
+        ApplyHighlight(TryFindResource("HighlightGreenBrush"))
+        mnuContext.IsOpen = False
+    End Sub
+
+    Friend Sub HighlightPink_Click(sender As Object, e As RoutedEventArgs)
+        ApplyHighlight(TryFindResource("HighlightPinkBrush"))
+    End Sub
+
+    Friend Sub HighlightsClear_Click(sender As Object, e As RoutedEventArgs)
+        ApplyHighlight(Nothing)
+        mnuContext.IsOpen = False
+    End Sub
+
+
+    ''' <summary>
+    ''' Toggles the specified background highlightBrush to the selected text to highlight it. If only part of the 
+    ''' selection has the specified background, then the complete selection obtains is. If the selection 
+    ''' is a subset of a larger range of the specified background, then its background is removed.
+    ''' </summary>
+    ''' 
+    Private Sub ApplyHighlight(highlightBrush As Brush)
+
+        Dim selectedText As TextRange = rtbComments.Selection
+
+        If Not selectedText.IsEmpty Then
+
+            If HasUniformBackground(selectedText) Then
+
+                Dim currentBackground As Object = selectedText.GetPropertyValue(TextElement.BackgroundProperty)
+
+                If TypeOf currentBackground Is Brush AndAlso currentBackground Is highlightBrush Then
+                    ' Remove background if it matches the selected highlightBrush
+                    selectedText.ApplyPropertyValue(TextElement.BackgroundProperty, Nothing)
+                Else
+                    ' Apply the new background highlightBrush
+                    selectedText.ApplyPropertyValue(TextElement.BackgroundProperty, highlightBrush)
+                End If
+            Else
+
+                ' Apply the new background highlightBrush
+                selectedText.ApplyPropertyValue(TextElement.BackgroundProperty, highlightBrush)
+
+            End If
+
+            ' Move the caret to the end of the selection to remove the selection
+            rtbComments.CaretPosition = selectedText.End
+
+        End If
+
+    End Sub
+
+
+    ''' <summary>
+    ''' Gets if the specified text selection has the same background highlightBrush. 
+    ''' </summary>
+    ''' 
+    Private Function HasUniformBackground(selection As TextRange) As Boolean
+
+        If selection.IsEmpty Then
+            Return False
+        End If
+
+        Dim selStart As TextPointer = selection.Start
+        Dim selEnd As TextPointer = selection.End
+        Dim firstBackground As Brush = Nothing
+
+        While selStart IsNot Nothing AndAlso selStart.CompareTo(selEnd) < 0
+
+            Dim textRange As New TextRange(selStart, selStart.GetPositionAtOffset(1, LogicalDirection.Forward))
+            Dim background As Brush = TryCast(textRange.GetPropertyValue(TextElement.BackgroundProperty), Brush)
+
+            If firstBackground Is Nothing Then
+                firstBackground = background
+            ElseIf Not Equals(firstBackground, background) Then
+                Return False
+            End If
+
+            selStart = selStart.GetNextContextPosition(LogicalDirection.Forward)
+
+        End While
+
+        Return True
+
+    End Function
 
 
 End Class
