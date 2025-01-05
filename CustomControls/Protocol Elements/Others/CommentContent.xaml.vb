@@ -138,6 +138,7 @@ Public Class CommentContent
 
     Friend Sub HighlightPink_Click(sender As Object, e As RoutedEventArgs)
         ApplyHighlight(TryFindResource("HighlightPinkBrush"))
+        mnuContext.IsOpen = False
     End Sub
 
     Friend Sub HighlightsClear_Click(sender As Object, e As RoutedEventArgs)

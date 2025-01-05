@@ -24,7 +24,7 @@
             <Setter Property="Padding" Value="0"/>
         </Style>
 
-        <SolidColorBrush x:Key="HighlightBlueBrush" Color="LightBlue"/>
+        <SolidColorBrush x:Key="HighlightBlueBrush" Color="#FFC2EDEE"/>
         <SolidColorBrush x:Key="HighlightGreenBrush" Color="LightGreen"/>
         <SolidColorBrush x:Key="HighlightPinkBrush" Color="Pink"/>
 
@@ -103,7 +103,7 @@
                         </MenuItem.Header>
                     </MenuItem>
 
-                    <MenuItem x:Name="mnuClear" Header="Clear All" Click="HighlightsClear_Click" ToolTip="Removes all selected markers">
+                    <MenuItem x:Name="mnuClear" Header="Clear Markers" Click="HighlightsClear_Click" ToolTip="Removes all markers in selected text">
                         <MenuItem.Icon>
                             <ContentControl Content="{StaticResource icoEraser}" Width="14" Height="14"/>
                         </MenuItem.Icon>
