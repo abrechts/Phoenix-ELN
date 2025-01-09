@@ -25,6 +25,9 @@
   <ItemGroup>
     <Reference Include="ChemBytesDraw">
       <HintPath>..\References\ChemBytesDraw.dll</HintPath>
+      <Private>True</Private>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+      <SpecificVersion>False</SpecificVersion>
     </Reference>
   </ItemGroup>
 
