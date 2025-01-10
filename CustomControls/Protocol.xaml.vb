@@ -1685,6 +1685,11 @@ Public Class ProtocolDropHandler
     End Sub
 
 
+    Public Sub DropHint(dropHintInfo As IDropHintInfo) Implements IDropTarget.DropHint
+
+    End Sub
+
+
     ''' <summary>
     ''' Rearranges the the sequence numbers of the experiment ProtocolElement collection to reflect the 
     ''' sequence order of the elements after the DragDrop move operation.

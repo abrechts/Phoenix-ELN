@@ -422,4 +422,9 @@ Public Class NavTreeDropHandler
 
     End Sub
 
+
+    Public Sub DropHint(dropHintInfo As IDropHintInfo) Implements IDropTarget.DropHint
+
+    End Sub
+
 End Class
