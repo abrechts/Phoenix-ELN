@@ -210,7 +210,7 @@
             <Border CornerRadius="8" Background="White" Margin="4,8,8,8" BorderBrush="gray" BorderThickness="1">
                 <DockPanel Margin="8,8,8,8">
                     <custom:StatusInfoPanel x:Name="pnlStatus" DockPanel.Dock="top"/>
-                    <custom:ContentInfoPanel DockPanel.Dock="bottom" Margin="0,12,0,0"/>
+                    <custom:StepSummary DockPanel.Dock="bottom" Margin="0,12,0,0"/>
                 </DockPanel>  
            </Border>
 

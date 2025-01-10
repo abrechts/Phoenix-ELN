@@ -29,156 +29,160 @@
 
     </UserControl.Resources>
 
-    <DockPanel Margin="0,4,0,4" >
+    <Border BorderBrush="gray" BorderThickness="1" CornerRadius="6" Padding="4,2,4,4" Background="#FFECECEC">
 
-        <!--Ref.Reactant-->
-        <StackPanel DockPanel.Dock="Top" Margin="0,2,0,8">
+        <DockPanel Margin="0,4,0,4" >
 
-            <TextBlock Text="Ref. Reactant" DockPanel.Dock="top" VerticalAlignment="Center" Foreground="{StaticResource DialogTitleForeground}"
+            <!--Ref.Reactant-->
+            <StackPanel DockPanel.Dock="Top" Margin="0,2,0,8">
+
+                <TextBlock Text="Ref. Reactant" DockPanel.Dock="top" VerticalAlignment="Center" Foreground="{StaticResource DialogTitleForeground}"
                 Background="transparent"  FontStyle="Italic" FontWeight="demibold" Padding="1,0" Margin="0,0,0,2" FontFamily="Verdana" 
                 FontSize="11.5" HorizontalAlignment="Center" Opacity="0.9"/>
 
-            <Separator Margin="0,0,0,0" Background="#FF4D84D7"/>
+                <Separator Margin="0,0,0,0" Background="#FF4D84D7"/>
 
-            <StackPanel Margin="0,0,0,0" Background="whitesmoke">
+                <StackPanel Margin="0,0,0,0" Background="whitesmoke">
 
-                <StackPanel Orientation="Horizontal" Margin="6,3,0,0" >
-                    <TextBlock Text="Elemental:" Width="70" FontWeight="DemiBold"/>
-                    <TextBlock x:Name="blkReactEf" d:Text="C₁₇H₂₃NO"/>
-                </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="6,3,0,0" >
+                        <TextBlock Text="Elemental:" Width="70" FontWeight="DemiBold"/>
+                        <TextBlock x:Name="blkReactEf" d:Text="C₁₇H₂₃NO"/>
+                    </StackPanel>
 
-                <StackPanel Orientation="Horizontal" Margin="6,0,0,0" >
-                    <TextBlock Text="MW:" Width="70" FontWeight="DemiBold"/>
-                    <TextBlock x:Name="blkReactMw" d:Text="234.75"/>
-                </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="6,0,0,0" >
+                        <TextBlock Text="MW:" Width="70" FontWeight="DemiBold"/>
+                        <TextBlock x:Name="blkReactMw" d:Text="234.75"/>
+                    </StackPanel>
 
-                <StackPanel Orientation="Horizontal" Margin="6,0,0,0" >
-                    <TextBlock Text="Exact Mass:" Width="70" FontWeight="DemiBold"/>
-                    <TextBlock x:Name="blkReactEM" d:Text="233.35"/>
-                </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="6,0,0,0" >
+                        <TextBlock Text="Exact Mass:" Width="70" FontWeight="DemiBold"/>
+                        <TextBlock x:Name="blkReactEM" d:Text="233.35"/>
+                    </StackPanel>
 
-                <StackPanel x:Name="pnlReactLinks" Orientation="Horizontal" Margin="6,0,0,0" >
-                    <TextBlock Text="Web Info:" Width="70" FontWeight="DemiBold"/>
-                    <TextBlock x:Name="lnkPubChemReact" Text="PubChem" Foreground="blue" TextDecorations="Underline" Cursor="Hand" Margin="0,0,4,0"/>
-                    <TextBlock Text="|"/>
-                    <TextBlock x:Name="lnkChemSpiderReact" Text="ChemSpider" Foreground="blue" TextDecorations="Underline"  Cursor="Hand" Margin="4,0,40,0" />
-                </StackPanel>
+                    <StackPanel x:Name="pnlReactLinks" Orientation="Horizontal" Margin="6,0,0,0" >
+                        <TextBlock Text="Web Info:" Width="70" FontWeight="DemiBold"/>
+                        <TextBlock x:Name="lnkPubChemReact" Text="PubChem" Foreground="blue" TextDecorations="Underline" Cursor="Hand" Margin="0,0,4,0"/>
+                        <TextBlock Text="|"/>
+                        <TextBlock x:Name="lnkChemSpiderReact" Text="ChemSpider" Foreground="blue" TextDecorations="Underline"  Cursor="Hand" Margin="4,0,40,0" />
+                    </StackPanel>
 
-                <StackPanel Orientation="Horizontal" Margin="6,0,0,5" >
-                    <TextBlock HorizontalAlignment="Left" Text="InChIKey:" FontWeight="Demibold" VerticalAlignment="Center" Width="70"/>
-                    <TextBox x:Name="blkInChIKeyReact" d:Text="CATMAVIUJSKTCV-UHFFFAOYSA-N" IsReadOnly="true" BorderThickness="0" 
+                    <StackPanel Orientation="Horizontal" Margin="6,0,0,5" >
+                        <TextBlock HorizontalAlignment="Left" Text="InChIKey:" FontWeight="Demibold" VerticalAlignment="Center" Width="70"/>
+                        <TextBox x:Name="blkInChIKeyReact" d:Text="CATMAVIUJSKTCV-UHFFFAOYSA-N" IsReadOnly="true" BorderThickness="0" 
                             Margin="-2,4,0,0" FontSize="11.5" VerticalAlignment="Center" FontFamily="Calibri" Background="transparent"/>
+                    </StackPanel>
+
                 </StackPanel>
+
+                <Separator Margin="0,0,0,2" DockPanel.Dock="top" Background="#FF4D84D7"/>
 
             </StackPanel>
 
-            <Separator Margin="0,0,0,2" DockPanel.Dock="top" Background="#FF4D84D7"/>
+            <!--Ref.Product-->
+            <StackPanel DockPanel.Dock="Top" >
 
-        </StackPanel>
-
-        <!--Ref.Product-->
-        <StackPanel DockPanel.Dock="Top" >
-
-            <TextBlock Text="Ref. Product" DockPanel.Dock="top" VerticalAlignment="Center" Foreground="{StaticResource DialogTitleForeground}"
+                <TextBlock Text="Ref. Product" DockPanel.Dock="top" VerticalAlignment="Center" Foreground="{StaticResource DialogTitleForeground}"
                 Background="transparent" FontStyle="Italic" FontWeight="demibold" Padding="1,0" Margin="0,0,0,2" FontFamily="Verdana" 
                 FontSize="11.5" HorizontalAlignment="Center" Opacity="0.9"/>
 
-            <Separator Margin="0,0,0,2" Background="#FF4D84D7"/>
+                <Separator Margin="0,0,0,2" Background="#FF4D84D7"/>
 
-            <StackPanel Margin="0,0,0,0" Background="whitesmoke">
+                <StackPanel Margin="0,0,0,0" Background="whitesmoke">
 
-                <StackPanel Orientation="Horizontal" Margin="6,3,0,0" >
-                    <TextBlock Text="Elemental:" Width="70" FontWeight="DemiBold"/>
-                    <TextBlock x:Name="blkProdEf" d:Text="C₁₇H₂₃NO"/>
-                </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="6,3,0,0" >
+                        <TextBlock Text="Elemental:" Width="70" FontWeight="DemiBold"/>
+                        <TextBlock x:Name="blkProdEf" d:Text="C₁₇H₂₃NO"/>
+                    </StackPanel>
 
-                <StackPanel Orientation="Horizontal" Margin="6,0,0,0" >
-                    <TextBlock Text="MW:" Width="70" FontWeight="DemiBold"/>
-                    <TextBlock x:Name="blkProdMw" d:Text="234.75"/>
-                </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="6,0,0,0" >
+                        <TextBlock Text="MW:" Width="70" FontWeight="DemiBold"/>
+                        <TextBlock x:Name="blkProdMw" d:Text="234.75"/>
+                    </StackPanel>
 
-                <StackPanel Orientation="Horizontal" Margin="6,0,0,0"  >
-                    <TextBlock Text="Exact Mass:" Width="70" FontWeight="DemiBold"/>
-                    <TextBlock x:Name="blkProdEM" d:Text="233.35"/>
-                </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="6,0,0,0"  >
+                        <TextBlock Text="Exact Mass:" Width="70" FontWeight="DemiBold"/>
+                        <TextBlock x:Name="blkProdEM" d:Text="233.35"/>
+                    </StackPanel>
 
-                <StackPanel x:Name="pnlProdLinks" Orientation="Horizontal" Margin="6,0,0,0"  >
-                    <TextBlock Text="Web Info:" Width="70" FontWeight="DemiBold"/>
-                    <TextBlock x:Name="lnkPubChemProd" Text="PubChem" Foreground="blue" TextDecorations="Underline"  Cursor="Hand" Margin="0,0,4,0"/>
-                    <TextBlock Text="|"/>
-                    <TextBlock x:Name="lnkChemSpiderProd" Text="ChemSpider" Foreground="blue" TextDecorations="Underline"  Cursor="Hand" Margin="4,0,40,0" />
-                </StackPanel>
+                    <StackPanel x:Name="pnlProdLinks" Orientation="Horizontal" Margin="6,0,0,0"  >
+                        <TextBlock Text="Web Info:" Width="70" FontWeight="DemiBold"/>
+                        <TextBlock x:Name="lnkPubChemProd" Text="PubChem" Foreground="blue" TextDecorations="Underline"  Cursor="Hand" Margin="0,0,4,0"/>
+                        <TextBlock Text="|"/>
+                        <TextBlock x:Name="lnkChemSpiderProd" Text="ChemSpider" Foreground="blue" TextDecorations="Underline"  Cursor="Hand" Margin="4,0,40,0" />
+                    </StackPanel>
 
-                <StackPanel Orientation="Horizontal" Margin="6,0,0,4">
-                    <TextBlock HorizontalAlignment="Left" Text="InChIKey:" FontWeight="Demibold" VerticalAlignment="Center" Width="70"/>
-                    <TextBox x:Name="blkInChIKeyProd" d:Text="CATMAVIUJSKTCV-UHFFFAOYSA-N" IsReadOnly="true" BorderThickness="0" 
+                    <StackPanel Orientation="Horizontal" Margin="6,0,0,4">
+                        <TextBlock HorizontalAlignment="Left" Text="InChIKey:" FontWeight="Demibold" VerticalAlignment="Center" Width="70"/>
+                        <TextBox x:Name="blkInChIKeyProd" d:Text="CATMAVIUJSKTCV-UHFFFAOYSA-N" IsReadOnly="true" BorderThickness="0" 
                             Margin="-2,3,0,0" FontSize="11.5" VerticalAlignment="Center" FontFamily="Calibri" Background="transparent"/>
-                </StackPanel>
+                    </StackPanel>
 
-            </StackPanel>
-
-            <Separator Margin="0,0,0,0" DockPanel.Dock="top" Background="#FF4D84D7"/>
-
-        </StackPanel>
-
-        <StackPanel DockPanel.Dock="Top">
-
-            <TextBlock Text="Exp. Info" DockPanel.Dock="top" VerticalAlignment="Center" Foreground="{StaticResource DialogTitleForeground}"
-                Background="transparent" FontStyle="Italic" FontWeight="demibold" Padding="1,0" Margin="0,12,0,2" FontFamily="Verdana" 
-                FontSize="11.5" HorizontalAlignment="Center" Opacity="0.9"/>
-            
-            <Separator Margin="0,0,0,2" Background="#FF4D84D7"/>
-
-            <StackPanel Margin="0,0,0,0" Background="whitesmoke">
-
-                <StackPanel Orientation="Horizontal" Margin="6,5,0,6" >
-                    <TextBlock Text="Materials:" Width="70" FontWeight="DemiBold" VerticalAlignment="Center" Margin="0,-2,0,0"/>
-                    <Button x:Name="btnMatTotals" Content="Required Materials" Padding="8,0,8,1" Background="White" Margin="0,4"/>
                 </StackPanel>
 
                 <Separator Margin="0,0,0,0" DockPanel.Dock="top" Background="#FF4D84D7"/>
 
             </StackPanel>
 
-        </StackPanel>
+            <StackPanel DockPanel.Dock="Top">
+
+                <TextBlock Text="Exp. Info" DockPanel.Dock="top" VerticalAlignment="Center" Foreground="{StaticResource DialogTitleForeground}"
+                Background="transparent" FontStyle="Italic" FontWeight="demibold" Padding="1,0" Margin="0,12,0,2" FontFamily="Verdana" 
+                FontSize="11.5" HorizontalAlignment="Center" Opacity="0.9"/>
+
+                <Separator Margin="0,0,0,2" Background="#FF4D84D7"/>
+
+                <StackPanel Margin="0,0,0,0" Background="whitesmoke">
+
+                    <StackPanel Orientation="Horizontal" Margin="6,5,0,6" >
+                        <TextBlock Text="Materials:" Width="70" FontWeight="DemiBold" VerticalAlignment="Center" Margin="0,-2,0,0"/>
+                        <Button x:Name="btnMatTotals" Content="Required Materials" Padding="8,0,8,1" Background="White" Margin="0,4"/>
+                    </StackPanel>
+
+                    <Separator Margin="0,0,0,0" DockPanel.Dock="top" Background="#FF4D84D7"/>
+
+                </StackPanel>
+
+            </StackPanel>
 
 
-        <DockPanel Margin="0,10,0,0" >
+            <DockPanel Margin="0,10,0,0" >
 
-            <TextBlock Text="Same Step" DockPanel.Dock="top" VerticalAlignment="Center" Foreground="{StaticResource DialogTitleForeground}"
+                <TextBlock Text="Same Step" DockPanel.Dock="top" VerticalAlignment="Center" Foreground="{StaticResource DialogTitleForeground}"
                 Background="transparent" FontStyle="Italic" FontWeight="demibold" Padding="1,0" Margin="0,0,0,2" FontFamily="Verdana" 
                 FontSize="11.5" HorizontalAlignment="Center"/>
 
-            <DockPanel Background="WhiteSmoke" DockPanel.Dock="top">
+                <DockPanel Background="WhiteSmoke" DockPanel.Dock="top">
 
-                <Separator Margin="0,0,0,2" DockPanel.Dock="top" Background="#FF4D84D7"/>
+                    <Separator Margin="0,0,0,2" DockPanel.Dock="top" Background="#FF4D84D7"/>
 
-                <local:ComboPlus x:Name="cboSortType" SelectedIndex="0" HorizontalAlignment="Center" Margin="0,4,0,0" Padding="6,1,6,2" 
+                    <local:ComboPlus x:Name="cboSortType" SelectedIndex="0" HorizontalAlignment="Center" Margin="0,4,0,0" Padding="6,1,6,2" 
                   CboBackground="white" VerticalAlignment="Center" DockPanel.Dock="top" FontSize="11.5">
-                    <ComboBoxItem Content="by yield"/>
-                    <ComboBoxItem Content="by scale"/>
-                </local:ComboPlus>
+                        <ComboBoxItem Content="by yield"/>
+                        <ComboBoxItem Content="by scale"/>
+                    </local:ComboPlus>
 
-                <Grid>
+                    <Grid>
 
-                    <TextBlock Text="- no items present so far -" Foreground="#FF6C6C6C" Margin="0,2,0,0" VerticalAlignment="Top" 
+                        <TextBlock Text="- no items present so far -" Foreground="#FF6C6C6C" Margin="0,2,0,0" VerticalAlignment="Top" 
                                 HorizontalAlignment="Center"/>
 
-                    <ListBox x:Name="lstStepExperiments" SelectionMode="Single" Background="transparent" BorderThickness="0"
+                        <ListBox x:Name="lstStepExperiments" SelectionMode="Single" Background="transparent" BorderThickness="0"
                                 FocusVisualStyle="{x:Null}"              
                                 Grid.IsSharedSizeScope="true" AllowDrop="false" Margin="0,4,4,4"
                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                                 VirtualizingStackPanel.IsVirtualizing="False" MinHeight="25"
                                 ItemsSource="{Binding Source={StaticResource cvsStepExperiments}}"
                                 ItemTemplate="{StaticResource expTreeItem}" HorizontalAlignment="Center" />
-                </Grid>
+                    </Grid>
+
+                </DockPanel>
+
+                <Separator Margin="0,0,0,2" VerticalAlignment="Top" Background="#FF4D84D7"/>
 
             </DockPanel>
 
-            <Separator Margin="0,0,0,2" VerticalAlignment="Top" Background="#FF4D84D7"/>
-
         </DockPanel>
 
-    </DockPanel>
+    </Border>
 
 </UserControl>

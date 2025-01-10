@@ -63,9 +63,6 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <AutoGen>True</AutoGen>
     </Compile>
-    <Compile Update="Notifications\ContentInfoPanel.xaml.vb">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Update="SketchAreaRSS.xaml.vb">
       <SubType>Code</SubType>
     </Compile>
