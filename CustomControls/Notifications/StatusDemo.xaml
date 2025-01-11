@@ -39,7 +39,7 @@
 
             <TextBlock Text="●" Margin="1,0,3,0" FontSize="14" Foreground="#FF5C5C5C"/>
             <TextBlock Text="You are in the 'demo' sandbox." FontWeight="bold" FontStyle="italic" Foreground="#FF494949"
-                TextWrapping="wrap" FontSize="12" Background="WhiteSmoke"/>
+                TextWrapping="wrap" FontSize="12"/>
             <ContentControl Content="{StaticResource icoInfo}" Height="14" Margin="4,0,0,0" ToolTipService.InitialShowDelay="250"
                 ToolTip="Familiarize with the application as 'demo'&#x0a;user, then create a unique user for your&#x0a;real experiments"/>
             
@@ -50,7 +50,7 @@
 
             <TextBlock Text="●" Margin="1,0,3,0" FontSize="14" Foreground="#FF5C5C5C"/>
             <TextBlock Text="Demo experiments left:" FontWeight="bold" FontStyle="italic" Foreground="#FF494949"     
-                TextWrapping="wrap" Background="whitesmoke" FontSize="12"/>
+                TextWrapping="wrap"  FontSize="12"/>
             <TextBlock x:Name="blkRemainingCount" d:Text="20" FontWeight="bold" FontStyle="italic" Foreground="#FF2B2BFD"
                 Text="{Binding tblExperiments.Count, Converter={StaticResource demoCountConv}}" Margin="3,0,6,0" FontSize="12"/>
             <ContentControl Content="{StaticResource icoInfo}" Height="14" ToolTipService.InitialShowDelay="250"

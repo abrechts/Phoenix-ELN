@@ -23,20 +23,18 @@
         
     </UserControl.Resources>
 
-    <Border BorderBrush="gray" BorderThickness="1" CornerRadius="6" Padding="10,6,8,4">
+    <Border BorderBrush="gray" BorderThickness="1" CornerRadius="6" Padding="10,6,6,4" Background="#FFF9F9F9">
         
-        <StackPanel>
+        <StackPanel Margin="0,2,0,0">
 
-            <Grid>
+            <Grid HorizontalAlignment="left">
                 
-                <TextBlock x:Name="blkWelcome" Text="{Binding FirstName,StringFormat={}Welcome {0}!}" d:Text="Welcome User!" 
-                   HorizontalAlignment="left" FontWeight="Bold" FontSize="12.5" 
-                   Foreground="{StaticResource DialogTitleForeground}" Margin="0,0,0,2" FontStyle="Italic"  />
+                <TextBlock x:Name="blkWelcome" Text="{Binding FirstName,StringFormat={}Welcome {0}!}" d:Text="Welcome User!" FontWeight="Bold"
+                  FontSize="12.5" Foreground="{StaticResource DialogTitleForeground}" Margin="0,0,0,2" FontStyle="Italic"/>
 
-                <TextBlock Text="Status Info" HorizontalAlignment="Stretch" Margin="0,0,0,2" FontStyle="Italic" 
-                   FontWeight="Bold" Foreground="#FF0941CC" FontSize="12.5" Background="white"
+                <TextBlock Text="Status Info"  Margin="0,0,0,2" FontStyle="Italic" FontWeight="Bold" 
+                  Foreground="#FF0941CC" FontSize="12.5" Background="white"
                    Visibility="{Binding UserID, Converter={StaticResource demoVisConv}}"/>
-
 
             </Grid>
 
@@ -44,25 +42,25 @@
 
             <local:StatusDemo Margin="-2,0,0,4" Visibility="{Binding UserID,Converter={StaticResource demoVisConv}}"/>
          
-            <StackPanel Margin="2,0,6,4" Background="Whitesmoke" >
+            <StackPanel Margin="0,0,0,2" Background="white">
 
                 <Grid HorizontalAlignment="Left">
 
                     <StackPanel Orientation="Horizontal" Margin="0,-3,0,4" TextBlock.FontSize="12.5">
                     
-                        <TextBlock Text="● App Version:" TextWrapping="Wrap" Margin="1,4,3,0" FontStyle="Italic" />
+                        <TextBlock Text="● App Version:" TextWrapping="Wrap" Margin="2,4,3,0" FontStyle="Italic" />
 
-                        <Border Margin="0,4,2,0" CornerRadius="4" Background="#FFEBEBEB">
+                        <Border Margin="0,4,2,0" CornerRadius="4" >
                             <TextBlock Text="{Binding Database.CurrAppVersion,Converter={StaticResource appVersionConv}}" d:Text="2.12.3" 
                                FontWeight="demibold" Padding="2,0,2,0"/>
                         </Border>
                     
                         <ContentControl x:Name="icoNoUpdateAvailable" Content="{StaticResource icoOkCheckmark}" Height="14" VerticalAlignment="center" 
-                            Margin="0,2,0,0" ToolTip="The application is up to date!" d:Visibility="Visible" Visibility="visible"
+                            Margin="0,3,0,0" ToolTip="The application is up to date!" d:Visibility="Visible" Visibility="visible"
                             ToolTipService.InitialShowDelay="250"/>
 
                         <ContentControl x:Name="icoUpdateAvailable" Content="{StaticResource icoWarningCircleRed}" Height="16" 
-                            Visibility="Collapsed" d:Visibility="visible" VerticalAlignment="Center" Margin="0,2,0,0"/>
+                            Visibility="Collapsed" d:Visibility="visible" VerticalAlignment="bottom" Margin="0,0,0,-1"/>
 
 
                     </StackPanel>
@@ -71,15 +69,15 @@
                     
                 </Grid>
                 
-                <StackPanel x:Name="pnlUpdateInfo" Orientation="Horizontal"  Margin="11,0,0,5" Visibility="Collapsed" d:Visibility="visible">
+                <StackPanel x:Name="pnlUpdateInfo" Orientation="Horizontal"  Margin="11,2,0,5" Visibility="Collapsed" d:Visibility="visible">
 
-                    <TextBlock FontStyle="Italic" Background="#FFFFFF6E" Padding="0,0,2,0" FontSize="11.5">
+                    <TextBlock FontStyle="Italic" Background="#FFFFFF6E" Padding="0,0,2,0">
                         <Run FontWeight="Bold" Text="Update" Foreground="#FF393939"/>
                         <Run Text="available:"/>
                     </TextBlock>
 
                     <TextBlock x:Name="lnkVersionInfo" Foreground="blue"  Margin="2,0,0,0" 
-                      Cursor="Hand" FontFamily="verdana" FontSize="11.5" HorizontalAlignment="Left" Padding="0,0,2,0" FontStyle="Italic">
+                      Cursor="Hand" FontFamily="verdana" HorizontalAlignment="Left" Padding="0,0,2,0" FontStyle="Italic">
                         <Run Text="Version"/>
                         <Run x:Name="blkNewVersion" d:Text="2.12.4" Text=""/>
                     </TextBlock>
@@ -90,9 +88,9 @@
 
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
 
-                        <TextBlock Text="● Unfinalized Exp:" TextWrapping="Wrap" Margin="1,0,2,0" VerticalAlignment="Center" FontStyle="Italic"/>
+                        <TextBlock Text="● Unfinalized Exp:" TextWrapping="Wrap" Margin="2,0,2,0" VerticalAlignment="Center" FontStyle="Italic"/>
 
-                        <Border Margin="0,0,2,0" CornerRadius="4" Background="#FFEBEBEB">
+                        <Border Margin="0,0,2,0" CornerRadius="4" >
                             <TextBlock d:Text="11" Text="{Binding tblExperiments, Converter={StaticResource unfinalizedCountConv}}"  
                             VerticalAlignment="Center" FontWeight="demibold" Padding="3,0,2,0" ScrollViewer.CanContentScroll="True" />
                         </Border>
