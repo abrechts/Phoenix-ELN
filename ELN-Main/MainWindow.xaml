@@ -14,7 +14,7 @@
         
         <custom:DemoVisibilityConverter x:Key="demoVisConv"/>
         <custom:DemoToBooleanConverter x:Key="demoToBoolConv"/>
-
+        
     </Window.Resources>
      
     
@@ -157,14 +157,13 @@
                             <MenuItem.Icon>
                                 <ContentControl Content="{StaticResource icoSettings}" Height="14" Opacity="0.8"/>
                             </MenuItem.Icon>
-                            <MenuItem x:Name="btnEditUser" Header="Edit Personal Settings ..." Icon="{StaticResource icoCreateUser}" Background="white"
-                              Margin="0,1" />
+                            <MenuItem x:Name="btnEditUser" Header="Edit Personal Settings ..." Icon="{StaticResource icoCreateUser}"
+                                Margin="0,3,0,1" />
                             <Separator/>
-                            <MenuItem x:Name="btnRestore" Header="Restore from Server ..." Background="white"
-                              Margin="0,1"/>
-                            <MenuItem x:Name="btnConnect" Header="Server Connection ..." Background="white"
-                               Margin="0,1" IsEnabled="{Binding ElementName=tabExperiments, Path=SelectedContent.UserID,
-                                    Converter={StaticResource demoToBoolConv},ConverterParameter=invert}"/>
+                            <MenuItem x:Name="btnConnect" Header="Server Connection ..." Margin="0,2,0,0" 
+                              IsEnabled="{Binding ElementName=tabExperiments, Path=SelectedContent.UserID, Converter={StaticResource demoToBoolConv},
+                                ConverterParameter=invert}"/>
+                            <MenuItem x:Name="btnRestore" Header="Restore from Server ..." Margin="0,0,0,2"/>
                         </MenuItem>
                     </Menu>
                     
@@ -174,16 +173,16 @@
                                 <StackPanel Orientation="Horizontal" >
                                     <ContentControl Content="{StaticResource icoHelpMenu}" Height="16" Margin="0,0,2,0"/>
                                     <TextBlock Text="Help" Margin="0,0,0,0" />
-                                    <Path VerticalAlignment="Center" Margin="4,2,0,0" Fill="Black" Data="M 0 0 L 3 3 L 6 0 Z"/>
+                                    <Path VerticalAlignment="Center" Margin="4,0,0,0" Fill="Black" Data="M 0 0 L 3 3 L 6 0 Z"/>
                                 </StackPanel>
                             </MenuItem.Header>
-                            <MenuItem x:Name="mnuHelp" Header="Help Docs..." Margin="0,2,0,1" Background="white">
+                            <MenuItem x:Name="mnuHelp" Header="Help Docs..." Margin="0,0">
                                 <MenuItem.Icon>
-                                    <ContentControl Content="{StaticResource icoInfo}" Height="14"/>
+                                    <ContentControl Content="{StaticResource icoInfo}" Height="16"/>
                                 </MenuItem.Icon>
                             </MenuItem>
-                            <MenuItem x:Name="mnuAbout" Header="About Phoenix ELN ..." Margin="0,2,0,1" Background="white"/>
-                            <MenuItem x:Name="mnuCheckForUpdates" Header="Check for updates ..."/>
+                            <MenuItem x:Name="mnuAbout" Header="About Phoenix ELN ..." Margin="0,1"/>
+                            <MenuItem x:Name="mnuCheckForUpdates" Header="Check for updates ..." Margin="0,1" />
                         </MenuItem>
                     </Menu>
 
