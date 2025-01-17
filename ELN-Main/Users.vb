@@ -1,5 +1,4 @@
-﻿Imports System.Reflection
-Imports CustomControls
+﻿Imports CustomControls
 Imports ElnBase
 Imports ElnBase.ELNEnumerations
 Imports ElnCoreModel
@@ -12,7 +11,6 @@ Public Class Users
     ''' empty experiment. The materials database is retained.
     ''' </summary>
     ''' <param name="mainWdw">The current main window.</param>
-    ''' <param name="expNavTree">The current experiment tree (for adding experiment)</param>
     ''' 
     Public Shared Function CreateFirstUser(mainWdw As MainWindow) As Boolean
 
@@ -117,6 +115,98 @@ Public Class Users
 
                                 '-Save all changes
                                 .SaveChanges()
+
+                                '- Update data context
+                                mainWdw.DataContext = Nothing
+                                mainWdw.DataContext = newUser
+
+                                Return True
+
+                            End With
+
+                        End If
+                    End With
+                End If
+            End With
+        End If
+
+        Return False
+
+    End Function
+
+
+    ''' <summary>
+    ''' Adds a new user to the current experiments database. This is useful for accommodating additional ELN users
+    ''' on your own machine, or when working in multiple groups in parallel.
+    ''' </summary>
+    ''' <param name="mainWdw">The main window</param>
+    ''' <returns>True, if successful</returns>
+    ''' 
+    Public Shared Function CreateAdditionalUser(mainWdw As MainWindow) As Boolean
+
+        'Applies to Non-Demo user only
+        Dim dbEntry = MainWindow.DBContext.tblDatabaseInfo.First
+        If dbEntry.tblUsers.First.UserID = "demo" Then
+            Return False
+        End If
+
+        Dim res = MsgBox("This will add a new user with its own user-ID to " + vbCrLf +
+                        "your current ELN database." + vbCrLf + vbCrLf +
+                        "This useful for accommodating additional ELN users" + vbCrLf +
+                        "on your own machine, or if you are working in " + vbCrLf +
+                        "multiple groups in parallel.",
+                        MsgBoxStyle.Information + MsgBoxStyle.OkCancel + MsgBoxStyle.DefaultButton2, "New User")
+
+        If res = MsgBoxResult.Ok Then
+
+            'Run new user wizard
+            Dim newUserDlg As New dlgNewUser(MainWindow.DBContext, MainWindow.ServerDBContext)
+
+            With newUserDlg
+                .Owner = mainWdw
+                If .ShowDialog Then
+
+                    'User confirms: Display password dialog
+                    Dim passwordDlg As New dlgPassword(Nothing)
+                    With passwordDlg
+                        .Title = "Password"
+                        .Owner = mainWdw
+
+                        If .ShowDialog() Then
+
+                            With MainWindow.DBContext
+
+                                '- Create the new user data
+                                Dim newUser As New tblUsers
+                                With newUser
+                                    .UserID = newUserDlg.txtUserID.Text
+                                    .PWHash = passwordDlg.NewPasswordHash
+                                    .PWHint = passwordDlg.NewPasswordHint
+                                    .FirstName = newUserDlg.txtFirstName.Text
+                                    .LastName = newUserDlg.txtLastName.Text
+                                    .CompanyName = newUserDlg.txtOrganization.Text
+                                    .City = newUserDlg.txtSite.Text
+                                    .DepartmentName = newUserDlg.txtDepartment.Text
+                                    .Database = dbEntry
+                                End With
+                                dbEntry.tblUsers.Add(newUser)
+
+                                '- Add first project
+                                Dim newProject As New tblProjects
+                                With newProject
+                                    .GUID = Guid.NewGuid.ToString("D")
+                                    .Title = "Project 1"
+                                    .IsNodeExpanded = True
+                                    .SequenceNr = 0
+                                    .User = newUser
+                                End With
+                                newUser.tblProjects.Add(newProject)
+
+                                '- Add first experiment
+                                ExperimentBase.AddExperiment(MainWindow.DBContext, newProject, Nothing, CloneType.EmptyExperiment)
+
+                                '-Save all changes
+                                .SaveChangesNoSyncTracking()
 
                                 '- Update data context
                                 mainWdw.DataContext = Nothing

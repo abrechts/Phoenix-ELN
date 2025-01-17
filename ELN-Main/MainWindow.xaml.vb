@@ -126,7 +126,7 @@ Class MainWindow
         AddHandler ExperimentContent.ExperimentContextChanged, AddressOf ExperimentContent_ContextChanged
 
         'Connect local database model with UI
-        ApplyAllDataBindings()
+        ApplyAllDataBindings(DBContext.tblUsers.First)
 
         'create server context async to reduce startup time
         With CustomControls.My.MySettings.Default
@@ -148,7 +148,9 @@ Class MainWindow
                         mainStatusInfo.DisplayServerError = True
                     End If
                 End If
+                btnAddUser.IsEnabled = True
             Else
+                btnAddUser.IsEnabled = False
                 'demo user has no server connection
                 .IsServerSpecified = False 'visibility of server status items is data bound to this setting
             End If
@@ -241,11 +243,11 @@ Class MainWindow
     ''' Performs all data binding between data model and UI.
     ''' </summary>
     ''' 
-    Private Sub ApplyAllDataBindings()
+    Private Sub ApplyAllDataBindings(currUser As tblUsers)
 
         '-- Assign initial contexts
 
-        Me.DataContext = DBContext.tblUsers.First   'currently only one local user assumed
+        Me.DataContext = currUser
 
         ExperimentContent.DbContext = DBContext
 
@@ -329,6 +331,8 @@ Class MainWindow
     Private Sub FirstTimeConnect()
 
         '- check for duplicate server usernames -> will immediately restart app if conflicts were resolved by re-assigning UserId 
+
+        ' --> TODO: Loop through ALL local users and check for conflicts with server userID's
 
         If AreSameUserDataOnServer(DBContext.tblUsers.First) Then
 
@@ -623,13 +627,33 @@ Class MainWindow
     End Sub
 
 
+    Private Sub cboUsers_SelectionChanged(sender As Object, e As SelectionChangedEventArgs) Handles cboUsers.SelectionChanged
+
+        If cboUsers.SelectedItem IsNot Nothing Then
+            Dim currUser = CType(cboUsers.SelectedItem, tblUsers)
+            ApplyAllDataBindings(currUser)
+            If currUser.tblExperiments.Count > 0 Then
+                expNavTree.SelectExperiment(currUser.tblExperiments.First)
+            End If
+        End If
+
+    End Sub
+
+
     ''' <summary>
     ''' Handles info panel request to create a first non-demo user-
     ''' </summary>
     ''' 
     Private Sub DemoStatus_RequestCreateFirstUser(sender As Object)
 
-        CreateFirstUser()
+        CreateNewUser(isFirstUser:=True)
+
+    End Sub
+
+
+    Private Sub btnAddUser_Click() Handles btnAddUser.Click
+
+        CreateNewUser(isFirstUser:=False)
 
     End Sub
 
@@ -638,28 +662,46 @@ Class MainWindow
     ''' Creates the first non-demo user
     ''' </summary>
     ''' 
-    Private Sub CreateFirstUser()
+    Private Sub CreateNewUser(isFirstUser As Boolean)
 
-        If CType(Me.DataContext, tblUsers).UserID = "demo" Then
+        If isFirstUser Then
 
             If Users.CreateFirstUser(Me) Then
 
                 'Connect data model of local database with UI
-                ApplyAllDataBindings()
-
                 Dim currUser = CType(Me.DataContext, tblUsers)
+                ApplyAllDataBindings(currUser)
+
                 expNavTree.SelectExperiment(currUser.tblExperiments.First)
+                cboUsers.SelectedItem = currUser
 
                 Dim res2 = MsgBox("Done! - If the optional Phoenix ELN server " + vbCrLf +
-                                  "database is installed in your environment," + vbCrLf +
-                                  "would you like to connect to it now for  " + vbCrLf +
-                                  "backup and in-house data sharing?",
-                                  MsgBoxStyle.Information + MsgBoxStyle.YesNo, "Server Connection")
+                            "database is installed in your environment," + vbCrLf +
+                            "would you like to connect to it now for  " + vbCrLf +
+                            "backup and in-house data sharing?",
+                            MsgBoxStyle.Information + MsgBoxStyle.YesNo, "Server Connection")
                 If res2 = MsgBoxResult.Yes Then
                     ConnectToServer()
                 End If
 
+                btnAddUser.IsEnabled = True
+
             End If
+
+        Else
+
+            If Users.CreateAdditionalUser(Me) Then
+
+                'Connect data model of local database with UI
+
+                Dim currUser = CType(Me.DataContext, tblUsers)
+                ApplyAllDataBindings(currUser)
+
+                expNavTree.SelectExperiment(currUser.tblExperiments.First)
+                cboUsers.SelectedItem = currUser
+
+            End If
+
         End If
 
     End Sub
