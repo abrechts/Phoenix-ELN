@@ -129,7 +129,7 @@ Public Class Protocol
                         If .ServerSynchronization IsNot Nothing Then
                             If Not ServerSync.IsSynchronizing Then
                                 '- sync to server asynchronously
-                                .ServerSynchronization.SynchronizeAsync()
+                                Await .ServerSynchronization.SynchronizeAsync()
                             Else
                                 '- skip this sync while another one is ongoing
                                 _wasSkipped = True

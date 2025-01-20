@@ -8,32 +8,47 @@
         Title="Server Data Conflict" Width="400" ShowInTaskbar="False" FontFamily="SegoeUI" FontSize="12.5" ResizeMode="NoResize" 
         WindowStartupLocation="CenterOwner" SizeToContent="Height" >
     <Grid>
-        <StackPanel Margin="30,15,30,20">
+        <StackPanel Margin="30,15,25,20">
             
-            <TextBlock Text="UserID Conflict" FontWeight="Bold" FontSize="13.5" FontStyle="Italic"  Foreground="{StaticResource DialogTitleForeground}"/>
+            <TextBlock Text="UserID Conflict" FontWeight="Bold" FontSize="14.5" FontStyle="Italic"  Foreground="{StaticResource DialogTitleForeground}"/>
            
-            <TextBlock Text="Another version of your experiments database seems to be present on the server (same userID and full name). Uploading your current data therefore would lead to version conflicts." 
-               Margin="0,6,0,2" TextWrapping="Wrap" FontSize="12"/>
+            <TextBlock x:Name="blkIntro" Text="Your data can't be uploaded to the server, since your local userID already is present there." 
+                Margin="0,6,0,4" TextWrapping="Wrap" />
 
-            <TextBlock Text="Select an option for conflict resolution:" Margin="0,6,0,5" TextWrapping="Wrap" FontSize="12"/>
+            <TextBlock Text="Select an option for conflict resolution:" Margin="0,6,0,8" TextWrapping="Wrap" />
 
             <RadioButton x:Name="rdoRestore" IsChecked="true">
-                <StackPanel Margin="0,2,0,0">
-                    <TextBlock Text="Restore your data from the server." FontWeight="DemiBold"/>
-                    <TextBlock Text="Replaces your current local experiments database by the version stored on the server. Discards your current local data." TextWrapping="Wrap" Margin="1,1,0,0" FontSize="12" FontStyle="Italic"/>
+                <StackPanel Margin="0,2,0,2">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Restore your data from the server." FontWeight="DemiBold"/>
+                        <ContentControl Content="{StaticResource icoInfo}" Height="14" ToolTipService.InitialShowDelay="250" Margin="4,-1,0,0"
+                        ToolTip="Restores your server experiments and combines &#x0a;them with your current local experiments."/>
+                    </StackPanel>
+                    <Separator/>
+                    <TextBlock Text="Scenario: You were already connected to the server and then migrated to a new machine, where you re-created your userID, instead of restoring your experiments from the server." 
+                    TextWrapping="Wrap" Margin="1,1,0,0" FontStyle="Italic" Width="310"/>
                 </StackPanel>
             </RadioButton>
 
-            <RadioButton x:Name="rdoRename" Margin="0,5,0,0">
+          
+            <RadioButton x:Name="rdoRename" Margin="0,8,0,0">
                 <StackPanel Margin="0,2,0,0">
-                    <TextBlock Text="Assign new experiment IDs to your local experiments." FontWeight="DemiBold"/>
-                    <TextBlock Text="Keeps the local data and both versions on the server. Already referenced local experiment-ID's are no more valid." TextWrapping="Wrap" Margin="1,1,0,0" FontSize="12" FontStyle="Italic"/>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Assign yourself a different, unique userID." FontWeight="DemiBold"/>
+                        <ContentControl Content="{StaticResource icoInfo}" Height="14" ToolTipService.InitialShowDelay="250" Margin="4,-1,0,0"
+                            ToolTip="Replaces your userID and modifies your &#x0a;experiment-ID's accordingly"/>
+                    </StackPanel>
+                    <Separator/>
+                    <TextBlock Text="Scenario: You chose a userID already utilized by someone else in your organization, leading to userID conflicts." TextWrapping="Wrap" Margin="1,1,0,0" FontStyle="Italic"/>
                 </StackPanel>
             </RadioButton>
 
-            <Button x:Name="btnOK" Content="OK" Margin="0,16,0,0" HorizontalAlignment="Center" Width="80" Height="22" 
-               VerticalAlignment="Center" FontSize="11" Padding="2,2,2,0" Background="#FFF9F9F9"/>
-            
+            <StackPanel Orientation="Horizontal" Margin="0,20,0,4" HorizontalAlignment="Center">
+                <Button x:Name="btnOK" Content="OK"  Width="80" Height="22" 
+                   VerticalAlignment="Center"  Padding="2,2,2,0" Background="#FFF9F9F9"/>
+                <!--<Button x:Name="btnCancel" Content="Cancel" Width="80" Height="22"/>-->
+            </StackPanel>
+       
         </StackPanel>
     </Grid>
 </Window>

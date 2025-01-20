@@ -4,14 +4,14 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="Username Conflict"  Width="320" SizeToContent="Height" WindowStartupLocation="CenterOwner">
+        Title="Username Conflict"  Width="320" SizeToContent="Height" WindowStartupLocation="CenterOwner" FontSize="12.5">
     <Grid>
 
         <StackPanel Margin="20,16,20,20">
 
-            <TextBlock Text="Username Duplicate" FontWeight="bold" Margin="0,0,0,4" FontSize="14" Foreground="{StaticResource DialogTitleForeground}"/>
+            <TextBlock Text="Username Duplicate" FontWeight="bold" Margin="0,0,0,4" FontSize="14.5" Foreground="{StaticResource DialogTitleForeground}"/>
 
-            <TextBlock Text="A user-ID identical with yours already exists on the server and would lead to data conflicts. " TextWrapping="wrap" Margin="0,0,0,5"/>
+            <TextBlock Text="A user-ID identical with yours already exists on the server and would lead to data conflicts: " TextWrapping="wrap" Margin="0,0,0,5"/>
             <Separator/>
             <TextBlock x:Name="blkDuplicates" d:Text=" • myusername (Mike Demo) " Margin="6,4,0,6" HorizontalAlignment="Left" 
                VerticalAlignment="Top" Background="whitesmoke" />
@@ -28,7 +28,7 @@
             <Separator Margin="0,12,0,2"/>
 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,14,0,0">
-                <Button x:Name="btnOK" Content="OK" IsDefault="true" Width="75" VerticalAlignment="Top" HorizontalAlignment="Left" Padding="1,2,1,2" />
+                <Button x:Name="btnOK" Content="OK" Width="75" VerticalAlignment="Top" HorizontalAlignment="Left" Padding="1,2,1,2" />
                 <Button x:Name="btnCancel" Content="Cancel" IsCancel="true" Width="75" HorizontalAlignment="Left" 
                   VerticalAlignment="Top" Margin="20,0,0,0" Padding="1,2,1,2"/>
             </StackPanel>

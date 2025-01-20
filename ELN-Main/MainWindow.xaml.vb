@@ -125,6 +125,14 @@ Class MainWindow
         AddHandler StepExpSelector.RequestOpenExperiment, AddressOf ExpList_RequestOpenExperiment
         AddHandler ExperimentContent.ExperimentContextChanged, AddressOf ExperimentContent_ContextChanged
 
+
+        ''testing only!
+        'Dim dlgTest As New dlgServerConflict
+        'With dlgTest
+        '    .Owner = Me
+        '    .ShowDialog()
+        'End With
+
         'Connect local database model with UI
         ApplyAllDataBindings(DBContext.tblUsers.First)
 
@@ -219,7 +227,9 @@ Class MainWindow
                 Else
 
                     '- connecting existing non-demo database for the first time
-                    FirstTimeConnect()
+                    If Not FirstTimeConnect() Then
+                        ' --- TODO: Disconnect from server
+                    End If
 
                 End If
 
@@ -323,147 +333,256 @@ Class MainWindow
     End Function
 
 
-    ''' <summary>
-    ''' Processes for connecting a local database to the server for the first time. Checks for
-    ''' userID duplicates and bulk uploads data . 
-    ''' </summary>
-    ''' 
-    Private Sub FirstTimeConnect()
+    Private Sub RenumberConflictingUserExp(user As tblUsers)
 
-        '- check for duplicate server usernames -> will immediately restart app if conflicts were resolved by re-assigning UserId 
+        'renumber local duplicate experiment-ID's to add them 'on top' of existing server experiments after merge sync
 
-        ' --> TODO: Loop through ALL local users and check for conflicts with server userID's
+        Dim maxLocalExpID = (From exp In user.tblExperiments Select exp.ExperimentID Order By ExperimentID Descending).First
+        Dim maxLocalIndex = maxLocalExpID.Split("-"c)(1)
+        Dim maxServerExpID = (From exp In ServerDBContext.tblExperiments Where exp.UserID = user.UserID Select exp.ExperimentID
+                              Order By ExperimentID Descending).First
+        Dim maxServerIndex = maxServerExpID.Split("-"c)(1)
 
-        If AreSameUserDataOnServer(DBContext.tblUsers.First) Then
-
-            '- experiment data of the same user already are on the server -> restore or inform about rename
-            If DBContext.tblUsers.First.tblExperiments.Count = 1 Then
-
-                'one experiment present: usually after creating a conflicting new user, no need to offer choices here.
-                MsgBox("The server already seems to contain your" + vbCrLf +
-                       "experiment data (same userID and full name). " + vbCrLf +
-                       "Please restore them from the server next ...", MsgBoxStyle.Information, "Restore Info")
-                RestoreFromServer()
-                Exit Sub
-
-            Else
-
-                'Multiple local experiments present: offer choice between restore and rename strategy
-                Dim serverConflictDlg As New dlgServerConflict
-                With serverConflictDlg
-                    .Owner = Me
-                    .ShowDialog()
-                    If .UseRestoreStrategy Then
-                        RestoreFromServer()
-                    End If
-                End With
-
-            End If
-
-        End If
-
-        If ResolveDuplicateUsernames(DBContext, ServerDBContext) Then
-
-            '- no userID conflicts with server
-
-            mainStatusInfo.DisplayServerError = False
-
-            ServerSync.DatabaseGUID = DBContext.tblDatabaseInfo.First.GUID
-
-            Dim uploadDlg As New dlgUploadProgress(DBContext, ServerDBContext)
-            With uploadDlg
-                .Owner = Me
-                .ShowDialog()
-            End With
-            DBContext.ServerSynchronization.SynchronizeAsync()
-
+        If maxLocalIndex <> maxServerIndex Then
+            For Each exp In user.tblExperiments
+                Dim res = exp.ExperimentID.Split("-"c)
+                exp.ExperimentID = res(0) + "-" + (CInt(res(1)) + maxServerIndex).ToString
+            Next
         End If
 
     End Sub
 
 
-
     ''' <summary>
-    ''' Determines if the userID of the user attempting to connect already exists on the server, 
-    ''' resulting in a duplicate. Displays a dialog with further actions, if found. 
+    ''' Connect to server db for first time: Performs username duplicate checks with server database and offers 
+    ''' resolution options if conflicts are found.
     ''' </summary>
+    ''' <returns>True, if operation is successful.</returns>
     ''' 
-    Public Function ResolveDuplicateUsernames(localContext As ElnDbContext, serverContext As ElnDbContext) As Boolean
+    Private Function FirstTimeConnect() As Boolean
 
-        Try
+        If ServerSync.DatabaseGUID Is Nothing Then  'just to make sure (already checked by calling function)
 
-            'note: currently only one local user is supported in the UI
-            Dim localUsers = (From user In localContext.tblUsers Select user.UserID).ToList
+            Dim conflictingLocalUsers = GetConflictingLocalUsers()
+            If conflictingLocalUsers.Count > 0 Then
 
-            Dim isFirst As Boolean = True
-            Dim localDbGUID = localContext.tblDatabaseInfo.First.GUID
-            Dim duplicateUsers = (From user In serverContext.tblUsers Where localUsers.Contains(user.UserID) AndAlso user.DatabaseID <> localDbGUID).ToList
+                'userID conflict(s) found
 
-            If duplicateUsers.Count > 0 Then
+                Dim resolveConflictDlg As New dlgServerConflict
+                With resolveConflictDlg
 
-                For Each dupUser In duplicateUsers
+                    .Owner = Me
+                    .ShowDialog()   'currently no option to cancel; if implemented then completely disconnect to prevent loops
 
-                    If Not isFirst Then
-                        MsgBox("There's another user-ID conflict -->", MsgBoxStyle.Information, "Duplicate")
+                    If .UseRestoreStrategy Then
+
+                        ' TODO: Restore and merge selected (missed restore from server after migration)
+                        Return True 'or false
+
+                    Else
+
+                        'Rename local userID references due conflicting username of other user
+                        Return RenameLocalUserIDs(conflictingLocalUsers)    'restarts app if successful
+
                     End If
 
-                    Dim duplicateDlg As New dlgChangeUsername(duplicateUsers, dupUser, localDbGUID)
-                    With duplicateDlg
-                        .Owner = Me
-                        If .ShowDialog Then
-                            If Not RenameUserID.DoRename(localContext, dupUser.UserID, .txtUsername.Text.ToLower) Then
-                                Return False
-                            End If
-                        Else
-                            Return True 'cancelled -> conflict still present
-                        End If
-                    End With
-                    isFirst = False
-
-                Next
-
-                MsgBox("User-ID reassignments complete. The application " + vbCrLf +
-                    "will restart now and upload your data.", MsgBoxStyle.Information, "Duplicate Resolution")
-
-                CustomControls.My.MySettings.Default.Save()
-                Process.Start(Environment.ProcessPath())
-                Process.GetCurrentProcess().Kill()
-                Return True 'dummy
+                End With
 
             Else
+
+                'no conflicts; bulk upload local database to server (standard case)
+
+                Dim uploadDlg As New dlgUploadProgress(DBContext, ServerDBContext)
+                With uploadDlg
+                    .Owner = Me
+                    .ShowDialog()
+                End With
+
+                mainStatusInfo.DisplayServerError = False
+                ServerSync.DatabaseGUID = DBContext.tblDatabaseInfo.First.GUID
+                DBContext.ServerSynchronization.SynchronizeAsync()
+
                 Return True
+
             End If
-        Catch ex As Exception
-            MsgBox(ex.Message + vbCrLf + ex.InnerException.Message)
+
+        Else
+
             Return True
-        End Try
+
+            '    mainStatusInfo.DisplayServerError = False
+
+            '    ServerSync.DatabaseGUID = DBContext.tblDatabaseInfo.First.GUID
+
+            '    'performs initial bulk upload
+            '    Dim uploadDlg As New dlgUploadProgress(DBContext, ServerDBContext)
+            '    With uploadDlg
+            '        .Owner = Me
+            '        .ShowDialog()
+            '    End With
+
+            '    DBContext.ServerSynchronization.SynchronizeAsync()
+
+            'Else
+
+            '    ' - Conflict situation: Database ALREADY PRESENT on server, where user restarted from userID-00001 locally
+            '    '   after migration to a new machine, instead of restoring from server.
+
+            '    For Each user In DBContext.tblDatabaseInfo.First.tblUsers
+
+            '        'iterate through all potential users of local database
+            '        Dim serverUserHit = (From serverUser In ServerDBContext.tblUsers Where serverUser.UserID = user.UserID).FirstOrDefault
+
+            '        'skip renumbering if user not yet present on server
+            '        If serverUserHit IsNot Nothing Then
+
+            '            'skip if there's just one empty user experiment present 
+            '            If Not (user.tblExperiments.Count = 1 AndAlso user.tblExperiments.First.RxnSketch Is Nothing) Then
+            '                RenumberConflictingUserExp(user)
+            '            End If
+
+            '        End If
+
+            '    Next
+
+            '    '1) sync local exp to server, wait for completion
+            '    DBContext.ServerSynchronization.SynchronizeAsync().Wait()
+
+            '    MsgBox("Your local experiments database already was" + vbCrLf +
+            '            "synchronized to the ELN server before. " + vbCrLf +
+            '            "Please restore it from the server next ...", MsgBoxStyle.Information, "Restore Info")
+
+
+            '    '2) restore the merged local database from server
+
+            '    'TODO -- Prevent user from cancelling the restore at this stage?
+            '    RestoreFromServer()
+
+        End If
+
     End Function
 
 
     ''' <summary>
-    ''' Gets if a user entry with identical with the specified local user entry by userID, first name 
-    ''' and last name already exists on the server. 
+    ''' Gets the local user entries having identical userID's with the server database. 
     ''' </summary>
-    ''' <remarks>
-    ''' Typically used to detect if a user should restore from the server instead 
-    ''' of creating a new identical user from the demo, e.g. after a machine migration.
-    ''' </remarks>
     ''' 
-    Private Function AreSameUserDataOnServer(localUser As tblUsers) As Boolean
+    Private Function GetConflictingLocalUsers() As List(Of tblUsers)
 
-        If ServerDBContext IsNot Nothing Then
-            Dim serverUser = (From user In ServerDBContext.tblUsers Where user.UserID = localUser.UserID).FirstOrDefault
-            If serverUser IsNot Nothing Then
-                With serverUser
-                    Return localUser.FirstName.Equals(.FirstName, StringComparison.CurrentCultureIgnoreCase) AndAlso
-                        localUser.LastName.Equals(.LastName, StringComparison.CurrentCultureIgnoreCase)
-                End With
-            End If
-        End If
+        ' Load local users into memory (prevents mixing contexts)
+        Dim localUsers = DBContext.tblUsers.ToList()
 
-        Return False
+        ' Perform the comparison in memory
+        Dim conflictingUsers = localUsers.Where(Function(localUser) _
+        ServerDBContext.tblUsers.Any(Function(serverUser) serverUser.UserID.ToLower() = localUser.UserID.ToLower())).ToList()
+
+        Return conflictingUsers
 
     End Function
+
+
+    ''' <summary>
+    ''' Interactively assigns new userIDs to all local experiments with conflicting server userIDs.
+    ''' </summary>
+    ''' 
+    Private Function RenameLocalUserIDs(duplicateLocalUsers As IEnumerable(Of tblUsers)) As Boolean
+
+        Dim isFirst As Boolean = True
+        Dim localDbGUID = DBContext.tblDatabaseInfo.First.GUID
+
+        For Each dupLocalUser In duplicateLocalUsers
+
+            If Not isFirst Then
+                MsgBox("Continue to resolve another user-ID conflict:", MsgBoxStyle.Information, "Duplicate Username")
+            End If
+
+            Dim dupServerUser = (From user In ServerDBContext.tblUsers Where user.UserID.ToLower = dupLocalUser.UserID.ToLower).First
+            Dim duplicateDlg As New dlgChangeUsername(ServerDBContext, dupServerUser)
+            With duplicateDlg
+                .Owner = Me
+                If .ShowDialog Then
+                    If Not Users.DoRename(DBContext, dupLocalUser, .txtUsername.Text) Then
+                        Return False
+                    End If
+                Else
+                    Return False 'cancelled
+                End If
+            End With
+
+            isFirst = False
+
+        Next
+
+        MsgBox("User-ID reassignments complete. The application " + vbCrLf +
+               "will restart now and upload your data.", MsgBoxStyle.Information, "Duplicate Resolution")
+
+        CustomControls.My.MySettings.Default.Save()
+
+        'restart application
+        Process.Start(Environment.ProcessPath())
+        Process.GetCurrentProcess().Kill()
+
+        Return True
+
+    End Function
+
+
+    '''' <summary>
+    '''' Determines if the userID of the user attempting to connect already exists on the server, 
+    '''' resulting in a duplicate. Displays a dialog with further actions, if found. 
+    '''' </summary>
+    '''' 
+    'Public Function ResolveDuplicateUsernames(localContext As ElnDbContext, serverContext As ElnDbContext) As Boolean
+
+    '    Try
+
+    '        Dim localUsers = (From user In localContext.tblUsers Select user.UserID).ToList
+    '        Dim localDbGUID = localContext.tblDatabaseInfo.First.GUID
+
+    '        Dim duplicateUsers = (From user In serverContext.tblUsers Where localUsers.Contains(user.UserID) AndAlso
+    '                              user.DatabaseID <> localDbGUID)
+
+    '        If duplicateUsers.Any Then
+
+    '            Dim isFirst As Boolean = True
+
+    '            For Each dupLocalUser In duplicateUsers
+
+    '                If Not isFirst Then
+    '                    MsgBox("There's another user-ID conflict -->", MsgBoxStyle.Information, "Duplicate")
+    '                End If
+
+    '                Dim duplicateDlg As New dlgChangeUsername(duplicateUsers, dupLocalUser, localDbGUID)
+    '                With duplicateDlg
+    '                    .Owner = Me
+    '                    If .ShowDialog Then
+    '                        If Not RenameUserID.DoRename(localContext, dupLocalUser.UserID, .txtUsername.Text.ToLower) Then
+    '                            Return False
+    '                        End If
+    '                    Else
+    '                        Return True 'cancelled -> conflict still present
+    '                    End If
+    '                End With
+    '                isFirst = False
+
+    '            Next
+
+    '            MsgBox("User-ID reassignments complete. The application " + vbCrLf +
+    '                "will restart now and upload your data.", MsgBoxStyle.Information, "Duplicate Resolution")
+
+    '            CustomControls.My.MySettings.Default.Save()
+    '            Process.Start(Environment.ProcessPath())
+    '            Process.GetCurrentProcess().Kill()
+    '            Return True 'dummy
+
+    '        Else
+    '            Return True
+    '        End If
+    '    Catch ex As Exception
+    '        MsgBox(ex.Message + vbCrLf + ex.InnerException.Message)
+    '        Return True
+    '    End Try
+    'End Function
 
 
     Private Sub RestoreFromServer()
@@ -503,7 +622,7 @@ Class MainWindow
             _isRestoring = False
 
         Else
-            MsgBox("Retry in a moment, a server sync Is currently ongoing!", MsgBoxStyle.Information, "Restore from Server")
+            MsgBox("Retry in a moment, a server sync is currently ongoing!", MsgBoxStyle.Information, "Restore from Server")
         End If
 
     End Sub
@@ -692,8 +811,9 @@ Class MainWindow
 
             If Users.CreateAdditionalUser(Me) Then
 
-                'Connect data model of local database with UI
+                SelectedExpContent.ExpProtocol.AutoSave(noUndoPoint:=True)
 
+                'Connect data model of local database with UI
                 Dim currUser = CType(Me.DataContext, tblUsers)
                 ApplyAllDataBindings(currUser)
 

@@ -4,18 +4,17 @@ Imports ElnCoreModel
 
 Public Class dlgChangeUsername
 
-    Private _dupUserList As List(Of tblUsers)
+    Private _serverDbContext As ElnDbContext
     Private _dupServerUser As tblUsers
     Private _localDbGuid As String
 
-    Public Sub New(dupUserList As List(Of tblUsers), dupUserEntry As tblUsers, localDbGuid As String)
+    Public Sub New(serverContext As ElnDbContext, dupUserEntry As tblUsers)
 
         ' This call is required by the designer.
         InitializeComponent()
 
-        _dupUserList = dupUserList
+        _serverDbContext = serverContext
         _dupServerUser = dupUserEntry
-        _localDbGuid = localDbGuid
 
     End Sub
 
@@ -32,9 +31,10 @@ Public Class dlgChangeUsername
     Private Function IsDuplicate(proposedID As String) As Boolean
 
         proposedID = proposedID.ToLower
-        Dim duplicateUsers = From user In _dupUserList Where user.UserID.ToLower = proposedID AndAlso user.DatabaseID <> _localDbGuid
+        Dim duplicateServerUsers = From user In _serverDbContext.tblUsers Where user.UserID.ToLower = proposedID
+        Dim duplicateLocalUsers = From user In MainWindow.DBContext.tblUsers Where user.UserID.ToLower = proposedID
 
-        Return duplicateUsers.Any
+        Return duplicateServerUsers.Any OrElse duplicateLocalUsers.Any
 
     End Function
 
@@ -50,8 +50,7 @@ Public Class dlgChangeUsername
     Private Sub btnOk_Click() Handles btnOK.Click
 
         If IsDuplicate(txtUsername.Text) Then
-            MsgBox("This user-ID already exists on the server." + vbCrLf +
-                   "Please try again!", MsgBoxStyle.Information, "Duplicate UserI-D")
+            MsgBox("This user-ID already exists - please try again!", MsgBoxStyle.Information, "Duplicate UserI-D")
             Exit Sub
         End If
 

@@ -191,7 +191,7 @@ Public Class ServerSync
     ''' <remarks>The synchronous part of this procedure is fast and strictly limited to the local data context, 
     ''' while the asynchronous (and much slower) part is strictly limited to the server data context.</remarks>
     ''' 
-    Public Async Sub SynchronizeAsync()
+    Public Async Function SynchronizeAsync() As Task
 
         Try
 
@@ -253,7 +253,7 @@ Public Class ServerSync
 
             '- Server save completed: 
             If syncResults Is Nothing Then
-                Exit Sub   'lost server sync
+                Exit Function  'lost server sync
             End If
 
             '- First time connected local db: assign dbGUID for later sync
@@ -301,7 +301,7 @@ Public Class ServerSync
 
         End Try
 
-    End Sub
+    End Function
 
 
     ''' <summary>
