@@ -20,13 +20,22 @@
             <RadioButton x:Name="rdoRestore" IsChecked="true">
                 <StackPanel Margin="0,2,0,2">
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="Restore your data from the server." FontWeight="DemiBold"/>
+                        <TextBlock Text="Restore your existing experiments from the server." FontWeight="DemiBold"/>
                         <ContentControl Content="{StaticResource icoInfo}" Height="14" ToolTipService.InitialShowDelay="250" Margin="4,-1,0,0"
                         ToolTip="Restores your server experiments and combines &#x0a;them with your current local experiments."/>
                     </StackPanel>
                     <Separator/>
-                    <TextBlock Text="Scenario: You were already connected to the server and then migrated to a new machine, where you re-created your userID, instead of restoring your experiments from the server." 
-                    TextWrapping="Wrap" Margin="1,1,0,0" FontStyle="Italic" Width="310"/>
+                    <TextBlock Text="You were already connected to the server before migrating to a new machine, where you re-created your userID, instead of restoring your experiments from the server." 
+                    TextWrapping="Wrap" Margin="1,1,0,0" FontStyle="Italic" Width="319"/>
+                    <Separator Margin="0,4,0,4
+                               "/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="left">
+                        <TextBlock Text="Your user password:" FontStyle="Italic" Margin="0,0,4,0" VerticalAlignment="Center"/>
+                        <PasswordBox x:Name="pwUserPassword" Width="140" HorizontalAlignment="Left"/>
+                        <ContentControl Content="{StaticResource icoInfoDark}" Height="14" ToolTipService.InitialShowDelay="250" Margin="2,-1,0,0" 
+                            ToolTip="This is the password you assigned to your userID, &#x0a;not the server login password. It is required to prove &#x0a;your ownership to prevent accidental operations on someone &#x0a;else's experiments." Opacity="0.9"/>
+                    </StackPanel>
+                    <Separator Margin="0,4,0,2"/>
                 </StackPanel>
             </RadioButton>
 
@@ -34,12 +43,12 @@
             <RadioButton x:Name="rdoRename" Margin="0,8,0,0">
                 <StackPanel Margin="0,2,0,0">
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="Assign yourself a different, unique userID." FontWeight="DemiBold"/>
+                        <TextBlock Text="Assign a unique userID to your experiments." FontWeight="DemiBold"/>
                         <ContentControl Content="{StaticResource icoInfo}" Height="14" ToolTipService.InitialShowDelay="250" Margin="4,-1,0,0"
                             ToolTip="Replaces your userID and modifies your &#x0a;experiment-ID's accordingly"/>
                     </StackPanel>
                     <Separator/>
-                    <TextBlock Text="Scenario: You chose a userID already utilized by someone else in your organization, leading to userID conflicts." TextWrapping="Wrap" Margin="1,1,0,0" FontStyle="Italic"/>
+                    <TextBlock Text="You by coincidence chose a userID for your experiments which is already utilized by someone else in your organization." TextWrapping="Wrap" Margin="1,1,0,0" FontStyle="Italic" Width="317"/>
                 </StackPanel>
             </RadioButton>
 

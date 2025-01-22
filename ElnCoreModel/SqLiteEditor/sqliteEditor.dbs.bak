@@ -168,7 +168,7 @@
 			<column name="SyncState" type="INTEGER" jt="4" >
 				<defo><![CDATA[0]]></defo>
 			</column>
-			<column name="RxnIndigoObj" type="TEXT" jt="-1" />
+			<column name="RxnIndigoObj" type="LONGBLOB" jt="-4" />
 			<column name="RxnFingerprint" type="BLOB" jt="2004" />
 			<index name="pk_tblExperiments" unique="PRIMARY_KEY" >
 				<column name="ExperimentID" />

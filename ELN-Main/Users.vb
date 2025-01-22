@@ -229,6 +229,101 @@ Public Class Users
 
 
     ''' <summary>
+    ''' Increases the sequence numbers of the local experiment-IDs of the specified user to allow seamless merge 'on top' of his 
+    ''' already existing server experiments and adds newly added local projects, followed by a restore from server. Typically 
+    ''' used when the user recreated his userID from scratch after the migration to a new PC, instead of restoring from the server.
+    ''' </summary>
+    ''' 
+    Public Shared Function MergeConflictingUserExp(localUser As tblUsers, localContext As ElnDbContext, serverContext As ElnDbContext) As Boolean
+
+        'renumber local duplicate experiment-ID's to add them 'on top' of existing server experiments after merge sync
+
+        Dim maxLocalExpID = (From exp In localUser.tblExperiments Select exp.ExperimentID Order By ExperimentID Descending).First
+        Dim maxLocalIndex = maxLocalExpID.Split("-"c)(1)
+        Dim maxServerExpID = (From exp In serverContext.tblExperiments Where exp.UserID = localUser.UserID Select exp.ExperimentID
+                              Order By ExperimentID Descending).First
+        Dim maxServerIndex = maxServerExpID.Split("-"c)(1)
+        Dim serverProjCount = (From proj In serverContext.tblProjects Where proj.UserID = localUser.UserID).Count
+
+        For Each projectEntry In localUser.tblProjects
+
+            Dim serverProjEntry = (From proj In serverContext.tblProjects Where proj.UserID = localUser.UserID _
+                                   AndAlso proj.Title = projectEntry.Title).FirstOrDefault 'user project titles are unique
+
+            'project not yet present on server? -> clone one
+            If serverProjEntry Is Nothing Then
+                serverProjEntry = CType(CloneEntity(localContext, projectEntry), tblProjects)
+                With serverProjEntry
+                    .GUID = Guid.NewGuid.ToString("D")
+                    .SequenceNr = serverProjCount   'add new server project to top
+                End With
+                serverContext.Add(serverProjEntry)
+            End If
+
+            'reset all existing project experiment current/pinned properties
+            Dim currExpList = From exp In serverProjEntry.tblExperiments Where exp.IsCurrent
+            For Each expEntry In currExpList
+                expEntry.IsCurrent = False
+                expEntry.DisplayIndex = Nothing
+            Next
+
+            'clone and update experiment entries
+            For Each expEntry In projectEntry.tblExperiments
+
+                Dim res = expEntry.ExperimentID.Split("-"c)
+                Dim newExpID = res(0) + "-" + Format(CInt(res(1)) + maxServerIndex, "00000")
+
+                Dim newExpEntry = CType(CloneEntity(localContext, expEntry), tblExperiments)
+                With newExpEntry
+                    .ExperimentID = newExpID
+                    .ProjectID = serverProjEntry.GUID
+                    .IsCurrent = False
+                End With
+
+                'TODO -- replace LOCAL projEntry by SERVER projEntry
+                serverProjEntry.tblExperiments.Add(newExpEntry)
+
+                'clone and update protocolItem entries
+                For Each protEntry In expEntry.tblProtocolItems
+
+                    Dim newProtEntry = CType(CloneEntity(localContext, protEntry), tblProtocolItems)
+                    With newProtEntry
+                        .GUID = Guid.NewGuid.ToString("D")
+                        .ExperimentID = newExpID
+                    End With
+                    newExpEntry.tblProtocolItems.Add(newProtEntry)
+
+                    'clone and update protocolItem child entries
+                    Dim contentItem = GetContentItem(localContext, protEntry, expEntry)
+                    If contentItem IsNot Nothing Then   'can be nothing for product placeholder
+                        Dim newContentEntry = CloneEntity(localContext, contentItem)
+                        With newContentEntry
+                            .GUID = Guid.NewGuid.ToString("D")
+                            .ProtocolItemID = newProtEntry.GUID
+                        End With
+                        serverContext.Add(newContentEntry)
+                    End If
+
+                Next
+            Next
+        Next
+
+        Try
+
+            serverContext.SaveChanges()
+            Return True
+
+        Catch ex As Exception
+
+            Return False
+
+        End Try
+
+    End Function
+
+
+
+    ''' <summary>
     ''' Replaces the specified userID original userID by the new userID in all user experiment-ID's in the user entry 
     ''' and in the related project items.
     ''' </summary>
@@ -237,7 +332,7 @@ Public Class Users
     ''' <param name="newUserID">The new userID, which needs to be checked for server duplicates before.</param>
     ''' <returns>False, if a database save error occurred after completed renaming.</returns>
     '''
-    Public Shared Function DoRename(localContext As ElnDbContext, dupLocalUser As tblUsers, newUserID As String) As Boolean
+    Public Shared Function ReplaceUserID(localContext As ElnDbContext, dupLocalUser As tblUsers, newUserID As String) As Boolean
 
         If dupLocalUser.UserID.ToLower = newUserID.ToLower Then
             Return True 'nothing to do, but no error

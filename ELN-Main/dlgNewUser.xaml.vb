@@ -132,7 +132,7 @@ Public Class dlgNewUser
 
         If Not duplicates.Any Then
 
-            blkUserID.Text = LCase(txtUserID.Text)
+            blkUserID.Text = txtUserID.Text
             blkExample.Text = blkUserID.Text + "-00001"
             generalTab.SelectedIndex = 1
 
