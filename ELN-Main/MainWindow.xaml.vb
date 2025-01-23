@@ -126,13 +126,6 @@ Class MainWindow
         AddHandler ExperimentContent.ExperimentContextChanged, AddressOf ExperimentContent_ContextChanged
 
 
-        ''testing only!
-        'Dim dlgTest As New dlgServerConflict
-        'With dlgTest
-        '    .Owner = Me
-        '    .ShowDialog()
-        'End With
-
         'Connect local database model with UI
         ApplyAllDataBindings(DBContext.tblUsers.First)
 
@@ -226,9 +219,17 @@ Class MainWindow
 
                 Else
 
-                    '- connecting existing non-demo database for the first time
+                    '- connecting current non-demo database for the first time
+
                     If Not FirstTimeConnect() Then
-                        ' --- TODO: Disconnect from server
+
+                        'Conflict resolution cancelled or other error: Disconnect from server
+                        dlgServerConnection.NewServerContext.Dispose()
+                        dlgServerConnection.NewServerContext = Nothing
+                        ServerDBContext.Dispose()
+                        ServerDBContext = Nothing
+                        CustomControls.My.MySettings.Default.IsServerSpecified = False  'server status icon visibilities are data bound to this setting
+
                     End If
 
                 End If
@@ -332,27 +333,6 @@ Class MainWindow
 
     End Function
 
-
-    'Private Sub MergeConflictingUserExp(localUser As tblUsers)
-
-    '    'renumber local duplicate experiment-ID's to add them 'on top' of existing server experiments after merge sync
-
-    '    Dim maxLocalExpID = (From exp In localUser.tblExperiments Select exp.ExperimentID Order By ExperimentID Descending).First
-    '    Dim maxLocalIndex = maxLocalExpID.Split("-"c)(1)
-    '    Dim maxServerExpID = (From exp In ServerDBContext.tblExperiments Where exp.UserID = localUser.UserID Select exp.ExperimentID
-    '                          Order By ExperimentID Descending).First
-    '    Dim maxServerIndex = maxServerExpID.Split("-"c)(1)
-
-    '    If maxLocalIndex <> maxServerIndex Then
-    '        For Each exp In localUser.tblExperiments
-    '            Dim res = exp.ExperimentID.Split("-"c)
-    '            exp.ExperimentID = res(0) + "-" + (CInt(res(1)) + maxServerIndex).ToString
-    '        Next
-    '    End If
-
-    'End Sub
-
-
     ''' <summary>
     ''' Connect to server db for first time: Performs username duplicate checks with server database and offers 
     ''' resolution options if conflicts are found.
@@ -368,18 +348,29 @@ Class MainWindow
 
                 'userID conflict(s) found
 
-                Dim resolveConflictDlg As New dlgServerConflict
+                Dim serverDbInfoEntry = (From user In ServerDBContext.tblUsers Where user.UserID = conflictingLocalUsers.First.UserID
+                                         Select user.Database).First
+
+                Dim resolveConflictDlg As New dlgServerConflict(serverDbInfoEntry)
                 With resolveConflictDlg
 
                     .Owner = Me
-                    .ShowDialog()   'currently no option to cancel; if implemented then completely disconnect to prevent loops
 
-                    If .UseRestoreStrategy Then
-                        ' Combine server experiments with local ones, then restores from server
-                        Return CombineWithServerExperiments(conflictingLocalUsers)  'restarts app if successful
+                    If .ShowDialog() Then   'currently no option to cancel; if implemented then completely disconnect to prevent loops
+
+                        If .UseRestoreStrategy Then
+                            ' Combine server experiments with local ones, then restores from server
+                            Return CombineWithServerExperiments(conflictingLocalUsers)  'restarts app if successful
+                        Else
+                            ' Rename local userID references due conflicting username of other localUser
+                            Return RenameLocalUserIDs(conflictingLocalUsers)    'restarts app if successful
+                        End If
+
                     Else
-                        ' Rename local userID references due conflicting username of other localUser
-                        Return RenameLocalUserIDs(conflictingLocalUsers)    'restarts app if successful
+
+                        MsgBox("Server connection cancelled!", MsgBoxStyle.Information, "Phoenix ELN")
+                        Return False  'resolution dialog cancelled
+
                     End If
 
                 End With
@@ -453,18 +444,15 @@ Class MainWindow
 
         ' restore from server
         _isRestoring = True
-
         Dim serverDBEntry = (From user In ServerDBContext.tblUsers Where user.UserID = duplicateLocalUsers.First.UserID Select user.Database).First
         Dim restoreProgressDlg As New dlgRestoreProgress(ServerDBContext.Database.GetConnectionString, SQLiteDbPath, serverDbEntry.GUID)
         With restoreProgressDlg
             .Owner = Me
-            If .ShowDialog() Then
-                'success
-                MsgBox("The application now will restart with " + vbCrLf +
+            .ShowDialog()
+            MsgBox("The application now will restart with " + vbCrLf +
                           "the restored database.", MsgBoxStyle.Information, "Restore from Server")
                 CustomControls.My.MySettings.Default.RestoreFromServer = True
-                Me.Close()
-            End If
+            Me.Close()
         End With
         _isRestoring = False
 

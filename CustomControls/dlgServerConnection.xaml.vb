@@ -13,7 +13,7 @@ Public Class dlgServerConnection
     ''' 
     Public Shared Event ServerContextCreated(dbContext As ElnDataContext)
 
-    Public Property NewServerContext As ElnDbContext
+    Public Shared Property NewServerContext As ElnDbContext
     Private _LocalContext As ElnDbContext
 
 

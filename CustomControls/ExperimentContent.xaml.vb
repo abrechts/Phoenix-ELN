@@ -254,10 +254,8 @@ Public Class ExperimentContent
 
             If currExp Is latestExp Then
                 'current exp is empty
-                MsgBox("Can't create another experiment while" + vbCrLf +
-                       "your current one is empty. - Select" + vbCrLf +
-                       "another experiment and then" + vbCrLf +
-                       "try again.", MsgBoxStyle.Information + MsgBoxStyle.OkCancel, "Experiment Creation")
+                MsgBox("Can't create another experiment while your" + vbCrLf +
+                       "most recent one is empty.", MsgBoxStyle.Information + MsgBoxStyle.OkCancel, "Experiment Creation")
                 Return False
             Else
                 replaceEmpty = True

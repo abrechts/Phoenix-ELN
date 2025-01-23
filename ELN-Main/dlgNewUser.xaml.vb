@@ -6,8 +6,8 @@ Public Class dlgNewUser
     ''' <summary>
     ''' Creates a wizard for entering new user data, or for editing current info.
     ''' </summary>
-    ''' <param name="localContext">The ElnDataContext of the local SQLite database (for checking local user ID duplicates).</param>
-    ''' <param name="serverContext">The ElnDataContext of the MySQL server database (for checking server user ID duplicates. 
+    ''' <param name="localContext">The ElnDataContext of the local SQLite database (for checking local user ID localDuplicates).</param>
+    ''' <param name="serverContext">The ElnDataContext of the MySQL server database (for checking server user ID localDuplicates. 
     ''' Set to nothing, if no server present.</param>
 
     Public Sub New(localContext As ElnDataContext, serverContext As ElnDataContext)
@@ -114,12 +114,13 @@ Public Class dlgNewUser
 
 
     ''' <summary>
-    ''' Checks for username duplicates and proceeds to the next tab if ok.
+    ''' Checks for username localDuplicates and proceeds to the next tab if ok.
     ''' </summary>
     '''
     Private Sub btnContinue_Click(ByVal sender As Object, ByVal e As RoutedEventArgs) Handles btnContinue.Click
 
-        'prevents creating a user-created demo user
+        ' prevents creating a user-created demo user
+
         If LCase(txtUserID.Text) = "demo" Then
             MsgBox("Sorry, the userID 'demo' cannot be used!", MsgBoxStyle.Information + MsgBoxStyle.OkOnly, "UserID Check")
             txtUserID.Focus()
@@ -127,10 +128,15 @@ Public Class dlgNewUser
             Exit Sub
         End If
 
-        'check for local userID duplicates
-        Dim duplicates = From user In DbContext.tblUsers Where user.UserID.ToLower = txtUserID.Text.ToLower
+        ' check for userID duplicates
 
-        If Not duplicates.Any Then
+        Dim localDuplicates = From user In DbContext.tblUsers Where user.UserID.ToLower = txtUserID.Text.ToLower
+        Dim serverDuplicates As New List(Of tblUsers)
+        If ServerDBContext IsNot Nothing Then
+            serverDuplicates = (From user In ServerDBContext.tblUsers Where user.UserID.ToLower = txtUserID.Text.ToLower).ToList
+        End If
+
+        If Not localDuplicates.Any AndAlso Not serverDuplicates.Any Then
 
             blkUserID.Text = txtUserID.Text
             blkExample.Text = blkUserID.Text + "-00001"
@@ -138,8 +144,14 @@ Public Class dlgNewUser
 
         Else
 
-            MsgBox("Sorry, this userID already exists on your machine." + vbCrLf +
-            "Please specify another one!", MsgBoxStyle.Information + MsgBoxStyle.OkOnly, "Duplicate")
+            If localDuplicates.Any Then
+                MsgBox("Sorry, this userID already exists on your machine." + vbCrLf +
+                       "Please specify another one!", MsgBoxStyle.Information + MsgBoxStyle.OkOnly, "Duplicate")
+            Else
+                MsgBox("Sorry, this userID already exists on the." + vbCrLf +
+                       "ELN server. Please specify another one!", MsgBoxStyle.Information + MsgBoxStyle.OkOnly, "Duplicate")
+            End If
+
             txtUserID.Focus()
             txtUserID.SelectAll()
             Exit Sub

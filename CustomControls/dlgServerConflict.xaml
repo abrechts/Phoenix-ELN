@@ -5,14 +5,14 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CustomControls"
         mc:Ignorable="d"
-        Title="Server Data Conflict" Width="400" ShowInTaskbar="False" FontFamily="SegoeUI" FontSize="12.5" ResizeMode="NoResize" 
+        Title="Server Data Conflict" Width="420" ShowInTaskbar="False" FontFamily="SegoeUI" FontSize="12.5" ResizeMode="NoResize" 
         WindowStartupLocation="CenterOwner" SizeToContent="Height" >
     <Grid>
-        <StackPanel Margin="30,15,25,20">
+        <StackPanel Margin="30,15,25,30">
             
             <TextBlock Text="UserID Conflict" FontWeight="Bold" FontSize="14.5" FontStyle="Italic"  Foreground="{StaticResource DialogTitleForeground}"/>
            
-            <TextBlock x:Name="blkIntro" Text="Your data can't be uploaded to the server, since your local userID already is present there." 
+            <TextBlock x:Name="blkIntro" Text="Your data can't be uploaded to the server, since your local userID is already present on the server, leading to a duplicate conflict." 
                 Margin="0,6,0,4" TextWrapping="Wrap" />
 
             <TextBlock Text="Select an option for conflict resolution:" Margin="0,6,0,8" TextWrapping="Wrap" />
@@ -25,17 +25,17 @@
                         ToolTip="Restores your server experiments and combines &#x0a;them with your current local experiments."/>
                     </StackPanel>
                     <Separator/>
-                    <TextBlock Text="You were already connected to the server before migrating to a new machine, where you re-created your userID, instead of restoring your experiments from the server." 
+                    <TextBlock Text="You were already connected to the server before, and now you try to reconnect from a re-created identical userID, e.g. after migrating to a new machine." 
                     TextWrapping="Wrap" Margin="1,1,0,0" FontStyle="Italic" Width="319"/>
-                    <Separator Margin="0,4,0,4
-                               "/>
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="left">
+                    <Separator Margin="0,4,0,4"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="left" Margin="6,0,0,0">
                         <TextBlock Text="Your user password:" FontStyle="Italic" Margin="0,0,4,0" VerticalAlignment="Center"/>
+                        <ContentControl Content="{StaticResource icoInfoDark}" Height="14" ToolTipService.InitialShowDelay="250" Margin="0,-1,2,0" 
+                            ToolTip="This is the password you originally assigned to your userID &#x0a;when your data were synchronized to the server.  Required to &#x0a;prove ownership of your server data to be restored." Opacity="0.9"/>
                         <PasswordBox x:Name="pwUserPassword" Width="140" HorizontalAlignment="Left"/>
-                        <ContentControl Content="{StaticResource icoInfoDark}" Height="14" ToolTipService.InitialShowDelay="250" Margin="2,-1,0,0" 
-                            ToolTip="This is the password you assigned to your userID, &#x0a;not the server login password. It is required to prove &#x0a;your ownership to prevent accidental operations on someone &#x0a;else's experiments." Opacity="0.9"/>
+                        
                     </StackPanel>
-                    <Separator Margin="0,4,0,2"/>
+                    <!--<Separator Margin="0,4,0,2"/>-->
                 </StackPanel>
             </RadioButton>
 
@@ -45,17 +45,17 @@
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="Assign a unique userID to your experiments." FontWeight="DemiBold"/>
                         <ContentControl Content="{StaticResource icoInfo}" Height="14" ToolTipService.InitialShowDelay="250" Margin="4,-1,0,0"
-                            ToolTip="Replaces your userID and modifies your &#x0a;experiment-ID's accordingly"/>
+                            ToolTip="Replaces your current userID and updates &#x0a;your experiment-ID's accordingly"/>
                     </StackPanel>
                     <Separator/>
-                    <TextBlock Text="You by coincidence chose a userID for your experiments which is already utilized by someone else in your organization." TextWrapping="Wrap" Margin="1,1,0,0" FontStyle="Italic" Width="317"/>
+                    <TextBlock Text="By coincidence you chose a userID which is already utilized by someone else in your organization." TextWrapping="Wrap" Margin="1,1,0,0" FontStyle="Italic" Width="317"/>
                 </StackPanel>
             </RadioButton>
 
             <StackPanel Orientation="Horizontal" Margin="0,20,0,4" HorizontalAlignment="Center">
                 <Button x:Name="btnOK" Content="OK"  Width="80" Height="22" 
                    VerticalAlignment="Center"  Padding="2,2,2,0" Background="#FFF9F9F9"/>
-                <!--<Button x:Name="btnCancel" Content="Cancel" Width="80" Height="22"/>-->
+                <Button x:Name="btnCancel" IsCancel="true" Content="Cancel" Width="80" Height="22" Margin="16,0,0,0"/>
             </StackPanel>
        
         </StackPanel>

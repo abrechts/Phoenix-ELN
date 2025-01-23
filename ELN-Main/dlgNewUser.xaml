@@ -26,7 +26,7 @@
                     <StackPanel Margin="2,14,0,0" Grid.Column="1">
 
                         <TextBlock Height="20" VerticalAlignment="Top" FontWeight="Bold" FontSize="12" HorizontalAlignment="Left"
-                          Text="New User: Specify User-ID" />
+                          Text="New User: Specify User-ID" Foreground="{StaticResource DialogTitleForeground}" />
 
                         <TextBlock Margin="0,4,0,0" TextWrapping="Wrap" HorizontalAlignment="Left" 
                            Text="Specify a unique and short personal user-ID, max. 10 characters, which will uniquely identify you and your experiments (e.g. smithk1):"/>
@@ -63,7 +63,7 @@
 
                     <StackPanel Grid.Column="1" Margin="0,12,0,0">
 
-                        <TextBlock Text="Confirm your User-ID" FontSize="12" FontWeight="Bold" />
+                        <TextBlock Text="Confirm your User-ID" FontSize="12" FontWeight="Bold" Foreground="{StaticResource DialogTitleForeground}" />
 
                         <StackPanel Orientation="Horizontal" Margin="0,20,0,0" >
                             <TextBlock Text="Your user-ID:" FontWeight="Bold" HorizontalAlignment="Left" VerticalAlignment="Center"/>
@@ -105,7 +105,7 @@
                     <StackPanel Grid.Column="1">
 
                         <TextBlock Margin="0,19,0,0" Text="Personal Settings" TextWrapping="Wrap" VerticalAlignment="Top"  
-                           FontWeight="Bold" FontSize="12" />
+                           FontWeight="Bold" FontSize="12" Foreground="{StaticResource DialogTitleForeground}" />
 
                         <TextBlock Margin="0,10,0,0" Text="The information below will appear in the header of your experiments:" 
                            TextWrapping="Wrap" FontStyle="Normal" HorizontalAlignment="Left" Width="279" />
