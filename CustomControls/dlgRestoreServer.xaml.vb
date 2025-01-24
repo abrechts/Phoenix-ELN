@@ -49,7 +49,8 @@ Partial Public Class dlgRestoreServer
         Me.Cursor = Cursors.Wait
         Me.ForceCursor = True
 
-        If My.Settings.IsServerSpecified AndAlso Not ServerSync.IsServerConnectionLost Then
+        If My.Settings.IsServerSpecified AndAlso Not ServerSync.IsServerConnectionLost AndAlso
+        _serverContext.Database.CanConnect Then
 
             Dim userEntry = (From user In _serverContext.tblUsers Where user.UserID = txtUserID.Text).FirstOrDefault
 
