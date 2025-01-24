@@ -53,6 +53,12 @@ Public Class DbUpgradeLocal
                 DbAddColumn("tblMaterials", "CurrDocIndex", "SMALLINT", "", sqliteConn)
             End If
 
+            ' --> introduced in version 2.6.0
+
+            If Not DbColumnExists("tblUsers", "IsCurrent", sqliteConn) Then
+                DbAddColumn("tblUsers", "IsCurrent", "TINYINT", "0", sqliteConn)
+            End If
+
 
         End Using
 

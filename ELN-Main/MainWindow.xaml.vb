@@ -125,9 +125,16 @@ Class MainWindow
         AddHandler StepExpSelector.RequestOpenExperiment, AddressOf ExpList_RequestOpenExperiment
         AddHandler ExperimentContent.ExperimentContextChanged, AddressOf ExperimentContent_ContextChanged
 
-        'Connect local database model with UI
-        ApplyAllDataBindings(DBContext.tblUsers.First)
-        cboUsers.SelectedIndex = 0
+        'determine current localUser (since multiple users possible)
+        Dim currUser = (From user In DBContext.tblUsers Where user.IsCurrent = 1).FirstOrDefault
+        If currUser Is Nothing Then
+            currUser = DBContext.tblUsers.First
+            currUser.IsCurrent = 1
+        End If
+
+        'connect local database model with UI
+        ApplyAllDataBindings(currUser)
+        cboUsers.SelectedItem = currUser
 
         'create server context async to reduce startup time
         With CustomControls.My.MySettings.Default
@@ -159,7 +166,6 @@ Class MainWindow
         End With
 
         'select experiment tab of current experiment (may be a pinned one)
-        Dim currUser = CType(Me.DataContext, tblUsers)
         Dim currExp = (From exp In currUser.tblExperiments Where exp.IsCurrent).FirstOrDefault
 
         If currExp IsNot Nothing Then
@@ -507,64 +513,6 @@ Class MainWindow
     End Function
 
 
-    '''' <summary>
-    '''' Determines if the userID of the localUser attempting to connect already exists on the server, 
-    '''' resulting in a duplicate. Displays a dialog with further actions, if found. 
-    '''' </summary>
-    '''' 
-    'Public Function ResolveDuplicateUsernames(localContext As ElnDbContext, serverContext As ElnDbContext) As Boolean
-
-    '    Try
-
-    '        Dim localUsers = (From localUser In localContext.tblUsers Select localUser.UserID).ToList
-    '        Dim localDbGUID = localContext.tblDatabaseInfo.First.GUID
-
-    '        Dim duplicateUsers = (From localUser In serverContext.tblUsers Where localUsers.Contains(localUser.UserID) AndAlso
-    '                              localUser.DatabaseID <> localDbGUID)
-
-    '        If duplicateUsers.Any Then
-
-    '            Dim isFirst As Boolean = True
-
-    '            For Each dupLocalUser In duplicateUsers
-
-    '                If Not isFirst Then
-    '                    MsgBox("There's another localUser-ID conflict -->", MsgBoxStyle.Information, "Duplicate")
-    '                End If
-
-    '                Dim duplicateDlg As New dlgChangeUsername(duplicateUsers, dupLocalUser, localDbGUID)
-    '                With duplicateDlg
-    '                    .Owner = Me
-    '                    If .ShowDialog Then
-    '                        If Not RenameUserID.ReplaceUserID(localContext, dupLocalUser.UserID, .txtUsername.Text.ToLower) Then
-    '                            Return False
-    '                        End If
-    '                    Else
-    '                        Return True 'cancelled -> conflict still present
-    '                    End If
-    '                End With
-    '                isFirst = False
-
-    '            Next
-
-    '            MsgBox("User-ID reassignments complete. The application " + vbCrLf +
-    '                "will restart now and upload your data.", MsgBoxStyle.Information, "Duplicate Resolution")
-
-    '            CustomControls.My.MySettings.Default.Save()
-    '            Process.Start(Environment.ProcessPath())
-    '            Process.GetCurrentProcess().Kill()
-    '            Return True 'dummy
-
-    '        Else
-    '            Return True
-    '        End If
-    '    Catch ex As Exception
-    '        MsgBox(ex.Message + vbCrLf + ex.InnerException.Message)
-    '        Return True
-    '    End Try
-    'End Function
-
-
     Private Sub RestoreFromServer()
 
         If Not ServerSync.IsSynchronizing Then
@@ -731,6 +679,12 @@ Class MainWindow
         If cboUsers.SelectedItem IsNot Nothing Then
 
             Dim currUser = CType(cboUsers.SelectedItem, tblUsers)
+
+            'set user as current
+            For Each user In DBContext.tblUsers
+                user.IsCurrent = 0
+            Next
+            currUser.IsCurrent = 1
 
             ApplyAllDataBindings(currUser)
 

@@ -45,6 +45,12 @@ Public Class DbUpgradeServer
                 DbAddColumn("tblMaterials", "CurrDocIndex", "SMALLINT", "IsValidated", serverConn)
             End If
 
+            ' --> introduced in version 2.6.0
+
+            If Not DbColumnExists("tblUsers", "IsCurrent", serverConn) Then
+                DbAddColumn("tblUsers", "IsCurrent", "TINYINT", "IsSpellCheckEnabled", serverConn)
+            End If
+
         End Using
 
     End Sub

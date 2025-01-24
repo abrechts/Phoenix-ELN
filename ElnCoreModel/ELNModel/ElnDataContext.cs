@@ -360,6 +360,9 @@ public partial class ElnDataContext : DbContext
             entity.Property(e => e.DatabaseID).HasColumnType("VARCHAR(36)");
             entity.Property(e => e.DepartmentName).HasColumnType("VARCHAR(100)");
             entity.Property(e => e.FirstName).HasColumnType("VARCHAR(50)");
+            entity.Property(e => e.IsCurrent)
+                .HasDefaultValue((byte)0)
+                .HasColumnType("TINYINT");
             entity.Property(e => e.IsSpellCheckEnabled).HasColumnType("TINYINT");
             entity.Property(e => e.LastName).HasColumnType("VARCHAR(50)");
             entity.Property(e => e.PWHash).HasColumnType("VARCHAR(64)");
