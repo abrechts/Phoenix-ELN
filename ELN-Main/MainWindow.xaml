@@ -203,14 +203,14 @@
 
                     <StackPanel Orientation="Horizontal" DockPanel.Dock="top" Margin="6,6,6,0" HorizontalAlignment="Left">
 
-                        <custom:ComboPlus x:Name="cboUsers" SelectedIndex="0" Padding="6,3,2,3" MinWidth="60"
+                        <ComboBox x:Name="cboUsers" Padding="6,3,2,3" MinWidth="90"
                            ItemsSource="{Binding Database.tblUsers}" >
-                            <custom:ComboPlus.ItemTemplate>
+                            <ComboBox.ItemTemplate>
                                 <DataTemplate>
                                     <TextBlock Text="{Binding Path=UserID}" FontFamily="Calibri" FontSize="13"/>
                                 </DataTemplate>
-                            </custom:ComboPlus.ItemTemplate>
-                        </custom:ComboPlus>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
 
                         <Button x:Name="btnAddUser" ToolTip="Add a new user" Margin="4,0,0,0">
                             <StackPanel Orientation="Horizontal">

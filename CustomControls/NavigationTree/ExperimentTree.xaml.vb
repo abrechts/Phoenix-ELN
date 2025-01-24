@@ -1,7 +1,6 @@
 ﻿Imports System.Windows
 Imports System.Windows.Controls
 Imports System.Windows.Threading
-Imports ElnBase
 Imports ElnCoreModel
 Imports GongSolutions.Wpf.DragDrop
 
@@ -20,20 +19,6 @@ Public Class ExperimentTree
     End Sub
 
 
-    Private Sub Me_Loaded() Handles Me.Loaded
-
-        'initially selects the currently selected experiment of the last session
-
-        If Me.DataContext IsNot Nothing Then
-            If SelectLastSelectedExperiment(CType(Me.DataContext, tblUsers)) Is Nothing Then
-                'not available: select first user experiment
-                SelectExperiment(CType(Me.DataContext, tblUsers).tblExperiments.Last)
-            End If
-        End If
-
-    End Sub
-
-
     Private Sub projectHeader_RequestAddExperiment(sender As Object, projectEntry As tblProjects)
 
         RaiseEvent RequestAddExperiment(Me, projectEntry)
@@ -42,7 +27,9 @@ Public Class ExperimentTree
 
 
     Private Sub projectHeader_RequestDeleteProject(sender As Object, projectEntry As tblProjects)
+
         DeleteProject(projectEntry)
+
     End Sub
 
 
@@ -157,14 +144,17 @@ Public Class ExperimentTree
 
         If expEntry IsNot Nothing Then
 
-            'unselect current experiment if present
-            If LastCurrentExperiment IsNot Nothing Then
-                LastCurrentExperiment.IsCurrent = 0
-            End If
+            'unselect current user experiment
+            Dim selExp = From exp In expEntry.User.tblExperiments Where exp.IsCurrent = 1
+            For Each exp In selExp
+                exp.IsCurrent = 0
+            Next
 
             'expand parent project node
-            expEntry.Project.IsNodeExpanded = 1
-            WPFToolbox.WaitForPriority(DispatcherPriority.ContextIdle)  'wait for node to expand
+            If expEntry.Project.IsNodeExpanded = 0 Then
+                expEntry.Project.IsNodeExpanded = 1
+                WPFToolbox.WaitForPriority(DispatcherPriority.ContextIdle)  'wait for node to expand
+            End If
 
             'select experiment child node, which is subsequently scrolled into view by TreeViewItem_Selected
             expEntry.IsCurrent = 1
@@ -174,8 +164,6 @@ Public Class ExperimentTree
             If firstItem IsNot Nothing Then
                 firstItem.IsSelected = 0
             End If
-
-            LastCurrentExperiment = expEntry
 
             If populateContent Then
                 RaiseEvent ExperimentSelected(Me, expEntry)
@@ -189,28 +177,6 @@ Public Class ExperimentTree
     End Sub
 
 
-    ''' <summary>
-    ''' Selects the experiment which was last selected. Typically used during application startup for restoring last state.
-    ''' </summary>
-    ''' <param name="userEntry">The parent user tblUsers entity.</param>
-    ''' <returns>The last selected tblExperiments, or nothing if not available.</returns>
-    ''' 
-    Public Function SelectLastSelectedExperiment(userEntry As tblUsers) As tblExperiments
-
-        Dim lastExp = (From exp In userEntry.tblExperiments Where exp.IsCurrent = 1).FirstOrDefault
-
-        If lastExp IsNot Nothing Then
-            SelectExperiment(lastExp, populateContent:=False)    'exp already populated by databinding
-        End If
-
-        Return lastExp
-
-    End Function
-
-
-    Private Property LastCurrentExperiment As tblExperiments
-
-
     Private Sub TreeViewItem_Selected(sender As Object, e As RoutedEventArgs)
 
         Dim entityObj As Object = e.OriginalSource.header
@@ -219,14 +185,18 @@ Public Class ExperimentTree
 
             Dim expEntry = CType(entityObj, tblExperiments)
 
+            'unselect current user experiment
+            Dim selExp = From exp In expEntry.User.tblExperiments Where exp.IsCurrent = 1
+            For Each exp In selExp
+                exp.IsCurrent = 0
+            Next
+
+            'mark selected experiment
             expEntry.IsCurrent = 1
-            If LastCurrentExperiment IsNot Nothing AndAlso LastCurrentExperiment IsNot expEntry Then
-                LastCurrentExperiment.IsCurrent = 0
-            End If
-            LastCurrentExperiment = expEntry
 
             CType(e.OriginalSource, TreeViewItem).BringIntoView()
             RaiseEvent ExperimentSelected(Me, expEntry)
+
         End If
 
     End Sub

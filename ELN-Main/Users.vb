@@ -260,10 +260,10 @@ Public Class Users
                 serverContext.Add(serverProjEntry)
             End If
 
-            'reset all existing project experiment current/pinned properties
+            'reset all existing project experiments current/pinned properties
             Dim currExpList = From exp In serverProjEntry.tblExperiments Where exp.IsCurrent
             For Each expEntry In currExpList
-                expEntry.IsCurrent = False
+                expEntry.IsCurrent = 0
                 expEntry.DisplayIndex = Nothing
             Next
 
@@ -277,7 +277,7 @@ Public Class Users
                 With newExpEntry
                     .ExperimentID = newExpID
                     .ProjectID = serverProjEntry.GUID
-                    .IsCurrent = False
+                    .IsCurrent = 0
                 End With
 
                 'TODO -- replace LOCAL projEntry by SERVER projEntry

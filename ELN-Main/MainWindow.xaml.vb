@@ -125,9 +125,9 @@ Class MainWindow
         AddHandler StepExpSelector.RequestOpenExperiment, AddressOf ExpList_RequestOpenExperiment
         AddHandler ExperimentContent.ExperimentContextChanged, AddressOf ExperimentContent_ContextChanged
 
-
         'Connect local database model with UI
         ApplyAllDataBindings(DBContext.tblUsers.First)
+        cboUsers.SelectedIndex = 0
 
         'create server context async to reduce startup time
         With CustomControls.My.MySettings.Default
@@ -729,11 +729,16 @@ Class MainWindow
     Private Sub cboUsers_SelectionChanged(sender As Object, e As SelectionChangedEventArgs) Handles cboUsers.SelectionChanged
 
         If cboUsers.SelectedItem IsNot Nothing Then
+
             Dim currUser = CType(cboUsers.SelectedItem, tblUsers)
+
             ApplyAllDataBindings(currUser)
-            If currUser.tblExperiments.Count > 0 Then
-                expNavTree.SelectExperiment(currUser.tblExperiments.First)
+
+            Dim currExp = (From exp In currUser.tblExperiments Where exp.IsCurrent = 1).FirstOrDefault
+            If currExp IsNot Nothing Then
+                expNavTree.SelectExperiment(currExp)
             End If
+
         End If
 
     End Sub
@@ -796,8 +801,6 @@ Class MainWindow
                 'Connect data model of local database with UI
                 Dim currUser = CType(Me.DataContext, tblUsers)
                 ApplyAllDataBindings(currUser)
-
-                expNavTree.SelectExperiment(currUser.tblExperiments.First)
                 cboUsers.SelectedItem = currUser
 
             End If
@@ -1445,10 +1448,10 @@ Class MainWindow
 
             If .ShowDialog() Then
 
-                If .NewServerContext IsNot Nothing Then
+                If dlgServerConnection.NewServerContext IsNot Nothing Then
 
                     '-- apply new server context
-                    ServerDBContext = .NewServerContext
+                    ServerDBContext = dlgServerConnection.NewServerContext
                     DBContext.ServerSynchronization = New ServerSync(DBContext, ServerDBContext)
 
                     mainStatusInfo.DisplayServerError = False
