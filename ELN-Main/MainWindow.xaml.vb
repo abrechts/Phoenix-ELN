@@ -199,14 +199,14 @@ Class MainWindow
 
             If ServerSync.HasSyncMismatch Then
 
-                mainStatusInfo.DisplayServerError = True
-
                 Dim syncMismatchWarningDlg As New dlgServerSyncIssue
                 With syncMismatchWarningDlg
                     .Owner = Me
                     .ShowDialog()
                     RestoreFromServer()  'restarts app when done
                 End With
+
+                mainStatusInfo.DisplayServerError = True
 
                 Exit Sub
 

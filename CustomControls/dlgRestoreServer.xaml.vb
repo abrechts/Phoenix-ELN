@@ -5,7 +5,7 @@ Imports ElnCoreModel
 
 Partial Public Class dlgRestoreServer
 
-    Private _ServerEntity As ElnDbContext
+    Private _serverContext As ElnDbContext
 
     Private Enum MessageType As Integer
         None
@@ -17,12 +17,12 @@ Partial Public Class dlgRestoreServer
     Public Property TargetDbInfoEntry As tblDatabaseInfo
 
 
-    Public Sub New(serverEntity As ElnDbContext)
+    Public Sub New(serverContext As ElnDbContext)
 
         ' This call is required by the designer.
         InitializeComponent()
 
-        _ServerEntity = serverEntity
+        _serverContext = serverContext
         blkSearchInfo.Visibility = Visibility.Collapsed
 
     End Sub
@@ -38,7 +38,7 @@ Partial Public Class dlgRestoreServer
     End Sub
 
 
-    Private Async Sub btnGoToRestore_Click() Handles btnGoToRestore.Click
+    Private Sub btnGoToRestore_Click() Handles btnGoToRestore.Click
 
         If LCase(txtUserID.Text) = "demo" Then
             MsgBox("Sorry, the sandbox 'demo' user can't be restored!" + vbCrLf +
@@ -49,10 +49,9 @@ Partial Public Class dlgRestoreServer
         Me.Cursor = Cursors.Wait
         Me.ForceCursor = True
 
-        If My.Settings.IsServerSpecified AndAlso Not ServerSync.IsServerConnectionLost AndAlso
-          Await Task.Run(Function() Protocol.IsServerConnAvailable()) Then
+        If My.Settings.IsServerSpecified AndAlso Not ServerSync.IsServerConnectionLost Then
 
-            Dim userEntry = (From user In _ServerEntity.tblUsers Where user.UserID = txtUserID.Text).FirstOrDefault
+            Dim userEntry = (From user In _serverContext.tblUsers Where user.UserID = txtUserID.Text).FirstOrDefault
 
             If IsNothing(userEntry) Then
 
