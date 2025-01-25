@@ -350,7 +350,7 @@ Public Class MatDocControl
             Dim fileBytes = SerializeFile(filePath)
             With newFileEntry
                 .GUID = Guid.NewGuid.ToString("D")
-                .FileName = Path.GetFileName(filePath)
+                .FileName = WPFToolbox.ShortenFileNameWithExtension(Path.GetFileName(filePath), 80) 'shorten file name if required, keeping extension
                 .FileSizeMB = docMB
                 .FileBytes = fileBytes
                 .IconImage = FileContent.GetFileIconBytes(filePath)

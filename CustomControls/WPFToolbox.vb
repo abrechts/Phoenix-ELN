@@ -821,6 +821,25 @@ Public Class WPFToolbox
     End Function
 
 
+    ''' <summary>
+    ''' Shortens the specified file name to the specified maximum length including and retaining its extension.
+    ''' </summary>
+    ''' <param name="fileName">The file name to shorten.</param>
+    ''' <param name="maxLength">The maximum length of the file name.</param>
+    ''' <returns>The shortened file name.</returns>
+    '''
+    Public Shared Function ShortenFileNameWithExtension(fileName As String, maxLength As Integer) As String
+
+        Dim extension As String = Path.GetExtension(fileName)
+        Dim nameWithoutExtension As String = Path.GetFileNameWithoutExtension(fileName)
+
+        If nameWithoutExtension.Length + extension.Length > maxLength Then
+            nameWithoutExtension = nameWithoutExtension.Substring(0, maxLength - extension.Length)
+        End If
+
+        Return nameWithoutExtension & extension
+
+    End Function
 
 End Class
 

@@ -454,13 +454,13 @@ Class MainWindow
         ' restore from server
         _isRestoring = True
         Dim serverDBEntry = (From user In ServerDBContext.tblUsers Where user.UserID = duplicateLocalUsers.First.UserID Select user.Database).First
-        Dim restoreProgressDlg As New dlgRestoreProgress(ServerDBContext.Database.GetConnectionString, SQLiteDbPath, serverDbEntry.GUID)
+        Dim restoreProgressDlg As New dlgRestoreProgress(ServerDBContext.Database.GetConnectionString, SQLiteDbPath, serverDBEntry.GUID)
         With restoreProgressDlg
             .Owner = Me
             .ShowDialog()
             MsgBox("The application now will restart with " + vbCrLf +
                           "the restored database.", MsgBoxStyle.Information, "Restore from Server")
-                CustomControls.My.MySettings.Default.RestoreFromServer = True
+            CustomControls.My.MySettings.Default.RestoreFromServer = True
             Me.Close()
         End With
         _isRestoring = False

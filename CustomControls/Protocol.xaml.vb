@@ -1021,10 +1021,10 @@ Public Class Protocol
                 .GUID = Guid.NewGuid.ToString("D")
                 .ProtocolItem = newProtocolEntry
                 .FileType = embedFileType
-                .FileName = Path.GetFileName(filePath)
+                .FileName = WPFToolbox.ShortenFileNameWithExtension(Path.GetFileName(filePath), 80) 'shorten file name if required, keeping extension
                 .FileSizeMB = docMB
                 .FileBytes = fileBytes
-                .FileComment = Path.GetFileName(filePath)
+                .FileComment = .FileName
                 .IconImage = FileContent.GetFileIconBytes(filePath)
                 .IsPortraitMode = isPortraitMode
                 .IsRotated = If(isPortraitMode, 1, 0)
