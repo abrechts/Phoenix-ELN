@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="Username Conflict"  Width="320" SizeToContent="Height" WindowStartupLocation="CenterOwner" FontSize="12.5">
+        Title="Username Conflict"  Width="320" SizeToContent="Height" WindowStartupLocation="CenterOwner" FontSize="12.5" ShowInTaskbar="False">
     <Grid>
 
         <StackPanel Margin="20,16,20,20">

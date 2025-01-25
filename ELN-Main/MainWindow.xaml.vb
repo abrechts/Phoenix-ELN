@@ -52,6 +52,10 @@ Class MainWindow
                 _IsVersionUpgrade = True
             End If
 
+            '------------------------
+            '  _IsVersionUpgrade = True
+            '------------------------
+
             'Apply settings
             If .StartupSize.Width > -1 Then
                 WindowStartupLocation = WindowStartupLocation.Manual
@@ -230,7 +234,6 @@ Class MainWindow
                     If Not FirstTimeConnect() Then
 
                         'Conflict resolution cancelled or other error: Disconnect from server
-                        dlgServerConnection.NewServerContext.Dispose()
                         dlgServerConnection.NewServerContext = Nothing
                         ServerDBContext.Dispose()
                         ServerDBContext = Nothing
@@ -755,6 +758,8 @@ Class MainWindow
                 'Connect data model of local database with UI
                 Dim currUser = CType(Me.DataContext, tblUsers)
                 ApplyAllDataBindings(currUser)
+
+                expNavTree.SelectExperiment(currUser.tblExperiments.First)
                 cboUsers.SelectedItem = currUser
 
             End If

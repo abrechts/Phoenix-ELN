@@ -56,6 +56,12 @@ Public Class dlgServerConflict
             DialogResult = True
             Me.Close()
 
+        Else
+
+            UseRestoreStrategy = False
+            DialogResult = True
+            Me.Close()
+
         End If
 
     End Sub

@@ -51,6 +51,15 @@ Public Class DbUpgradeServer
                 DbAddColumn("tblUsers", "IsCurrent", "TINYINT", "IsSpellCheckEnabled", serverConn)
             End If
 
+            '     corrects too limiting field sizes for user input (crashes server upload & sync if too long)
+            If GetFieldType("tblEmbeddedFiles", "FileName", serverConn) = "varchar(50)" Then
+                ChangeFieldType("tblEmbeddedFiles", "FileName", "TINYTEXT", serverConn)
+            End If
+
+            If GetFieldType("tblDbMaterialFiles", "FileName", serverConn) = "varchar(50)" Then
+                ChangeFieldType("tblDbMaterialFiles", "FileName", "TINYTEXT", serverConn)
+            End If
+
         End Using
 
     End Sub
@@ -129,14 +138,14 @@ Public Class DbUpgradeServer
 
         Dim sqlCommand = "Select COLUMN_TYPE From information_schema.COLUMNS Where TABLE_Name = '" + tableName + "' And COLUMN_NAME = '" + colName + "'"
         Try
-Using command As New MySqlCommand(sqlCommand, serverConn)
-serverConn.Open()
-Dim res = command.ExecuteScalar()
-serverConn.Close()
-Return res
-End Using
-Catch ex As Exception
-'this command will cause an exception when executed, if table and/or column don't exist
+            Using command As New MySqlCommand(sqlCommand, serverConn)
+                serverConn.Open()
+                Dim res = command.ExecuteScalar()
+                serverConn.Close()
+                Return res
+            End Using
+        Catch ex As Exception
+            'this command will cause an exception when executed, if table and/or column don't exist
             serverConn.Close()
             Return ""
         End Try

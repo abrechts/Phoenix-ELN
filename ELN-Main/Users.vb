@@ -105,7 +105,7 @@ Public Class Users
                                 With newProject
                                     .GUID = Guid.NewGuid.ToString("D")
                                     .Title = "Project 1"
-                                    .IsNodeExpanded = True
+                                    .IsNodeExpanded = 1
                                     .SequenceNr = 0
                                     .User = newUser
                                 End With
@@ -197,7 +197,7 @@ Public Class Users
                                 With newProject
                                     .GUID = Guid.NewGuid.ToString("D")
                                     .Title = "Project 1"
-                                    .IsNodeExpanded = True
+                                    .IsNodeExpanded = 1
                                     .SequenceNr = 0
                                     .User = newUser
                                 End With

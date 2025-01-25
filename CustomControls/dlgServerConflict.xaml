@@ -8,7 +8,7 @@
         Title="Server Data Conflict" Width="420" ShowInTaskbar="False" FontFamily="SegoeUI" FontSize="12.5" ResizeMode="NoResize" 
         WindowStartupLocation="CenterOwner" SizeToContent="Height" >
     <Grid>
-        <StackPanel Margin="30,15,25,30">
+        <StackPanel Margin="30,15,25,28">
             
             <TextBlock Text="UserID Conflict" FontWeight="Bold" FontSize="14.5" FontStyle="Italic"  Foreground="{StaticResource DialogTitleForeground}"/>
            
@@ -19,36 +19,29 @@
 
             <RadioButton x:Name="rdoRestore" IsChecked="true">
                 <StackPanel Margin="0,2,0,2">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="Restore your existing experiments from the server." FontWeight="DemiBold"/>
-                        <ContentControl Content="{StaticResource icoInfo}" Height="14" ToolTipService.InitialShowDelay="250" Margin="4,-1,0,0"
-                        ToolTip="Restores your server experiments and combines &#x0a;them with your current local experiments."/>
-                    </StackPanel>
+                    <TextBlock Text="Restore your existing experiments from the server." FontWeight="DemiBold"/>
                     <Separator/>
-                    <TextBlock Text="You were already connected to the server before, and now you try to reconnect from a re-created identical userID, e.g. after migrating to a new machine." 
-                    TextWrapping="Wrap" Margin="1,1,0,0" FontStyle="Italic" Width="319"/>
-                    <Separator Margin="0,4,0,4"/>
+                    <TextBlock Text="If already connected to the server before: Restores your backed up server experiments and combines them with your newly created local ones." 
+                    TextWrapping="Wrap" Margin="1,1,0,0" FontStyle="Italic" Width="328"/>
+                    <Separator Margin="0,4,0,6"/>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="left" Margin="6,0,0,0">
                         <TextBlock Text="Your user password:" FontStyle="Italic" Margin="0,0,4,0" VerticalAlignment="Center"/>
-                        <ContentControl Content="{StaticResource icoInfoDark}" Height="14" ToolTipService.InitialShowDelay="250" Margin="0,-1,2,0" 
-                            ToolTip="This is the password you originally assigned to your userID &#x0a;when your data were synchronized to the server.  Required to &#x0a;prove ownership of your server data to be restored." Opacity="0.9"/>
+                       
                         <PasswordBox x:Name="pwUserPassword" Width="140" HorizontalAlignment="Left"/>
-                        
+                        <ContentControl Content="{StaticResource icoInfoDark}" Height="14" ToolTipService.InitialShowDelay="250" Margin="2,-1,0,0" 
+                            ToolTip="This is the password you originally assigned to your userID &#x0a;when your data were synchronized to the server.  Required to &#x0a;prove ownership of your server data to be restored." Opacity="0.9"/>
+
                     </StackPanel>
                     <!--<Separator Margin="0,4,0,2"/>-->
                 </StackPanel>
             </RadioButton>
 
           
-            <RadioButton x:Name="rdoRename" Margin="0,8,0,0">
+            <RadioButton x:Name="rdoRename" Margin="0,14,0,0">
                 <StackPanel Margin="0,2,0,0">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="Assign a unique userID to your experiments." FontWeight="DemiBold"/>
-                        <ContentControl Content="{StaticResource icoInfo}" Height="14" ToolTipService.InitialShowDelay="250" Margin="4,-1,0,0"
-                            ToolTip="Replaces your current userID and updates &#x0a;your experiment-ID's accordingly"/>
-                    </StackPanel>
+                    <TextBlock Text="Specify a different, unique userID." FontWeight="DemiBold"/>
                     <Separator/>
-                    <TextBlock Text="By coincidence you chose a userID which is already utilized by someone else in your organization." TextWrapping="Wrap" Margin="1,1,0,0" FontStyle="Italic" Width="317"/>
+                    <TextBlock Text="If not connceted to the server before: Replaces your current userID and updates your experiment-ID's accordingly, then uploads your data to the server." TextWrapping="Wrap" Margin="1,1,0,0" FontStyle="Italic" Width="333"/>
                 </StackPanel>
             </RadioButton>
 
