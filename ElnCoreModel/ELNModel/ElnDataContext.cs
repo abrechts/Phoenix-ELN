@@ -70,9 +70,8 @@ public partial class ElnDataContext : DbContext
 
             entity.Property(e => e.GUID).HasColumnType("VARCHAR(36)");
             entity.Property(e => e.IsDisplayAsVolume).HasColumnType("TINYINT");
-            entity.Property(e => e.Name).HasColumnType("VARCHAR(50)");
             entity.Property(e => e.ProtocolItemID).HasColumnType("VARCHAR(36)");
-            entity.Property(e => e.Source).HasColumnType("VARCHAR(40)");
+            entity.Property(e => e.SpecifiedUnitType).HasColumnType("SMALLINT");
             entity.Property(e => e.SyncState)
                 .HasDefaultValue((byte)0)
                 .HasColumnType("TINYINT");
@@ -87,7 +86,6 @@ public partial class ElnDataContext : DbContext
             entity.HasIndex(e => e.ProtocolItemID, "unq_tblComments").IsUnique();
 
             entity.Property(e => e.GUID).HasColumnType("VARCHAR(36)");
-            entity.Property(e => e.CommentFlowDoc).HasColumnType("MEDIUMTEXT");
             entity.Property(e => e.ProtocolItemID).HasColumnType("VARCHAR(36)");
             entity.Property(e => e.SyncState)
                 .HasDefaultValue((byte)0)
@@ -117,7 +115,6 @@ public partial class ElnDataContext : DbContext
 
             entity.Property(e => e.GUID).HasColumnType("VARCHAR(36)");
             entity.Property(e => e.DbMaterialID).HasColumnType("VARCHAR(36)");
-            entity.Property(e => e.FileName).HasColumnType("VARCHAR(50)");
             entity.Property(e => e.SyncState).HasDefaultValue(0);
 
             entity.HasOne(d => d.DbMaterial).WithMany(p => p.tblDbMaterialFiles).HasForeignKey(d => d.DbMaterialID);
@@ -130,7 +127,7 @@ public partial class ElnDataContext : DbContext
             entity.HasIndex(e => e.ProtocolItemID, "idx_tblEmbeddedFiles").IsUnique();
 
             entity.Property(e => e.GUID).HasColumnType("VARCHAR(36)");
-            entity.Property(e => e.FileName).HasColumnType("VARCHAR(50)");
+            entity.Property(e => e.FileType).HasColumnType("SMALLINT");
             entity.Property(e => e.IsPortraitMode)
                 .HasDefaultValue((byte)0)
                 .HasColumnType("TINYINT");
@@ -200,8 +197,6 @@ public partial class ElnDataContext : DbContext
             entity.Property(e => e.IsValidated)
                 .HasDefaultValue((byte)0)
                 .HasColumnType("TINYINT");
-            entity.Property(e => e.MatName).HasColumnType("VARCHAR(150)");
-            entity.Property(e => e.MatSource).HasColumnType("VARCHAR(100)");
             entity.Property(e => e.MatType).HasColumnType("SMALLINT");
             entity.Property(e => e.Molarity).HasDefaultValueSql("NULL");
             entity.Property(e => e.Molweight).HasDefaultValueSql("NULL");
@@ -221,9 +216,7 @@ public partial class ElnDataContext : DbContext
 
             entity.Property(e => e.GUID).HasColumnType("VARCHAR(36)");
             entity.Property(e => e.BatchID).HasColumnType("VARCHAR(40)");
-            entity.Property(e => e.ElementalFormula).HasColumnType("VARCHAR(50)");
             entity.Property(e => e.InChIKey).HasColumnType("VARCHAR(27)");
-            entity.Property(e => e.Name).HasColumnType("VARCHAR(50)");
             entity.Property(e => e.ProductIndex).HasColumnType("SMALLINT");
             entity.Property(e => e.ProtocolItemID).HasColumnType("VARCHAR(36)");
             entity.Property(e => e.SyncState)
@@ -243,10 +236,10 @@ public partial class ElnDataContext : DbContext
 
             entity.Property(e => e.GUID).HasColumnType("VARCHAR(36)");
             entity.Property(e => e.IsNodeExpanded).HasColumnType("TINYINT");
+            entity.Property(e => e.SequenceNr).HasColumnType("SMALLINT");
             entity.Property(e => e.SyncState)
                 .HasDefaultValue((byte)0)
                 .HasColumnType("TINYINT");
-            entity.Property(e => e.Title).HasColumnType("VARCHAR(100)");
             entity.Property(e => e.UserID).HasColumnType("VARCHAR(25)");
 
             entity.HasOne(d => d.User).WithMany(p => p.tblProjects).HasForeignKey(d => d.UserID);
@@ -279,9 +272,8 @@ public partial class ElnDataContext : DbContext
             entity.Property(e => e.GUID).HasColumnType("VARCHAR(36)");
             entity.Property(e => e.IsDisplayAsVolume).HasColumnType("TINYINT");
             entity.Property(e => e.IsMolarity).HasColumnType("TINYINT");
-            entity.Property(e => e.Name).HasColumnType("VARCHAR(50)");
             entity.Property(e => e.ProtocolItemID).HasColumnType("VARCHAR(36)");
-            entity.Property(e => e.Source).HasColumnType("VARCHAR(50)");
+            entity.Property(e => e.SpecifiedUnitType).HasColumnType("SMALLINT");
             entity.Property(e => e.SyncState)
                 .HasDefaultValue((byte)0)
                 .HasColumnType("TINYINT");
@@ -298,9 +290,8 @@ public partial class ElnDataContext : DbContext
             entity.Property(e => e.GUID).HasColumnType("VARCHAR(36)");
             entity.Property(e => e.InChIKey).HasColumnType("VARCHAR(27)");
             entity.Property(e => e.IsDisplayAsVolume).HasColumnType("TINYINT");
-            entity.Property(e => e.Name).HasColumnType("VARCHAR(50)");
             entity.Property(e => e.ProtocolItemID).HasColumnType("VARCHAR(36)");
-            entity.Property(e => e.Source).HasColumnType("VARCHAR(40)");
+            entity.Property(e => e.SpecifiedUnitType).HasColumnType("SMALLINT");
             entity.Property(e => e.SyncState)
                 .HasDefaultValue((byte)0)
                 .HasColumnType("TINYINT");
@@ -323,7 +314,6 @@ public partial class ElnDataContext : DbContext
             entity.Property(e => e.SyncState)
                 .HasDefaultValue((byte)0)
                 .HasColumnType("TINYINT");
-            entity.Property(e => e.Title).HasColumnType("VARCHAR(80)");
 
             entity.HasOne(d => d.ProtocolItem).WithOne(p => p.tblSeparators).HasForeignKey<tblSeparators>(d => d.ProtocolItemID);
         });
@@ -337,10 +327,10 @@ public partial class ElnDataContext : DbContext
             entity.Property(e => e.GUID).HasColumnType("VARCHAR(36)");
             entity.Property(e => e.IsDisplayAsWeight).HasColumnType("TINYINT");
             entity.Property(e => e.IsMolEquivalents).HasColumnType("TINYINT");
-            entity.Property(e => e.Name).HasColumnType("VARCHAR(50)");
             entity.Property(e => e.ProtocolItemID).HasColumnType("VARCHAR(36)");
-            entity.Property(e => e.Source).HasColumnType("VARCHAR(40)");
-            entity.Property(e => e.SpecifiedUnitType).HasDefaultValue(1);
+            entity.Property(e => e.SpecifiedUnitType)
+                .HasDefaultValue((short)1)
+                .HasColumnType("SMALLINT");
             entity.Property(e => e.SyncState)
                 .HasDefaultValue((byte)0)
                 .HasColumnType("TINYINT");
@@ -355,18 +345,12 @@ public partial class ElnDataContext : DbContext
             entity.HasIndex(e => e.DatabaseID, "idx_DatabaseID");
 
             entity.Property(e => e.UserID).HasColumnType("VARCHAR(25)");
-            entity.Property(e => e.City).HasColumnType("VARCHAR(50)");
-            entity.Property(e => e.CompanyName).HasColumnType("VARCHAR(100)");
             entity.Property(e => e.DatabaseID).HasColumnType("VARCHAR(36)");
-            entity.Property(e => e.DepartmentName).HasColumnType("VARCHAR(100)");
-            entity.Property(e => e.FirstName).HasColumnType("VARCHAR(50)");
             entity.Property(e => e.IsCurrent)
                 .HasDefaultValue((byte)0)
                 .HasColumnType("TINYINT");
             entity.Property(e => e.IsSpellCheckEnabled).HasColumnType("TINYINT");
-            entity.Property(e => e.LastName).HasColumnType("VARCHAR(50)");
             entity.Property(e => e.PWHash).HasColumnType("VARCHAR(64)");
-            entity.Property(e => e.PWHint).HasColumnType("VARCHAR(80)");
             entity.Property(e => e.SyncState)
                 .HasDefaultValue((byte)0)
                 .HasColumnType("TINYINT");

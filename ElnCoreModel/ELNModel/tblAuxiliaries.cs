@@ -9,7 +9,7 @@ public partial class tblAuxiliaries
 
     public string ProtocolItemID { get; set; } = null!;
 
-    public int SpecifiedUnitType { get; set; }
+    public short SpecifiedUnitType { get; set; }
 
     public byte IsDisplayAsVolume { get; set; }
 

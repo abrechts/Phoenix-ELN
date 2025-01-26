@@ -51,16 +51,127 @@ Public Class DbUpgradeServer
                 DbAddColumn("tblUsers", "IsCurrent", "TINYINT", "IsSpellCheckEnabled", serverConn)
             End If
 
-            '     corrects too limiting field sizes for user input (crashes server upload & sync if too long)
-            If GetFieldType("tblEmbeddedFiles", "FileName", serverConn) = "varchar(50)" Then
-                ChangeFieldType("tblEmbeddedFiles", "FileName", "TINYTEXT", serverConn)
-            End If
-
-            If GetFieldType("tblDbMaterialFiles", "FileName", serverConn) = "varchar(50)" Then
-                ChangeFieldType("tblDbMaterialFiles", "FileName", "TINYTEXT", serverConn)
-            End If
+            UpdateServerFieldTypes(serverConn)  'corrects initial too limiting field sizes for (unicode) text input
 
         End Using
+
+    End Sub
+
+
+    'corrects too limiting field sizes for user input (crashes server upload & sync if too long)
+
+    Private Shared Sub UpdateServerFieldTypes(serverConn As MySqlConnection)
+
+        ' Update fileName text field types
+
+        If GetFieldType("tblEmbeddedFiles", "FileName", serverConn) <> "text" Then
+            ChangeFieldType("tblEmbeddedFiles", "FileName", "TEXT", serverConn)
+        End If
+        If GetFieldType("tblEmbeddedFiles", "FileType", serverConn) <> "smallint" Then
+            ChangeFieldType("tblEmbeddedFiles", "FileType", "SMALLINT", serverConn)
+        End If
+
+        If GetFieldType("tblDbMaterialFiles", "FileName", serverConn) <> "text" Then
+            ChangeFieldType("tblDbMaterialFiles", "FileName", "TEXT", serverConn)
+        End If
+
+        ' Update material name & source text fields, plus SpecifiedUnitType
+
+        If GetFieldType("tblAuxiliaries", "SpecifiedUnitType", serverConn) <> "smallint" Then
+            ChangeFieldType("tblAuxiliaries", "SpecifiedUnitType", "SMALLINT", serverConn)
+        End If
+        If GetFieldType("tblAuxiliaries", "Name", serverConn) <> "text" Then
+            ChangeFieldType("tblAuxiliaries", "Name", "TEXT", serverConn)
+        End If
+        If GetFieldType("tblAuxiliaries", "Source", serverConn) <> "text" Then
+            ChangeFieldType("tblAuxiliaries", "Source", "TEXT", serverConn)
+        End If
+
+        If GetFieldType("tblReagents", "SpecifiedUnitType", serverConn) <> "smallint" Then
+            ChangeFieldType("tblReagents", "SpecifiedUnitType", "SMALLINT", serverConn)
+        End If
+        If GetFieldType("tblReagents", "Name", serverConn) <> "text" Then
+            ChangeFieldType("tblReagents", "Name", "TEXT", serverConn)
+        End If
+        If GetFieldType("tblReagents", "Source", serverConn) <> "text" Then
+            ChangeFieldType("tblReagents", "Source", "TEXT", serverConn)
+        End If
+
+        If GetFieldType("tblRefReactants", "SpecifiedUnitType", serverConn) <> "smallint" Then
+            ChangeFieldType("tblRefReactants", "SpecifiedUnitType", "SMALLINT", serverConn)
+        End If
+        If GetFieldType("tblRefReactants", "Name", serverConn) <> "text" Then
+            ChangeFieldType("tblRefReactants", "Name", "TEXT", serverConn)
+        End If
+        If GetFieldType("tblRefReactants", "Source", serverConn) <> "text" Then
+            ChangeFieldType("tblRefReactants", "Source", "TEXT", serverConn)
+        End If
+
+        If GetFieldType("tblSolvents", "SpecifiedUnitType", serverConn) <> "smallint" Then
+            ChangeFieldType("tblSolvents", "SpecifiedUnitType", "SMALLINT", serverConn)
+        End If
+        If GetFieldType("tblSolvents", "Name", serverConn) <> "text" Then
+            ChangeFieldType("tblSolvents", "Name", "TEXT", serverConn)
+        End If
+        If GetFieldType("tblSolvents", "Source", serverConn) <> "text" Then
+            ChangeFieldType("tblSolvents", "Source", "TEXT", serverConn)
+        End If
+
+        '---------------------
+
+        If GetFieldType("tblProducts", "Name", serverConn) <> "text" Then
+            ChangeFieldType("tblProducts", "Name", "TEXT", serverConn)
+        End If
+        If GetFieldType("tblProducts", "ElementalFormula", serverConn) <> "text" Then
+            ChangeFieldType("tblProducts", "ElementalFormula", "TEXT", serverConn)
+        End If
+
+        If GetFieldType("tblComments", "CommentFlowDoc", serverConn) <> "text" Then
+            ChangeFieldType("tblComments", "CommentFlowDoc", "TEXT", serverConn)
+        End If
+
+        If GetFieldType("tblProtocolItems", "SequenceNr", serverConn) <> "smallint" Then
+            ChangeFieldType("tblProtocolItems", "SequenceNr", "SMALLINT", serverConn)
+        End If
+
+        If GetFieldType("tblProjects", "Title", serverConn) <> "text" Then
+            ChangeFieldType("tblProjects", "Title", "TEXT", serverConn)
+        End If
+        If GetFieldType("tblProjects", "SequenceNr", serverConn) <> "smallint" Then
+            ChangeFieldType("tblProjects", "SequenceNr", "SMALLINT", serverConn)
+        End If
+
+        If GetFieldType("tblMaterials", "MatName", serverConn) <> "text" Then
+            ChangeFieldType("tblMaterials", "MatName", "TEXT", serverConn)
+        End If
+        If GetFieldType("tblMaterials", "MatSource", serverConn) <> "text" Then
+            ChangeFieldType("tblMaterials", "MatSource", "TEXT", serverConn)
+        End If
+
+        If GetFieldType("tblSeparators", "Title", serverConn) <> "text" Then
+            ChangeFieldType("tblSeparators", "Title", "TEXT", serverConn)
+        End If
+
+        '-----------------------
+
+        If GetFieldType("tblUsers", "FirstName", serverConn) <> "text" Then
+            ChangeFieldType("tblUsers", "FirstName", "TEXT", serverConn)
+        End If
+        If GetFieldType("tblUsers", "LastName", serverConn) <> "text" Then
+            ChangeFieldType("tblUsers", "LastName", "TEXT", serverConn)
+        End If
+        If GetFieldType("tblUsers", "CompanyName", serverConn) <> "text" Then
+            ChangeFieldType("tblUsers", "CompanyName", "TEXT", serverConn)
+        End If
+        If GetFieldType("tblUsers", "DepartmentName", serverConn) <> "text" Then
+            ChangeFieldType("tblUsers", "DepartmentName", "TEXT", serverConn)
+        End If
+        If GetFieldType("tblUsers", "City", serverConn) <> "text" Then
+            ChangeFieldType("tblUsers", "City", "TEXT", serverConn)
+        End If
+        If GetFieldType("tblUsers", "PWHint", serverConn) <> "text" Then
+            ChangeFieldType("tblUsers", "PWHint", "TEXT", serverConn)
+        End If
 
     End Sub
 

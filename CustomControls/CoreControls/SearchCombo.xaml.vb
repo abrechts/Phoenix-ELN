@@ -1,10 +1,8 @@
 ﻿Imports System.Globalization
 Imports System.Windows
 Imports System.Windows.Controls
-Imports System.Windows.Controls.Primitives
 Imports System.Windows.Data
 Imports System.Windows.Input
-Imports System.Windows.Media
 Imports ElnCoreModel
 
 Public Class SearchCombo

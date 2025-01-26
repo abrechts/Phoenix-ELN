@@ -25,9 +25,9 @@ public partial class tblUsers
 
     public byte IsSpellCheckEnabled { get; set; }
 
-    public byte? IsCurrent { get; set; }
-
     public byte? SyncState { get; set; }
+
+    public byte? IsCurrent { get; set; }
 
     public virtual tblDatabaseInfo Database { get; set; } = null!;
 

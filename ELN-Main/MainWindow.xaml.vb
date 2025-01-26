@@ -53,7 +53,7 @@ Class MainWindow
             End If
 
             '------------------------
-            '  _IsVersionUpgrade = True
+            ' _IsVersionUpgrade = True
             '------------------------
 
             'Apply settings
