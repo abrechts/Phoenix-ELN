@@ -3,6 +3,9 @@
 This script creates a Phoenix ELN server database for MariaDB or MySQL. 
 -------------------------------------------------------------------------------------------
 
+Version 1.1
+-----------
+
 Create a login User
 '-------------------'
 In your database tool, please manually create a new database user account for Phoenix ELN.
@@ -15,6 +18,7 @@ SET foreign_key_checks = 0;     -- is reset at end of script
 
 CREATE DATABASE IF NOT EXISTS `PhoenixElnData` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci */;
 USE `PhoenixElnData`;
+
 
 CREATE TABLE IF NOT EXISTS `sync_Tombstone` (
   `GUID` varchar(36) NOT NULL,
@@ -31,10 +35,10 @@ CREATE TABLE IF NOT EXISTS `sync_Tombstone` (
 CREATE TABLE IF NOT EXISTS `tblAuxiliaries` (
   `GUID` varchar(36) NOT NULL,
   `ProtocolItemID` varchar(36) NOT NULL,
-  `SpecifiedUnitType` bigint(20) NOT NULL,
+  `SpecifiedUnitType` smallint(6) DEFAULT NULL,
   `IsDisplayAsVolume` tinyint(4) NOT NULL,
-  `Name` varchar(50) NOT NULL,
-  `Source` varchar(40) DEFAULT NULL,
+  `Name` text DEFAULT NULL,
+  `Source` text DEFAULT NULL,
   `Grams` double NOT NULL,
   `Equivalents` double NOT NULL,
   `Density` double DEFAULT NULL,
@@ -48,7 +52,7 @@ CREATE TABLE IF NOT EXISTS `tblAuxiliaries` (
 CREATE TABLE IF NOT EXISTS `tblComments` (
   `GUID` varchar(36) NOT NULL,
   `ProtocolItemID` varchar(36) NOT NULL,
-  `CommentFlowDoc` mediumtext DEFAULT NULL,
+  `CommentFlowDoc` text DEFAULT NULL,
   `SyncState` tinyint(4) DEFAULT 0,
   PRIMARY KEY (`GUID`),
   UNIQUE KEY `unq_tblComments` (`ProtocolItemID`),
@@ -67,11 +71,25 @@ CREATE TABLE IF NOT EXISTS `tblDatabaseInfo` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 
+CREATE TABLE IF NOT EXISTS `tblDbMaterialFiles` (
+  `GUID` varchar(36) NOT NULL,
+  `DbMaterialID` varchar(36) NOT NULL,
+  `FileName` text DEFAULT NULL,
+  `FileBytes` longblob NOT NULL,
+  `FileSizeMB` double DEFAULT NULL,
+  `IconImage` blob DEFAULT NULL,
+  `SyncState` int(11) DEFAULT 0,
+  PRIMARY KEY (`GUID`),
+  KEY `DbMaterialID` (`DbMaterialID`),
+  CONSTRAINT `tblDbMaterialFiles_ibfk_1` FOREIGN KEY (`DbMaterialID`) REFERENCES `tblMaterials` (`GUID`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
 CREATE TABLE IF NOT EXISTS `tblEmbeddedFiles` (
   `GUID` varchar(36) NOT NULL,
   `ProtocolItemID` varchar(36) NOT NULL,
-  `FileType` bigint(20) NOT NULL,
-  `FileName` varchar(50) NOT NULL,
+  `FileType` smallint(6) DEFAULT NULL,
+  `FileName` text DEFAULT NULL,
   `FileBytes` longblob NOT NULL,
   `FileSizeMB` double DEFAULT NULL,
   `FileComment` longtext NOT NULL,
@@ -107,6 +125,8 @@ CREATE TABLE IF NOT EXISTS `tblExperiments` (
   `FinalizeDate` varchar(20) DEFAULT NULL,
   `DisplayIndex` smallint(6) DEFAULT NULL,
   `IsNodeExpanded` tinyint(4) DEFAULT 0,
+  `RxnIndigoObj` longblob DEFAULT NULL,
+  `RxnFingerprint` blob DEFAULT NULL,
   `SyncState` tinyint(4) DEFAULT 0,
   PRIMARY KEY (`ExperimentID`),
   KEY `IX_tblExperiments_ProjectID` (`ProjectID`),
@@ -119,8 +139,8 @@ CREATE TABLE IF NOT EXISTS `tblExperiments` (
 CREATE TABLE IF NOT EXISTS `tblMaterials` (
   `GUID` varchar(36) NOT NULL,
   `DatabaseID` varchar(36) NOT NULL,
-  `MatName` varchar(150) NOT NULL,
-  `MatSource` varchar(100) DEFAULT NULL,
+  `MatName` text DEFAULT NULL,
+  `MatSource` text DEFAULT NULL,
   `MatType` smallint(6) NOT NULL,
   `Molweight` double DEFAULT NULL,
   `Density` double DEFAULT NULL,
@@ -128,6 +148,7 @@ CREATE TABLE IF NOT EXISTS `tblMaterials` (
   `Molarity` double DEFAULT NULL,
   `InChIKey` varchar(30) DEFAULT NULL,
   `IsValidated` tinyint(4) DEFAULT 0,
+  `CurrDocIndex` smallint(6) DEFAULT NULL,
   `SyncState` tinyint(4) DEFAULT 0,
   PRIMARY KEY (`GUID`),
   KEY `IX_tblMaterials_DatabaseID` (`DatabaseID`),
@@ -139,12 +160,12 @@ CREATE TABLE IF NOT EXISTS `tblProducts` (
   `GUID` varchar(36) NOT NULL,
   `ProtocolItemID` varchar(36) NOT NULL,
   `ProductIndex` smallint(6) NOT NULL,
-  `Name` varchar(50) NOT NULL,
+  `Name` text DEFAULT NULL,
   `Grams` double NOT NULL,
   `MolecularWeight` double NOT NULL,
   `Yield` double NOT NULL,
   `ExactMass` double DEFAULT NULL,
-  `ElementalFormula` varchar(50) DEFAULT NULL,
+  `ElementalFormula` text DEFAULT NULL,
   `Purity` double DEFAULT NULL,
   `ResinLoad` double DEFAULT NULL,
   `BatchID` varchar(40) DEFAULT NULL,
@@ -159,8 +180,8 @@ CREATE TABLE IF NOT EXISTS `tblProducts` (
 CREATE TABLE IF NOT EXISTS `tblProjects` (
   `GUID` varchar(36) NOT NULL,
   `UserID` varchar(25) NOT NULL,
-  `Title` varchar(100) DEFAULT NULL,
-  `SequenceNr` bigint(20) DEFAULT NULL,
+  `Title` text DEFAULT NULL,
+  `SequenceNr` smallint(6) DEFAULT NULL,
   `IsNodeExpanded` tinyint(4) NOT NULL,
   `SyncState` tinyint(4) DEFAULT 0,
   PRIMARY KEY (`GUID`),
@@ -187,11 +208,11 @@ CREATE TABLE IF NOT EXISTS `tblProtocolItems` (
 CREATE TABLE IF NOT EXISTS `tblReagents` (
   `GUID` varchar(36) NOT NULL,
   `ProtocolItemID` varchar(36) NOT NULL,
-  `SpecifiedUnitType` bigint(20) NOT NULL,
+  `SpecifiedUnitType` smallint(6) DEFAULT NULL,
   `IsDisplayAsVolume` tinyint(4) NOT NULL,
   `MolecularWeight` double DEFAULT NULL,
-  `Name` varchar(50) NOT NULL,
-  `Source` varchar(50) DEFAULT NULL,
+  `Name` text DEFAULT NULL,
+  `Source` text DEFAULT NULL,
   `Grams` double NOT NULL,
   `MMols` double NOT NULL,
   `Equivalents` double NOT NULL,
@@ -210,10 +231,10 @@ CREATE TABLE IF NOT EXISTS `tblReagents` (
 CREATE TABLE IF NOT EXISTS `tblRefReactants` (
   `GUID` varchar(36) NOT NULL,
   `ProtocolItemID` varchar(36) NOT NULL,
-  `SpecifiedUnitType` bigint(20) NOT NULL,
+  `SpecifiedUnitType` smallint(6) DEFAULT NULL,
   `IsDisplayAsVolume` tinyint(4) NOT NULL,
-  `Name` varchar(50) NOT NULL,
-  `Source` varchar(40) DEFAULT NULL,
+  `Name` text DEFAULT NULL,
+  `Source` text DEFAULT NULL,
   `MolecularWeight` double NOT NULL,
   `Grams` double NOT NULL,
   `MMols` double NOT NULL,
@@ -234,7 +255,7 @@ CREATE TABLE IF NOT EXISTS `tblSeparators` (
   `ProtocolItemID` varchar(36) NOT NULL,
   `ElementType` smallint(6) NOT NULL DEFAULT 0,
   `DisplayType` smallint(6) NOT NULL DEFAULT 0,
-  `Title` varchar(80) DEFAULT NULL,
+  `Title` text DEFAULT NULL,
   `SyncState` tinyint(4) NOT NULL DEFAULT 0,
   PRIMARY KEY (`GUID`),
   UNIQUE KEY `unq_tblSeparators` (`ProtocolItemID`),
@@ -245,10 +266,10 @@ CREATE TABLE IF NOT EXISTS `tblSeparators` (
 CREATE TABLE IF NOT EXISTS `tblSolvents` (
   `GUID` varchar(36) NOT NULL,
   `ProtocolItemID` varchar(36) NOT NULL,
-  `SpecifiedUnitType` bigint(20) NOT NULL DEFAULT 1,
+  `SpecifiedUnitType` smallint(6) DEFAULT NULL,
   `IsDisplayAsWeight` tinyint(4) NOT NULL,
-  `Name` varchar(50) NOT NULL,
-  `Source` varchar(40) DEFAULT NULL,
+  `Name` text DEFAULT NULL,
+  `Source` text DEFAULT NULL,
   `Milliliters` double NOT NULL,
   `Density` double DEFAULT NULL,
   `IsMolEquivalents` tinyint(4) NOT NULL,
@@ -263,14 +284,15 @@ CREATE TABLE IF NOT EXISTS `tblSolvents` (
 CREATE TABLE IF NOT EXISTS `tblUsers` (
   `UserID` varchar(25) NOT NULL,
   `DatabaseID` varchar(36) NOT NULL,
-  `FirstName` varchar(50) DEFAULT NULL,
-  `LastName` varchar(50) DEFAULT NULL,
-  `CompanyName` varchar(100) DEFAULT NULL,
-  `DepartmentName` varchar(100) DEFAULT NULL,
-  `City` varchar(50) DEFAULT NULL,
+  `FirstName` text DEFAULT NULL,
+  `LastName` text DEFAULT NULL,
+  `CompanyName` text DEFAULT NULL,
+  `DepartmentName` text DEFAULT NULL,
+  `City` text DEFAULT NULL,
   `PWHash` varchar(64) DEFAULT NULL,
-  `PWHint` varchar(80) DEFAULT NULL,
+  `PWHint` text DEFAULT NULL,
   `IsSpellCheckEnabled` tinyint(4) NOT NULL,
+  `IsCurrent` tinyint(4) DEFAULT NULL,
   `SyncState` tinyint(4) DEFAULT 0,
   PRIMARY KEY (`UserID`),
   KEY `IX_tblUsers_DatabaseID` (`DatabaseID`),
@@ -278,4 +300,3 @@ CREATE TABLE IF NOT EXISTS `tblUsers` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 SET foreign_key_checks = 1;
-

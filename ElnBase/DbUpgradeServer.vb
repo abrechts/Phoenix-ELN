@@ -49,20 +49,24 @@ Public Class DbUpgradeServer
 
             If Not DbColumnExists("tblUsers", "IsCurrent", serverConn) Then
                 DbAddColumn("tblUsers", "IsCurrent", "TINYINT", "IsSpellCheckEnabled", serverConn)
+                UpdateRev1ServerFieldTypes(serverConn)  'changes are introduced in version 2.6.0
             End If
 
-            UpdateServerFieldTypes(serverConn)  'corrects initial too limiting field sizes for (unicode) text input
 
         End Using
 
     End Sub
 
 
-    'corrects too limiting field sizes for user input (crashes server upload & sync if too long)
+    ''' <summary>
+    ''' This server DB revision updates a large number of sever table field types (introduced in version 2.6.0)
+    ''' </summary>
+    ''' <remarks>Changes initial varchar(x) types for text input to less restricive TEXT 
+    ''' and replaces intial bigint fields by smallint.</remarks>
+    ''' 
+    Private Shared Sub UpdateRev1ServerFieldTypes(serverConn As MySqlConnection)
 
-    Private Shared Sub UpdateServerFieldTypes(serverConn As MySqlConnection)
-
-        ' Update fileName text field types
+        'changes were introduced in version 2.6.0; no need to repeat checks for later versions
 
         If GetFieldType("tblEmbeddedFiles", "FileName", serverConn) <> "text" Then
             ChangeFieldType("tblEmbeddedFiles", "FileName", "TEXT", serverConn)
@@ -212,12 +216,13 @@ Public Class DbUpgradeServer
 
     End Sub
 
+
     Friend Shared Sub DbAddColumnWithDefault(tableName As String, fieldName As String, fieldType As String, defaultValue As String,
        afterField As String, serverConn As MySqlConnection)
 
         Try
             If Not DbColumnExists(tableName, fieldName, serverConn) Then
-                Dim sqlCommand = "ALTER TABLE " + tableName + " ADD " + fieldName + " " + fieldType + " DEFAULT " + defaultValue + " AFTER " + afterField
+                Dim sqlCommand = "ALTER TABLE " + tableName + " ADD " + fieldName + " " + fieldType + " Default " + defaultValue + " AFTER " + afterField
                 Using command As New MySqlCommand(sqlCommand, serverConn)
                     serverConn.Open()
                     command.ExecuteNonQuery()
@@ -244,6 +249,7 @@ Public Class DbUpgradeServer
         End Try
 
     End Sub
+
 
     Friend Shared Function GetFieldType(tableName As String, colName As String, serverConn As MySqlConnection) As String
 
