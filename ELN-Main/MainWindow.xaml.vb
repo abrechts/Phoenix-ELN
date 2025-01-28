@@ -1280,6 +1280,7 @@ Class MainWindow
 
         With newUserDlg
             .Owner = Me
+            .Title = "User Info"
             .CurrentUser = CType(Me.DataContext, tblUsers)  'specifying a localUser means to edit its data
             If .ShowDialog() Then
 

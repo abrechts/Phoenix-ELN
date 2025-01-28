@@ -24,7 +24,7 @@
 
         <TreeView x:Name="navTree" ItemsSource="{Binding tblProjects, Converter={StaticResource projectsCollectionViewConv}}" 
             TreeViewItem.Selected="TreeViewItem_Selected" TreeViewItem.Unselected="TreeViewItem_Unselected" 
-            Padding="2,6,2,8" BorderThickness="0"
+            Padding="2,2,2,8" BorderThickness="0"
             dd:DragDrop.IsDragSource="True"
             dd:DragDrop.IsDropTarget="True"
             dd:DragDrop.UseDefaultDragAdorner="false"

@@ -1222,4 +1222,89 @@
         </Rectangle>
     </Viewbox>
 
+    <Viewbox x:Key="icoAddUser2" x:Shared="false">
+        <Rectangle Width="16 " Height="16">
+            <Rectangle.Resources>
+                <SolidColorBrush x:Key="canvas" Opacity="0" />
+                <SolidColorBrush x:Key="light-defaultgrey-10" Color="#212121" Opacity="0.1" />
+                <SolidColorBrush x:Key="light-defaultgrey" Color="#212121" Opacity="1" />
+                <SolidColorBrush x:Key="light-green" Color="#1f801f" Opacity="1" />
+            </Rectangle.Resources>
+            <Rectangle.Fill>
+                <DrawingBrush Stretch="None">
+                    <DrawingBrush.Drawing>
+                        <DrawingGroup>
+                            <DrawingGroup>
+                                <GeometryDrawing Brush="{DynamicResource canvas}" Geometry="F1M16,16H0V0H16Z" />
+                            </DrawingGroup>
+                            <DrawingGroup>
+                                <GeometryDrawing Brush="{DynamicResource light-defaultgrey-10}" Geometry="F1M10.5,4.5a3,3,0,1,1-3,3A3,3,0,0,1,10.5,4.5ZM15,15a4.5,4.5,0,0,0-9,0Z" />
+                                <GeometryDrawing Brush="{DynamicResource light-defaultgrey}" Geometry="F1M12.457,10.4a3.5,3.5,0,1,0-3.914,0A5.007,5.007,0,0,0,5.5,15h1a4,4,0,0,1,8,0h1A5.007,5.007,0,0,0,12.457,10.4ZM8,7.5A2.5,2.5,0,1,1,10.5,10,2.5,2.5,0,0,1,8,7.5Z" />
+                                <GeometryDrawing Brush="{DynamicResource light-green}" Geometry="F1M7,4H4V7H3V4H0V3H3V0H4V3H7Z" />
+                            </DrawingGroup>
+                        </DrawingGroup>
+                    </DrawingBrush.Drawing>
+                </DrawingBrush>
+            </Rectangle.Fill>
+        </Rectangle>
+    </Viewbox>
+
+    <Viewbox x:Key="icoUser2" x:Shared="false">
+        <Rectangle Width="16 " Height="16">
+            <Rectangle.Resources>
+                <SolidColorBrush x:Key="canvas" Opacity="0" />
+                <SolidColorBrush x:Key="light-defaultgrey-10" Color="#212121" Opacity="0.1" />
+                <SolidColorBrush x:Key="light-defaultgrey" Color="#FF0861D7" Opacity="1" />
+            </Rectangle.Resources>
+            <Rectangle.Fill>
+                <DrawingBrush Stretch="None">
+                    <DrawingBrush.Drawing>
+                        <DrawingGroup>
+                            <DrawingGroup>
+                                <GeometryDrawing Brush="{DynamicResource canvas}" Geometry="F1M16,16H0V0H16Z" />
+                            </DrawingGroup>
+                            <DrawingGroup>
+                                <GeometryDrawing Brush="{DynamicResource light-defaultgrey-10}" Geometry="F1M8,3.5a3,3,0,1,1-3,3A3,3,0,0,1,8,3.5Z" />
+                                <GeometryDrawing Brush="{DynamicResource light-defaultgrey-10}" Geometry="F1M3.5,14a4.5,4.5,0,0,1,9,0Z" />
+                                <GeometryDrawing Brush="{DynamicResource light-defaultgrey}" Geometry="F1M9.957,9.4a3.5,3.5,0,1,0-3.914,0A5.007,5.007,0,0,0,3,14H4a4,4,0,0,1,8,0h1A5.007,5.007,0,0,0,9.957,9.4ZM5.5,6.5A2.5,2.5,0,1,1,8,9,2.5,2.5,0,0,1,5.5,6.5Z" />
+                            </DrawingGroup>
+                        </DrawingGroup>
+                    </DrawingBrush.Drawing>
+                </DrawingBrush>
+            </Rectangle.Fill>
+        </Rectangle>
+    </Viewbox>
+
+    <Viewbox x:Key="icoEditUser" x:Shared="false">
+        <Rectangle Width="16 " Height="16">
+            <Rectangle.Resources>
+                <SolidColorBrush x:Key="canvas" Opacity="0" />
+                <SolidColorBrush x:Key="light-defaultgrey-10" Color="#212121" Opacity="0.1" />
+                <SolidColorBrush x:Key="light-defaultgrey" Color="#212121" Opacity="1" />
+            </Rectangle.Resources>
+            <Rectangle.Fill>
+                <DrawingBrush Stretch="None">
+                    <DrawingBrush.Drawing>
+                        <DrawingGroup>
+                            <DrawingGroup>
+                                <GeometryDrawing Brush="{DynamicResource canvas}" Geometry="F1M16,16H0V0H16Z" />
+                            </DrawingGroup>
+                            <DrawingGroup>
+                                <DrawingGroup Opacity="0.75">
+                                    <GeometryDrawing Brush="{DynamicResource light-defaultgrey-10}" Geometry="F1M14.5,4.5v9H8.313a5.03,5.03,0,0,0-1.107-1.318A3.7,3.7,0,0,0,6.5,7.476V4.5Z" />
+                                    <GeometryDrawing Brush="{DynamicResource light-defaultgrey}" Geometry="F1M15,4.5v9l-.5.5H8.569a5.091,5.091,0,0,0-.587-1H14V5H7V8.023A3.765,3.765,0,0,0,6,7.09V4.5L6.5,4h8Z" />
+                                </DrawingGroup>
+                                <GeometryDrawing Brush="{DynamicResource light-defaultgrey}" Geometry="F1M12.5,3a2,2,0,0,0-4,0H7V5h7V3Zm-2-1a1,1,0,1,1-1,1A1,1,0,0,1,10.5,2Z" />
+                                <GeometryDrawing Brush="{DynamicResource light-defaultgrey-10}" Geometry="F1M6.25,10.25A2.25,2.25,0,1,1,4,8,2.25,2.25,0,0,1,6.25,10.25ZM7.5,16a3.5,3.5,0,0,0-7,0Z" />
+                                <GeometryDrawing Brush="{DynamicResource light-defaultgrey}" Geometry="F1M2.25,10.25A1.75,1.75,0,1,1,4,12,1.752,1.752,0,0,1,2.25,10.25ZM5.7,12.394a2.75,2.75,0,1,0-3.4,0A4,4,0,0,0,0,16H1a3,3,0,0,1,6,0H8A4,4,0,0,0,5.7,12.394Z" />
+                            </DrawingGroup>
+                        </DrawingGroup>
+                    </DrawingBrush.Drawing>
+                </DrawingBrush>
+            </Rectangle.Fill>
+        </Rectangle>
+    </Viewbox>
+
+
+
 </ResourceDictionary>

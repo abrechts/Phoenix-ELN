@@ -2,6 +2,6 @@
 Database Administrator Note
 ---------------------------
 
-Run this script just once to set up the Phoenix ELN server database from scratch. No subsequent manual schema updates are required, since the first connecting client will auto-update the server schema automatically whenever required by future version releases.
+Run this script just once to set up the Phoenix ELN server database from scratch. No subsequent manual schema updates are required: The first connecting client will auto-update the server schema automatically whenever required by future version releases.
 
 
