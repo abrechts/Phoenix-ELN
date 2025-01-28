@@ -151,7 +151,7 @@ Public Class Users
             Return False
         End If
 
-        Dim res = MsgBox("This will add another user with its own user-ID to " + vbCrLf +
+        Dim res = MsgBox("This will add another user with its own userID to " + vbCrLf +
                         "your local ELN database." + vbCrLf + vbCrLf +
                         "This is useful when sharing your machine with other" + vbCrLf +
                         "ELN users, or if you are working in multiple" + vbCrLf +

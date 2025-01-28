@@ -57,6 +57,7 @@ Public Class DbUpgradeLocal
 
             If Not DbColumnExists("tblUsers", "IsCurrent", sqliteConn) Then
                 DbAddColumn("tblUsers", "IsCurrent", "TINYINT", "0", sqliteConn)
+                DbAddColumn("tblUsers", "SequenceNr", "SMALLINT", "0", sqliteConn)
             End If
 
 

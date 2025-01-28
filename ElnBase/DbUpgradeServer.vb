@@ -21,8 +21,8 @@ Public Class DbUpgradeServer
             ' --> introduced in version 0.9.4 (RSS queries)
 
             If Not DbColumnExists("tblExperiments", "RxnIndigoObj", serverConn) Then
-                DbAddColumn("tblExperiments", "RxnIndigoObj", "LONGBLOB", "IsNodeExpanded", serverConn)
-                DbAddColumn("tblExperiments", "RxnFingerprint", "BLOB", "RxnIndigoObj", serverConn)
+                DbAddColumn("tblExperiments", "RxnIndigoObj", "LONGBLOB", "", "IsNodeExpanded", serverConn)
+                DbAddColumn("tblExperiments", "RxnFingerprint", "BLOB", "", "RxnIndigoObj", serverConn)
             End If
 
             ' --> introduced in version 2.3.0
@@ -42,16 +42,16 @@ Public Class DbUpgradeServer
             ' --> introduced in version 2.4.0 
 
             If Not DbColumnExists("tblMaterials", "CurrDocIndex", serverConn) Then
-                DbAddColumn("tblMaterials", "CurrDocIndex", "SMALLINT", "IsValidated", serverConn)
+                DbAddColumn("tblMaterials", "CurrDocIndex", "SMALLINT", "0", "IsValidated", serverConn)
             End If
 
             ' --> introduced in version 2.6.0
 
             If Not DbColumnExists("tblUsers", "IsCurrent", serverConn) Then
-                DbAddColumn("tblUsers", "IsCurrent", "TINYINT", "IsSpellCheckEnabled", serverConn)
+                DbAddColumn("tblUsers", "IsCurrent", "TINYINT", "0", "IsSpellCheckEnabled", serverConn)
+                DbAddColumn("tblUsers", "SequenceNr", "SMALLINT", "0", "IsCurrent", serverConn)
                 UpdateRev1ServerFieldTypes(serverConn)  'changes are introduced in version 2.6.0
             End If
-
 
         End Using
 
@@ -62,119 +62,119 @@ Public Class DbUpgradeServer
     ''' This server DB revision updates a large number of sever table field types (introduced in version 2.6.0)
     ''' </summary>
     ''' <remarks>Changes initial varchar(x) types for text input to less restricive TEXT 
-    ''' and replaces intial bigint fields by smallint.</remarks>
+    ''' and replaces initial bigint fields by smallint.</remarks>
     ''' 
     Private Shared Sub UpdateRev1ServerFieldTypes(serverConn As MySqlConnection)
 
         'changes were introduced in version 2.6.0; no need to repeat checks for later versions
 
         If GetFieldType("tblEmbeddedFiles", "FileName", serverConn) <> "text" Then
-            ChangeFieldType("tblEmbeddedFiles", "FileName", "TEXT", serverConn)
+            ChangeFieldType(serverConn, "tblEmbeddedFiles", "FileName", "TEXT")
         End If
         If GetFieldType("tblEmbeddedFiles", "FileType", serverConn) <> "smallint" Then
-            ChangeFieldType("tblEmbeddedFiles", "FileType", "SMALLINT", serverConn)
+            ChangeFieldType(serverConn, "tblEmbeddedFiles", "FileType", "SMALLINT")
         End If
 
         If GetFieldType("tblDbMaterialFiles", "FileName", serverConn) <> "text" Then
-            ChangeFieldType("tblDbMaterialFiles", "FileName", "TEXT", serverConn)
+            ChangeFieldType(serverConn, "tblDbMaterialFiles", "FileName", "TEXT")
         End If
 
         ' Update material name & source text fields, plus SpecifiedUnitType
 
         If GetFieldType("tblAuxiliaries", "SpecifiedUnitType", serverConn) <> "smallint" Then
-            ChangeFieldType("tblAuxiliaries", "SpecifiedUnitType", "SMALLINT", serverConn)
+            ChangeFieldType(serverConn, "tblAuxiliaries", "SpecifiedUnitType", "SMALLINT")
         End If
         If GetFieldType("tblAuxiliaries", "Name", serverConn) <> "text" Then
-            ChangeFieldType("tblAuxiliaries", "Name", "TEXT", serverConn)
+            ChangeFieldType(serverConn, "tblAuxiliaries", "Name", "TEXT")
         End If
         If GetFieldType("tblAuxiliaries", "Source", serverConn) <> "text" Then
-            ChangeFieldType("tblAuxiliaries", "Source", "TEXT", serverConn)
+            ChangeFieldType(serverConn, "tblAuxiliaries", "Source", "TEXT")
         End If
 
         If GetFieldType("tblReagents", "SpecifiedUnitType", serverConn) <> "smallint" Then
-            ChangeFieldType("tblReagents", "SpecifiedUnitType", "SMALLINT", serverConn)
+            ChangeFieldType(serverConn, "tblReagents", "SpecifiedUnitType", "SMALLINT")
         End If
         If GetFieldType("tblReagents", "Name", serverConn) <> "text" Then
-            ChangeFieldType("tblReagents", "Name", "TEXT", serverConn)
+            ChangeFieldType(serverConn, "tblReagents", "Name", "TEXT")
         End If
         If GetFieldType("tblReagents", "Source", serverConn) <> "text" Then
-            ChangeFieldType("tblReagents", "Source", "TEXT", serverConn)
+            ChangeFieldType(serverConn, "tblReagents", "Source", "TEXT")
         End If
 
         If GetFieldType("tblRefReactants", "SpecifiedUnitType", serverConn) <> "smallint" Then
-            ChangeFieldType("tblRefReactants", "SpecifiedUnitType", "SMALLINT", serverConn)
+            ChangeFieldType(serverConn, "tblRefReactants", "SpecifiedUnitType", "SMALLINT")
         End If
         If GetFieldType("tblRefReactants", "Name", serverConn) <> "text" Then
-            ChangeFieldType("tblRefReactants", "Name", "TEXT", serverConn)
+            ChangeFieldType(serverConn, "tblRefReactants", "Name", "TEXT")
         End If
         If GetFieldType("tblRefReactants", "Source", serverConn) <> "text" Then
-            ChangeFieldType("tblRefReactants", "Source", "TEXT", serverConn)
+            ChangeFieldType(serverConn, "tblRefReactants", "Source", "TEXT")
         End If
 
         If GetFieldType("tblSolvents", "SpecifiedUnitType", serverConn) <> "smallint" Then
-            ChangeFieldType("tblSolvents", "SpecifiedUnitType", "SMALLINT", serverConn)
+            ChangeFieldType(serverConn, "tblSolvents", "SpecifiedUnitType", "SMALLINT")
         End If
         If GetFieldType("tblSolvents", "Name", serverConn) <> "text" Then
-            ChangeFieldType("tblSolvents", "Name", "TEXT", serverConn)
+            ChangeFieldType(serverConn, "tblSolvents", "Name", "TEXT")
         End If
         If GetFieldType("tblSolvents", "Source", serverConn) <> "text" Then
-            ChangeFieldType("tblSolvents", "Source", "TEXT", serverConn)
+            ChangeFieldType(serverConn, "tblSolvents", "Source", "TEXT")
         End If
 
         '---------------------
 
         If GetFieldType("tblProducts", "Name", serverConn) <> "text" Then
-            ChangeFieldType("tblProducts", "Name", "TEXT", serverConn)
+            ChangeFieldType(serverConn, "tblProducts", "Name", "TEXT")
         End If
         If GetFieldType("tblProducts", "ElementalFormula", serverConn) <> "text" Then
-            ChangeFieldType("tblProducts", "ElementalFormula", "TEXT", serverConn)
+            ChangeFieldType(serverConn, "tblProducts", "ElementalFormula", "TEXT")
         End If
 
         If GetFieldType("tblComments", "CommentFlowDoc", serverConn) <> "text" Then
-            ChangeFieldType("tblComments", "CommentFlowDoc", "TEXT", serverConn)
+            ChangeFieldType(serverConn, "tblComments", "CommentFlowDoc", "TEXT")
         End If
 
         If GetFieldType("tblProtocolItems", "SequenceNr", serverConn) <> "smallint" Then
-            ChangeFieldType("tblProtocolItems", "SequenceNr", "SMALLINT", serverConn)
+            ChangeFieldType(serverConn, "tblProtocolItems", "SequenceNr", "SMALLINT")
         End If
 
         If GetFieldType("tblProjects", "Title", serverConn) <> "text" Then
-            ChangeFieldType("tblProjects", "Title", "TEXT", serverConn)
+            ChangeFieldType(serverConn, "tblProjects", "Title", "TEXT")
         End If
         If GetFieldType("tblProjects", "SequenceNr", serverConn) <> "smallint" Then
-            ChangeFieldType("tblProjects", "SequenceNr", "SMALLINT", serverConn)
+            ChangeFieldType(serverConn, "tblProjects", "SequenceNr", "SMALLINT")
         End If
 
         If GetFieldType("tblMaterials", "MatName", serverConn) <> "text" Then
-            ChangeFieldType("tblMaterials", "MatName", "TEXT", serverConn)
+            ChangeFieldType(serverConn, "tblMaterials", "MatName", "TEXT")
         End If
         If GetFieldType("tblMaterials", "MatSource", serverConn) <> "text" Then
-            ChangeFieldType("tblMaterials", "MatSource", "TEXT", serverConn)
+            ChangeFieldType(serverConn, "tblMaterials", "MatSource", "TEXT")
         End If
 
         If GetFieldType("tblSeparators", "Title", serverConn) <> "text" Then
-            ChangeFieldType("tblSeparators", "Title", "TEXT", serverConn)
+            ChangeFieldType(serverConn, "tblSeparators", "Title", "TEXT")
         End If
 
         '-----------------------
 
         If GetFieldType("tblUsers", "FirstName", serverConn) <> "text" Then
-            ChangeFieldType("tblUsers", "FirstName", "TEXT", serverConn)
+            ChangeFieldType(serverConn, "tblUsers", "FirstName", "TEXT")
         End If
         If GetFieldType("tblUsers", "LastName", serverConn) <> "text" Then
-            ChangeFieldType("tblUsers", "LastName", "TEXT", serverConn)
+            ChangeFieldType(serverConn, "tblUsers", "LastName", "TEXT")
         End If
         If GetFieldType("tblUsers", "CompanyName", serverConn) <> "text" Then
-            ChangeFieldType("tblUsers", "CompanyName", "TEXT", serverConn)
+            ChangeFieldType(serverConn, "tblUsers", "CompanyName", "TEXT")
         End If
         If GetFieldType("tblUsers", "DepartmentName", serverConn) <> "text" Then
-            ChangeFieldType("tblUsers", "DepartmentName", "TEXT", serverConn)
+            ChangeFieldType(serverConn, "tblUsers", "DepartmentName", "TEXT")
         End If
         If GetFieldType("tblUsers", "City", serverConn) <> "text" Then
-            ChangeFieldType("tblUsers", "City", "TEXT", serverConn)
+            ChangeFieldType(serverConn, "tblUsers", "City", "TEXT")
         End If
         If GetFieldType("tblUsers", "PWHint", serverConn) <> "text" Then
-            ChangeFieldType("tblUsers", "PWHint", "TEXT", serverConn)
+            ChangeFieldType(serverConn, "tblUsers", "PWHint", "TEXT")
         End If
 
     End Sub
@@ -199,11 +199,22 @@ Public Class DbUpgradeServer
     End Function
 
 
-    Friend Shared Sub DbAddColumn(tableName As String, fieldName As String, fieldType As String, afterField As String, serverConn As MySqlConnection)
+    ''' <summary>
+    ''' Adds a column to the specified table according to the specified values. If the default value is empty, it is not added.
+    ''' </summary>
+    ''' 
+    Friend Shared Sub DbAddColumn(tableName As String, fieldName As String, fieldType As String, defaultValue As String, afterField As String,
+        serverConn As MySqlConnection)
 
         Try
             If Not DbColumnExists(tableName, fieldName, serverConn) Then
-                Dim sqlCommand = "ALTER TABLE " + tableName + " ADD " + fieldName + " " + fieldType + " AFTER " + afterField
+
+                Dim sqlCommand As String
+                If defaultValue = "" Then
+                    sqlCommand = $"ALTER TABLE {tableName} ADD {fieldName} {fieldType} AFTER {afterField}"
+                Else
+                    sqlCommand = $"ALTER TABLE {tableName} ADD {fieldName} {fieldType} Default {defaultValue} AFTER {afterField}"
+                End If
                 Using command As New MySqlCommand(sqlCommand, serverConn)
                     serverConn.Open()
                     command.ExecuteNonQuery()
@@ -270,13 +281,20 @@ Public Class DbUpgradeServer
     End Function
 
 
-    Friend Shared Function ChangeFieldType(tableName As String, colName As String, newType As String, serverConn As MySqlConnection) As Boolean
+    Friend Shared Function ChangeFieldType(serverConn As MySqlConnection, tableName As String, colName As String,
+       newType As String, Optional defaultValue As String = "") As Boolean
 
-        Dim sqlCommand = "ALTER TABLE " + tableName + " MODIFY " + colName + " " + newType
+        Dim sqlCommand As String
+        If defaultValue = "" Then
+            sqlCommand = $"ALTER TABLE {tableName} MODIFY {colName} {newType}"
+        Else
+            sqlCommand = $"ALTER TABLE {tableName} MODIFY {colName} {newType} Default {defaultValue}"
+        End If
+
         Try
             Using command As New MySqlCommand(sqlCommand, serverConn)
                 serverConn.Open()
-                Dim res = command.ExecuteScalar()
+                command.ExecuteNonQuery()
                 serverConn.Close()
                 Return True
             End Using

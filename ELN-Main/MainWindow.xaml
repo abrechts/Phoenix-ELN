@@ -201,7 +201,7 @@
 
                     <DockPanel DockPanel.Dock="top" Margin="6,6,6,0" HorizontalAlignment="Left">
 
-                        <custom:ComboPlus x:Name="cboUsers" Padding="4,0,2,1" MinWidth="90" ItemsSource="{Binding Source={StaticResource SortedUsers}}"
+                        <custom:ComboPlus x:Name="cboUsers" Padding="4,0,2,1" MinWidth="94" ItemsSource="{Binding Source={StaticResource SortedUsers}}"
                            CboBackground="white" CboBorderBrush="#FF979797" VerticalAlignment="Center">
                             <ComboBox.ItemTemplate>
                                 <DataTemplate>

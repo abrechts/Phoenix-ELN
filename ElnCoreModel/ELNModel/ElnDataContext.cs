@@ -351,6 +351,7 @@ public partial class ElnDataContext : DbContext
                 .HasColumnType("TINYINT");
             entity.Property(e => e.IsSpellCheckEnabled).HasColumnType("TINYINT");
             entity.Property(e => e.PWHash).HasColumnType("VARCHAR(64)");
+            entity.Property(e => e.SequenceNr).HasColumnType("SMALLINT");
             entity.Property(e => e.SyncState)
                 .HasDefaultValue((byte)0)
                 .HasColumnType("TINYINT");
