@@ -53,6 +53,14 @@ Public Class DbUpgradeServer
                 UpdateRev1ServerFieldTypes(serverConn)  'changes are introduced in version 2.6.0
             End If
 
+
+
+            ' --->
+            'Important: If a DEFAULT VALUE for an SQLite column is specified, ALWAYS also assign it to the
+            'server column to be added (could otherwise also lead to failed restore from server operation 
+            'for a non-nullable SQLite field!).
+            ' --->
+
         End Using
 
     End Sub
@@ -200,7 +208,8 @@ Public Class DbUpgradeServer
 
 
     ''' <summary>
-    ''' Adds a column to the specified table according to the specified values. If the default value is empty, it is not added.
+    ''' Adds a column to the specified table according to the specified values. If the 
+    ''' default value is empty string, no default is assigned.
     ''' </summary>
     ''' 
     Friend Shared Sub DbAddColumn(tableName As String, fieldName As String, fieldType As String, defaultValue As String, afterField As String,
@@ -213,27 +222,8 @@ Public Class DbUpgradeServer
                 If defaultValue = "" Then
                     sqlCommand = $"ALTER TABLE {tableName} ADD {fieldName} {fieldType} AFTER {afterField}"
                 Else
-                    sqlCommand = $"ALTER TABLE {tableName} ADD {fieldName} {fieldType} Default {defaultValue} AFTER {afterField}"
+                    sqlCommand = $"ALTER TABLE {tableName} ADD {fieldName} {fieldType} DEFAULT {defaultValue} AFTER {afterField}"
                 End If
-                Using command As New MySqlCommand(sqlCommand, serverConn)
-                    serverConn.Open()
-                    command.ExecuteNonQuery()
-                    serverConn.Close()
-                End Using
-            End If
-        Catch ex As Exception
-            MsgBox(ex.Message, MsgBoxStyle.Exclamation)
-        End Try
-
-    End Sub
-
-
-    Friend Shared Sub DbAddColumnWithDefault(tableName As String, fieldName As String, fieldType As String, defaultValue As String,
-       afterField As String, serverConn As MySqlConnection)
-
-        Try
-            If Not DbColumnExists(tableName, fieldName, serverConn) Then
-                Dim sqlCommand = "ALTER TABLE " + tableName + " ADD " + fieldName + " " + fieldType + " Default " + defaultValue + " AFTER " + afterField
                 Using command As New MySqlCommand(sqlCommand, serverConn)
                     serverConn.Open()
                     command.ExecuteNonQuery()
