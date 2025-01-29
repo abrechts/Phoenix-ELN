@@ -15,10 +15,10 @@
         <custom:DemoVisibilityConverter x:Key="demoVisConv"/>
         <custom:DemoToBooleanConverter x:Key="demoToBoolConv"/>
 
-        <!-- cboUsers userID sorting -->
-        <CollectionViewSource x:Key="SortedUsers" Source="{Binding Database.tblUsers}">
+        <!-- cboUsers sequenceNr sorting -->
+        <CollectionViewSource x:Key="cvsSortedUsers" Source="{Binding Database.tblUsers}">
             <CollectionViewSource.SortDescriptions>
-                <componentModel:SortDescription PropertyName="UserID" Direction="Ascending"/>
+                <componentModel:SortDescription PropertyName="SequenceNr" Direction="Ascending"/>
             </CollectionViewSource.SortDescriptions>
         </CollectionViewSource>
 
@@ -201,8 +201,8 @@
 
                     <DockPanel DockPanel.Dock="top" Margin="6,6,6,0" HorizontalAlignment="Left">
 
-                        <custom:ComboPlus x:Name="cboUsers" Padding="4,0,2,1" MinWidth="94" ItemsSource="{Binding Source={StaticResource SortedUsers}}"
-                           CboBackground="white" CboBorderBrush="#FF979797" VerticalAlignment="Center">
+                        <custom:ComboPlus x:Name="cboUsers" ItemsSource="{Binding Source={StaticResource cvsSortedUsers}}" MinWidth="94"
+                           Padding="4,0,2,1" CboBackground="white" CboBorderBrush="#FF979797" VerticalAlignment="Center">
                             <ComboBox.ItemTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal" Margin="1,3">

@@ -96,6 +96,7 @@ Public Class Users
                                     .CompanyName = newUserDlg.txtOrganization.Text
                                     .City = newUserDlg.txtSite.Text
                                     .DepartmentName = newUserDlg.txtDepartment.Text
+                                    .SequenceNr = 0  'is default field value, but assign anyway
                                     .Database = newDbInfo
                                 End With
                                 newDbInfo.tblUsers.Add(newUser)
@@ -141,14 +142,14 @@ Public Class Users
     ''' on your own machine, or when working in multiple groups in parallel.
     ''' </summary>
     ''' <param name="mainWdw">The main window</param>
-    ''' <returns>True, if successful</returns>
+    ''' <returns>New user entry if successful, otherwise nothing.</returns>
     ''' 
-    Public Shared Function CreateAdditionalUser(mainWdw As MainWindow) As Boolean
+    Public Shared Function CreateAdditionalUser(mainWdw As MainWindow) As tblUsers
 
         'Applies to Non-Demo user only
         Dim dbEntry = MainWindow.DBContext.tblDatabaseInfo.First
         If dbEntry.tblUsers.First.UserID = "demo" Then
-            Return False
+            Return Nothing
         End If
 
         Dim res = MsgBox("This will add another user with its own userID to " + vbCrLf +
@@ -175,6 +176,9 @@ Public Class Users
 
                         If .ShowDialog() Then
 
+                            'get highest user sequence number
+                            Dim maxUserSeqNr = Aggregate user In dbEntry.tblUsers Into Max(user.SequenceNr)
+
                             With MainWindow.DBContext
 
                                 '- Create the new user data
@@ -188,6 +192,7 @@ Public Class Users
                                     .CompanyName = newUserDlg.txtOrganization.Text
                                     .City = newUserDlg.txtSite.Text
                                     .DepartmentName = newUserDlg.txtDepartment.Text
+                                    .SequenceNr = maxUserSeqNr + 1
                                     .Database = dbEntry
                                 End With
                                 dbEntry.tblUsers.Add(newUser)
@@ -210,10 +215,10 @@ Public Class Users
                                 .SaveChanges()
 
                                 '- Update data context
-                                mainWdw.DataContext = Nothing
-                                mainWdw.DataContext = newUser
+                                '  mainWdw.DataContext = Nothing
+                                '  mainWdw.DataContext = newUser
 
-                                Return True
+                                Return newUser
 
                             End With
 
@@ -223,7 +228,7 @@ Public Class Users
             End With
         End If
 
-        Return False
+        Return Nothing
 
     End Function
 

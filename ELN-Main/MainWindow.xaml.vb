@@ -751,16 +751,20 @@ Class MainWindow
 
         Else
 
-            If Users.CreateAdditionalUser(Me) Then
+            Dim newUserEntry = Users.CreateAdditionalUser(Me)
+
+            If newUserEntry IsNot Nothing Then
 
                 SelectedExpContent.ExpProtocol.AutoSave(noUndoPoint:=True)
 
-                'Connect data model of local database with UI
-                Dim currUser = CType(Me.DataContext, tblUsers)
-                ApplyAllDataBindings(currUser)
+                ApplyAllDataBindings(newUserEntry)
 
-                expNavTree.SelectExperiment(currUser.tblExperiments.First)
-                cboUsers.SelectedItem = currUser
+                'cvs does not update automatically on added items
+                Dim cvsSortedUsers As CollectionViewSource = FindResource("cvsSortedUsers")
+                cvsSortedUsers.View.Refresh()
+                cboUsers.SelectedItem = newUserEntry
+
+                expNavTree.SelectExperiment(newUserEntry.tblExperiments.First)
 
             End If
 
