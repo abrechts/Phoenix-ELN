@@ -3,7 +3,7 @@
 This script creates a Phoenix ELN server database for MariaDB or MySQL. 
 -------------------------------------------------------------------------------------------
 
-Version 1.1
+Version 1.2
 -----------
 
 Create a login User
@@ -292,7 +292,8 @@ CREATE TABLE IF NOT EXISTS `tblUsers` (
   `PWHash` varchar(64) DEFAULT NULL,
   `PWHint` text DEFAULT NULL,
   `IsSpellCheckEnabled` tinyint(4) NOT NULL,
-  `IsCurrent` tinyint(4) DEFAULT NULL,
+  `IsCurrent` tinyint(4) DEFAULT 0,
+  `SequenceNr` smallint(6) DEFAULT 0,
   `SyncState` tinyint(4) DEFAULT 0,
   PRIMARY KEY (`UserID`),
   KEY `IX_tblUsers_DatabaseID` (`DatabaseID`),

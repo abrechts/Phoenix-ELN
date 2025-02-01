@@ -214,10 +214,6 @@ Public Class Users
                                 '-Save all changes
                                 .SaveChanges()
 
-                                '- Update data context
-                                '  mainWdw.DataContext = Nothing
-                                '  mainWdw.DataContext = newUser
-
                                 Return newUser
 
                             End With
