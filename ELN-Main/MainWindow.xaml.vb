@@ -1,5 +1,6 @@
 ﻿Imports System.Collections.ObjectModel
 Imports System.ComponentModel
+Imports System.Windows.Threading
 Imports CustomControls
 Imports ElnBase
 Imports ElnBase.ELNEnumerations
@@ -18,6 +19,8 @@ Class MainWindow
     Friend Shared Property ApplicationVersion As Version
 
     Private Property ExpDisplayList As ObservableCollection(Of tblExperiments)
+
+    Private WithEvents UpdateChecker As UpdateCheck
 
     Private _IsVersionUpgrade As Boolean = False
 
@@ -180,14 +183,29 @@ Class MainWindow
         End If
 
         'start the periodic cleanup process for embedded document editing resources (currently set to every hour)
-        FileContent.StartDocEditCleanupTimer(New TimeSpan(1, 0, 0))
+        FileContent.StartDocEditCleanupTimer(TimeSpan.FromHours(1))
 
-        'check for updates async
-        CheckForUpdatesAsync()
+        'Regularly check for version updates (currently every 6 h)
+        UpdateChecker = New UpdateCheck(ApplicationVersion, TimeSpan.FromHours(6))
 
     End Sub
 
 
+    ''' <summary>
+    '' Handles version update availability message
+    ''' </summary>
+    '''
+    Private Sub UpdateChecker_UpdateAvailable(sender As Object, newVersion As String) Handles UpdateChecker.UpdateAvailable
+
+        pnlStatus.ShowAvailableUpdate(newVersion)
+
+    End Sub
+
+
+    ''' <summary>
+    ''' Shared handler for actions after completed server connection.
+    ''' </summary>
+    ''' 
     Private Sub ServerSync_ServerContextCreated(serverContext As ElnDbContext)
 
         Me.Cursor = Cursors.Arrow
@@ -237,16 +255,15 @@ Class MainWindow
                         dlgServerConnection.NewServerContext = Nothing
                         ServerDBContext.Dispose()
                         ServerDBContext = Nothing
-                        CustomControls.My.MySettings.Default.IsServerSpecified = False  'server status icon visibilities are data bound to this setting
+
+                        'server status icon visibilities are data bound to this setting:
+                        CustomControls.My.MySettings.Default.IsServerSpecified = False
 
                     End If
 
                 End If
-
             Else
-
                 _isRestoring = False
-
             End If
 
         Else
@@ -255,7 +272,6 @@ Class MainWindow
             Protocol_ConnectedChanged(False)
 
         End If
-
     End Sub
 
 
@@ -287,30 +303,6 @@ Class MainWindow
     End Sub
 
 
-    ''' <summary>
-    ''' Asynchronously checks for new version updates and displays the update notification in 
-    ''' the application toolbar accordingly.
-    ''' </summary>
-    ''' 
-    Private Async Sub CheckForUpdatesAsync()
-
-        'IMPORTANT: It may take a few minutes until updates to the publisher version database 
-        'actually become available to the PHP service.
-
-        Dim newVersionStr = Await PhpServices.GetLatestAppVersionAsync
-        If newVersionStr = "" Then
-            Exit Sub 'server error
-        End If
-
-        Dim latestVersion = New Version(newVersionStr)
-        If ApplicationVersion < latestVersion Then
-            pnlStatus.ShowAvailableUpdate(newVersionStr)
-        End If
-
-    End Sub
-
-
-
     Private Sub UpdateExperimentTabs(Optional newExpItem As tblExperiments = Nothing)
 
         'remove doomed items (DisplayIndex = nothing)
@@ -333,7 +325,6 @@ Class MainWindow
         tabExperiments.UpdateLayout()
 
     End Sub
-
 
 
     Private Function FilterList(expItem As tblExperiments) As Boolean
