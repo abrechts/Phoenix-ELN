@@ -185,15 +185,15 @@ Class MainWindow
         'start the periodic cleanup process for embedded document editing resources (currently set to every hour)
         FileContent.StartDocEditCleanupTimer(TimeSpan.FromHours(1))
 
-        'Regularly check for version updates (currently every 6 h)
-        UpdateChecker = New UpdateCheck(ApplicationVersion, TimeSpan.FromHours(6))
+        'Regularly check for version updates (currently every 12 h)
+        UpdateChecker = New UpdateCheck(ApplicationVersion, TimeSpan.FromHours(12))
 
     End Sub
 
 
     ''' <summary>
-    '' Handles version update availability message
-    ''' </summary>
+    ''' Handles version update availability message
+    ''' /summary>
     '''
     Private Sub UpdateChecker_UpdateAvailable(sender As Object, newVersion As String) Handles UpdateChecker.UpdateAvailable
 
