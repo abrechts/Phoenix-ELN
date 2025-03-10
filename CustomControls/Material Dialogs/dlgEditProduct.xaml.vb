@@ -84,7 +84,7 @@ Public Class dlgEditProduct
             ProductEntry.ProductIndex = 0
             pnlResinLoad.Visibility = If(SketchInfo.Products(0).IsAttachedToResin, Visibility.Visible, Visibility.Collapsed)
             blkMW.Text = SketchInfo.Products(0).Molweight.ToString("0.00")
-            txtMatName.Text = "Product"
+            txtMatName.Text = If(ProductEntry.Name, "Product")
 
         End If
 
@@ -95,7 +95,7 @@ Public Class dlgEditProduct
         ProductEntry.ProductIndex = 1
         pnlResinLoad.Visibility = If(SketchInfo.Products(1).IsAttachedToResin, Visibility.Visible, Visibility.Collapsed)
         blkMW.Text = SketchInfo.Products(1).Molweight.ToString("0.00")
-        txtMatName.Text = "Side Prod 1"
+        txtMatName.Text = If(ProductEntry.Name, "Side Prod 1")
 
     End Sub
 
@@ -104,7 +104,7 @@ Public Class dlgEditProduct
         ProductEntry.ProductIndex = 2
         pnlResinLoad.Visibility = If(SketchInfo.Products(2).IsAttachedToResin, Visibility.Visible, Visibility.Collapsed)
         blkMW.Text = SketchInfo.Products(2).Molweight.ToString("0.00")
-        txtMatName.Text = "Side Prod 2"
+        txtMatName.Text = If(ProductEntry.Name, "Side Prod 2")
 
     End Sub
 
