@@ -11,16 +11,19 @@
         WindowStartupLocation="CenterScreen">
 
     <Window.Resources>
-        
-        <custom:DemoVisibilityConverter x:Key="demoVisConv"/>
-        <custom:DemoToBooleanConverter x:Key="demoToBoolConv"/>
 
-        <!-- cboUsers sequenceNr sorting -->
-        <CollectionViewSource x:Key="cvsSortedUsers" Source="{Binding Database.tblUsers}">
-            <CollectionViewSource.SortDescriptions>
-                <componentModel:SortDescription PropertyName="SequenceNr" Direction="Ascending"/>
-            </CollectionViewSource.SortDescriptions>
-        </CollectionViewSource>
+        <ResourceDictionary>
+
+            <custom:DemoVisibilityConverter x:Key="demoVisConv"/>
+            <custom:DemoToBooleanConverter x:Key="demoToBoolConv"/>
+
+            <!-- cboUsers sequenceNr sorting -->
+            <CollectionViewSource x:Key="cvsSortedUsers" Source="{Binding Database.tblUsers}">
+                <CollectionViewSource.SortDescriptions>
+                    <componentModel:SortDescription PropertyName="SequenceNr" Direction="Ascending"/>
+                </CollectionViewSource.SortDescriptions>
+            </CollectionViewSource>
+        </ResourceDictionary>
 
     </Window.Resources>
      

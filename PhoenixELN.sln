@@ -9,6 +9,9 @@ Project("{778DAE3C-4631-46EA-AA77-85C1314464D9}") = "ELN_Main", "ELN-Main\ELN_Ma
 	EndProjectSection
 EndProject
 Project("{778DAE3C-4631-46EA-AA77-85C1314464D9}") = "CustomControls", "CustomControls\CustomControls.vbproj", "{DA2753F7-9ED7-4C01-9887-5179B310EE68}"
+	ProjectSection(ProjectDependencies) = postProject
+		{DF07DA23-D0D3-40B8-8F32-FC3405654845} = {DF07DA23-D0D3-40B8-8F32-FC3405654845}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElnCoreModel", "ElnCoreModel\ElnCoreModel.csproj", "{DF07DA23-D0D3-40B8-8F32-FC3405654845}"
 EndProject

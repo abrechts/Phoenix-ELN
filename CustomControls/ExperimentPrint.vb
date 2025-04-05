@@ -25,8 +25,11 @@ Public Class ExperimentPrint
         Dim expEntry = expContent.DataContext
         Dim origSketchArea = expContent.SketchPanel
         Dim pdfPath As String = ""
+        Dim paperSize As PaperSize
 
         If printAsPDF Then
+
+            ' PDF export
 
             Dim saveFileDlg As New SaveFileDialog
             With saveFileDlg
@@ -46,14 +49,73 @@ Public Class ExperimentPrint
                 End If
             End With
 
+            appWindow.Cursor = Cursors.Wait
+            appWindow.ForceCursor = True
+            WPFToolbox.WaitForPriority(Threading.DispatcherPriority.ContextIdle)
+
+            Dim printDoc = New PrintDocument()
+            If printDoc.PrinterSettings.IsValid Then
+                paperSize = printDoc.DefaultPageSettings.PaperSize
+            Else
+                'fallback to A4 if no printer is installed
+                paperSize = New PaperSize("A4", 827, 1169)
+            End If
+
+            Dim printTemplate = SetPrintTemplate(expEntry, origSketchArea, paperSize)
+
+            ' create and store PDF doc with attachments
+            Dim pdfDoc = PaginatorToPdfDoc(printTemplate.Paginator, printAsPDF)
+            If pdfDoc IsNot Nothing Then
+                If CompletePDF(pdfDoc, pdfPath, expEntry) Then 'add attachments, convert to PDF/A-3b; also handles file open exception with dialog.
+                    Dim info As New ProcessStartInfo(pdfPath)
+                    info.UseShellExecute = True
+                    Process.Start(info)
+                End If
+            End If
+
+            appWindow.Cursor = Cursors.Arrow
+            appWindow.ForceCursor = False
+
+        Else
+
+            ' Printer
+
+            Dim printDlg As New PrintDialog
+            If Not printDlg.ShowDialog Then
+                Exit Sub
+            End If
+
+            With printDlg.PrintTicket.PageMediaSize
+                Dim height = CInt(.Height * 100 / 96)
+                Dim width = CInt(.Width * 100 / 96)
+                paperSize = New PaperSize(.PageMediaSizeName.ToString(), width, height)
+            End With
+
+            Dim printTemplate = SetPrintTemplate(expEntry, origSketchArea, paperSize)
+
+            Try
+                printDlg.PrintDocument(printTemplate.Paginator, "Printing " + expEntry.ExperimentID)
+            Catch ex As Exception
+                MsgBox("Printing error. If using a printer driver generating an" + vbCrLf +
+                       "output file (e.g. PDF), the specified file may currently" + vbCrLf +
+                       "be in use by another application and can't be overwritten!",
+                       MsgBoxStyle.Information + MsgBoxStyle.OkOnly, "Printing Error")
+
+            End Try
+
         End If
 
-        'set wait cursor on application window
-        appWindow.Cursor = Cursors.Wait
-        appWindow.ForceCursor = True
-        WPFToolbox.WaitForPriority(Threading.DispatcherPriority.ContextIdle)
+    End Sub
+
+
+    ''' <summary>
+    ''' Creates and returns the PrintPageTemplate for the given experiment entry and sketch area.
+    ''' </summary>
+    ''' 
+    Private Shared Function SetPrintTemplate(expEntry As tblExperiments, skArea As SketchArea, pageSize As PaperSize) As PrintPageTemplate
 
         Dim printExpContent As New ExperimentContent
+        printExpContent.Width = 686     'current UI display width of this data template
         printExpContent.DataContext = expEntry
 
         WPFToolbox.WaitForPriority(Threading.DispatcherPriority.ContextIdle)
@@ -65,13 +127,10 @@ Public Class ExperimentPrint
         With printExpContent
             .Measure(New Size)
             .Arrange(New Rect)
-            .SketchPanel.SetComponentLabels(origSketchArea.ComponentFontSize, origSketchArea.BottomOffset)
+            .SketchPanel.SetComponentLabels(skArea.ComponentFontSize, skArea.BottomOffset)
         End With
 
-
-        Dim printDoc = New PrintDocument()
-        Dim paperSize = printDoc.DefaultPageSettings.PaperSize
-        Dim stackPrintTempl As New PrintPageTemplate(printStack, paperSize, 0.95)
+        Dim stackPrintTempl As New PrintPageTemplate(printStack, pageSize, 0.95)
 
         With stackPrintTempl
             .ShowConfidentialMarker = False
@@ -81,45 +140,9 @@ Public Class ExperimentPrint
             .FooterCenterImage = Nothing ' --> add CompanyLogoImage in the future
         End With
 
-        Try
+        Return stackPrintTempl
 
-            If printAsPDF Then
-
-                Dim pdfDoc = PaginatorToPdfDoc(stackPrintTempl.Paginator, printAsPDF)
-                If pdfDoc IsNot Nothing Then
-                    CompletePDF(pdfDoc, pdfPath, expEntry)  'add attachments, convert to PDF/A-3b
-                End If
-
-                Dim info As New ProcessStartInfo(pdfPath)
-                info.UseShellExecute = True
-                Process.Start(info)
-
-            Else
-
-                Dim printDlg As New PrintDialog
-                If Not printDlg.ShowDialog Then
-                    Exit Sub
-                End If
-
-                printDlg.PrintDocument(stackPrintTempl.Paginator, "Printing " + expEntry.ExperimentID)
-
-            End If
-
-        Catch ex As Exception
-
-            If printAsPDF Then
-                MsgBox("Could not overwrite the specified file, since it" + vbCrLf +
-                "is currently in use by another application!", MsgBoxStyle.Information + MsgBoxStyle.OkOnly, "PDF Creation")
-            End If
-
-        Finally
-
-            appWindow.Cursor = Cursors.Arrow
-            appWindow.ForceCursor = False
-
-        End Try
-
-    End Sub
+    End Function
 
 
     ''' <summary>
@@ -128,7 +151,7 @@ Public Class ExperimentPrint
     ''' <param name="origPDF">The initial PDF document to convert.</param>
     ''' <param name="convPDFPath">The destination path to save it to.</param>
     ''' 
-    Private Shared Sub CompletePDF(origPDF As PdfDocument, convPDFPath As String, expEntry As tblExperiments)
+    Private Shared Function CompletePDF(origPDF As PdfDocument, convPDFPath As String, expEntry As tblExperiments) As Boolean
 
         With origPDF
 
@@ -178,14 +201,16 @@ Public Class ExperimentPrint
             Try
                 convertedPDF.SaveToFile(convPDFPath)
             Catch ex As Exception
-                MsgBox("Could Not write PDF, since a document with the same" + vbCrLf +
-               "name is currently open in a PDF viewer. ", MsgBoxStyle.Information, "PDF Export")
-                Exit Sub
+                MsgBox("Could not write PDF, since a document with the same" + vbCrLf +
+               "name Is currently open in a PDF viewer. ", MsgBoxStyle.Information, "PDF Export")
+                Return False
             End Try
+
+            Return True
 
         End With
 
-    End Sub
+    End Function
 
 
     ''' <summary>

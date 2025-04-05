@@ -22,6 +22,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Page Remove="App.xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="Resources\Application.ico" />
   </ItemGroup>
 
@@ -37,10 +41,6 @@
     <Import Include="System.Windows.Navigation" />
     <Import Include="System.Windows.Shapes" />
     <Import Include="System.XML" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="Application.xaml" />
   </ItemGroup>
 
   <ItemGroup>
