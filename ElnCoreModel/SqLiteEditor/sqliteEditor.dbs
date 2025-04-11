@@ -454,25 +454,25 @@
 		</table>
 	</schema>
 	<layout name="Infrastructure" id="Layout-4c1" show_column_type="y" show_relation="cascade" >
-		<entity schema="Default" name="sync_Tombstone" color="3986C1" x="368" y="320" />
-		<entity schema="Default" name="tblDatabaseInfo" color="3986C1" x="48" y="48" />
-		<entity schema="Default" name="tblDbMaterialFiles" color="3986C1" x="368" y="496" />
-		<entity schema="Default" name="tblExperiments" color="3986C1" x="960" y="48" />
-		<entity schema="Default" name="tblMaterials" color="3986C1" x="80" y="336" />
-		<entity schema="Default" name="tblProjects" color="3986C1" x="672" y="48" />
-		<entity schema="Default" name="tblProtocolItems" color="3986C1" x="992" y="512" />
-		<entity schema="Default" name="tblUsers" color="3986C1" x="368" y="48" />
+		<entity schema="Default" name="sync_Tombstone" color="3986C1" x="361" y="323" />
+		<entity schema="Default" name="tblDatabaseInfo" color="3986C1" x="57" y="57" />
+		<entity schema="Default" name="tblDbMaterialFiles" color="3986C1" x="361" y="494" />
+		<entity schema="Default" name="tblExperiments" color="3986C1" x="969" y="57" />
+		<entity schema="Default" name="tblMaterials" color="3986C1" x="76" y="342" />
+		<entity schema="Default" name="tblProjects" color="3986C1" x="665" y="57" />
+		<entity schema="Default" name="tblProtocolItems" color="3986C1" x="665" y="437" />
+		<entity schema="Default" name="tblUsers" color="3986C1" x="361" y="57" />
 	</layout>
 	<layout name="Protocol Elements" id="Layout-16d" show_column_type="y" show_relation="cascade" >
-		<entity schema="Default" name="tblAuxiliaries" color="3986C1" x="592" y="384" />
-		<entity schema="Default" name="tblComments" color="3986C1" x="320" y="384" />
-		<entity schema="Default" name="tblEmbeddedFiles" color="C1D8EE" x="336" y="576" />
-		<entity schema="Default" name="tblProducts" color="3986C1" x="848" y="320" />
-		<entity schema="Default" name="tblProtocolItems" color="3986C1" x="48" y="256" />
-		<entity schema="Default" name="tblReagents" color="3986C1" x="592" y="48" />
-		<entity schema="Default" name="tblRefReactants" color="3986C1" x="320" y="64" />
-		<entity schema="Default" name="tblSeparators" color="3986C1" x="592" y="640" />
-		<entity schema="Default" name="tblSolvents" color="3986C1" x="848" y="64" />
+		<entity schema="Default" name="tblAuxiliaries" color="3986C1" x="589" y="380" />
+		<entity schema="Default" name="tblComments" color="3986C1" x="323" y="380" />
+		<entity schema="Default" name="tblEmbeddedFiles" color="C1D8EE" x="342" y="570" />
+		<entity schema="Default" name="tblProducts" color="3986C1" x="855" y="323" />
+		<entity schema="Default" name="tblProtocolItems" color="3986C1" x="57" y="247" />
+		<entity schema="Default" name="tblReagents" color="3986C1" x="589" y="57" />
+		<entity schema="Default" name="tblRefReactants" color="3986C1" x="323" y="57" />
+		<entity schema="Default" name="tblSeparators" color="3986C1" x="589" y="646" />
+		<entity schema="Default" name="tblSolvents" color="3986C1" x="855" y="57" />
 	</layout>
 	<layout name="Sqlite" id="Layout-1015" show_relation="cascade" />
 </project>
