@@ -26,6 +26,7 @@ Public Class dlgSearch
         CurrentDbContext = LocalDBContext
 
         If ServerDBContext Is Nothing Then
+            IsServerQuery = False
             rdoServer.IsEnabled = False
         Else
             rdoServer.IsChecked = IsServerQuery
