@@ -39,11 +39,12 @@ Class MainWindow
 
         SQLiteDbPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\Phoenix ELN Data\ElnData.db"
 
-        'Replace local database by demo database, if missing for some reason
+        ' Replace local database by demo database, if missing for some reason
         If Not File.Exists(SQLiteDbPath) Then
             File.Copy("DB-Seed\ElnData.db", SQLiteDbPath)
             DbUpgradeLocal.Upgrade(SQLiteDbPath)
         End If
+
 
         With CustomControls.My.MySettings.Default
 
@@ -81,6 +82,9 @@ Class MainWindow
                 .RestoreFromServer = False
                 .Save()
             End If
+
+            'Initialize the the spell checker
+            SpellChecker.Initialize(.LastSpellCheckLocale, Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\Phoenix ELN Data\customWords.lex")
 
         End With
 
@@ -142,6 +146,17 @@ Class MainWindow
         'connect local database model with UI
         ApplyAllDataBindings(currUser)
         cboUsers.SelectedItem = currUser
+
+        'update spell checker header with last used locale
+        For Each spellItem In mnuSpelling.Items(0).items
+            If TypeOf spellItem Is MenuItem Then
+                If spellItem.Tag = CustomControls.My.MySettings.Default.LastSpellCheckLocale Then
+                    txtSpellHeader.Text = spellItem.Header
+                    txtSpellHeader.ToolTip = spellItem.ToolTip
+                    Exit For
+                End If
+            End If
+        Next
 
         'create server context async to reduce startup time
         With CustomControls.My.MySettings.Default
@@ -612,6 +627,7 @@ Class MainWindow
 
     Private Sub ExperimentContent_ContextChanged(sender As Object, newExpEntry As tblExperiments)
         btnClear.IsEnabled = (newExpEntry.WorkflowState <> WorkflowStatus.Finalized)
+        mnuSpelling.IsEnabled = (newExpEntry.WorkflowState <> WorkflowStatus.Finalized)
     End Sub
 
 
@@ -798,6 +814,8 @@ Class MainWindow
                             .AddFiles()
                     End Select
                 End With
+
+                e.Handled = True
 
                 'allow text edits to undo/redo before higher-level undo/redo occurs
 
@@ -1382,6 +1400,77 @@ Class MainWindow
     End Sub
 
 
+    Private Sub mnuSpellOff_Click() Handles mnuSpellOff.Click
+        SpellChecker.IsEnabled = False
+        txtSpellHeader.Text = mnuSpellOff.Header
+        txtSpellHeader.Tag = mnuSpellOff.Tag
+        txtSpellHeader.ToolTip = "No spell checking"
+        CustomControls.My.MySettings.Default.LastSpellCheckLocale = ""
+    End Sub
+
+    Private Sub mnuSpellDE_Click() Handles mnuSpellDE.Click
+        SpellChecker.ChangeLocale("de-DE")
+        txtSpellHeader.Text = mnuSpellDE.Header
+        txtSpellHeader.ToolTip = mnuSpellDE.ToolTip
+        CustomControls.My.MySettings.Default.LastSpellCheckLocale = "de-DE"
+    End Sub
+
+    Private Sub mnuSpellEnUS_Click() Handles mnuSpellEnUS.Click
+        SpellChecker.ChangeLocale("en-US")
+        txtSpellHeader.Text = mnuSpellEnUS.Header
+        txtSpellHeader.ToolTip = mnuSpellEnUS.ToolTip
+        CustomControls.My.MySettings.Default.LastSpellCheckLocale = "en-US"
+    End Sub
+
+    Private Sub mnuSpellEnGB_Click() Handles mnuSpellEnGB.Click
+        SpellChecker.ChangeLocale("en-GB")
+        txtSpellHeader.Text = mnuSpellEnGB.Header
+        txtSpellHeader.ToolTip = mnuSpellEnGB.ToolTip
+        CustomControls.My.MySettings.Default.LastSpellCheckLocale = "en-GB"
+    End Sub
+
+    Private Sub mnuSpellFR_Click() Handles mnuSpellFR.Click
+        SpellChecker.ChangeLocale("fr-FR")
+        txtSpellHeader.Text = mnuSpellFR.Header
+        txtSpellHeader.ToolTip = mnuSpellFR.ToolTip
+        CustomControls.My.MySettings.Default.LastSpellCheckLocale = "fr-FR"
+    End Sub
+
+    Private Sub mnuSpellES_Click() Handles mnuSpellES.Click
+        SpellChecker.ChangeLocale("es-ES")
+        txtSpellHeader.Text = mnuSpellES.Header
+        txtSpellHeader.ToolTip = mnuSpellES.ToolTip
+        CustomControls.My.MySettings.Default.LastSpellCheckLocale = "es-ES"
+    End Sub
+
+    Private Sub mnuSpellIT_Click() Handles mnuSpellIT.Click
+        SpellChecker.ChangeLocale("it-IT")
+        txtSpellHeader.Text = mnuSpellIT.Header
+        txtSpellHeader.ToolTip = mnuSpellIT.ToolTip
+        CustomControls.My.MySettings.Default.LastSpellCheckLocale = "it-IT"
+    End Sub
+
+    Private Sub mnuSpellPT_Click() Handles mnuSpellPT.Click
+        SpellChecker.ChangeLocale("pt-PT")
+        txtSpellHeader.Text = mnuSpellPT.Header
+        txtSpellHeader.ToolTip = mnuSpellPT.ToolTip
+        CustomControls.My.MySettings.Default.LastSpellCheckLocale = "pt-PT"
+    End Sub
+
+    Private Sub mnuDict_Click() Handles mnuDict.Click
+
+        Dim ignoredWords = SpellChecker.CustomIgnoredWords
+        ignoredWords.Sort()
+
+        Dim customWordsDlg As New dlgCustomDictionary(ignoredWords)
+        With customWordsDlg
+            .Owner = Me
+            .ShowDialog()
+        End With
+
+    End Sub
+
+
     ''' <summary>
     ''' Displays server connect dialog and return true if the connection succeeded
     ''' </summary>
@@ -1463,7 +1552,6 @@ Class MainWindow
         'ProtocolItemBase.DbInfo = ServerDBContext.tblDatabaseInfo.First
 
     End Sub
-
 
 End Class
 

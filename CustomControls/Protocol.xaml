@@ -96,7 +96,7 @@
                             
                             SelectionMode="Single" Background="transparent" BorderThickness="0" FocusVisualStyle="{x:Null}"              
                             Grid.IsSharedSizeScope="true" HorizontalContentAlignment="stretch" AllowDrop="true"
-                            ScrollViewer.HorizontalScrollBarVisibility="Disabled" Padding="0,0,0,4"
+                            ScrollViewer.HorizontalScrollBarVisibility="Disabled" Padding="0,0,0,4" Margin="0,0,0,4"
                             VirtualizingStackPanel.IsVirtualizing="True"  MinHeight="20" d:Visibility="visible"
                             Visibility="{Binding ElementName=lstProtocol, Path=Items.Count,Converter={StaticResource intToVisConv}}"
                              

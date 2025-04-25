@@ -337,32 +337,3 @@ Public Class ExperimentBase
     End Function
 
 End Class
-
-
-
-'Public NotInheritable Class ExcludePropertyModifier
-
-'    Inherits DefaultJsonTypeInfoResolver
-
-
-'    Public Overrides Function GetTypeInfo(type As Object, options As JsonSerializerOptions) As JsonTypeInfo
-
-'        Return Nothing
-
-'    End Function
-
-'    'Public Overrides Function GetTypeInfo(Type, options) As JsonTypeInfo
-'    'End Function
-
-
-'    '    'Public Sub Modify(typeInfo As JsonTypeInfo)
-'    '    '    If typeInfo.Kind = JsonTypeInfoKind.Object Then
-'    '    '        ' Exclude properties with specific names
-'    '    '        For Each property In typeInfo.Properties
-'    '    '            If property.GetMemberName() = "PropertyToExclude" Then
-'    '    '            Property.ShouldSerialize = Function(obj, value) False
-'    '    'End If
-'    '    'Next
-'    '    'End If
-'    '    'End Sub
-'End Class

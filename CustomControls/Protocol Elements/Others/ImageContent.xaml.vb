@@ -1,5 +1,8 @@
 ﻿
 Imports System.IO
+Imports System.Windows
+Imports System.Windows.Controls
+Imports System.Windows.Input
 Imports System.Windows.Media.Imaging
 Imports ElnCoreModel
 Imports Microsoft.Win32
@@ -8,12 +11,116 @@ Public Class ImageContent
 
     Public Shared Event MouseOverChanged(sender As Object, isEntering As Boolean)
 
+    Private Property tbSpellChecker As SpellChecker.SpellCheckerTb
+
+
     Public Sub New()
 
         ' This call is required by the designer.
         InitializeComponent()
 
+        tbSpellChecker = SpellChecker.CreateTextBoxSpellChecker(txtComments)
+
     End Sub
+
+
+    ''' <summary>
+    ''' Defines the IsSpellCheckAllowed dependency property
+    ''' </summary>
+    '''
+    Public Shared ReadOnly IsSpellCheckAllowedProperty As DependencyProperty = DependencyProperty.Register(
+        "IsSpellCheckAllowed",
+        GetType(Boolean),
+        GetType(ImageContent),
+        New PropertyMetadata(True, AddressOf OnIsSpellCheckAllowedChanged)
+    )
+
+    Public Property IsSpellCheckAllowed As Boolean
+
+        Get
+            Return CBool(GetValue(IsSpellCheckAllowedProperty))
+        End Get
+        Set(value As Boolean)
+            SetValue(IsSpellCheckAllowedProperty, value)
+        End Set
+
+    End Property
+
+    Private Shared Sub OnIsSpellCheckAllowedChanged(d As DependencyObject, e As DependencyPropertyChangedEventArgs)
+
+        Dim imageItem = TryCast(d, ImageContent)
+        If imageItem IsNot Nothing Then
+            Dim isAllowed = CBool(e.NewValue)
+            If imageItem.tbSpellChecker IsNot Nothing Then
+                imageItem.tbSpellChecker.IsSpellCheckAllowed = isAllowed
+            End If
+        End If
+
+    End Sub
+
+
+    Private Sub txtComments_ContextMenuOpening(sender As Object, e As ContextMenuEventArgs) Handles txtComments.ContextMenuOpening
+
+        Dim mousePos = Mouse.GetPosition(txtComments)
+        Dim suggestedWords = tbSpellChecker.GetSuggestedWords(mousePos)
+
+        If suggestedWords.Count = 0 Then
+
+            mnuSpellCheck.Visibility = Visibility.Collapsed
+            sepSpellCheck.Visibility = Visibility.Collapsed
+
+        Else
+
+            mnuSpellCheck.Visibility = Visibility.Visible
+            sepSpellCheck.Visibility = Visibility.Visible
+
+            With mnuSpellCheck
+
+                .Items.Clear()
+
+                If suggestedWords.Count > 0 Then
+                    For Each suggestion In suggestedWords
+                        Dim suggestItem = New MenuItem() With {.Header = suggestion}
+                        AddHandler suggestItem.Click, AddressOf SuggestItem_Click
+                        .Items.Add(suggestItem)
+                    Next
+                Else
+                    .Items.Add(New MenuItem() With {.Header = "No suggestions available", .IsEnabled = False})
+                End If
+
+                .Items.Add(New Separator())
+
+                Dim mnuAddToDictionary = New MenuItem() With {.Header = "Add to dictionary", .Tag = "AddDictionary"}
+                AddHandler mnuAddToDictionary.Click, AddressOf mnuAddToDictionary_Click
+                .Items.Add(mnuAddToDictionary)
+
+                .IsSubmenuOpen = True
+
+            End With
+
+        End If
+
+    End Sub
+
+    Private Sub SuggestItem_Click(sender As Object, e As RoutedEventArgs)
+
+        Dim clickedItem = TryCast(sender, MenuItem)
+        If clickedItem IsNot Nothing Then
+            tbSpellChecker.ReplaceWordOccurrences(clickedItem.Header)
+        End If
+
+    End Sub
+
+    Private Sub mnuAddToDictionary_Click(sender As Object, e As RoutedEventArgs)
+
+        Dim clickedItem = TryCast(sender, MenuItem)
+        If clickedItem IsNot Nothing Then
+            tbSpellChecker.AddCurrentToDictionary()
+        End If
+
+    End Sub
+
+
 
 
     Public Sub ActivateEdit()

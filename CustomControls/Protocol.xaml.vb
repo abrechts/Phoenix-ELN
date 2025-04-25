@@ -476,8 +476,10 @@ Public Class Protocol
 
         'select the affected ProtocolItem
         With thisLbItem
-            .IsSelected = True
-            .Focus() 'ends pending text edits
+            If Not .IsKeyboardFocusWithin Then
+                .IsSelected = True
+                .Focus() 'ends pending text edits
+            End If
         End With
 
         Dim protocolItemEntry = CType(sender.Content, tblProtocolItems)
@@ -878,7 +880,7 @@ Public Class Protocol
             If .ShowDialog Then
 
                 Dim insertPos As Integer
-                If lstProtocol.SelectedItem IsNot Nothing Then
+                If lstProtocol.SelectedItem IsNot Nothing AndAlso AdditionToolbar.DoInsert Then
                     insertPos = CType(lstProtocol.SelectedItem, tblProtocolItems).SequenceNr 'multiple selection: returns last item
                 Else
                     insertPos = lstProtocol.Items.Count - 1
@@ -956,7 +958,7 @@ Public Class Protocol
                 embedFile.ActivateEdit()
             Else
                 Dim embedImage = WPFToolbox.FindVisualChild(Of ImageContent)(lbItem)
-                embedImage.ActivateEdit()
+                embedImage?.ActivateEdit()
             End If
 
             AutoSave()

@@ -2,7 +2,6 @@
 Imports System.IO
 Imports System.Windows
 Imports System.Windows.Data
-Imports System.Windows.Media
 Imports System.Windows.Media.Imaging
 
 Public Class BytesToBitmapImgConverter

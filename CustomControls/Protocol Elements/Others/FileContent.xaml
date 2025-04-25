@@ -10,7 +10,15 @@
              d:DataContext="{d:DesignInstance Type=data:tblEmbeddedFiles}" DataContext="{Binding tblEmbeddedFiles}">
 
     <UserControl.Resources>
+
+        <!--binding for disabling spell checker for finalized experiments-->
+        <local:ExpIsUnfinalizedConverter x:Key="ExpUnfinalizedConv"/>
+        <Style TargetType="local:FileContent">
+            <Setter Property="IsSpellCheckAllowed" Value="{Binding ProtocolItem.Experiment.WorkflowState,Converter={StaticResource ExpUnfinalizedConv}}"/>
+        </Style>
+
         <local:BytesToBitmapImgConverter x:Key="BytesToBitmapConv"/>
+        
     </UserControl.Resources>
 
     <Grid x:Name="sharedSizeGrid">
@@ -23,7 +31,7 @@
 
         <StackPanel Orientation="Horizontal" Grid.Column="2">
 
-            <Border x:Name="iconImage" Cursor="Hand" BorderThickness="0" Padding="1" Margin="2,0,0,0">
+            <Border x:Name="iconImage" Cursor="Hand" BorderThickness="0" Padding="1" Margin="2,2,0,2">
                 <Image Width="22" Height="22" ToolTipService.InitialShowDelay="350"
                     Source="{Binding IconImage, Converter={StaticResource BytesToBitmapConv}}">
                     <Image.ContextMenu>
@@ -43,9 +51,19 @@
                 </Image>
             </Border>
 
-            <TextBox x:Name="txtFileTitle" Text="{Binding FileComment}" d:Text="Title" BorderThickness="0"
-               MaxLength="80" VerticalAlignment="Center" FontStyle="Italic" Padding="2,0,12,0"/>
-            
+            <TextBox x:Name="txtFileComment" Text="{Binding FileComment}" d:Text="Title" BorderThickness="0"
+               MaxLength="80" VerticalAlignment="Center" FontStyle="Italic" Padding="2,0,12,0">
+                <TextBox.ContextMenu>
+                    <ContextMenu x:Name="mnuContext">
+                        <MenuItem x:Name="mnuSpellCheck" Icon="{StaticResource icoSpellCheck}" Header="Spelling"/>
+                        <Separator x:Name="sepSpellCheck"/>
+                        <MenuItem Icon="{StaticResource icoCut}" Command="ApplicationCommands.Cut" InputGestureText="Ctrl+X"/>
+                        <MenuItem Icon="{StaticResource icoCopy}" Command="ApplicationCommands.Copy" InputGestureText="Ctrl+C"/>
+                        <MenuItem Icon="{StaticResource icoPaste}" Command="ApplicationCommands.Paste" InputGestureText="Ctrl+P"/>
+                    </ContextMenu>
+                </TextBox.ContextMenu>
+            </TextBox>
+
         </StackPanel>
 
     </Grid>

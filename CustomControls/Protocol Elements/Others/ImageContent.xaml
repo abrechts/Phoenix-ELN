@@ -10,7 +10,13 @@
              d:DataContext="{d:DesignInstance Type=data:tblEmbeddedFiles}" DataContext="{Binding tblEmbeddedFiles}">
 
     <UserControl.Resources>
-        
+
+        <!--binding for disabling spell checker for finalized experiments--> 
+        <local:ExpIsUnfinalizedConverter x:Key="ExpUnfinalizedConv"/>
+        <Style TargetType="local:ImageContent">
+            <Setter Property="IsSpellCheckAllowed" Value="{Binding ProtocolItem.Experiment.WorkflowState,Converter={StaticResource ExpUnfinalizedConv}}"/>
+        </Style>
+
         <local:BytesToBitmapImgRotateConverter x:Key="bytesToBitmapImgRotateConv"/>
         <local:IntegerToVisibilityConverter x:Key="intToVisConv"/>
         <local:BooleanToVisibilityConverter x:Key="boolToVisConv"/>
@@ -73,7 +79,17 @@
             </Grid>
 
             <TextBox x:Name="txtComments" Grid.Column="1" MaxLength="250" BorderThickness="0" Margin="8,2" TextWrapping="Wrap"           
-                Text="{Binding FileComment}" d:Text="Image_1234.jpg" AcceptsReturn="true" AcceptsTab="true" Padding="0,0,12,0"/>
+                Text="{Binding FileComment}" d:Text="Image_1234.jpg" AcceptsReturn="true" AcceptsTab="true" Padding="0,0,12,0">
+                <TextBox.ContextMenu>
+                    <ContextMenu x:Name="mnuContext">
+                        <MenuItem x:Name="mnuSpellCheck" Icon="{StaticResource icoSpellCheck}" Header="Spelling"/>
+                        <Separator x:Name="sepSpellCheck"/>
+                        <MenuItem Icon="{StaticResource icoCut}" Command="ApplicationCommands.Cut" InputGestureText="Ctrl+X"/>
+                        <MenuItem Icon="{StaticResource icoCopy}" Command="ApplicationCommands.Copy" InputGestureText="Ctrl+C"/>
+                        <MenuItem Icon="{StaticResource icoPaste}" Command="ApplicationCommands.Paste" InputGestureText="Ctrl+P"/>
+                    </ContextMenu>
+                </TextBox.ContextMenu>
+            </TextBox>
 
         </Grid>
         

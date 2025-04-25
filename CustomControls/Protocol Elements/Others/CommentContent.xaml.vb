@@ -1,16 +1,60 @@
 ﻿Imports System.Windows
+Imports System.Windows.Controls
 Imports System.Windows.Documents
 Imports System.Windows.Input
 Imports System.Windows.Media
 
+
 Public Class CommentContent
+
+
+    Private Property rtbSpellChecker As SpellChecker.SpellCheckerRtb
+
 
     Public Sub New()
 
         ' This call is required by the designer.
         InitializeComponent()
 
+        rtbSpellChecker = SpellChecker.CreateRichTextBoxSpellChecker(rtbComments)
+
     End Sub
+
+
+    ''' <summary>
+    ''' Defines the IsSpellCheckAllowed dependency property
+    ''' </summary>
+    '''
+    Public Shared ReadOnly IsSpellCheckAllowedProperty As DependencyProperty = DependencyProperty.Register(
+        "IsSpellCheckAllowed",
+        GetType(Boolean),
+        GetType(CommentContent),
+        New PropertyMetadata(True, AddressOf OnIsSpellCheckAllowedChanged)
+    )
+
+    Public Property IsSpellCheckAllowed As Boolean
+
+        Get
+            Return CBool(GetValue(IsSpellCheckAllowedProperty))
+        End Get
+        Set(value As Boolean)
+            SetValue(IsSpellCheckAllowedProperty, value)
+        End Set
+
+    End Property
+
+    Private Shared Sub OnIsSpellCheckAllowedChanged(d As DependencyObject, e As DependencyPropertyChangedEventArgs)
+
+        Dim commentItem = TryCast(d, CommentContent)
+        If commentItem IsNot Nothing Then
+            Dim isAllowed = CBool(e.NewValue)
+            If commentItem.rtbSpellChecker IsNot Nothing Then
+                commentItem.rtbSpellChecker.IsSpellCheckAllowed = isAllowed
+            End If
+        End If
+
+    End Sub
+
 
     ''' <summary>
     ''' The maximum allowed characters for user input. The default value 
@@ -19,8 +63,9 @@ Public Class CommentContent
     ''' 
     Private Const MaxCharacters As Integer = 5000
 
+
     ''' <summary>
-    ''' Brings the control into active edit mode.
+    ''' Brings the commentItem into active edit mode.
     ''' </summary>
     ''' 
     Public Sub ActivateEdit()
@@ -44,6 +89,49 @@ Public Class CommentContent
     ''' 
     Private Sub mnuContext_Opened(sender As Object, e As RoutedEventArgs) Handles mnuContext.Opened
 
+        ' handle spell check menu item
+
+        Dim mousePos = Mouse.GetPosition(rtbComments)
+        Dim suggestedWords = rtbSpellChecker.GetSuggestedWords(mousePos)
+
+        If suggestedWords.Count = 0 Then
+
+            mnuSpellCheck.Visibility = Visibility.Collapsed
+            sepSpellCheck.Visibility = Visibility.Collapsed
+
+        Else
+
+            mnuSpellCheck.Visibility = Visibility.Visible
+            sepSpellCheck.Visibility = Visibility.Visible
+
+            With mnuSpellCheck
+
+                .Items.Clear()
+
+                If suggestedWords.Count > 0 Then
+                    For Each suggestion In suggestedWords
+                        Dim suggestItem = New MenuItem() With {.Header = suggestion}
+                        AddHandler suggestItem.Click, AddressOf SuggestItem_Click
+                        .Items.Add(suggestItem)
+                    Next
+                Else
+                    .Items.Add(New MenuItem() With {.Header = "No suggestions available", .IsEnabled = False})
+                End If
+
+                .Items.Add(New Separator())
+
+                Dim mnuAddToDictionary = New MenuItem() With {.Header = "Add to dictionary", .Tag = "AddDictionary"}
+                AddHandler mnuAddToDictionary.Click, AddressOf mnuAddToDictionary_Click
+                .Items.Add(mnuAddToDictionary)
+
+                .IsSubmenuOpen = True
+
+            End With
+
+        End If
+
+        'handle text selection menu items
+
         Dim selectedText As TextRange = rtbComments.Selection
 
         If selectedText.IsEmpty Then
@@ -65,6 +153,21 @@ Public Class CommentContent
         End If
 
     End Sub
+
+
+    ''' <summary>
+    ''' Handles spell check suggested word clicks.
+    ''' </summary>
+    '''
+    Private Sub SuggestItem_Click(sender As Object, e As RoutedEventArgs)
+
+        Dim clickedItem = TryCast(sender, MenuItem)
+        If clickedItem IsNot Nothing Then
+            rtbSpellChecker.ReplaceWordOccurrences(clickedItem.Header)
+        End If
+
+    End Sub
+
 
     ''' <summary>
     ''' Validates the content to be pasted
@@ -144,6 +247,15 @@ Public Class CommentContent
     Friend Sub HighlightsClear_Click(sender As Object, e As RoutedEventArgs)
         ApplyHighlight(Nothing)
         mnuContext.IsOpen = False
+    End Sub
+
+    Private Sub mnuAddToDictionary_Click(sender As Object, e As RoutedEventArgs)
+
+        Dim clickedItem = TryCast(sender, MenuItem)
+        If clickedItem IsNot Nothing Then
+            rtbSpellChecker.AddCurrentToDictionary()
+        End If
+
     End Sub
 
 
