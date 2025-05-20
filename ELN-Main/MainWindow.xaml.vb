@@ -798,26 +798,32 @@ Class MainWindow
                     Select Case e.Key
                         Case Key.D1
                             .AddRefReactant()
+                            e.Handled = True
                         Case Key.D2
                             .AddReagent()
+                            e.Handled = True
                         Case Key.D3
                             .AddSolvent()
+                            e.Handled = True
                         Case Key.D4
                             .AddAuxiliary()
+                            e.Handled = True
                         Case Key.D5
                             .AddProduct()
+                            e.Handled = True
                         Case Key.D6
                             .AddComment()
+                            e.Handled = True
                         Case Key.D7
                             .AddSeparator()
+                            e.Handled = True
                         Case Key.D8
                             .AddFiles()
+                            e.Handled = True
                     End Select
                 End With
 
-                e.Handled = True
-
-                'allow text edits to undo/redo before higher-level undo/redo occurs
+                ' allow protocol-item level undo and redo if no undoable text edit is active
 
                 Dim canUndo As Boolean = False
                 Dim focusedBox = Keyboard.FocusedElement

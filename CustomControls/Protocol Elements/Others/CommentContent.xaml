@@ -123,7 +123,7 @@
                     
                     <MenuItem Icon="{StaticResource icoCut}" Command="ApplicationCommands.Cut" InputGestureText="Ctrl+X"/>
                     <MenuItem Icon="{StaticResource icoCopy}" Command="ApplicationCommands.Copy" InputGestureText="Ctrl+C"/>
-                    <MenuItem Icon="{StaticResource icoPaste}" Command="ApplicationCommands.Paste" InputGestureText="Ctrl+P"/>
+                    <MenuItem Icon="{StaticResource icoPaste}" Command="ApplicationCommands.Paste" InputGestureText="Ctrl+V"/>
 
                 </ContextMenu>
             </RichTextBox.ContextMenu>

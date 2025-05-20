@@ -194,6 +194,7 @@ Public Class CommentContent
 
     End Sub
 
+
     Private Sub rtbComments_PreviewKeyDown(sender As Object, e As KeyEventArgs) Handles rtbComments.PreviewKeyDown
 
         If Keyboard.Modifiers = ModifierKeys.Control Then
