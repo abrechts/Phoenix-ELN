@@ -16,12 +16,12 @@
 
     </Control.Resources>
 
-    <Border BorderThickness="0" BorderBrush="#FF84A0C4" Background="#FFE4E4E4" Padding="4" CornerRadius="8" >
+    <Border BorderThickness="1" BorderBrush="#FFB1B1B1" Background="#FFECECEC" Padding="4" CornerRadius="8" >
 
         <StackPanel Orientation="Horizontal">
 
             <local:ComboPlus x:Name="cboAddMat" DropDownDirection="Up" Margin="2,0,4,0" IsEditable="False" SelectedIndex="0"
-               CboBackground="white" CboBorderBrush="#FFC6C6C6"
+               CboBackground="white" CboBorderBrush="#FFBCBCBC"
                Grid.IsSharedSizeScope="true" Padding="3,3" >
 
                 <ComboBoxItem IsEnabled="False" Background="{StaticResource ButtonGradient}" >
@@ -100,7 +100,7 @@
             </local:ComboPlus>
 
 
-            <Button x:Name="btnAddComment" Margin="2,0,2,0" Background="white" BorderBrush="#FFC6C6C6"
+            <Button x:Name="btnAddComment" Margin="2,0,2,0" Background="white" BorderBrush="#FFBCBCBC"
                     BorderThickness="1">
                 <StackPanel Orientation="Horizontal">
                     <ContentControl Content="{StaticResource icoMessageBubble}" Margin="4,0,4,0" Height="16"/>
@@ -110,7 +110,7 @@
             
 
             <local:ComboPlus x:Name="cboAddOther" DropDownDirection="Up" Margin="4,0,4,0" IsEditable="False" SelectedIndex="0"
-              CboBackground="white" CboBorderBrush="#FFC6C6C6"
+              CboBackground="white" CboBorderBrush="#FFBCBCBC"
               Grid.IsSharedSizeScope="true" Padding="3,3" >
 
                 <ComboBoxItem IsEnabled="False" Background="{StaticResource ButtonGradient}" >

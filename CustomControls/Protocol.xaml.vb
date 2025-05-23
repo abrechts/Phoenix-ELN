@@ -325,6 +325,7 @@ Public Class Protocol
                 Me.Cursor = LockCursor
                 Me.ForceCursor = True
                 lstProtocol.ItemContainerStyle = FindResource("ProtocolFinalizedListBoxItemStyle")
+                scrlProtocol.Margin = New Thickness(0, 4, 0, 8)
                 lstProtocol.AllowDrop = False
                 UnselectAll()
                 UndoEngine?.Reset()
@@ -334,6 +335,7 @@ Public Class Protocol
                 Me.Cursor = Cursors.Arrow
                 Me.ForceCursor = False
                 lstProtocol.ItemContainerStyle = FindResource("ProtocolListBoxItemStyle")
+                scrlProtocol.Margin = New Thickness(0, 4, 0, 22)
                 lstProtocol.AllowDrop = True
                 lstProtocol.Focus()
 
