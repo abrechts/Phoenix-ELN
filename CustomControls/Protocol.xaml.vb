@@ -239,7 +239,6 @@ Public Class Protocol
         IsPrinting = True
         addToolbar.Visibility = Visibility.Collapsed
         pnlProtocol.Background = Brushes.Transparent
-        pnlDock.Margin = New Thickness(0)
         scrlProtocol.Margin = New Thickness(4, 4, 4, 8)
 
         UnselectAll()

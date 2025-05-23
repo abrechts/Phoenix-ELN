@@ -83,12 +83,10 @@
 
     <Grid>
 
-        <DockPanel x:Name="pnlDock" Margin="0,0,0,0">
-
-            <Border x:Name="pnlProtocol" DockPanel.Dock="top" BorderBrush="#FFD4D4D4" BorderThickness="1" CornerRadius="0,0,8,8" 
+        <Border x:Name="pnlProtocol" DockPanel.Dock="top" BorderBrush="#FFD4D4D4" BorderThickness="1" CornerRadius="0,0,8,8" 
               Background="#FFF6F6F6" >
-
-                <ScrollViewer x:Name="scrlProtocol" VerticalScrollBarVisibility="auto" Margin="0,4,0,22">
+            <DockPanel>
+                <ScrollViewer x:Name="scrlProtocol" VerticalScrollBarVisibility="auto" Margin="0,4,0,22" DockPanel.Dock="top">
 
                     <ListBox x:Name="lstProtocol" VerticalAlignment="Top"
                             
@@ -112,25 +110,23 @@
 
                 </ScrollViewer>
 
-            </Border>
+                <local:AdditionToolbar x:Name="addToolbar" HorizontalAlignment="center" Margin="0,-16,0,-14" DockPanel.Dock="Bottom" VerticalAlignment="Top" >
+                    <local:AdditionToolbar.Style>
+                        <Style TargetType="local:AdditionToolbar">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding WorkflowState}" Value="1">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ElementName=lstProtocol, Path=Items.Count}" Value="0">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </local:AdditionToolbar.Style>
+                </local:AdditionToolbar>
 
-        </DockPanel>
-
-        <local:AdditionToolbar x:Name="addToolbar" HorizontalAlignment="center" Margin="0,0,0,-13" VerticalAlignment="Bottom" >
-            <local:AdditionToolbar.Style>
-                <Style TargetType="local:AdditionToolbar">
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding WorkflowState}" Value="1">
-                            <Setter Property="Visibility" Value="Collapsed"/>
-                        </DataTrigger>
-                        <DataTrigger Binding="{Binding ElementName=lstProtocol, Path=Items.Count}" Value="0">
-                            <Setter Property="Visibility" Value="Collapsed"/>
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </local:AdditionToolbar.Style>
-        </local:AdditionToolbar>
-
+            </DockPanel>
+        </Border>
     </Grid>
 
 </UserControl>
