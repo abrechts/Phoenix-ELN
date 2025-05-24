@@ -142,7 +142,9 @@ Public Class dlgEditAuxiliary
             matDbDocsCtrl.Documents = New ObservableCollection(Of tblDbMaterialFiles)(MatDbEntry.tblDbMaterialFiles)
 
             If Keyboard.Modifiers And ModifierKeys.Control = ModifierKeys.Control Then
-                btnOK_Click()  'shortcut for immediately committing database entry and closing dialog
+                If Me.IsVisible Then
+                    btnOK_Click()  'shortcut for immediately committing database entry and closing dialog
+                End If
             End If
 
         Else
