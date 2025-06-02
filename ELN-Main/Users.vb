@@ -112,8 +112,11 @@ Public Class Users
                                 End With
                                 newUser.tblProjects.Add(newProject)
 
+                                Dim projFolder = ProjectFolders.Add(newProject, ProjectFolders.DefaultFolderTitle, MainWindow.DBContext)
+
                                 '- Add first experiment
-                                ExperimentBase.AddExperiment(MainWindow.DBContext, newProject, Nothing, CloneType.EmptyExperiment)
+                                Dim newExp = ExperimentBase.AddExperiment(MainWindow.DBContext, newProject, projFolder, Nothing, CloneType.EmptyExperiment)
+                                newExp.ProjFolder = projFolder
 
                                 '-Save all changes
                                 .SaveChanges()
@@ -208,8 +211,11 @@ Public Class Users
                                 End With
                                 newUser.tblProjects.Add(newProject)
 
+                                Dim projFolder = ProjectFolders.Add(newProject, ProjectFolders.DefaultFolderTitle, MainWindow.DBContext)
+
                                 '- Add first experiment
-                                ExperimentBase.AddExperiment(MainWindow.DBContext, newProject, Nothing, CloneType.EmptyExperiment)
+                                Dim newExp = ExperimentBase.AddExperiment(MainWindow.DBContext, newProject, projFolder, Nothing, CloneType.EmptyExperiment)
+                                newExp.ProjFolder = projFolder
 
                                 '-Save all changes
                                 .SaveChanges()

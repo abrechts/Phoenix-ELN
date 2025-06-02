@@ -15,6 +15,7 @@
         <local:ExperimentDateConverter x:Key="ExpDateConv"/>
         <local:ExperimentStateToVisibilityConverter x:Key="expStateVisConv"/>
         <local:ExperimentStateToTabIndexConverter x:Key="expStateIndexConv"/>
+        <local:GroupNameVisibilityConverter x:Key="groupNameVisConv"/>
 
         <SolidColorBrush x:Key="BoldTitleForeground" Color="#FF252525"/>
         
@@ -52,8 +53,6 @@
             </Setter>
         </Style>
 
-       
-
     </UserControl.Resources>
 
         <Grid>
@@ -66,13 +65,13 @@
 
             <!--experiment header-->
             <Border Grid.Row="0" Margin="12,10,12,0" Background="#FFEAF2FF" CornerRadius="8,8,0,0" Padding="12,4,12,0"
-               BorderBrush="#FFADADAD" BorderThickness="1,1,1,0" TextBlock.FontStyle="Italic" TextBlock.FontSize="10.5" 
-               TextBlock.FontFamily="Verdana">
+                BorderBrush="#FFADADAD" BorderThickness="1,1,1,0" TextBlock.FontStyle="Italic" TextBlock.FontSize="10.5" 
+                TextBlock.FontFamily="Verdana">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="22"/>
                         <RowDefinition/>
-                        <RowDefinition Height="30"/>
+                        <RowDefinition Height="34"/>
                     </Grid.RowDefinitions>
 
                     <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
@@ -91,7 +90,7 @@
                     </TextBlock>
 
                     <TextBlock Grid.Row="0" d:Text="millera-00012" Text="{Binding ExperimentID}" HorizontalAlignment="Right" 
-                       FontWeight="bold" VerticalAlignment="Center" Foreground="{StaticResource BoldTitleForeground}"/>
+                        FontWeight="bold" VerticalAlignment="Center" Foreground="{StaticResource BoldTitleForeground}"/>
 
                     <Separator Grid.Row="1" Margin="0,1,0,1"/>
 
@@ -99,11 +98,14 @@
                         <TextBlock Text="Created: " FontWeight="demibold" Foreground="{StaticResource BoldTitleForeground}"/>
                         <TextBlock Text="{Binding CreationDate,Converter={StaticResource ExpDateConv}}" d:Text="August 13, 2029"/>
                     </StackPanel>
+                    
+                <StackPanel Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center" TextOptions.TextFormattingMode="Display" Margin="0,-2,0,0">
+                    <TextBlock Text="{Binding Project.Title}" d:Text="Testproject" Foreground="#FF1818C3" FontWeight="demibold"  HorizontalAlignment="Center" FontSize="11"/>
+                    <TextBlock Text="{Binding ProjFolder.FolderName}" d:Text="All Experiments" Foreground="#FF1818C3" FontSize="10.5" Margin="0,1,0,0"
+                        HorizontalAlignment="center" Visibility="{Binding ProjFolder.Project.tblProjFolders.Count,Converter={StaticResource groupNameVisConv}}"/>
+                </StackPanel>
 
-                    <TextBlock Grid.Row="2" Text="{Binding Project.Title}" d:Text="Testproject" HorizontalAlignment="Center" 
-                       VerticalAlignment="Center" Foreground="#FF1818C3" FontWeight="demibold"/>
-
-                    <TabControl x:Name="tabFinalized" Grid.Row="2" VerticalAlignment="Center" HorizontalAlignment="Right" 
+                <TabControl x:Name="tabFinalized" Grid.Row="2" VerticalAlignment="Center" HorizontalAlignment="Right" 
                       Background="transparent" BorderThickness="0" Margin="0,0,0,2"
                       SelectedIndex="{Binding Path=WorkflowState,Converter={StaticResource expStateIndexConv},Mode=OneWay}">
 

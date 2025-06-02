@@ -24,7 +24,31 @@ Public Class ProjectsCollectionViewConverter
 
         View = New ListCollectionView(CType(value, IList))
         View.SortDescriptions.Add(New SortDescription("SequenceNr", ListSortDirection.Descending))
-        Return view
+        Return View
+
+    End Function
+
+    Private Function ConvertBack(value As Object, targetType As Type, parameter As Object, culture As CultureInfo) As Object Implements IValueConverter.ConvertBack
+
+        Dim view = CType(value, CollectionView)
+        Return view.SourceCollection
+
+    End Function
+
+End Class
+
+
+Public Class ProjectFoldersCollectionViewConverter
+
+    Implements IValueConverter
+
+    Public Property View As ListCollectionView
+
+    Private Function Convert(value As Object, targetType As Type, parameter As Object, culture As CultureInfo) As Object Implements IValueConverter.Convert
+
+        View = New ListCollectionView(CType(value, IList))
+        View.SortDescriptions.Add(New SortDescription("SequenceNr", ListSortDirection.Descending))
+        Return View
 
     End Function
 
@@ -54,7 +78,7 @@ Public Class ExperimentsCollectionViewConverter
 
         View = New ListCollectionView(CType(value, IList))
         View.SortDescriptions.Add(New SortDescription("ExperimentID", ListSortDirection.Descending))
-        Return view
+        Return View
 
     End Function
 

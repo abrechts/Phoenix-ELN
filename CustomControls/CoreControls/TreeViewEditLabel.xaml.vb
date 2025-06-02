@@ -1,7 +1,5 @@
-﻿Imports System.Globalization
-Imports System.Windows
+﻿Imports System.Windows
 Imports System.Windows.Controls
-Imports System.Windows.Data
 Imports System.Windows.Input
 Imports System.Windows.Media
 
@@ -111,7 +109,6 @@ Public Class TreeViewEditLabel
     Private Sub parentTreeViewItem_Selected(sender As Object, e As RoutedEventArgs) Handles ParentTreeViewItem.Selected
 
         If Me.IsMouseOver Then
-            HasFirstMouseClick = True
             blkTitle.Background = New SolidColorBrush(ColorConverter.ConvertFromString("#FFE2E2E2"))
         End If
 
@@ -125,7 +122,7 @@ Public Class TreeViewEditLabel
     End Sub
 
 
-    Private Sub blkTitle_MouseLeftButtonDown() Handles blkTitle.PreviewMouseLeftButtonDown
+    Private Sub blkTitle_MouseLeftButtonUp() Handles blkTitle.PreviewMouseLeftButtonUp
 
         If Not HasFirstMouseClick Then
 
@@ -192,7 +189,7 @@ Public Class TreeViewEditLabel
 
         With txtTitle
             .Focus()
-            .Select(255, 0)
+            .Select(0, 255)
         End With
 
         HasFirstMouseClick = True

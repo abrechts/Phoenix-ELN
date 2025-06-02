@@ -29,6 +29,8 @@ public partial class ElnDataContext : DbContext
 
     public virtual DbSet<tblProducts> tblProducts { get; set; }
 
+    public virtual DbSet<tblProjFolders> tblProjFolders { get; set; }
+
     public virtual DbSet<tblProjects> tblProjects { get; set; }
 
     public virtual DbSet<tblProtocolItems> tblProtocolItems { get; set; }
@@ -147,6 +149,8 @@ public partial class ElnDataContext : DbContext
         {
             entity.HasKey(e => e.ExperimentID);
 
+            entity.HasIndex(e => e.ProjFolderID, "idx_ProjFolderID");
+
             entity.HasIndex(e => e.ProjectID, "idx_ProjectID");
 
             entity.HasIndex(e => e.UserID, "idx_UserID");
@@ -162,6 +166,7 @@ public partial class ElnDataContext : DbContext
                 .HasColumnType("TINYINT");
             entity.Property(e => e.MDLRxnFileString).HasColumnType("LONGTEXT");
             entity.Property(e => e.ProductInChIKey).HasColumnType("VARCHAR(27)");
+            entity.Property(e => e.ProjFolderID).HasColumnType("VARCHAR (36)");
             entity.Property(e => e.ProjectID).HasColumnType("VARCHAR(36)");
             entity.Property(e => e.ReactantInChIKey).HasColumnType("VARCHAR(27)");
             entity.Property(e => e.RefYieldFactor).HasDefaultValue(1.0);
@@ -177,6 +182,10 @@ public partial class ElnDataContext : DbContext
             entity.Property(e => e.WorkflowState)
                 .HasDefaultValue((short)0)
                 .HasColumnType("SMALLINT");
+
+            entity.HasOne(d => d.ProjFolder).WithMany(p => p.tblExperiments)
+                .HasForeignKey(d => d.ProjFolderID)
+                .OnDelete(DeleteBehavior.Cascade);
 
             entity.HasOne(d => d.Project).WithMany(p => p.tblExperiments).HasForeignKey(d => d.ProjectID);
 
@@ -226,11 +235,31 @@ public partial class ElnDataContext : DbContext
             entity.HasOne(d => d.ProtocolItem).WithOne(p => p.tblProducts).HasForeignKey<tblProducts>(d => d.ProtocolItemID);
         });
 
+        modelBuilder.Entity<tblProjFolders>(entity =>
+        {
+            entity.HasKey(e => e.GUID);
+
+            entity.Property(e => e.GUID).HasColumnType("VARCHAR(36)");
+            entity.Property(e => e.FolderName).HasColumnType("TINYTEXT");
+            entity.Property(e => e.IsNodeExpanded)
+                .HasDefaultValue((byte)0)
+                .HasColumnType("TINYINT");
+            entity.Property(e => e.ProjectID).HasColumnType("VARCHAR (36)");
+            entity.Property(e => e.SequenceNr).HasColumnType("SMALLINT");
+            entity.Property(e => e.SyncState)
+                .HasDefaultValue((byte)0)
+                .HasColumnType("TINYINT");
+
+            entity.HasOne(d => d.Project).WithMany(p => p.tblProjFolders).HasForeignKey(d => d.ProjectID);
+        });
+
         modelBuilder.Entity<tblProjects>(entity =>
         {
             entity.HasKey(e => e.GUID);
 
             entity.HasIndex(e => e.UserID, "idx_ProjUserID");
+
+            entity.HasIndex(e => e.GUID, "idx_ProjectGUID");
 
             entity.HasIndex(e => e.GUID, "pk_tblProjects_2").IsUnique();
 
@@ -351,7 +380,9 @@ public partial class ElnDataContext : DbContext
                 .HasColumnType("TINYINT");
             entity.Property(e => e.IsSpellCheckEnabled).HasColumnType("TINYINT");
             entity.Property(e => e.PWHash).HasColumnType("VARCHAR(64)");
-            entity.Property(e => e.SequenceNr).HasColumnType("SMALLINT");
+            entity.Property(e => e.SequenceNr)
+                .HasDefaultValue((short)0)
+                .HasColumnType("SMALLINT");
             entity.Property(e => e.SyncState)
                 .HasDefaultValue((byte)0)
                 .HasColumnType("TINYINT");

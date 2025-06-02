@@ -60,6 +60,27 @@ Public Class DbUpgradeLocal
                 DbAddColumn("tblUsers", "SequenceNr", "SMALLINT", "0", sqliteConn)
             End If
 
+            ' --> introduced in version 3.0.0 for new project folders
+
+            Dim tblStr2 =
+               "CREATE TABLE IF NOT EXISTS tblProjFolders (
+                GUID VARCHAR(36) PRIMARY KEY NOT NULL, 
+                ProjectID VARCHAR (36) NOT NULL REFERENCES tblProjects(GUID) ON DELETE CASCADE, 
+                FolderName TINYTEXT NOT NULL, 
+                SequenceNr SMALLINT,
+                IsNodeExpanded TINYINT DEFAULT 0,
+                SyncState TINYINT DEFAULT 0);
+
+                CREATE INDEX IF NOT EXISTS idx_ProjectGUID ON tblProjects(GUID);"
+
+            DbExecuteCmd(tblStr2, sqliteConn)
+
+            If Not DbColumnExists("tblExperiments", "ProjFolderID", sqliteConn) Then
+                Dim addColCmd =
+                   "ALTER TABLE tblExperiments ADD COLUMN ProjFolderID VARCHAR (36) REFERENCES tblProjFolders(GUID) ON DELETE CASCADE;
+                    CREATE INDEX IF NOT EXISTS idx_ProjFolderID ON tblExperiments(ProjFolderID);"
+                DbExecuteCmd(addColCmd, sqliteConn)
+            End If
 
         End Using
 

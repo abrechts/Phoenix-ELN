@@ -13,33 +13,25 @@
         <local:IntegerToVisibilityConverter x:Key="intToVisibilityConv"/>
         <Style TargetType="MenuItem">
             <Setter Property="Template" Value="{StaticResource ContextMenuItem}"/>
-        </Style>
+        </Style> 
     </UserControl.Resources>
     
     <UserControl.ContextMenu>
         <ContextMenu TextOptions.TextFormattingMode="Display">
-            <MenuItem x:Name="mnuDeleteProject" Icon="{StaticResource icoDeleteFolder}" Header="Delete Empty Project"/>
+            <MenuItem x:Name="mnuAddSubProject" Icon="{StaticResource icoGrayDot}" Header="Add Group"/>
+            <Separator/>
+            <MenuItem x:Name="mnuDeleteProject" Icon="{StaticResource icoDelete}" Header="Delete Project">
+               
+            </MenuItem>
         </ContextMenu>
     </UserControl.ContextMenu>
 
     <Grid Margin="0,1,0,0">
-
-        <StackPanel>
-
-            <StackPanel Orientation="Horizontal">
-                <ContentControl Content="{StaticResource icoFolderClosed}" Height="16" HorizontalAlignment="Left" Margin="0,1,0,0"/>
-                <local:TreeViewEditLabel x:Name="lblTitle" EditText="{Binding Title, Mode=TwoWay}" MaxCharacters="40"  
-                   Foreground="#FF333333" FontWeight="demibold" Margin="1,0,0,0" FontStyle="Italic" />
-            </StackPanel>
-
-            <StackPanel Visibility="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=TreeViewItem}, Path=IsExpanded,
-              Converter={StaticResource intToVisibilityConv}}" Orientation="Horizontal" Margin="4,0,0,1">
-                
-                <ContentControl Content="{StaticResource icoAdd}" Margin="-3,2,0,0"  Height="14"/>
-                <TextBlock x:Name="btnAddExp" Text="add experiment" Foreground="blue" TextDecorations="Underline" Cursor="Hand" FontStyle="Italic" Background="#FFECF8FF" Padding="2,0,3,0"/>
-                
-            </StackPanel>
-
+        <StackPanel Orientation="Horizontal">
+            <ContentControl Content="{StaticResource icoFolderClosed}" Height="16" HorizontalAlignment="Left" Margin="0,1,0,0"/>
+            <local:TreeViewEditLabel x:Name="lblTitle" EditText="{Binding Title, Mode=TwoWay}" MaxCharacters="40"  
+                Foreground="#FF333333" FontWeight="demibold" Margin="1,0,0,0" FontStyle="Italic" />
+            <!--<TextBlock Text="{Binding SequenceNr}" Margin="2,0,0,0" d:Text="3" FontWeight="bold" Foreground="blue"/>-->
         </StackPanel>
     </Grid>
 

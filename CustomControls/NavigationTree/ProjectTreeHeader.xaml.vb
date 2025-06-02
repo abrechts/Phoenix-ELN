@@ -1,12 +1,12 @@
 ﻿Imports ElnCoreModel
-Imports ElnBase.ELNEnumerations
 Imports System.Windows
 Imports System.Windows.Controls
-Imports System.Windows.Input
 
 Public Class ProjectTreeHeader
 
     Public Event RequestAddExperiment(sender As Object, projectEntry As tblProjects)
+
+    Public Event RequestAddFolder(sender As Object, projectEntry As tblProjects)
 
     Public Event RequestDeleteProject(sender As Object, projectEntry As tblProjects)
 
@@ -22,13 +22,6 @@ Public Class ProjectTreeHeader
     Public Sub BeginTitleEdit()
 
         lblTitle.BeginEdit()
-
-    End Sub
-
-
-    Private Sub btnAddExp_Click(sender As Object, e As RoutedEventArgs) Handles btnAddExp.PreviewMouseUp
-
-        RaiseEvent RequestAddExperiment(Me, CType(DataContext, tblProjects))
 
     End Sub
 
@@ -53,9 +46,9 @@ Public Class ProjectTreeHeader
             Dim projectEntry = TryCast(DataContext, tblProjects)
             If projectEntry IsNot Nothing Then
 
-                testTitle = testTitle.ToLower
+                testTitle = Trim(testTitle.ToLower)
 
-                Dim duplicates = From proj In projectEntry.User.tblProjects Where proj.Title.ToLower = testTitle
+                Dim duplicates = From proj In projectEntry.User.tblProjects Where Trim(proj.Title.ToLower) = testTitle
                 If duplicates.Count > 1 Then
                     MsgBox("A duplicate project name was entered." + vbCrLf +
                                 "Please choose another title ...", MsgBoxStyle.OkOnly + MsgBoxStyle.Information, "Validation")
@@ -87,12 +80,26 @@ Public Class ProjectTreeHeader
         End If
 
         'disable delete project if it contains experiments
-        mnuDeleteProject.IsEnabled = Not projectEntry.tblExperiments.Any
+        mnuDeleteProject.IsEnabled = (projectEntry.tblExperiments.Count = 0)
+
+        'disable folder addition if project has no title
+        mnuAddSubProject.IsEnabled = (projectEntry.Title <> "")
+
+    End Sub
+
+
+    Private Sub mnuAddSubProject_Click() Handles mnuAddSubProject.Click
+
+        Dim projectEntry = CType(DataContext, tblProjects)
+        RaiseEvent RequestAddFolder(Me, projectEntry)
 
     End Sub
 
 
     Private Sub mnuClearProject_Click(sender As Object, e As RoutedEventArgs) Handles mnuDeleteProject.Click
+
+        lblTitle.EditText = Space(12)  'dummy to suppress empty title validation blocking after delete
+        lblTitle.EndEdit()
 
         Dim projectEntry = CType(DataContext, tblProjects)
         RaiseEvent RequestDeleteProject(Me, projectEntry)

@@ -51,6 +51,10 @@ public partial class tblExperiments
 
     public byte[]? RxnFingerprint { get; set; }
 
+    public string? ProjFolderID { get; set; }
+
+    public virtual tblProjFolders? ProjFolder { get; set; }
+
     public virtual tblProjects Project { get; set; } = null!;
 
     public virtual tblUsers User { get; set; } = null!;

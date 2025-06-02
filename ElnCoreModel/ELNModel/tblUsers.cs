@@ -29,7 +29,7 @@ public partial class tblUsers
 
     public byte? IsCurrent { get; set; }
 
-    public short SequenceNr { get; set; }
+    public short? SequenceNr { get; set; }
 
     public virtual tblDatabaseInfo Database { get; set; } = null!;
 

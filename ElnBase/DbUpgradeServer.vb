@@ -53,7 +53,24 @@ Public Class DbUpgradeServer
                 UpdateRev1ServerFieldTypes(serverConn)  'changes are introduced in version 2.6.0
             End If
 
+            ' --> introduced in version 3.0.0 (new project folders)
 
+            Dim tblStr2 =
+               "CREATE TABLE IF NOT EXISTS tblProjFolders (
+                GUID VARCHAR(36) PRIMARY KEY NOT NULL, 
+                ProjectID VARCHAR (36) NOT NULL REFERENCES tblProjects(GUID) ON DELETE CASCADE, 
+                FolderName TINYTEXT NOT NULL, 
+                SequenceNr SMALLINT,
+                IsNodeExpanded TINYINT DEFAULT 0,
+                SyncState TINYINT DEFAULT 0);"
+
+            DbExecuteCmd(tblStr2, serverConn)
+
+            If Not DbColumnExists("tblExperiments", "ProjFolderID", serverConn) Then
+                Dim addColCmd = "ALTER TABLE tblExperiments ADD COLUMN ProjFolderID VARCHAR (36) 
+                    REFERENCES tblProjFolders(GUID) ON DELETE CASCADE;"
+                DbExecuteCmd(addColCmd, serverConn)
+            End If
 
             ' --->
             'Important: If a DEFAULT VALUE for an SQLite column is specified, ALWAYS also assign it to the
@@ -69,7 +86,7 @@ Public Class DbUpgradeServer
     ''' <summary>
     ''' This server DB revision updates a large number of sever table field types (introduced in version 2.6.0)
     ''' </summary>
-    ''' <remarks>Changes initial varchar(x) types for text input to less restricive TEXT 
+    ''' <remarks>Changes initial varchar(x) types for text input to less restrictive TEXT 
     ''' and replaces initial bigint fields by smallint.</remarks>
     ''' 
     Private Shared Sub UpdateRev1ServerFieldTypes(serverConn As MySqlConnection)

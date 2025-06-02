@@ -36,12 +36,12 @@
                 
                 <Separator Margin="0,6,0,4"/>
                 
-                <TextBlock Margin="0,2,0,4" Text="Target Project:" VerticalAlignment="Top" HorizontalAlignment="Left" 
+                <TextBlock Margin="2,2,0,2" Text="Target Project:" VerticalAlignment="Top" HorizontalAlignment="Left" 
                    FontWeight="Bold" Foreground="DarkBlue"  />
 
                 <StackPanel Orientation="Horizontal"  HorizontalAlignment="Left" VerticalAlignment="Top">
 
-                    <local:ComboPlus x:Name="cboProjects" DisplayMemberPath="Title" CboBackground="white" MinWidth="180"/>
+                    <local:ComboPlus x:Name="cboProjects" DisplayMemberPath="Title" CboBackground="white" MinWidth="200"/>
 
                     <ToggleButton x:Name="chkSortProjects" Margin="8,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center"
                         Background="white" BorderBrush="#FF45A1FD" ToolTip="Sort projects alphabetically">
@@ -49,6 +49,14 @@
                     </ToggleButton>
 
                 </StackPanel>
+
+                <TextBlock Margin="2,2,0,1" Text="Subfolder:" VerticalAlignment="Top" HorizontalAlignment="Left" FontWeight="Bold" Foreground="DarkBlue"/>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top">
+                    <local:ComboPlus x:Name="cboProjFolders" DisplayMemberPath="FolderName" CboBackground="white" MinWidth="200"
+                         ItemsSource="{Binding ElementName=cboProjects, Path=SelectedItem.tblProjFolders}"/>
+                </StackPanel>
+
 
             </StackPanel>
 

@@ -20,4 +20,6 @@ public partial class tblProjects
     public virtual tblUsers User { get; set; } = null!;
 
     public virtual ICollection<tblExperiments> tblExperiments { get; set; } = new List<tblExperiments>();
+
+    public virtual ICollection<tblProjFolders> tblProjFolders { get; set; } = new List<tblProjFolders>();
 }

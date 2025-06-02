@@ -1,10 +1,12 @@
 ﻿
 Imports System.IO
+Imports ElnCoreModel
 
 Public Class RestoreFromServer
 
     Private Shared Property ServerContext As ElnDbContext
     Private Shared Property TmpLocalContext As ElnDbContext
+    Private Shared Property tblFoldersDataPresent As Boolean
 
 
     ''' <summary>
@@ -37,6 +39,9 @@ Public Class RestoreFromServer
 
                     Dim serverDbInfoEntry = (From info In ServerContext.tblDatabaseInfo Where info.GUID = serverDbInfoGUID).FirstOrDefault
                     If serverDbInfoEntry IsNot Nothing Then
+
+                        'for legacy data check, to determine if source the client database was upgraded to at least v.3.0.0 
+                        tblFoldersDataPresent = IsTblProjFoldersDataPresent(serverDbInfoEntry)
 
                         'get and transfer root entity
                         AddEntity(serverDbInfoEntry)
@@ -81,8 +86,14 @@ Public Class RestoreFromServer
             coll.Load()
             Dim childTableName = coll.Metadata.Name
 
-            'prevent double tblExperiments reference with tblProjects -> tblExperiments
-            If Not (parentTableName = "tblUsers" AndAlso childTableName = "tblExperiments") Then
+            'prevent double tblExperiments references in the presence of multiple foreign keys
+            Dim isBlockedRelation = (parentTableName = "tblUsers" AndAlso childTableName = "tblExperiments")
+            If tblFoldersDataPresent Then
+                'do this only for non-legacy data to prevent broken relations to tblExperiments 
+                isBlockedRelation = isBlockedRelation OrElse (parentTableName = "tblProjects" AndAlso childTableName = "tblExperiments")
+            End If
+
+            If Not isBlockedRelation Then
 
                 Dim children = coll.CurrentValue
                 For Each child In children
@@ -141,5 +152,18 @@ Public Class RestoreFromServer
         End With
 
     End Sub
+
+
+    ''' <summary>
+    ''' Determine if the specified source client database was upgraded to at least v.3.0.0 
+    ''' to contain tblProjFolders data. 
+    ''' </summary>
+    ''' 
+    Private Shared Function IsTblProjFoldersDataPresent(serverDbInfoEntry As tblDatabaseInfo) As Boolean
+
+        Return New Version(serverDbInfoEntry.CurrAppVersion) >= New Version("3.0")
+
+    End Function
+
 
 End Class

@@ -1,9 +1,9 @@
 /* 
 -------------------------------------------------------------------------------------------
-This script creates a Phoenix ELN server database for MariaDB or MySQL. 
+This script creates a new Phoenix ELN server database for MariaDB or MySQL.
 -------------------------------------------------------------------------------------------
 
-Version 1.2
+Version 1.3
 -----------
 
 Create a login User
@@ -128,11 +128,14 @@ CREATE TABLE IF NOT EXISTS `tblExperiments` (
   `RxnIndigoObj` longblob DEFAULT NULL,
   `RxnFingerprint` blob DEFAULT NULL,
   `SyncState` tinyint(4) DEFAULT 0,
+  `ProjFolderID` varchar(36) DEFAULT NULL,
   PRIMARY KEY (`ExperimentID`),
   KEY `IX_tblExperiments_ProjectID` (`ProjectID`),
   KEY `IX_tblExperiments_UserID` (`UserID`),
+  KEY `ProjFolderID` (`ProjFolderID`),
   CONSTRAINT `FK_tblExperiments_tblProjects_ProjectID` FOREIGN KEY (`ProjectID`) REFERENCES `tblProjects` (`GUID`) ON DELETE CASCADE,
-  CONSTRAINT `FK_tblExperiments_tblUsers_UserID` FOREIGN KEY (`UserID`) REFERENCES `tblUsers` (`UserID`) ON DELETE CASCADE
+  CONSTRAINT `FK_tblExperiments_tblUsers_UserID` FOREIGN KEY (`UserID`) REFERENCES `tblUsers` (`UserID`) ON DELETE CASCADE,
+  CONSTRAINT `tblExperiments_ibfk_1` FOREIGN KEY (`ProjFolderID`) REFERENCES `tblProjFolders` (`GUID`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 
@@ -188,6 +191,19 @@ CREATE TABLE IF NOT EXISTS `tblProjects` (
   UNIQUE KEY `pk_tblProjects_2` (`GUID`),
   KEY `IX_tblProjects_UserID` (`UserID`),
   CONSTRAINT `FK_tblProjects_tblUsers_UserID` FOREIGN KEY (`UserID`) REFERENCES `tblUsers` (`UserID`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+CREATE TABLE IF NOT EXISTS `tblProjFolders` (
+  `GUID` varchar(36) NOT NULL,
+  `ProjectID` varchar(36) NOT NULL,
+  `FolderName` tinytext NOT NULL,
+  `SequenceNr` smallint(6) DEFAULT NULL,
+  `IsNodeExpanded` tinyint(4) DEFAULT 0,
+  `SyncState` tinyint(4) DEFAULT 0,
+  PRIMARY KEY (`GUID`),
+  KEY `ProjectID` (`ProjectID`),
+  CONSTRAINT `tblProjFolders_ibfk_1` FOREIGN KEY (`ProjectID`) REFERENCES `tblProjects` (`GUID`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 
@@ -299,5 +315,6 @@ CREATE TABLE IF NOT EXISTS `tblUsers` (
   KEY `IX_tblUsers_DatabaseID` (`DatabaseID`),
   CONSTRAINT `FK_tblUsers_tblDatabaseInfo_DatabaseID` FOREIGN KEY (`DatabaseID`) REFERENCES `tblDatabaseInfo` (`GUID`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 
 SET foreign_key_checks = 1;

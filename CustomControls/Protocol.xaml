@@ -110,7 +110,7 @@
 
                 </ScrollViewer>
 
-                <local:AdditionToolbar x:Name="addToolbar" HorizontalAlignment="center" Margin="0,-16,0,-14" DockPanel.Dock="Bottom" VerticalAlignment="Top" >
+                <local:AdditionToolbar x:Name="addToolbar" HorizontalAlignment="center" Margin="0,-18,0,-16" DockPanel.Dock="Bottom" VerticalAlignment="Top" >
                     <local:AdditionToolbar.Style>
                         <Style TargetType="local:AdditionToolbar">
                             <Style.Triggers>
