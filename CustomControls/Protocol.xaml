@@ -83,9 +83,9 @@
 
     <Grid>
 
-        <Border x:Name="pnlProtocol" DockPanel.Dock="top" BorderBrush="#FFD4D4D4" BorderThickness="1" CornerRadius="0,0,8,8" 
-              Background="#FFF6F6F6" >
+        <Border x:Name="pnlProtocol" DockPanel.Dock="top" BorderBrush="#FFD4D4D4" BorderThickness="1" CornerRadius="0,0,8,8" Background="#FFF6F6F6" >
             <DockPanel>
+                
                 <ScrollViewer x:Name="scrlProtocol" VerticalScrollBarVisibility="auto" Margin="0,4,0,22" DockPanel.Dock="top">
 
                     <ListBox x:Name="lstProtocol" VerticalAlignment="Top"
@@ -110,7 +110,7 @@
 
                 </ScrollViewer>
 
-                <local:AdditionToolbar x:Name="addToolbar" HorizontalAlignment="center" Margin="0,-16,0,-14" DockPanel.Dock="Bottom" VerticalAlignment="Top" >
+                <local:AdditionToolbar x:Name="addToolbar" HorizontalAlignment="center" Margin="0,-18,0,-16" DockPanel.Dock="Bottom" VerticalAlignment="Top">
                     <local:AdditionToolbar.Style>
                         <Style TargetType="local:AdditionToolbar">
                             <Style.Triggers>
