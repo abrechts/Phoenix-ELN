@@ -90,7 +90,7 @@ Class MainWindow
 
         'Apply database upgrades for new version if required
         If _IsVersionUpgrade Then
-            DbUpgradeServer.IsNewAppVersion = True
+            DbUpgradeServer.IsUpgradeCheckRequired = True
             DbUpgradeLocal.Upgrade(SQLiteDbPath)
         End If
 
@@ -1077,6 +1077,7 @@ Class MainWindow
         With CustomControls.My.MySettings.Default
             If .IsServerSpecified Then
                 .IsServerOffByUser = False
+                DbUpgradeServer.IsUpgradeCheckRequired = True
                 ServerSync.CreateServerContextAsync(.ServerName, .ServerDbUserName, .ServerDbPassword, .ServerPort,
                     DBContext.tblDatabaseInfo.First) 'handled by ServerSync_ServerContextCreated (also sets mainStatusInfo)
             End If

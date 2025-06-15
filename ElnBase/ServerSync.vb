@@ -104,7 +104,7 @@ Public Class ServerSync
 
 
     ''' <summary>
-    ''' Asynchronously creates the server context, and sets the specified max_packet_size (in MB), if the current one is smaller 
+    ''' Asynchronously creates the specified server context, and sets the specified max_packet_size (in MB), if the current one is smaller 
     ''' than the specified value.
     ''' </summary>
     ''' 
@@ -121,7 +121,8 @@ Public Class ServerSync
     End Sub
 
     ''' <summary>
-    ''' Executed during above async task
+    ''' Creates the server specified context, and sets the specified max_packet_size (in MB), if the current one is smaller 
+    ''' than the specified value.
     ''' </summary>
     ''' 
     Public Shared Function CreateMySQLContext(serverName As String, userName As String, password As String, port As Integer,
@@ -132,12 +133,13 @@ Public Class ServerSync
             Dim mySqlContext = New MySqlContext(serverName, userName, password, "PhoenixElnData", port)
             Dim serverDbContext = mySqlContext.ElnServerContext
 
-            'test for required db upgrades
-            If DbUpgradeServer.IsNewAppVersion Then
+            ' test for required db upgrades
+            If DbUpgradeServer.IsUpgradeCheckRequired Then
                 DbUpgradeServer.Upgrade(serverDbContext.Database.GetConnectionString)
+                DbUpgradeServer.IsUpgradeCheckRequired = False
             End If
 
-            'temporarily set required max_packet_size for connection
+            ' temporarily set required max_packet_size for connection
             Dim requiredPacketBytes = 60 * 1024 * 1024  '60 MB
             Try
                 Dim dummy = serverDbContext.Database.SqlQueryRaw(Of Integer)("SET GLOBAL max_allowed_packet =" + requiredPacketBytes.ToString).AsEnumerable(0)
@@ -146,7 +148,7 @@ Public Class ServerSync
                 Return Nothing
             End Try
 
-            'check synchronization validity
+            ' check synchronization validity
             Dim serverDbInfo = (From info In serverDbContext.tblDatabaseInfo Where info.GUID = localDbInfoEntry.GUID).FirstOrDefault
             If serverDbInfo IsNot Nothing Then
                 DatabaseGUID = serverDbInfo.GUID

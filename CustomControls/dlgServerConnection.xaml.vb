@@ -138,6 +138,7 @@ Public Class dlgServerConnection
         Me.Cursor = Cursors.Wait
 
         'synchronous
+        DbUpgradeServer.IsUpgradeCheckRequired = True
         NewServerContext = ServerSync.CreateMySQLContext(txtServerPath.Text, txtUserID.Text, txtPassword.Password, My.Settings.ServerPort,
             _LocalContext.tblDatabaseInfo.First)
 

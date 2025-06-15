@@ -10,7 +10,7 @@ Public Class DbUpgradeServer
     ''' <value></value>
     ''' <remarks>Typically set if a client update is detected.</remarks>
     ''' 
-    Public Shared Property IsNewAppVersion As Boolean = False
+    Public Shared Property IsUpgradeCheckRequired As Boolean = False
 
     Public Shared Sub Upgrade(serverConnStr As String)
 
