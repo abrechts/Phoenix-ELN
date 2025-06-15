@@ -284,6 +284,7 @@ Class MainWindow
         Else
 
             'e.g. server unavailable
+            ServerDBContext = Nothing
             Protocol_ConnectedChanged(False)
 
         End If
@@ -577,12 +578,14 @@ Class MainWindow
 
             Dispatcher.Invoke(Sub() ServerWarningDelegate(isConnected))
 
-            MsgBox("The ELN server is unavailable!" + vbCrLf + "Changes currently are not backed up." + vbCrLf + vbCrLf +
+            If Not CustomControls.My.MySettings.Default.IsServerOffByUser Then
+                MsgBox("The ELN server is unavailable!" + vbCrLf + "Changes currently are not backed up." + vbCrLf + vbCrLf +
                    "Try to reconnect later ...", MsgBoxStyle.Information, "Server Sync")
+            End If
 
         Else
-            'currently no action
-        End If
+                'currently no action
+            End If
 
     End Sub
 
