@@ -84,6 +84,7 @@ Public Class ExperimentBase
             .Project = dstProject
             .User = dstProject.User
             .CreationDate = Now.ToString("yyyy-MM-dd HH:mm")
+            .FinalizeDate = Nothing
             .UserTag = Nothing
             .WorkflowState = WorkflowStatus.InProgress
         End With
