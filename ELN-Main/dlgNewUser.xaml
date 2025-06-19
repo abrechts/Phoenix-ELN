@@ -107,6 +107,8 @@
                         <TextBlock Margin="0,19,0,0" Text="User Info" TextWrapping="Wrap" VerticalAlignment="Top"  
                            FontWeight="Bold" FontSize="12" Foreground="{StaticResource DialogTitleForeground}" />
 
+                        <Separator Margin="0,2,12,2"/>
+
                         <TextBlock Margin="0,10,0,0" Text="The information below will appear in the header of your experiments:" 
                            TextWrapping="Wrap" FontStyle="Normal" HorizontalAlignment="Left" Width="279" />
 
@@ -140,11 +142,16 @@
                                 VerticalAlignment="Top" HorizontalAlignment="Left" Width="197" Padding="0,1" />
                         </StackPanel>
 
-                        <StackPanel Orientation="Horizontal" Grid.Column="1" HorizontalAlignment="Center" Margin="0,20,0,18" VerticalAlignment="Bottom">
-                            <Button x:Name="btnCancel" Content="Cancel" IsCancel="True" Width="67" Padding="1,3" Margin="0,0,24,0"
-                               Background="white"/>
-                            <Button x:Name="btnClose" Content="Done" IsDefault="True" Width="75" 
+                        <Button x:Name="btnChangePW" Content="Change Password" Margin="84,10,0,0" HorizontalAlignment="Left" Padding="6,3"
+                           Visibility="Collapsed" d:Visibility="Visible" Background="white"/>
+
+                        <Separator Margin="0,12,12,0" />
+
+                        <StackPanel Orientation="Horizontal" Grid.Column="1" HorizontalAlignment="left" Margin="84,20,0,18" VerticalAlignment="Bottom">
+                            <Button x:Name="btnClose" Content="Done" IsDefault="True" Width="75" Margin="0,0,24,0"
                                 IsEnabled="False" Padding="1,3" Background="white"/>
+                            <Button x:Name="btnCancel" Content="Cancel" IsCancel="True" Width="67" Padding="1,3" Margin="0,0,0,0"
+                               Background="white"/>
                         </StackPanel>
 
                     </StackPanel>

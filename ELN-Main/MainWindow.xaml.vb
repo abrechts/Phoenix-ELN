@@ -584,8 +584,8 @@ Class MainWindow
             End If
 
         Else
-                'currently no action
-            End If
+            'currently no action
+        End If
 
     End Sub
 

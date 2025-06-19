@@ -28,6 +28,7 @@ Public Class dlgNewUser
 
             tabSettings.IsSelected = True
             btnClose.Content = "OK"
+            btnChangePW.Visibility = Visibility.Visible
 
             With CurrentUser
                 txtFirstName.Text = .FirstName
@@ -205,6 +206,23 @@ Public Class dlgNewUser
 
         Me.DialogResult = True
         Me.Close()
+
+    End Sub
+
+    Private Sub btnChangePW_Click(sender As Object, e As RoutedEventArgs) Handles btnChangePW.Click
+
+        Dim changePWDlg As New dlgPassword(CurrentUser.PWHash)
+        With changePWDlg
+            .Owner = Me
+            If .ShowDialog() Then
+                'update password hash in database
+                With CurrentUser
+                    .PWHash = changePWDlg.NewPasswordHash
+                    .PWHint = changePWDlg.NewPasswordHint
+                End With
+                DbContext.SaveChanges()
+            End If
+        End With
 
     End Sub
 
