@@ -62,9 +62,7 @@
                 <StackPanel x:Name="pnlReactLinks" Orientation="Horizontal" Margin="6,0,0,0" >
                     <TextBlock Text="Web Info:" Width="70" FontWeight="DemiBold"/>
                     <TextBlock x:Name="lnkPubChemReact" Text="PubChem" Foreground="blue" TextDecorations="Underline" Cursor="Hand" Margin="0,0,4,0"/>
-                    <TextBlock Text="|"/>
-                    <TextBlock x:Name="lnkChemSpiderReact" Text="ChemSpider" Foreground="blue" TextDecorations="Underline"  Cursor="Hand" Margin="4,0,40,0" />
-                </StackPanel>
+                    </StackPanel>
 
                 <StackPanel Orientation="Horizontal" Margin="6,0,0,5" >
                     <TextBlock HorizontalAlignment="Left" Text="InChIKey:" FontWeight="Demibold" VerticalAlignment="Center" Width="70"/>
@@ -107,9 +105,7 @@
                 <StackPanel x:Name="pnlProdLinks" Orientation="Horizontal" Margin="6,0,0,0"  >
                     <TextBlock Text="Web Info:" Width="70" FontWeight="DemiBold"/>
                     <TextBlock x:Name="lnkPubChemProd" Text="PubChem" Foreground="blue" TextDecorations="Underline"  Cursor="Hand" Margin="0,0,4,0"/>
-                    <TextBlock Text="|"/>
-                    <TextBlock x:Name="lnkChemSpiderProd" Text="ChemSpider" Foreground="blue" TextDecorations="Underline"  Cursor="Hand" Margin="4,0,40,0" />
-                </StackPanel>
+                    </StackPanel>
 
                 <StackPanel Orientation="Horizontal" Margin="6,0,0,4">
                     <TextBlock HorizontalAlignment="Left" Text="InChIKey:" FontWeight="Demibold" VerticalAlignment="Center" Width="70"/>
