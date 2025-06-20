@@ -232,12 +232,6 @@
                     </Menu>
 
                     <Separator/>
-                    <Button x:Name="btnChangePW" Content="Change PW" />
-
-
-                    <Separator/>
-
-                    
 
                 </ToolBar>
 
