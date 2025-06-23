@@ -23,7 +23,7 @@
         
     </UserControl.Resources>
 
-    <Border BorderBrush="gray" BorderThickness="1" CornerRadius="6" Padding="10,6,6,4" Background="#FFF9F9F9">
+    <Border BorderBrush="gray" BorderThickness="1" CornerRadius="6" Padding="10,6,6,4" Background="white">
         
         <StackPanel Margin="0,2,0,0">
 

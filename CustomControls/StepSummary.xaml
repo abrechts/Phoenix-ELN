@@ -29,7 +29,7 @@
 
     </UserControl.Resources>
 
-    <Border BorderBrush="gray" BorderThickness="1" CornerRadius="6" Padding="4,2,4,4" Background="#FFECECEC">
+    <Border BorderBrush="gray" BorderThickness="1" CornerRadius="6" Padding="4,2,4,4" Background="white">
 
         <DockPanel Margin="0,4,0,4" >
 
@@ -42,7 +42,7 @@
 
             <Separator Margin="0,0,0,0" Background="#FF4D84D7"/>
 
-            <StackPanel Margin="0,0,0,0" Background="whitesmoke">
+            <StackPanel Margin="0,0,0,0" Background="white">
 
                 <StackPanel Orientation="Horizontal" Margin="6,3,0,0" >
                     <TextBlock Text="Elemental:" Width="70" FontWeight="DemiBold"/>
@@ -85,7 +85,7 @@
 
             <Separator Margin="0,0,0,2" Background="#FF4D84D7"/>
 
-            <StackPanel Margin="0,0,0,0" Background="whitesmoke">
+            <StackPanel Margin="0,0,0,0" Background="white">
 
                 <StackPanel Orientation="Horizontal" Margin="6,3,0,0" >
                     <TextBlock Text="Elemental:" Width="70" FontWeight="DemiBold"/>
@@ -127,7 +127,7 @@
             
             <Separator Margin="0,0,0,2" Background="#FF4D84D7"/>
 
-            <StackPanel Margin="0,0,0,0" Background="whitesmoke">
+            <StackPanel Margin="0,0,0,0" Background="white">
 
                 <StackPanel Orientation="Horizontal" Margin="6,5,0,6" >
                     <TextBlock Text="Materials:" Width="70" FontWeight="DemiBold" VerticalAlignment="Center" Margin="0,-2,0,0"/>
@@ -147,35 +147,33 @@
                 Background="transparent" FontStyle="Italic" FontWeight="Bold" Padding="1,0" Margin="0,0,0,2" 
                 FontSize="12.5" HorizontalAlignment="Center"/>
 
-            <DockPanel Background="WhiteSmoke" DockPanel.Dock="top">
+                <DockPanel Background="White" DockPanel.Dock="top">
 
-                <Separator Margin="0,0,0,2" DockPanel.Dock="top" Background="#FF4D84D7"/>
+                    <Separator Margin="0,0,0,2" DockPanel.Dock="top" Background="#FF4D84D7"/>
 
-                <local:ComboPlus x:Name="cboSortType" SelectedIndex="0" HorizontalAlignment="Center" Margin="0,4,0,0" Padding="6,1,6,2" 
-                  CboBackground="white" VerticalAlignment="Center" DockPanel.Dock="top" FontSize="11.5">
-                    <ComboBoxItem Content="by yield"/>
-                    <ComboBoxItem Content="by scale"/>
-                </local:ComboPlus>
+                    <local:ComboPlus x:Name="cboSortType" SelectedIndex="0" HorizontalAlignment="Center" Margin="0,4,0,0" Padding="6,1,6,2" 
+                      CboBackground="white" VerticalAlignment="Center" DockPanel.Dock="top" FontSize="11.5">
+                        <ComboBoxItem Content="by yield"/>
+                        <ComboBoxItem Content="by scale"/>
+                    </local:ComboPlus>
 
-                <Grid>
+                    <Grid>
 
-                    <TextBlock Text="- no items present so far -" Foreground="#FF6C6C6C" Margin="0,2,0,0" VerticalAlignment="Top" 
+                        <TextBlock Text="- no items present so far -" Foreground="#FF6C6C6C" Margin="0,2,0,0" VerticalAlignment="Top" 
                                 HorizontalAlignment="Center"/>
 
-                    <ListBox x:Name="lstStepExperiments" SelectionMode="Single" Background="transparent" BorderThickness="0"
+                        <ListBox x:Name="lstStepExperiments" SelectionMode="Single" Background="whitesmoke" BorderThickness="0,1" BorderBrush="#FF45A1FD"
                                 FocusVisualStyle="{x:Null}"              
-                                Grid.IsSharedSizeScope="true" AllowDrop="false" Margin="0,4,4,4"
+                                Grid.IsSharedSizeScope="true" AllowDrop="false" Margin="4,4,4,0"
                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                                 VirtualizingStackPanel.IsVirtualizing="False" MinHeight="25"
                                 ItemsSource="{Binding Source={StaticResource cvsStepExperiments}}"
-                                ItemTemplate="{StaticResource expTreeItem}" HorizontalAlignment="Center" />
-                </Grid>
+                                ItemTemplate="{StaticResource expTreeItem}" />
+                    </Grid>
+
+                </DockPanel>
 
             </DockPanel>
-
-            <Separator Margin="0,0,0,2" VerticalAlignment="Top" Background="#FF4D84D7"/>
-
-        </DockPanel>
 
     </DockPanel>
         
