@@ -93,7 +93,7 @@ Class MainWindow
         'Apply database upgrades for new version if required
         If _IsVersionUpgrade Then
             DbUpgradeLocal.Upgrade(SQLiteDbPath)
-            DbUpgradeServer.IsNewAppVersion = True
+            DbUpgradeServer.IsUpgradeCheckRequired = True
         End If
 
         'Create local SqliteContext
