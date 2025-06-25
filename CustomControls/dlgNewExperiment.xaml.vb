@@ -1,10 +1,9 @@
 ﻿
-
-Imports System.Globalization
 Imports ElnCoreModel
 Imports ElnBase.ELNEnumerations
 Imports ElnBase.ELNCalculations
 Imports System.Windows
+
 
 Public Class dlgNewExperiment
 
@@ -15,6 +14,7 @@ Public Class dlgNewExperiment
 
 
     Private _ProjectSortType As ProjectSort = ProjectSort.SequenceNrDesc
+    Private _isInitializing As Boolean = False
 
     Public Sub New()
 
@@ -26,23 +26,22 @@ Public Class dlgNewExperiment
 
     Public Sub Me_Loaded() Handles Me.Loaded
 
+        _isInitializing = True
+
         chkSortProjects.IsChecked = (ProjectSortType = ProjectSort.NameAscending)
         SkipEmbeddedDocs = My.Settings.CloneSkipEmbedded
         CloneMethod = CType(My.Settings.LastCloneType, CloneType)
 
         ProjectSortType = My.Settings.NewExpProjectSort
+
         cboProjects.SelectedItem = TargetProject
+        cboProjFolders.SelectedItem = TargetFolder
 
         cboScalingMatUnit.Text = My.Settings.LastScaleUnit
 
+        _isInitializing = False
+
     End Sub
-
-
-    ''' <summary>
-    ''' Sets or gets the current user (for enumerating available projects)
-    ''' </summary>
-    '''
-  '  Public Property CurrentUser As tblUsers
 
 
     ''' <summary>
@@ -50,6 +49,12 @@ Public Class dlgNewExperiment
     ''' </summary>
     Public Property TargetProject As tblProjects
 
+
+    ''' <summary>
+    ''' Sets or gets the project subfolder in which to create the new experiment
+    ''' <returns></returns>
+    ''' 
+    Public Property TargetFolder As tblProjFolders
 
     ''' <summary>
     ''' Sets or gets the total grams amount of the source reference reactant (for scaling reference).
@@ -175,6 +180,17 @@ Public Class dlgNewExperiment
     Private Sub cboProjects_SelectionChanged() Handles cboProjects.SelectionChanged
 
         TargetProject = cboProjects.SelectedItem
+
+        If Not _isInitializing Then
+            cboProjFolders.SelectedItem = TargetProject.tblProjFolders.First
+        End If
+
+    End Sub
+
+
+    Private Sub cboProjFolders_SelectionChanged() Handles cboProjFolders.SelectionChanged
+
+        TargetFolder = cboProjFolders.SelectedItem
 
     End Sub
 

@@ -19,7 +19,7 @@ Public Class ExperimentBase
     ''' <param name="cloneMethod">The CloneType specifying the cloning type. Ignored, if srcExperiment is nothing.</param>
     ''' <returns></returns>
     ''' 
-    Public Shared Function AddExperiment(dbContext As ElnDataContext, parentProject As tblProjects,
+    Public Shared Function AddExperiment(dbContext As ElnDataContext, parentProject As tblProjects, parentProjFolder As tblProjFolders,
        srcExperiment As tblExperiments, cloneMethod As CloneType) As tblExperiments
 
         If cloneMethod = CloneType.EmptyExperiment Then
@@ -46,7 +46,7 @@ Public Class ExperimentBase
 
             'Clone the specified experiment
 
-            Return CloneExperiment(dbContext, srcExperiment, parentProject, cloneMethod)
+            Return CloneExperiment(dbContext, srcExperiment, parentProject, parentProjFolder, cloneMethod)
 
         End If
 
@@ -60,13 +60,14 @@ Public Class ExperimentBase
     ''' <param name="dbContext">The current database entity context.</param>
     ''' <param name="expEntry">The experiment entry to clone.</param>
     ''' <param name="dstProject">The destination project of the clone.</param>
+    ''' <param name="dstProjFolder">The destination project subfolder of the clone.</param>
     ''' <param name="cloneMethod">The CloneType to apply.</param>
     ''' <param name="removeEmbedded">Removes all embedded items (images, files, etc.) from the clone. This 
     ''' parameter is ignored for all clone types except CloneType.FullExperiment.</param>
     ''' <returns>Cloned experiment entry, for reference only.</returns>
     ''' 
     Public Shared Function CloneExperiment(dbContext As ElnDataContext, expEntry As tblExperiments, dstProject As tblProjects,
-      cloneMethod As CloneType, Optional removeEmbedded As Boolean = False) As tblExperiments
+      dstProjFolder As tblProjFolders, cloneMethod As CloneType, Optional removeEmbedded As Boolean = False) As tblExperiments
 
         Dim expCopy As tblExperiments
 
@@ -82,6 +83,7 @@ Public Class ExperimentBase
         With expCopy
             .ExperimentID = GetNextExperimentID(dstProject.User)
             .Project = dstProject
+            .ProjFolderID = dstProjFolder.GUID
             .User = dstProject.User
             .CreationDate = Now.ToString("yyyy-MM-dd HH:mm")
             .FinalizeDate = Nothing
@@ -167,13 +169,13 @@ Public Class ExperimentBase
     ''' <returns>Nothing, if the process was cancelled or an error occurred.</returns>
     ''' 
     Public Shared Function ImportExperiment(dbContext As ElnDataContext, importPath As String, dstProject As tblProjects,
-      currAppVersion As String) As tblExperiments
+      dstProjFolder As tblProjFolders, currAppVersion As String) As tblExperiments
 
         Try
             Dim jsonStr = File.ReadAllText(importPath)
             Dim importExp = ExperimentFromJsonString(jsonStr, currAppVersion)
             If importExp IsNot Nothing Then
-                Dim newExp = CloneExperiment(dbContext, importExp, dstProject, CloneType.FullExperiment, removeEmbedded:=False)
+                Dim newExp = CloneExperiment(dbContext, importExp, dstProject, dstProjFolder, CloneType.FullExperiment, removeEmbedded:=False)
                 Return newExp
             Else
                 Return Nothing

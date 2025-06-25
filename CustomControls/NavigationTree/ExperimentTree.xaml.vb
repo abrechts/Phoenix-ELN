@@ -3,25 +3,20 @@ Imports System.Windows.Controls
 Imports System.Windows.Threading
 Imports ElnCoreModel
 Imports GongSolutions.Wpf.DragDrop
+Imports Microsoft.EntityFrameworkCore
+
 
 Public Class ExperimentTree
 
     Public Event ExperimentSelected(sender As Object, selectedExperiment As tblExperiments)
 
-    Public Event RequestAddExperiment(sender As Object, projectEntry As tblProjects)
+    Public Event RequestAddExperiment(sender As Object, projFolderEntry As tblProjFolders)
 
 
     Public Sub New()
 
         ' This call is required by the designer.
         InitializeComponent()
-
-    End Sub
-
-
-    Private Sub projectHeader_RequestAddExperiment(sender As Object, projectEntry As tblProjects)
-
-        RaiseEvent RequestAddExperiment(Me, projectEntry)
 
     End Sub
 
@@ -33,10 +28,32 @@ Public Class ExperimentTree
     End Sub
 
 
+    Private Sub projectHeader_RequestAddFolder(sender As Object, projectEntry As tblProjects)
+
+        AddFolder(projectEntry)
+
+    End Sub
+
+
+    Private Sub folderHeader_RequestDeleteFolder(sender As Object, folderEntry As tblProjFolders)
+
+        DeleteFolder(folderEntry)
+
+    End Sub
+
+
+    Private Sub folderHeader_RequestAddExperiment(sender As Object, projFolderEntry As tblProjFolders)
+
+        RaiseEvent RequestAddExperiment(Me, projFolderEntry)
+
+    End Sub
+
+
+
+
     ''' <summary>
     ''' Adds a new project.
     ''' </summary>
-    ''' <returns>The created tblProjects.</returns>
     ''' 
     Public Function AddProject() As tblProjects
 
@@ -54,20 +71,58 @@ Public Class ExperimentTree
 
         currUser.tblProjects.Add(newProject)
 
+        ProjectFolders.Add(newProject, ProjectFolders.DefaultFolderTitle, ExperimentContent.DbContext)
+
         Dim projectConv As ProjectsCollectionViewConverter = FindResource("projectsCollectionViewConv")
         projectConv.View.Refresh()   'navTree.Items.Refresh() does not work here
         navTree.UpdateLayout()
 
         'Set project tree title to edit mode
-        Dim tvItem As TreeViewItem = navTree.ItemContainerGenerator.ContainerFromItem(newProject)
         Dim projHeader = WPFToolbox.FindVisualChild(Of ProjectTreeHeader)(Me)
-        If projHeader IsNot Nothing Then
-            projHeader.BeginTitleEdit()
-        End If
+        projHeader?.BeginTitleEdit()
+
+        ExperimentContent.DbContext.SaveChanges()
 
         Return newProject
 
     End Function
+
+
+    ''' <summary>
+    ''' Adds a new subfolder to the project containing the current experiment. 
+    ''' </summary>
+    ''' 
+    Public Sub AddFolder(Optional currProject As tblProjects = Nothing)
+
+        '  parent project not specified: get it from currently selected experiment
+
+        If currProject Is Nothing Then
+
+            Dim currUser = CType(Me.DataContext, tblUsers)
+            Dim currExp = (From exp In currUser.tblExperiments Where exp.IsCurrent = 1).FirstOrDefault
+
+            If currExp IsNot Nothing Then
+                currProject = currExp.Project
+            Else
+                Exit Sub
+            End If
+
+        End If
+
+        Dim newFolder = ProjectFolders.Add(currProject, "", ExperimentContent.DbContext)
+
+        RefreshItems()
+
+        Dim projTvi As TreeViewItem = navTree.ItemContainerGenerator.ContainerFromItem(currProject)
+        navTree.UpdateLayout()
+
+        Dim projFolderHeader = WPFToolbox.FindVisualChild(Of ProjFolderTreeHeader)(projTvi) 'takes first one encountered
+        projFolderHeader?.BeginTitleEdit()
+
+        ExperimentContent.DbContext.SaveChanges()
+
+
+    End Sub
 
 
     ''' <summary>
@@ -76,14 +131,35 @@ Public Class ExperimentTree
     ''' 
     Private Sub DeleteProject(projectEntry As tblProjects)
 
-        If Not projectEntry.tblExperiments.Any Then
+        If projectEntry.tblExperiments.Count = 0 Then
 
             projectEntry.User.tblProjects.Remove(projectEntry)
+            UpdateProjectSequenceNumbers()
 
             Dim projectConv As ProjectsCollectionViewConverter = FindResource("projectsCollectionViewConv")
             projectConv.View.Refresh() 'navTree.Items.Refresh() does not work here for some reason
 
-            UpdateProjectSequenceNumbers()
+            ExperimentContent.DbContext.SaveChanges()
+
+        End If
+
+    End Sub
+
+
+    ''' <summary>
+    ''' Deletes the specified project folder
+    ''' </summary>
+    ''' 
+    Private Sub DeleteFolder(folderEntry As tblProjFolders)
+
+        If folderEntry.tblExperiments.Count = 0 AndAlso folderEntry.Project.tblProjFolders.Count > 1 Then
+
+            folderEntry.Project.tblProjFolders.Remove(folderEntry)
+
+            UpdateFolderSequenceNumbers(folderEntry.Project)
+            navTree.Items.Refresh()
+
+            ExperimentContent.DbContext.SaveChanges()
 
         End If
 
@@ -125,6 +201,22 @@ Public Class ExperimentTree
         Dim pos = 0
         Dim projItems = From proj In currUser.tblProjects Order By proj.SequenceNr Ascending
         For Each item In projItems
+            item.SequenceNr = pos
+            pos += 1
+        Next
+
+    End Sub
+
+
+    ''' <summary>
+    '''  Re-assigns the folder sequence numbers within the specified project towards a contiguous sequence
+    ''' </summary>
+    '''
+    Private Sub UpdateFolderSequenceNumbers(parentProject As tblProjects)
+
+        Dim pos = 0
+        Dim folderItems = From folder In parentProject.tblProjFolders Order By folder.SequenceNr Ascending
+        For Each item In folderItems
             item.SequenceNr = pos
             pos += 1
         Next
@@ -223,44 +315,94 @@ Public Class NavTreeDropHandler
 
         With dropInfo
 
-            Dim targetProj As tblProjects = Nothing
-            If TypeOf .TargetItem Is tblProjects Then
-                targetProj = .TargetItem
-            ElseIf TypeOf .TargetItem Is tblExperiments Then
-                targetProj = CType(.TargetItem, tblExperiments).Project
-            End If
-
             If TypeOf .Data Is tblExperiments Then
 
-                Dim parentProj = CType(.Data, tblExperiments).Project
-                If targetProj IsNot parentProj AndAlso TypeOf .TargetItem Is tblProjects Then
+                ' drag experiment node
+                '---------------------
+
+                Dim expFolder = CType(.Data, tblExperiments).ProjFolder
+
+                If .TargetItem IsNot expFolder AndAlso TypeOf .TargetItem Is tblProjFolders Then
                     .Effects = DragDropEffects.Move
                     .DropTargetAdorner = DropTargetAdorners.Highlight
-                Else
-                    .Effects = DragDropEffects.None
-                    .DropTargetAdorner = Nothing
                 End If
 
-            ElseIf TypeOf .Data Is tblProjects AndAlso TypeOf .TargetItem IsNot tblExperiments Then
+            ElseIf TypeOf .Data Is tblProjFolders Then
 
-                If targetProj IsNot .Data Then
+                ' drag project subfolder node
+                '----------------------------
 
-                    If .InsertIndex = .DragInfo.SourceIndex + 1 Then
-                        .DropTargetAdorner = Nothing
+                If TypeOf .TargetItem Is tblProjFolders AndAlso .TargetItem IsNot .Data Then
+
+                    'drag over another project node
+
+                    Dim srcFolder = CType(.Data, tblProjFolders)
+                    Dim targetFolder = CType(.TargetItem, tblProjFolders)
+                    Dim folderCount = targetFolder.Project.tblProjFolders.Count
+
+                    'prevent inserting into another project
+                    If targetFolder.Project IsNot srcFolder.Project Then
                         Exit Sub
                     End If
 
-                    Dim insertAtEnd = .TargetItem Is Nothing AndAlso .DropPosition.Y > 25
-                    .Effects = DragDropEffects.Move
-                    If TypeOf .TargetItem Is tblProjects OrElse insertAtEnd Then
+                    ''prevent inserting below itself
+                    'If targetFolder.SequenceNr = srcFolder.SequenceNr - 1 Then
+                    '    Exit Sub
+                    'End If
+
+                    If (.InsertPosition = RelativeInsertPosition.BeforeTargetItem AndAlso (targetFolder.IsNodeExpanded = 1 _
+                      OrElse targetFolder.SequenceNr = folderCount - 1)) Then
+                        .Effects = DragDropEffects.Move
                         .DropTargetAdorner = DropTargetAdorners.Insert
-                    Else
-                        .DropTargetAdorner = Nothing
+
+                    ElseIf .InsertPosition = RelativeInsertPosition.AfterTargetItem AndAlso targetFolder.IsNodeExpanded = 0 Then
+                        .Effects = DragDropEffects.Move
+                        .DropTargetAdorner = DropTargetAdorners.Insert
+
                     End If
 
-                Else
-                    .Effects = DragDropEffects.None
-                    .DropTargetAdorner = Nothing
+                ElseIf TypeOf .TargetItem Is tblExperiments Then
+
+                    'drag over last experiment node of last project folder (i.e. for append)
+
+                    Dim targetExp = CType(dropInfo.TargetItem, tblExperiments)
+                    Dim lastFolderExp = (From exp In targetExp.ProjFolder.tblExperiments Order By exp.ExperimentID Descending).Last
+
+                    If targetExp.ProjFolder.SequenceNr = 0 AndAlso targetExp Is lastFolderExp Then
+
+                        If .InsertPosition = RelativeInsertPosition.AfterTargetItem Then
+                            .DropTargetAdorner = DropTargetAdorners.Insert
+                            .Effects = DragDropEffects.Move
+                        End If
+
+                    End If
+
+                End If
+
+            ElseIf TypeOf .Data Is tblProjects Then
+
+                ' drag project node
+                '-------------------
+
+                If TypeOf .TargetItem Is tblProjects AndAlso .TargetItem IsNot .Data Then
+
+                    ''prevent inserting below itself
+                    'If .InsertIndex = .DragInfo.SourceIndex + 1 Then
+                    '    .DropTargetAdorner = Nothing
+                    '    Exit Sub
+                    'End If
+
+                    If .InsertPosition = RelativeInsertPosition.BeforeTargetItem Then
+                        .DropTargetAdorner = DropTargetAdorners.Insert
+                        .Effects = DragDropEffects.Move
+                    End If
+
+                ElseIf .TargetItem Is Nothing Then
+
+                    'allow insertion below expanded last project folder
+                    .DropTargetAdorner = DropTargetAdorners.Highlight
+                    .Effects = DragDropEffects.Move
+
                 End If
 
             End If
@@ -276,59 +418,96 @@ Public Class NavTreeDropHandler
 
         If TypeOf dropInfo.Data Is tblExperiments Then
 
-            'drop experiment into new project
-            '---------------------------------
+            'drop experiment into new project folder
+            '---------------------------------------
 
             Dim dragExperiment = CType(dropInfo.Data, tblExperiments)
-            Dim targetProject As tblProjects
-            If TypeOf dropInfo.TargetItem Is tblExperiments Then
-                targetProject = CType(dropInfo.TargetItem, tblExperiments).Project
-            ElseIf TypeOf dropInfo.TargetItem Is tblProjects Then
-                targetProject = CType(dropInfo.TargetItem, tblProjects)
-            Else
-                Exit Sub
-            End If
+            Dim targetFolder = CType(dropInfo.TargetItem, tblProjFolders)
 
-            dragExperiment.Project.tblExperiments.Remove(dragExperiment)
-            targetProject.tblExperiments.Add(dragExperiment)
-            dragExperiment.Project = targetProject
+            dragExperiment.ProjFolder.tblExperiments.Remove(dragExperiment)
+            targetFolder.tblExperiments.Add(dragExperiment)
+            dragExperiment.Project = targetFolder.Project
+            dragExperiment.ProjFolder = targetFolder
 
             navTree.Items.Refresh()
+
+            'Set auto-save point
+            Dim currExpContent = WPFToolbox.FindVisualChild(Of ExperimentContent)(ExperimentContent.TabExperimentsPresenter)
+            currExpContent.pnlProtocol.AutoSave(allowFinalized:=True)
+
+
+        ElseIf TypeOf dropInfo.Data Is tblProjFolders Then 'AndAlso TypeOf dropInfo.TargetItem Is tblProjFolders Then
+
+            'drop project subfolder
+            '----------------------
+
+            Dim dragFolder = CType(dropInfo.Data, tblProjFolders)
+
+            If TypeOf dropInfo.TargetItem Is tblProjFolders Then
+
+                'insert: update sequence numbers
+
+                Dim targetFolder = CType(dropInfo.TargetItem, tblProjFolders)
+                Dim origPos = dragFolder.SequenceNr
+                Dim insertPos = targetFolder.SequenceNr
+                Dim folderCount = targetFolder.Project.tblProjFolders.Count
+
+                If targetFolder.IsNodeExpanded = 0 AndAlso (targetFolder.SequenceNr < folderCount - 1) Then
+                    insertPos -= 1
+                End If
+
+                If origPos > insertPos Then
+                    insertPos += 1
+                End If
+
+                For Each folder In dragFolder.Project.tblProjFolders   'remove item
+                    If folder.SequenceNr > origPos Then
+                        folder.SequenceNr -= 1
+                    End If
+                Next
+
+                For Each folder In dragFolder.Project.tblProjFolders  'insert item
+                    If folder.SequenceNr >= insertPos Then
+                        folder.SequenceNr += 1
+                    End If
+                Next
+
+                dragFolder.SequenceNr = insertPos
+
+            ElseIf TypeOf dropInfo.TargetItem Is tblExperiments Then
+
+                ' append to the end of the collection if last node expanded
+
+                For Each folder In dragFolder.Project.tblProjFolders
+                    If folder.SequenceNr < dragFolder.SequenceNr Then
+                        folder.SequenceNr += 1
+                    End If
+                Next
+                dragFolder.SequenceNr = 0 ' bottom position
+
+            End If
+
+            navTree.Items.Refresh()
+
+            ExperimentContent.DbContext.SaveChanges()   'auto-save only possible on experiment level
 
 
         ElseIf TypeOf dropInfo.Data Is tblProjects Then
 
-            'move project folder
-            '-------------------
+            'drop project
+            '------------
 
-            Dim isAboveFirst As Boolean = False
             Dim dragProject = CType(dropInfo.Data, tblProjects)
-            Dim targetProject As tblProjects
+            Dim origPos = dragProject.SequenceNr
 
             If TypeOf dropInfo.TargetItem Is tblProjects Then
-                targetProject = CType(dropInfo.TargetItem, tblProjects)
-
-            ElseIf TypeOf dropInfo.TargetItem Is tblExperiments Then
-                targetProject = CType(dropInfo.TargetItem, tblExperiments).Project
-
-            ElseIf dropInfo.TargetItem Is Nothing Then
-                'project was dropped below last TreeViewItem
-                targetProject = Nothing
-                If dropInfo.DropPosition.Y < 25 Then
-                    isAboveFirst = True
-                End If
-            Else
-                Exit Sub
-            End If
-
-            If targetProject IsNot Nothing Then
 
                 'insert: update sequence numbers
 
-                Dim origPos = dragProject.SequenceNr
+                Dim targetProject = CType(dropInfo.TargetItem, tblProjects)
                 Dim insertPos = targetProject.SequenceNr
 
-                If origPos > insertPos Then
+                If origPos > insertPos AndAlso dropInfo.InsertPosition = RelativeInsertPosition.BeforeTargetItem Then
                     insertPos += 1
                 End If
 
@@ -346,36 +525,25 @@ Public Class NavTreeDropHandler
 
                 dragProject.SequenceNr = insertPos  'assign item
 
-            Else
 
-                'dropped into empty space on top or below TreeViewItems
+            ElseIf dropInfo.TargetItem Is Nothing Then
 
-                If isAboveFirst Then
+                ' append to the end of the collection
 
-                    'insert above first
-                    For Each proj In dragProject.User.tblProjects   'insert item
-                        If proj.SequenceNr > dragProject.SequenceNr Then
-                            proj.SequenceNr -= 1
-                        End If
-                    Next
-                    dragProject.SequenceNr = dragProject.User.tblProjects.Count - 1
+                For Each proj In dragProject.User.tblProjects
+                    If proj.SequenceNr < dragProject.SequenceNr Then
+                        proj.SequenceNr += 1
+                    End If
+                Next
 
-                Else
-
-                    'insert below last
-                    For Each proj In dragProject.User.tblProjects   'insert item
-                        If proj.SequenceNr < dragProject.SequenceNr Then
-                            proj.SequenceNr += 1
-                        End If
-                    Next
-                    dragProject.SequenceNr = 0
-
-                End If
+                dragProject.SequenceNr = 0 ' bottom position
 
             End If
 
             Dim projectConv As ProjectsCollectionViewConverter = navTree.FindResource("projectsCollectionViewConv")
             projectConv.View.Refresh()
+
+            ExperimentContent.DbContext.SaveChanges()   'auto-save only possible on experiment level
 
         End If
 
@@ -389,6 +557,7 @@ Public Class NavTreeDropHandler
 
 
     Private Sub IDropTarget_DragLeave(dropInfo As IDropInfo) Implements IDropTarget.DragLeave
+
 
     End Sub
 

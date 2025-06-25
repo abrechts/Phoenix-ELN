@@ -240,7 +240,8 @@ Public Class ExperimentContent
     ''' False, if the action was cancelled by the user, otherwise true.
     ''' </returns>
     ''' 
-    Public Function CreateExperiment(dbContext As ElnDataContext, expNavTree As ExperimentTree, dstProject As tblProjects) As Boolean
+    Public Function CreateExperiment(dbContext As ElnDataContext, expNavTree As ExperimentTree, dstProject As tblProjects,
+      dstFolder As tblProjFolders) As Boolean
 
         Dim result As Boolean = False
 
@@ -273,6 +274,7 @@ Public Class ExperimentContent
             .CloneMethod = CloneType.EmptyExperiment
             .CurrentExperiment = currExp
             .TargetProject = dstProject
+            .TargetFolder = dstFolder
 
             If .ShowDialog() Then
 
@@ -288,7 +290,7 @@ Public Class ExperimentContent
                     'Create new or clone current experiment 
                     '--------------------------------------
 
-                    Dim clonedExp = ExperimentBase.CloneExperiment(dbContext, currExp, .TargetProject, .CloneMethod, .SkipEmbeddedDocs)
+                    Dim clonedExp = ExperimentBase.CloneExperiment(dbContext, currExp, .TargetProject, .TargetFolder, .CloneMethod, .SkipEmbeddedDocs)
                     clonedExp.DisplayIndex = Nothing
 
                     expNavTree.RefreshItems()
@@ -297,6 +299,7 @@ Public Class ExperimentContent
                     'After SelectExperiment this ExperimentContent is removed from the visual tree
                     'since replaced by the new one -> access the new ExperimentContent now!
 
+                    TabExperimentsPresenter.UpdateLayout()
                     Dim newExpContent = WPFToolbox.FindVisualChild(Of ExperimentContent)(TabExperimentsPresenter)
 
                     If .CloneMethod <> CloneType.EmptyExperiment Then
@@ -376,7 +379,8 @@ Public Class ExperimentContent
 
                         If .ShowDialog Then
 
-                            Dim importExp = ExperimentBase.ImportExperiment(dbContext, .FileName, newDlg.TargetProject, dbContext.tblDatabaseInfo.First.CurrAppVersion)
+                            Dim importExp = ExperimentBase.ImportExperiment(dbContext, .FileName, newDlg.TargetProject, newDlg.TargetFolder,
+                               dbContext.tblDatabaseInfo.First.CurrAppVersion)
 
                             If importExp IsNot Nothing Then
 
@@ -390,6 +394,8 @@ Public Class ExperimentContent
 
                                 'After SelectExperiment this ExperimentContent is removed from the visual tree
                                 'since replaced by the new one -> access the new ExperimentContent now!
+
+                                TabExperimentsPresenter.UpdateLayout()
 
                                 Dim newExpContent = WPFToolbox.FindVisualChild(Of ExperimentContent)(TabExperimentsPresenter)
                                 newExpContent.ExpProtocol.AutoSave(, noUndoPoint:=True)
@@ -575,6 +581,23 @@ Public Class ExperimentStateToTabIndexConverter
     End Function
 
     Public Function ConvertBack(value As Object, targetType As System.Type, parameter As Object, culture As CultureInfo) As Object Implements IValueConverter.ConvertBack
+        Throw New NotImplementedException()
+    End Function
+End Class
+
+
+Public Class GroupNameVisibilityConverter
+
+    Implements IValueConverter
+
+    Public Function Convert(value As Object, targetType As Type, parameter As Object, culture As CultureInfo) As Object Implements IValueConverter.Convert
+
+        Dim groupCount As Integer = value
+        Return If(groupCount = 1, Visibility.Collapsed, Visibility.Visible)
+
+    End Function
+
+    Public Function ConvertBack(value As Object, targetType As Type, parameter As Object, culture As CultureInfo) As Object Implements IValueConverter.ConvertBack
         Throw New NotImplementedException()
     End Function
 End Class

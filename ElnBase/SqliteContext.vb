@@ -1,6 +1,5 @@
 
 Imports ElnCoreModel
-Imports Microsoft.Data.Sqlite
 Imports Microsoft.EntityFrameworkCore
 
 
@@ -134,7 +133,6 @@ Public Class ElnDbContext
     End Function
 
 
-
     Friend Sub RemoveTombstoneEntry(entity As Object)
 
         Dim itemKey = GetEntityKeyValue(entity)
@@ -161,6 +159,18 @@ Public Class ElnDbContext
         sync_Tombstone.Add(doomedEntry)
 
     End Sub
+
+
+    ''' <summary>
+    ''' Determines if the specified table exists in the context.
+    ''' </summary>
+    ''' 
+    Public Function TableExists(tableName As String) As Boolean
+
+        Dim res = From eType In Model.GetEntityTypes() Where eType.GetTableName.Equals(tableName.ToLower, StringComparison.OrdinalIgnoreCase)
+        Return res.Any
+
+    End Function
 
 
     ''' <summary>

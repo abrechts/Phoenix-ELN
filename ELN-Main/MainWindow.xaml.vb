@@ -27,6 +27,8 @@ Class MainWindow
 
     Public Sub New()
 
+        Dim isRestoreFromServer As Boolean = False
+
         InitializeComponent()
 
         'Prevent another instance of the application to be run
@@ -45,7 +47,6 @@ Class MainWindow
             DbUpgradeLocal.Upgrade(SQLiteDbPath)
         End If
 
-
         With CustomControls.My.MySettings.Default
 
             'Upgrade settings
@@ -57,7 +58,7 @@ Class MainWindow
             End If
 
             '------------------------
-            ' _IsVersionUpgrade = True
+            '_IsVersionUpgrade = True
             '------------------------
 
             'Apply settings
@@ -79,6 +80,7 @@ Class MainWindow
                     MsgBox("Can't replace current experiments database for " + vbCrLf +
                         "restore, since locked by another application!", MsgBoxStyle.Information, "Restore Error")
                 End Try
+                isRestoreFromServer = True
                 .RestoreFromServer = False
                 .Save()
             End If
@@ -90,8 +92,8 @@ Class MainWindow
 
         'Apply database upgrades for new version if required
         If _IsVersionUpgrade Then
-            DbUpgradeServer.IsUpgradeCheckRequired = True
             DbUpgradeLocal.Upgrade(SQLiteDbPath)
+            DbUpgradeServer.IsNewAppVersion = True
         End If
 
         'Create local SqliteContext
@@ -102,6 +104,18 @@ Class MainWindow
             Dim rss As New RxnSubstructure
             rss.RegisterRssBacklog(DBContext.tblDatabaseInfo.First.tblUsers.First)
             DBContext.SaveChanges()
+        End If
+
+        'Version upgrade to project folders (from v.3.0.0 on) - one-time initialize default folders
+        If _IsVersionUpgrade OrElse isRestoreFromServer Then
+            If Not DBContext.tblProjFolders.Any Then
+                ProjectFolders.Initialize(DBContext)
+            End If
+        End If
+
+        'Restored legacy DB's may be lacking tblProjFolders (from v.3.0.0 on) initializations. 
+        If isRestoreFromServer Then
+            ProjectFolders.SetMissingProjFolderRefs(DBContext)
         End If
 
         ApplicationVersion = GetType(MainWindow).Assembly.GetName().Version
@@ -911,28 +925,36 @@ Class MainWindow
     ''' 
     Private Function ValidateAndCommitOpenEditControls() As Boolean
 
-        Dim result = True
-
-        Dim currTreeEditItem = WPFToolbox.FindVisualParent(Of TreeViewEditLabel)(Mouse.DirectlyOver)
-        If (TreeViewEditLabel.CurrentEditItem IsNot Nothing) AndAlso (TreeViewEditLabel.CurrentEditItem IsNot currTreeEditItem) Then
-            If Not TreeViewEditLabel.CurrentEditItem.EndEdit Then 'also performs validation
-                result = False
+        ' TreeViewEditLabel
+        '------------------
+        If TreeViewEditLabel.CurrentEditItem IsNot Nothing Then
+            If Not TreeViewEditLabel.CurrentEditItem.IsMouseOver Then
+                'mouse is not over active edit label
+                Return TreeViewEditLabel.CurrentEditItem.EndEdit  'also performs validation
+            Else
+                'same item: skip validation and EndEdit
+                Return True
             End If
         End If
 
-        Dim currListEditItem = WPFToolbox.FindVisualParent(Of ListBoxEditLabel)(Mouse.DirectlyOver)
-        If (ListBoxEditLabel.CurrentEditItem IsNot Nothing) AndAlso (ListBoxEditLabel.CurrentEditItem IsNot currListEditItem) Then
-            If Not ListBoxEditLabel.CurrentEditItem.EndEdit Then 'also performs validation
-                result = False
+        ' LisBoxEditLabel
+        '----------------
+        If ListBoxEditLabel.CurrentEditItem IsNot Nothing Then
+            If Not ListBoxEditLabel.CurrentEditItem.IsMouseOver Then
+                ' mouse not over active edit tvItem
+                Return ListBoxEditLabel.CurrentEditItem.EndEdit  'also performs validation
+            Else
+                'same item: skip validation and EndEdit
+                Return True
             End If
         End If
 
-        Return result
+        Return True
 
     End Function
 
 
-    Private Sub Me_PreviewMouseDown(sender As Object, e As RoutedEventArgs) Handles Me.PreviewMouseDown
+    Private Sub Me_PreviewMouseLeftButtonDown(sender As Object, e As RoutedEventArgs) Handles Me.PreviewMouseDown
 
         If Not ValidateAndCommitOpenEditControls() Then
             e.Handled = True
@@ -992,7 +1014,7 @@ Class MainWindow
     ''' Add or clone a new experiment
     ''' </summary>
     '''
-    Private Sub expNavTree_RequestAddExperiment(sender As Object, projectEntry As tblProjects) Handles expNavTree.RequestAddExperiment
+    Private Sub expNavTree_RequestAddExperiment(sender As Object, folderEntry As tblProjFolders) Handles expNavTree.RequestAddExperiment
 
         Dim userEntry = CType(Me.DataContext, tblUsers)
 
@@ -1009,7 +1031,7 @@ Class MainWindow
 
         End If
 
-        If SelectedExpContent.CreateExperiment(DBContext, expNavTree, projectEntry) Then
+        If SelectedExpContent.CreateExperiment(DBContext, expNavTree, folderEntry.Project, folderEntry) Then
 
             pnlInfo.DataContext = Nothing
             pnlInfo.DataContext = CType(Me.DataContext, tblUsers)
@@ -1235,13 +1257,23 @@ Class MainWindow
 
 
     Private Sub btnAddProject_Click() Handles btnAddProject.Click
+
         expNavTree.AddProject()
+
+    End Sub
+
+
+    Private Sub btnAddFolder_Click() Handles btnAddFolder.Click
+
+        expNavTree.AddFolder()
+
     End Sub
 
 
     Private Sub btnPrint_Click() Handles btnPrint.Click
 
         ExperimentPrint.Print(SelectedExpContent, False, Me)
+
     End Sub
 
 

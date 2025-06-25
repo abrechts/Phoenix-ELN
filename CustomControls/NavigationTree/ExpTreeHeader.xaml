@@ -41,6 +41,7 @@
                 Visibility="{Binding WorkflowState, Converter={StaticResource expStateVisConv},ConverterParameter=invert}"/>
             <MenuItem x:Name="mnuUnlock" Icon="{StaticResource icoReopened}" Header="Unlock Experiment" Opacity="0.8"
                Visibility="{Binding WorkflowState, Converter={StaticResource expStateVisConv}}"/>
+            
         </ContextMenu>
     </UserControl.ContextMenu>
 

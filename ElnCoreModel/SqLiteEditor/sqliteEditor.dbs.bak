@@ -48,7 +48,7 @@
 		<table name="tblComments" spec="" >
 			<column name="GUID" type="TEXT" length="36" jt="-1" mandatory="y" />
 			<column name="ProtocolItemID" type="TEXT" length="36" jt="-1" mandatory="y" />
-			<column name="CommentFlowDoc" type="MEDIUMTEXT" jt="-1" />
+			<column name="CommentFlowDoc" type="TEXT" jt="-1" />
 			<column name="SyncState" type="INTEGER" jt="4" >
 				<defo><![CDATA[0]]></defo>
 			</column>
@@ -170,6 +170,7 @@
 			</column>
 			<column name="RxnIndigoObj" type="LONGBLOB" jt="-4" />
 			<column name="RxnFingerprint" type="BLOB" jt="2004" />
+			<column name="ProjFolderID" type="TEXT" length="36" jt="-1" />
 			<index name="pk_tblExperiments" unique="PRIMARY_KEY" >
 				<column name="ExperimentID" />
 			</index>
@@ -179,11 +180,17 @@
 			<index name="idx_UserID" unique="NORMAL" >
 				<column name="UserID" />
 			</index>
+			<index name="idx_ProjFolderID" unique="NORMAL" >
+				<column name="ProjFolderID" />
+			</index>
 			<fk name="Fk_0" to_schema="Default" to_table="tblUsers" >
 				<fk_column name="UserID" pk="UserID" />
 			</fk>
 			<fk name="Fk_1" to_schema="Default" to_table="tblProjects" delete_action="cascade" >
 				<fk_column name="ProjectID" pk="GUID" />
+			</fk>
+			<fk name="Fk" to_schema="Default" to_table="tblProjFolders" delete_action="cascade" options="" >
+				<fk_column name="ProjFolderID" pk="GUID" />
 			</fk>
 		</table>
 		<table name="tblMaterials" spec="" >
@@ -258,6 +265,24 @@
 			</index>
 			<fk name="Fk_2" to_schema="Default" to_table="tblProtocolItems" delete_action="cascade" >
 				<fk_column name="ProtocolItemID" pk="GUID" />
+			</fk>
+		</table>
+		<table name="tblProjFolders" spec="" >
+			<column name="GUID" type="TEXT" length="36" jt="-1" mandatory="y" />
+			<column name="ProjectID" type="TEXT" length="36" jt="-1" mandatory="y" />
+			<column name="FolderName" type="ENUM" jt="12" mandatory="y" />
+			<column name="SequenceNr" type="INTEGER" jt="4" />
+			<column name="IsNodeExpanded" type="INTEGER" jt="4" >
+				<defo><![CDATA[0]]></defo>
+			</column>
+			<column name="SyncState" type="INTEGER" jt="4" >
+				<defo><![CDATA[0]]></defo>
+			</column>
+			<index name="pk_tblProjFolders" unique="PRIMARY_KEY" >
+				<column name="GUID" />
+			</index>
+			<fk name="Fk_7" to_schema="Default" to_table="tblProjects" delete_action="cascade" >
+				<fk_column name="ProjectID" pk="GUID" />
 			</fk>
 		</table>
 		<table name="tblProjects" spec="" >
@@ -442,6 +467,12 @@
 			<column name="SyncState" type="INTEGER" jt="4" >
 				<defo><![CDATA[0]]></defo>
 			</column>
+			<column name="IsCurrent" type="INTEGER" jt="4" >
+				<defo><![CDATA[0]]></defo>
+			</column>
+			<column name="SequenceNr" type="INTEGER" jt="4" >
+				<defo><![CDATA[0]]></defo>
+			</column>
 			<index name="pk_tblUsers" unique="PRIMARY_KEY" >
 				<column name="UserID" />
 			</index>
@@ -454,25 +485,26 @@
 		</table>
 	</schema>
 	<layout name="Infrastructure" id="Layout-4c1" show_column_type="y" show_relation="cascade" >
-		<entity schema="Default" name="sync_Tombstone" color="3986C1" x="361" y="323" />
 		<entity schema="Default" name="tblDatabaseInfo" color="3986C1" x="57" y="57" />
-		<entity schema="Default" name="tblDbMaterialFiles" color="3986C1" x="361" y="494" />
-		<entity schema="Default" name="tblExperiments" color="3986C1" x="969" y="57" />
 		<entity schema="Default" name="tblMaterials" color="3986C1" x="76" y="342" />
-		<entity schema="Default" name="tblProjects" color="3986C1" x="665" y="57" />
-		<entity schema="Default" name="tblProtocolItems" color="3986C1" x="665" y="437" />
 		<entity schema="Default" name="tblUsers" color="3986C1" x="361" y="57" />
+		<entity schema="Default" name="tblDbMaterialFiles" color="3986C1" x="361" y="551" />
+		<entity schema="Default" name="sync_Tombstone" color="3986C1" x="361" y="380" />
+		<entity schema="Default" name="tblProjFolders" color="3986C1" x="684" y="304" />
+		<entity schema="Default" name="tblProtocolItems" color="3986C1" x="703" y="532" />
+		<entity schema="Default" name="tblProjects" color="3986C1" x="665" y="57" />
+		<entity schema="Default" name="tblExperiments" color="3986C1" x="969" y="57" />
 	</layout>
 	<layout name="Protocol Elements" id="Layout-16d" show_column_type="y" show_relation="cascade" >
-		<entity schema="Default" name="tblAuxiliaries" color="3986C1" x="589" y="380" />
-		<entity schema="Default" name="tblComments" color="3986C1" x="323" y="380" />
-		<entity schema="Default" name="tblEmbeddedFiles" color="C1D8EE" x="342" y="570" />
-		<entity schema="Default" name="tblProducts" color="3986C1" x="855" y="323" />
-		<entity schema="Default" name="tblProtocolItems" color="3986C1" x="57" y="247" />
-		<entity schema="Default" name="tblReagents" color="3986C1" x="589" y="57" />
-		<entity schema="Default" name="tblRefReactants" color="3986C1" x="323" y="57" />
-		<entity schema="Default" name="tblSeparators" color="3986C1" x="589" y="646" />
-		<entity schema="Default" name="tblSolvents" color="3986C1" x="855" y="57" />
+		<entity schema="Default" name="tblProducts" color="3986C1" x="855" y="342" />
+		<entity schema="Default" name="tblProtocolItems" color="3986C1" x="57" y="266" />
+		<entity schema="Default" name="tblReagents" color="3986C1" x="589" y="76" />
+		<entity schema="Default" name="tblRefReactants" color="3986C1" x="323" y="76" />
+		<entity schema="Default" name="tblSolvents" color="3986C1" x="817" y="57" />
+		<entity schema="Default" name="tblEmbeddedFiles" color="C1D8EE" x="342" y="608" />
+		<entity schema="Default" name="tblSeparators" color="3986C1" x="608" y="494" />
+		<entity schema="Default" name="tblAuxiliaries" color="3986C1" x="665" y="684" />
+		<entity schema="Default" name="tblComments" color="3986C1" x="342" y="437" />
 	</layout>
 	<layout name="Sqlite" id="Layout-1015" show_relation="cascade" />
 </project>

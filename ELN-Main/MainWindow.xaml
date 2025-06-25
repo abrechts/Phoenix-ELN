@@ -7,7 +7,7 @@
         xmlns:data="clr-namespace:ElnCoreModel;assembly=ElnCoreModel" xmlns:componentModel="clr-namespace:System.ComponentModel;assembly=WindowsBase"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=data:tblUsers}"
-        Title="Phoenix ELN" Height="800" MinWidth="1320" MinHeight="800" d:Height="900" TextOptions.TextFormattingMode="Display" 
+        Title="Phoenix ELN" Height="800" MinWidth="1326" MinHeight="800" d:Height="900" TextOptions.TextFormattingMode="Display" 
         WindowStartupLocation="CenterScreen">
 
     <Window.Resources>
@@ -43,7 +43,7 @@
                         </StackPanel>
                     </Button>
 
-                    <Button x:Name="btnPDF" HorizontalAlignment="Left" VerticalAlignment="Center" ToolTip="Save experiment to PDF.">
+                    <Button x:Name="btnPDF" HorizontalAlignment="Left" VerticalAlignment="Center" ToolTip="Save experiment to PDF">
                         <StackPanel Orientation="Horizontal">
                             <ContentControl Height="16" Margin="2,0,4,0">
                                 <Border Background="#FFF3F0F0" CornerRadius="3" BorderThickness="1" BorderBrush="#005dba" >
@@ -55,7 +55,7 @@
                     </Button>
 
                     <Button x:Name="btnExport" HorizontalAlignment="Left" VerticalAlignment="Center" 
-                      ToolTip="Export experiment for import by another user.">
+                      ToolTip="Export experiment for import by another user">
                         <StackPanel Orientation="Horizontal">
                             <ContentControl Content="{StaticResource icoExport}" Height="16" Margin="0,0,4,0"/>
                             <TextBlock Text="Export" Margin="0,0,2,0" VerticalAlignment="Center"/>
@@ -240,7 +240,7 @@
             </Grid>
         </Border>
 
-        <Grid DockPanel.Dock="left" Width="310">
+        <Grid DockPanel.Dock="left" Width="316">
             
             <!-- Navigation Tree -->
             <Border CornerRadius="8" Background="WhiteSmoke" Margin="8,8,4,8" BorderBrush="gray" BorderThickness="1">
@@ -260,11 +260,22 @@
                             </ComboBox.ItemTemplate>
                         </custom:ComboPlus>
 
-                        <Button x:Name="btnAddProject" VerticalAlignment="Center" ToolTip="Add a new project folder" Margin="4,0,4,0" 
+                        <Button x:Name="btnAddProject" VerticalAlignment="Center" ToolTip="Add a new project" Margin="6,0,4,0" 
                            Background="white" BorderThickness="0" Padding="2,1,2,2" >
                             <StackPanel Orientation="Horizontal">
                                 <ContentControl Content="{StaticResource icoNewFolder}" Height="16" Margin="2,0,4,0" />
                                 <TextBlock Text="Project" Margin="0,0,2,-2" VerticalAlignment="Center" FontFamily="Verdana" />
+                            </StackPanel>
+                        </Button>
+
+                        <Button x:Name="btnAddFolder" VerticalAlignment="Center" Margin="2,0,0,0"  Background="white" BorderThickness="0" Padding="2,1,2,2"
+                            ToolTip="Add an experiment group to the current project.&#x0a;----------------------------------------------------&#x0a;Experiment groups let you organize your project experiments into user-defined &#x0a;categories such as ‘Preliminary Experiments’, ‘Optimized Synthesis’, 'Step 1', etc.  &#x0a;&#x0a;Initially, all project experiments are in the default group 'All experiments'.&#x0a;">
+                            <StackPanel Orientation="Horizontal">
+                                <Grid>
+                                    <ContentControl Content="{StaticResource icoGrayDot}" Height="16" HorizontalAlignment="Left" Margin="6,1,-0,0"/>
+                                    <ContentControl Content="{StaticResource icoNew}" Height="12" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top"/>
+                                </Grid>
+                                <TextBlock Text="Group" Margin="0,0,4,-2" VerticalAlignment="Center" FontFamily="Verdana" />
                             </StackPanel>
                         </Button>
 

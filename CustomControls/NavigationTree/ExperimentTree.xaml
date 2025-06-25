@@ -13,6 +13,7 @@
     <UserControl.Resources>
         
         <local:ProjectsCollectionViewConverter x:Key="projectsCollectionViewConv"/>
+        <local:ProjectFoldersCollectionViewConverter x:Key="projectFoldersCollectionViewConv"/>
         <local:ExperimentsCollectionViewConverter x:Key="expCollectionViewConv"/>
         <local:BindingTypeConverter x:Key="bindingTypeConv"/>
         <local:IntegerToBooleanConverter x:Key="intToBooleanConv"/>
@@ -24,7 +25,7 @@
 
         <TreeView x:Name="navTree" ItemsSource="{Binding tblProjects, Converter={StaticResource projectsCollectionViewConv}}" 
             TreeViewItem.Selected="TreeViewItem_Selected" TreeViewItem.Unselected="TreeViewItem_Unselected" 
-            Padding="2,2,2,8" BorderThickness="0"
+            Padding="2,2,2,8" BorderThickness="0"    
             dd:DragDrop.IsDragSource="True"
             dd:DragDrop.IsDropTarget="True"
             dd:DragDrop.UseDefaultDragAdorner="false"
@@ -35,10 +36,16 @@
             <TreeView.Resources>
 
                 <!--Project nodes-->
-                <HierarchicalDataTemplate DataType="{x:Type data:tblProjects}" ItemsSource="{Binding tblExperiments, 
+                <HierarchicalDataTemplate DataType="{x:Type data:tblProjects}" 
+                  ItemsSource="{Binding tblProjFolders,Converter={StaticResource projectFoldersCollectionViewConv}}">
+                    <local:ProjectTreeHeader RequestDeleteProject="projectHeader_RequestDeleteProject" RequestAddFolder="projectHeader_RequestAddFolder"/>
+                </HierarchicalDataTemplate>
+
+                <!--Project Folder nodes -->
+                <HierarchicalDataTemplate DataType="{x:Type data:tblProjFolders}" ItemsSource="{Binding tblExperiments, 
                   Converter={StaticResource expCollectionViewConv}}">
-                    <local:ProjectTreeHeader RequestAddExperiment="projectHeader_RequestAddExperiment" 
-                       RequestDeleteProject="projectHeader_RequestDeleteProject"/>
+                    <local:ProjFolderTreeHeader RequestAddExperiment="folderHeader_RequestAddExperiment" 
+                       RequestDeleteFolder="folderHeader_RequestDeleteFolder" />
                 </HierarchicalDataTemplate>
 
                 <!--Experiment nodes-->

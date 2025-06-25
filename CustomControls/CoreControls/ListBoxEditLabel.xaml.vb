@@ -1,7 +1,6 @@
-﻿Imports System.Globalization
+﻿
 Imports System.Windows
 Imports System.Windows.Controls
-Imports System.Windows.Data
 Imports System.Windows.Input
 Imports System.Windows.Media
 
