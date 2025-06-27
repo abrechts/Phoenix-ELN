@@ -94,6 +94,10 @@
                         InputGestureText="Ctrl+I"/>
                     <MenuItem x:Name="mnuUnderline" Icon="{StaticResource icoUnderline}" Header="Underline" 
                          Command="EditingCommands.ToggleUnderline" InputGestureText="Ctrl+U"/>
+                    <MenuItem x:Name="mnuSubscript" Icon="{StaticResource icoSubscript}" Header="Subscript" 
+                         Command="EditingCommands.ToggleSubscript"/>
+                    <MenuItem x:Name="mnuSuperscript" Icon="{StaticResource icoSuperscript}" Header="Superscript" 
+                         Command="EditingCommands.ToggleSuperscript"/>
                     
                     <Separator/>
 

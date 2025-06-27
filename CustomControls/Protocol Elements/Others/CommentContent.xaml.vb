@@ -140,6 +140,8 @@ Public Class CommentContent
             mnuUnderline.IsEnabled = False
             mnuMarkerGroup.IsEnabled = False
             mnuClear.IsEnabled = False
+            mnuSuperscript.IsEnabled = False
+            mnuSubscript.IsEnabled = False
         Else
             mnuBold.IsEnabled = True
             mnuItalic.IsEnabled = True
@@ -150,6 +152,9 @@ Public Class CommentContent
             Else
                 mnuClear.IsEnabled = True
             End If
+            Dim isDigitsOnly = Trim(selectedText.Text).All(AddressOf Char.IsDigit)    'digits only selected?
+            mnuSuperscript.IsEnabled = isDigitsOnly
+            mnuSubscript.IsEnabled = isDigitsOnly
         End If
 
     End Sub
