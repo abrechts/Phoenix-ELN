@@ -1265,7 +1265,7 @@ Class MainWindow
 
     Private Sub btnAddFolder_Click() Handles btnAddFolder.Click
 
-        expNavTree.AddFolder()
+        expNavTree.AddExpGroup()
 
     End Sub
 

@@ -3,7 +3,6 @@ Imports System.Windows.Controls
 Imports System.Windows.Threading
 Imports ElnCoreModel
 Imports GongSolutions.Wpf.DragDrop
-Imports Microsoft.EntityFrameworkCore
 
 
 Public Class ExperimentTree
@@ -30,14 +29,14 @@ Public Class ExperimentTree
 
     Private Sub projectHeader_RequestAddFolder(sender As Object, projectEntry As tblProjects)
 
-        AddFolder(projectEntry)
+        AddExpGroup(projectEntry)
 
     End Sub
 
 
     Private Sub folderHeader_RequestDeleteFolder(sender As Object, folderEntry As tblProjFolders)
 
-        DeleteFolder(folderEntry)
+        DeleteExpGroup(folderEntry)
 
     End Sub
 
@@ -89,10 +88,10 @@ Public Class ExperimentTree
 
 
     ''' <summary>
-    ''' Adds a new subfolder to the project containing the current experiment. 
+    ''' Adds a new experiment group subfolder to the project containing the current experiment. 
     ''' </summary>
     ''' 
-    Public Sub AddFolder(Optional currProject As tblProjects = Nothing)
+    Public Sub AddExpGroup(Optional currProject As tblProjects = Nothing)
 
         '  parent project not specified: get it from currently selected experiment
 
@@ -150,13 +149,13 @@ Public Class ExperimentTree
     ''' Deletes the specified project folder
     ''' </summary>
     ''' 
-    Private Sub DeleteFolder(folderEntry As tblProjFolders)
+    Private Sub DeleteExpGroup(groupEntry As tblProjFolders)
 
-        If folderEntry.tblExperiments.Count = 0 AndAlso folderEntry.Project.tblProjFolders.Count > 1 Then
+        If groupEntry.tblExperiments.Count = 0 AndAlso groupEntry.Project.tblProjFolders.Count > 1 Then
 
-            folderEntry.Project.tblProjFolders.Remove(folderEntry)
+            groupEntry.Project.tblProjFolders.Remove(groupEntry)
 
-            UpdateFolderSequenceNumbers(folderEntry.Project)
+            UpdateFolderSequenceNumbers(groupEntry.Project)
             navTree.Items.Refresh()
 
             ExperimentContent.DbContext.SaveChanges()
