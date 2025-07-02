@@ -870,6 +870,13 @@ Class MainWindow
                 e.Handled = True
             End If
 
+        Else
+
+            'help key
+            If e.Key = Key.F1 Then
+                mnuHelp_Click()
+            End If
+
         End If
 
     End Sub
