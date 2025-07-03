@@ -101,7 +101,7 @@
                     
                 <StackPanel Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center" TextOptions.TextFormattingMode="Display" Margin="0,-2,0,0">
                     <TextBlock Text="{Binding Project.Title}" d:Text="Testproject" Foreground="#FF1818C3" FontWeight="demibold"  HorizontalAlignment="Center" FontSize="11"/>
-                    <TextBlock Text="{Binding ProjFolder.FolderName}" d:Text="All Experiments" Foreground="#FF1818C3" FontSize="10.5" Margin="0,1,0,0"
+                    <TextBlock Text="{Binding ProjFolder.FolderName}" d:Text="All Experiments" Foreground="#FF1818C3" FontSize="10.5" Margin="-2,1,0,0"
                         HorizontalAlignment="center" Visibility="{Binding ProjFolder.Project.tblProjFolders.Count,Converter={StaticResource groupNameVisConv}}"/>
                 </StackPanel>
 

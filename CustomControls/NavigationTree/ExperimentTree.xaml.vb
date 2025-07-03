@@ -328,8 +328,8 @@ Public Class NavTreeDropHandler
 
             ElseIf TypeOf .Data Is tblProjFolders Then
 
-                ' drag project subfolder node
-                '----------------------------
+                ' drag experiment group node
+                '---------------------------
 
                 If TypeOf .TargetItem Is tblProjFolders AndAlso .TargetItem IsNot .Data Then
 
@@ -354,7 +354,7 @@ Public Class NavTreeDropHandler
                         .Effects = DragDropEffects.Move
                         .DropTargetAdorner = DropTargetAdorners.Insert
 
-                    ElseIf .InsertPosition = RelativeInsertPosition.AfterTargetItem AndAlso targetFolder.IsNodeExpanded = 0 Then
+                    ElseIf .InsertPosition = RelativeInsertPosition.AfterTargetItem Then
                         .Effects = DragDropEffects.Move
                         .DropTargetAdorner = DropTargetAdorners.Insert
 
@@ -366,6 +366,11 @@ Public Class NavTreeDropHandler
 
                     Dim targetExp = CType(dropInfo.TargetItem, tblExperiments)
                     Dim lastFolderExp = (From exp In targetExp.ProjFolder.tblExperiments Order By exp.ExperimentID Descending).Last
+
+                    'prevent inserting into another project
+                    If targetExp.Project IsNot .Data.Project Then
+                        Exit Sub
+                    End If
 
                     If targetExp.ProjFolder.SequenceNr = 0 AndAlso targetExp Is lastFolderExp Then
 
@@ -449,9 +454,8 @@ Public Class NavTreeDropHandler
                 Dim targetFolder = CType(dropInfo.TargetItem, tblProjFolders)
                 Dim origPos = dragFolder.SequenceNr
                 Dim insertPos = targetFolder.SequenceNr
-                Dim folderCount = targetFolder.Project.tblProjFolders.Count
 
-                If targetFolder.IsNodeExpanded = 0 AndAlso (targetFolder.SequenceNr < folderCount - 1) Then
+                If dropInfo.InsertPosition = RelativeInsertPosition.AfterTargetItem Then
                     insertPos -= 1
                 End If
 
