@@ -56,6 +56,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="ChemBytesDraw">
+      <HintPath>..\References\ChemBytesDraw.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Update="dlgChangeUsername.xaml.vb">
       <SubType>Code</SubType>
     </Compile>

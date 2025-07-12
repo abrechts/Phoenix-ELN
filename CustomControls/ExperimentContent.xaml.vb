@@ -31,6 +31,13 @@ Public Class ExperimentContent
     Public Shared Event ExperimentContextChanged(sender As Object, newExpEntry As tblExperiments)
 
 
+    ''' <summary>
+    ''' 
+    ''' </summary>
+    ''' 
+    Public Shared Event RequestSequencesDialog(sender As Object, refExp As tblExperiments)
+
+
     Public Sub New()
 
         ' This call is required by the designer.
@@ -184,6 +191,7 @@ Public Class ExperimentContent
     Private Sub SketchArea_SketchSourceChanged(sender As Object, skInfo As SketchResults)  'shared event
 
         pnlProtocol.SketchInfo = skInfo
+        btnSequences.Visibility = If(skInfo Is Nothing, Visibility.Collapsed, Visibility.Visible)
 
     End Sub
 
@@ -228,6 +236,14 @@ Public Class ExperimentContent
 
         Dim expEntry = CType(Me.DataContext, tblExperiments)
         ExpProtocol.ChangeWorkflowState(expEntry, WorkflowStatus.Finalized)
+
+    End Sub
+
+
+    Private Sub btnSequences_Click() Handles btnSequences.Click
+
+        Dim refExp = CType(Me.DataContext, tblExperiments)
+        RaiseEvent RequestSequencesDialog(Me, refExp)
 
     End Sub
 
@@ -427,13 +443,15 @@ Public Class ExperimentContent
     ''' 
     Public Sub SetPrintUI()
 
-
         pnlProtocol.SetPrintUI()
+
+        btnSequences.Visibility = Visibility.Collapsed
 
         Dim expEntry = CType(Me.DataContext, tblExperiments)
         If pnlProtocol.IsPrinting Then
             tabFinalized.SelectedIndex = 0
         End If
+
 
         Margin = New Thickness(0, -10, 0, 0)
 

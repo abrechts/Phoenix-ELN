@@ -1,8 +1,11 @@
-﻿Imports System.Windows
+﻿Imports System.Text.RegularExpressions
+Imports System.Windows
 Imports System.Windows.Controls
 Imports System.Windows.Documents
 Imports System.Windows.Input
+Imports System.Windows.Markup
 Imports System.Windows.Media
+
 
 
 Public Class CommentContent
@@ -61,7 +64,7 @@ Public Class CommentContent
     ''' of zero means no restriction.
     ''' </summary>
     ''' 
-    Private Const MaxCharacters As Integer = 5000
+    Private Const MaxCharacters As Integer = 16 * 1024 * 1024  '16 MB
 
 
     ''' <summary>
@@ -76,10 +79,13 @@ Public Class CommentContent
 
     End Sub
 
-    Private Function GetTextLength() As Integer
+    Private Function GetDocLength() As Integer
 
-        Dim tr = New TextRange(rtbComments.Document.ContentStart, rtbComments.Document.ContentEnd)
-        Return tr.Text.Length
+        ' Dim tr = New TextRange(rtbComments.Document.ContentStart, rtbComments.Document.ContentEnd)
+        ' Return tr.Text.Length
+
+        Dim docXAML = XamlWriter.Save(rtbComments.Document)
+        Return docXAML.Length
 
     End Function
 
@@ -174,27 +180,78 @@ Public Class CommentContent
     End Sub
 
 
+    Private _IsPasting As Boolean = False
+
     ''' <summary>
     ''' Validates the content to be pasted
     ''' </summary>
     ''' 
     Private Sub rtbComments_Pasting(sender As Object, e As DataObjectPastingEventArgs)
 
-        'Efficiently restricts pasting to unformatted text only, i.e. no images etc. 
-        e.FormatToApply = DataFormats.Text
+        Dim clipFormats = e.SourceDataObject.GetFormats()
+        _IsPasting = True
 
-        'limit total text length
-        If Clipboard.ContainsText Then
+        If Clipboard.ContainsText Then    'pasting a copied image file is internally disabled in RichTextBox
 
-            Dim clipText = Clipboard.GetText()
-            If (GetTextLength() + clipText.Length) > MaxCharacters Then
+            If Clipboard.ContainsData(DataFormats.Rtf) Then
 
-                e.CancelCommand()
+                Dim rtfText As String = Clipboard.GetData(DataFormats.Rtf).ToString()
+                Dim pictRegex As New Regex("\\pict", RegexOptions.IgnoreCase)
+                Dim hasEmbeddedGraphics = pictRegex.IsMatch(rtfText)
 
-                Dispatcher.BeginInvoke(CType(Function() MsgBox("Pasting the clipboard content would exceed" + vbCrLf +
-                  "the maximum allowed text length!", MsgBoxStyle.Information, "Comment Validation"), Action))
+                If hasEmbeddedGraphics Then
+                    ' cancel if embedded images in RTF
+                    e.CancelCommand()
+                    Dispatcher.BeginInvoke(CType(Function() MsgBox("Sorry, can't paste comments " + vbCrLf +
+                      "containing graphics!", MsgBoxStyle.Information, "Comment Validation"), Action))
+                    Exit Sub
+                End If
+
+                Dim clipText = Clipboard.GetText()
+                If (GetDocLength() + rtfText.Length) <= MaxCharacters Then
+                    ' proceed with paste
+                    e.FormatToApply = DataFormats.Rtf
+                Else
+                    ' cancel if exceeding maximum length
+                    e.CancelCommand()
+                    Dispatcher.BeginInvoke(CType(Function() MsgBox("Pasting the clipboard content would exceed" + vbCrLf +
+                      "the maximum allowed text length!", MsgBoxStyle.Information, "Comment Validation"), Action))
+                End If
 
             End If
+
+        End If
+
+    End Sub
+
+
+    ''' <summary>
+    ''' After completed pasting: Formats resulting text to fit current font size and family, as well as the default paragraph line spacing. 
+    ''' </summary>
+    ''' 
+    Private Sub rtbComments_TextChanged() Handles rtbComments.TextChanged
+
+        If _IsPasting Then
+
+            With rtbComments
+
+                Dim docSel As New TextRange(.Document.ContentStart, .Document.ContentEnd)
+
+                'apply standard font size and family
+                docSel.ApplyPropertyValue(TextElement.FontSizeProperty, .FontSize)
+                docSel.ApplyPropertyValue(TextElement.FontFamilyProperty, .FontFamily)
+
+                'apply default block line height
+                For Each block In .Document.Blocks
+                    If TypeOf block Is Paragraph Then
+                        block.Margin = New Thickness(0)
+                    End If
+                Next
+
+            End With
+
+            _IsPasting = False
+
         End If
 
     End Sub
@@ -212,7 +269,7 @@ Public Class CommentContent
 
         End If
 
-        If (GetTextLength() >= MaxCharacters) Then
+        If (GetDocLength() >= MaxCharacters) Then
 
             e.Handled = True
             MsgBox("Maximum comment length reached!", MsgBoxStyle.Information, "Comment Validation")

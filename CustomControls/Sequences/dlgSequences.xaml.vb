@@ -1,7 +1,9 @@
-﻿
-Imports System.Windows
+﻿Imports System.Windows
+Imports System.Windows.Input
+Imports System.Windows.Media
 Imports ElnBase
 Imports ElnCoreModel
+
 
 Public Class dlgSequences
 
@@ -9,13 +11,98 @@ Public Class dlgSequences
     Public Shared Event ClearSequenceSelections(sender As Object)
 
 
-    Public Sub New()
+    Public Sub New(refExperiment As tblExperiments, localDbContext As ElnDbContext, serverDbContext As ElnDbContext, useServer As Boolean)
 
         ' This call is required by the designer.
         InitializeComponent()
 
+        ReferenceExperiment = refExperiment
+        LocalContext = localDbContext
+        ServerContext = serverDbContext
+        UseServerContext = useServer
+
         AddHandler SequenceControl.SequenceSelected, AddressOf SequenceControl_SequenceClicked
         AddHandler SequenceStructure.StepArrowSelected, AddressOf SequenceStructure_StepArrowSelected
+
+    End Sub
+
+
+    Private Sub Me_Loaded() Handles Me.Loaded
+
+        cboItemServer.IsEnabled = (ServerContext IsNot Nothing)
+        cboDataContext.SelectedItem = If(cboItemServer.IsEnabled AndAlso UseServerContext, cboItemServer, cboItemLocal)
+
+    End Sub
+
+
+    ''' <summary>
+    ''' Sets or gets the current experiment, on which the initial sequence is built. 
+    ''' </summary>
+    ''' 
+    Private Property ReferenceExperiment As tblExperiments
+
+
+    ''' <summary>
+    ''' Sets of gets the local experiments database context.
+    ''' </summary>
+    ''' 
+    Private Property LocalContext As ElnDbContext
+
+
+    ''' <summary>
+    ''' Sets of gets the server experiments database context.
+    ''' </summary>
+    ''' 
+    Public Shared Property ServerContext As ElnDbContext
+
+
+    ''' <summary>
+    ''' Sets of gets if the server database should be used instead of the local one.
+    ''' </summary>
+    ''' 
+    Public Shared Property UseServerContext As Boolean = False
+
+
+    ''' <summary>
+    ''' Calculate and display the sequence containing the current experiment.
+    ''' </summary>
+    ''' 
+    Private Sub Me_ContentRendered() Handles Me.ContentRendered
+
+        'ToDo: Disable 'Synthesis' button if current experiment contains no sketch
+
+        If ReferenceExperiment.RxnSketch Is Nothing Then
+            Exit Sub
+        End If
+
+        Cursor = Cursors.Wait
+        ForceCursor = True
+
+        BuildSequences(ReferenceExperiment)
+
+        Cursor = Cursors.Arrow
+        ForceCursor = False
+
+    End Sub
+
+
+    Private Sub cboDataContext_SelectionChanged() Handles cboDataContext.SelectionChanged
+
+        UseServerContext = (cboDataContext.SelectedItem Is cboItemServer)
+        My.Settings.UseServerSequences = UseServerContext
+
+        BuildSequences(ReferenceExperiment)
+
+    End Sub
+
+
+    ''' <summary>
+    ''' Display and select current reference step.
+    ''' </summary>
+    ''' 
+    Private Sub lnkRefStep_PreviewMouseUp(sender As Object, e As RoutedEventArgs)   'XAML risen event
+
+        Me_ContentRendered()
 
     End Sub
 
@@ -25,17 +112,20 @@ Public Class dlgSequences
     ''' downstream and upstream sequences, then highlights the seed sequence and the step the reference 
     ''' experiment is part of.
     ''' </summary>
-    ''' <param name="refExperiment"></param>
+    ''' <param name="refExperiment">The experiment the sequence is based on.</param>
     ''' 
-    Public Sub BuildSequences(refExperiment As tblExperiments, dbContext As ElnDbContext)
+    Private Sub BuildSequences(refExperiment As tblExperiments)
+
+        Dim dbContext As ElnDbContext = If(UseServerContext AndAlso ServerContext IsNot Nothing, ServerContext, LocalContext)
 
         Dim seedSequence = New SequenceControl(refExperiment, dbContext)
-        pnlConnections.Children.Add(seedSequence)
+        With pnlConnections.Children
+            .Clear()
+            .Add(seedSequence)
+        End With
 
         seedSequence.HighlightControl()
         PopulateSequenceScheme(seedSequence)
-
-        blkSeedExpId.Text = " ➔ " + refExperiment.ExperimentID + " ➔ "
 
     End Sub
 
@@ -49,9 +139,10 @@ Public Class dlgSequences
         Dim seedStepStruct As SequenceStructure = Nothing
         Dim stepPos As Integer = 1
 
-        blkSequenceTitle.Text = sequence.SequenceTitle
-
         pnlSeqStructures.Children.Clear()
+
+        ' Set global reaction component foreground color (for reactant and product canvases in displayed sequence)
+        SketchResults.ComponentStructureColor = Brushes.Yellow
 
         For Each stp In sequence.SequenceSteps
 
@@ -66,9 +157,16 @@ Public Class dlgSequences
             End If
 
             With seqStruct
+
                 .StructureCanvas = stp.GetReactantImage
                 .blkStepNr.Text = "Step " + stepPos.ToString
-                .blkExpCount.Text = stp.GetStepExperiments.Count.ToString + " exp"
+                .blkSeedSymbol.Visibility = If(stp.IsSeedStep, Visibility.Visible, Visibility.Collapsed)
+
+                Dim stepExpList = stp.GetStepExperiments
+                Dim maxYield = (From exp In stepExpList Order By exp.Yield Descending).FirstOrDefault.Yield
+                Dim yieldPrefix = If(stepExpList.Count > 1, "≤ ", "")
+                .blkExpCount.Text = If(maxYield Is Nothing, "no yield", yieldPrefix + ELNCalculations.SignificantDigitsString(maxYield, 3) + "%")
+
             End With
 
             stepPos += 1

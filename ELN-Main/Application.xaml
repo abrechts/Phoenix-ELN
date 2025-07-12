@@ -6,9 +6,11 @@
     <Application.Resources>
 
         <ResourceDictionary>
+            
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/CustomControls;component/Resources/SpecialIcons.xaml"/>
                 <ResourceDictionary Source="/CustomControls;component/Resources/StandardIcons.xaml"/>
+                <ResourceDictionary Source="/CustomControls;component/Resources/DarkModeCtrlStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
             <SolidColorBrush x:Key="ProtocolItemBorder" Color="#FFD9D9D9"/>

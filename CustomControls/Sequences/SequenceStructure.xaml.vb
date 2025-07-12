@@ -3,6 +3,7 @@ Imports System.Windows.Controls
 Imports System.Windows.Media
 Imports System.Windows
 
+
 Public Class SequenceStructure
 
     Public Shared Event StepArrowSelected(sender As Object)
@@ -13,6 +14,56 @@ Public Class SequenceStructure
         InitializeComponent()
 
     End Sub
+
+
+    Private Sub Me_Loaded() Handles Me.Loaded
+
+        ArrowColor = Brushes.Lavender
+        UpperLabelForeground = Brushes.LightBlue
+        LowerLabelForeground = Brushes.WhiteSmoke
+
+    End Sub
+
+
+    ''' <summary>
+    ''' Sets or gets the foreground brush of the reaction arrow
+    ''' </summary>
+    ''' 
+    Public Property ArrowColor As SolidColorBrush
+
+        Get
+            Return CType(TryFindResource("arrowForegroundCol"), SolidColorBrush)
+        End Get
+        Set(value As SolidColorBrush)
+            CType(TryFindResource("arrowForegroundCol"), SolidColorBrush).Color = value.Color
+        End Set
+
+    End Property
+
+
+    Public Property UpperLabelForeground As SolidColorBrush
+
+        Get
+            Return blkStepNr.Foreground
+        End Get
+        Set(value As SolidColorBrush)
+            blkStepNr.Foreground = value
+        End Set
+
+    End Property
+
+
+    Public Property LowerLabelForeground As SolidColorBrush
+
+        Get
+            Return blkExpCount.Foreground
+        End Get
+        Set(value As SolidColorBrush)
+            blkExpCount.Foreground = value
+        End Set
+
+    End Property
+
 
 
     ''' <summary>
@@ -52,35 +103,23 @@ Public Class SequenceStructure
             _IsSelected = value
 
             If value = True Then
-                pnlArrowRight.BorderBrush = CType(New BrushConverter().ConvertFrom("#FF7DDEFF"), SolidColorBrush)
-                pnlArrowRight.Background = CType(New BrushConverter().ConvertFrom("#FFD8F5FF"), SolidColorBrush)
+                pnlArrowRight.BorderBrush = Brushes.LightSkyBlue
             Else
-                pnlArrowRight.BorderBrush = Brushes.Transparent
-                pnlArrowRight.Background = Brushes.Transparent
+                If SourceStep IsNot Nothing Then
+                    If Not SourceStep.IsSeedStep Then
+                        pnlArrowRight.BorderBrush = Brushes.Transparent
+                        pnlArrowRight.Background = Brushes.Transparent
+                    Else
+                        pnlArrowRight.BorderBrush = Brushes.Gray
+                        pnlArrowRight.Background = CType(New BrushConverter().ConvertFrom("#FF3F3F3F"), SolidColorBrush)
+                    End If
+                End If
             End If
 
         End Set
 
     End Property
 
-
-    Private Sub pnlArrowRight_MouseEnter() Handles pnlArrowRight.MouseEnter
-
-        pnlArrowRight.Background = CType(New BrushConverter().ConvertFrom("#FFD8F5FF"), SolidColorBrush)
-
-    End Sub
-
-
-    Private Sub pnlArrowRight_MouseLeave() Handles pnlArrowRight.MouseLeave
-
-        If Not IsSelected Then
-            pnlArrowRight.Background = Brushes.Transparent
-        End If
-
-    End Sub
-
-
-    Private mSourceStep As SequenceStep
 
     ''' <summary>
     ''' Sets or gets the underlying SequenceStep
@@ -88,28 +127,22 @@ Public Class SequenceStructure
     ''' 
     Public Property SourceStep As SequenceStep
 
-        Get
-            Return mSourceStep
-        End Get
 
-        Set(value As SequenceStep)
-            mSourceStep = value
-            If value.IsSeedStep Then
-                blkStepNr.FontWeight = FontWeights.DemiBold
-                blkStepNr.FontStyle = FontStyles.Italic
-            End If
-        End Set
-
-    End Property
-
-
+    ''' <summary>
+    ''' Hides the right solid arrow
+    ''' </summary>
+    ''' 
     Public Sub HideRightArrow()
 
-        arrowRight.Visibility = Visibility.Collapsed
+        pnlArrowRight.Visibility = Visibility.Collapsed
 
     End Sub
 
 
+    ''' <summary>
+    ''' Displays the dotted right arrow
+    ''' </summary>
+    ''' 
     Public Sub ShowDottedRightArrow()
 
         HideRightArrow()
@@ -118,6 +151,10 @@ Public Class SequenceStructure
     End Sub
 
 
+    ''' <summary>
+    ''' Displays the left arrow
+    ''' </summary>
+    ''' 
     Public Sub ShowLeftArrow()
 
         arrowLeftDotted.Visibility = Visibility.Visible

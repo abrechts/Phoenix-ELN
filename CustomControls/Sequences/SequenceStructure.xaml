@@ -5,7 +5,14 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:CustomControls"
              mc:Ignorable="d" 
-             d:DesignHeight="90"  >
+             d:DesignHeight="90" >
+
+    <UserControl.Resources>
+
+        <SolidColorBrush x:Key="arrowForegroundCol" Color="Orange"/>
+
+    </UserControl.Resources>
+    
     <Grid>
 
         <StackPanel Orientation="Horizontal">
@@ -14,8 +21,8 @@
 
             <StackPanel x:Name="arrowLeftDotted" Orientation="Horizontal" Margin="0,10,12,0" d:Visibility="Visible" 
                 Visibility="Collapsed">
-                <Rectangle Stroke="Black" StrokeDashArray="4 4" Width="50" Height="1" VerticalAlignment="Center"/>
-                <TextBlock Text="&#10148;" FontSize="11" Foreground="Black" VerticalAlignment="Center" Margin="-3,-2,0,0"/>
+                <Rectangle Stroke="{DynamicResource arrowForegroundCol}" StrokeDashArray="4 4" Width="50" Height="1" VerticalAlignment="Center"/>
+                <TextBlock Text="&#10148;" FontSize="11" Foreground="{DynamicResource arrowForegroundCol}" VerticalAlignment="Center" Margin="-3,-2,0,0"/>
             </StackPanel>
 
             <!--Reactant structure area-->
@@ -30,32 +37,37 @@
 
                 <!--Standard right arrow-->
 
-                <Border x:Name="pnlArrowRight" BorderThickness="1" CornerRadius="8" Margin="2,10,2,0" Background="#FF7DDEFF">
+                <Border x:Name="pnlArrowRight" BorderThickness="1" CornerRadius="8" Margin="2,10,2,0" BorderBrush="#FF7DDEFF" >
 
                     <StackPanel x:Name="arrowRight" Cursor="Hand" Margin="2,1,2,1">
 
-                        <TextBlock x:Name="blkStepNr" d:Text="Step 2"  Margin="-4,0,0,-3" FontSize="11.5" 
-                           FontFamily="Segoe UI" Foreground="blue" HorizontalAlignment="Center"/>
-
-                        <StackPanel Orientation="Horizontal" Margin="4,0,4,-4" Background="Transparent">
-                            <Rectangle Stroke="Black" Width="50" Height="1" VerticalAlignment="Center"/>
-                            <TextBlock Text="&#10148;" FontSize="11" Foreground="Black" VerticalAlignment="Center" Margin="-3,-2,0,0"/>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="center" Margin="-10,0,0,-3">
+                            <TextBlock x:Name="blkSeedSymbol" Text="➤" Foreground="lightblue" d:Visibility="Visible" Visibility="Collapsed" FontSize="9.5" Margin="0,2,3,0"/>
+                            <TextBlock x:Name="blkStepNr" d:Text="Step 2" FontSize="11.5" FontFamily="Segoe UI" Foreground="lightblue" />
                         </StackPanel>
 
-                        <TextBlock x:Name="blkExpCount"  d:Text="12 exp" Margin="-4,-1,0,2" FontSize="10.5" HorizontalAlignment="Center" />
+                        <StackPanel Orientation="Horizontal" Margin="4,0,4,-4" Background="Transparent">
+                            <Rectangle Stroke="{DynamicResource arrowForegroundCol}"  Width="50" Height="1" VerticalAlignment="Center"/>
+                            <TextBlock x:Name="blkUpperLabel" Text="&#10148;" FontSize="11" Foreground="{DynamicResource arrowForegroundCol}" 
+                                VerticalAlignment="Center" Margin="-3,-1,0,0"/>
+                        </StackPanel>
+
+                        <TextBlock x:Name="blkExpCount"  d:Text="≤ 98.5%" Margin="-8,0,0,2" FontSize="10.5" HorizontalAlignment="Center" Foreground="WhiteSmoke" />
 
                     </StackPanel>
 
                 </Border>
 
-                <!--Dotted right trailing connector arrow -->
+            </StackPanel>
 
-                <StackPanel x:Name="arrowRightDotted" Orientation="Horizontal" Margin="0,10,12,0" d:Visibility="Visible" 
+            <!--Dotted right trailing connector arrow -->
+
+            <StackPanel x:Name="arrowRightDotted" Orientation="Horizontal" Margin="0,10,12,0" d:Visibility="Visible" 
                    Visibility="Collapsed">
-                    <Rectangle Stroke="Black" StrokeDashArray="4 4" Width="50" Height="1" VerticalAlignment="Center"/>
-                    <TextBlock Text="&#10148;" FontSize="11" Foreground="Black" VerticalAlignment="Center" Margin="-3,-2,0,0"/>
-                </StackPanel>
-
+                <Rectangle Stroke="{DynamicResource arrowForegroundCol}" StrokeDashArray="4 4" Width="50" 
+                       Height="1" VerticalAlignment="Center"/>
+                <TextBlock Text="&#10148;" FontSize="11" Foreground="{DynamicResource arrowForegroundCol}"
+                       VerticalAlignment="Center" Margin="-3,-2,0,0"/>
             </StackPanel>
 
         </StackPanel>

@@ -3,6 +3,7 @@ Imports System.Windows.Input
 Imports System.Windows
 Imports ElnBase
 Imports ElnCoreModel
+Imports System.Windows.Media
 
 Public Class dlgSearch
 
@@ -76,6 +77,9 @@ Public Class dlgSearch
                 Exit Sub
 
         End Select
+
+        'set global component structure color for obtained results
+        SketchResults.ComponentStructureColor = Brushes.Black
 
         'the multi-property grouping criterion is achieved by concatenating the reactant and product InChIKeys 
         Dim sameRxnGroups = expHitInfo.ExperimentHits.GroupBy(Function(item) item.ReactantInChIKey + "/" + item.ProductInChIKey) _

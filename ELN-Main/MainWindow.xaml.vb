@@ -149,6 +149,7 @@ Class MainWindow
         AddHandler RssItemGroup.RequestOpenExperiment, AddressOf ExpList_RequestOpenExperiment
         AddHandler StepExpSelector.RequestOpenExperiment, AddressOf ExpList_RequestOpenExperiment
         AddHandler ExperimentContent.ExperimentContextChanged, AddressOf ExperimentContent_ContextChanged
+        AddHandler ExperimentContent.RequestSequencesDialog, AddressOf ExperimentContent_RequestSequencesDialog
 
         'determine current localUser (since multiple users possible)
         Dim currUser = (From user In DBContext.tblUsers Where user.IsCurrent = 1).FirstOrDefault
@@ -1434,16 +1435,31 @@ Class MainWindow
     End Sub
 
 
-    Private Sub btnSequences_Click() Handles btnSequences.Click
-
-        Dim refExp = CType(SelectedExpContent.DataContext, tblExperiments)
+    Private Sub ExperimentContent_RequestSequencesDialog(sender As Object, refExp As tblExperiments)
 
         If refExp IsNot Nothing Then
-            Dim seqDlg As New dlgSequences()
-            With seqDlg
-                .BuildSequences(refExp, DBContext)
-                .ShowDialog()
+
+            Dim seqDlg As New dlgSequences(refExp, DBContext, ServerDBContext, CustomControls.My.MySettings.Default.UseServerSequences)
+
+            With CustomControls.My.MySettings.Default
+
+                If .dlgSequencesSize.Width > -1 Then
+                    seqDlg.WindowStartupLocation = WindowStartupLocation.Manual
+                    seqDlg.Left = .dlgSequencesPosition.X
+                    seqDlg.Top = .dlgSequencesPosition.Y
+                    seqDlg.Width = .dlgSequencesSize.Width
+                    seqDlg.Height = .dlgSequencesSize.Height
+                Else
+                    seqDlg.Owner = Me
+                End If
+
+                seqDlg.ShowDialog()
+
+                .dlgSequencesPosition = New System.Drawing.Point(seqDlg.Left, seqDlg.Top)
+                .dlgSequencesSize = New System.Drawing.Size(seqDlg.ActualWidth, seqDlg.ActualHeight)
+
             End With
+
         End If
 
     End Sub

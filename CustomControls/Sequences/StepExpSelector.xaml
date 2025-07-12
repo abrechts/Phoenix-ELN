@@ -11,8 +11,10 @@
     
     <UserControl.Resources>
 
+        <local:ExpEntryEnabledConverter x:Key="expEntryEnabledConv"/>
+
         <DataTemplate x:Key="expTreeItem">
-            <local:ExpTreeHeader Margin="0,-1" IsTabIndicatorVisible="false"/>
+            <local:ExpTreeHeader Margin="0,-1" IsTabIndicatorVisible="false" IsEnabled="{Binding Converter={StaticResource expEntryEnabledConv}}"/>
         </DataTemplate>
 
     </UserControl.Resources>
@@ -24,7 +26,35 @@
             Grid.IsSharedSizeScope="true" AllowDrop="false"
             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
             VirtualizingStackPanel.IsVirtualizing="False" MinHeight="25"
-            ItemTemplate="{StaticResource expTreeItem}" />
+            ItemTemplate="{StaticResource expTreeItem}">
+
+            <ListBox.ItemContainerStyle>
+                <Style TargetType="ListBoxItem">
+                    <!--Disable unfinalized server experiments-->
+                    <Setter Property="IsEnabled" Value="{Binding Converter={StaticResource expEntryEnabledConv}}" />
+                    <Setter Property="ToolTipService.ShowOnDisabled" Value="True" />
+                    <Setter Property="ToolTipService.InitialShowDelay" Value="1000" />
+                    <Style.Triggers>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.7"/>
+                            <Setter Property="ToolTip">
+                                <Setter.Value>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="🚫" FontSize="12" Foreground="LightCoral" Margin="0,0,4,0" />
+                                        <TextBlock Foreground="whitesmoke">
+                                            Unfinalized server experiments are 
+                                            <LineBreak/>
+                                            inaccessible (work in progress).
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Setter.Value>
+                            </Setter>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </ListBox.ItemContainerStyle>
+
+        </ListBox>
 
     </Grid>
     

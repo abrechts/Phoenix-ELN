@@ -55,50 +55,50 @@
 
     </UserControl.Resources>
 
-        <Grid>
+    <Grid>
 
-            <Grid.RowDefinitions>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto"/>
-                <RowDefinition/>
-            </Grid.RowDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
 
-            <!--experiment header-->
-            <Border Grid.Row="0" Margin="12,10,12,0" Background="#FFEAF2FF" CornerRadius="8,8,0,0" Padding="12,4,12,0"
+        <!--experiment header-->
+        <Border Grid.Row="0" Margin="12,10,12,0" Background="#FFEAF2FF" CornerRadius="8,8,0,0" Padding="12,4,12,0"
                 BorderBrush="#FFADADAD" BorderThickness="1,1,1,0" TextBlock.FontStyle="Italic" TextBlock.FontSize="10.5" 
                 TextBlock.FontFamily="Verdana">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="22"/>
-                        <RowDefinition/>
-                        <RowDefinition Height="34"/>
-                    </Grid.RowDefinitions>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="22"/>
+                    <RowDefinition/>
+                    <RowDefinition Height="34"/>
+                </Grid.RowDefinitions>
 
-                    <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
-                        <TextBlock Text="{Binding User.FirstName}" d:Text="Alexander" Margin="0,0,3,0"/>
-                        <TextBlock Text="{Binding User.LastName}" d:Text="Miller"/>
-                    </StackPanel>
+                <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding User.FirstName}" d:Text="Alexander" Margin="0,0,3,0"/>
+                    <TextBlock Text="{Binding User.LastName}" d:Text="Miller"/>
+                </StackPanel>
 
-                    <TextBlock d:Text="DemoCompany - Research (New York)" HorizontalAlignment="Center" VerticalAlignment="Center" >
-                        <TextBlock.Text>
-                            <MultiBinding Converter="{StaticResource locationTitleConv}" >
-                                <Binding Path="User.CompanyName"/>
-                                <Binding Path="User.DepartmentName"/>
-                                <Binding Path="User.City"/>
-                            </MultiBinding>
-                        </TextBlock.Text>
-                    </TextBlock>
+                <TextBlock d:Text="DemoCompany - Research (New York)" HorizontalAlignment="Center" VerticalAlignment="Center" >
+                    <TextBlock.Text>
+                        <MultiBinding Converter="{StaticResource locationTitleConv}" >
+                            <Binding Path="User.CompanyName"/>
+                            <Binding Path="User.DepartmentName"/>
+                            <Binding Path="User.City"/>
+                        </MultiBinding>
+                    </TextBlock.Text>
+                </TextBlock>
 
-                    <TextBlock Grid.Row="0" d:Text="millera-00012" Text="{Binding ExperimentID}" HorizontalAlignment="Right" 
+                <TextBlock Grid.Row="0" d:Text="millera-00012" Text="{Binding ExperimentID}" HorizontalAlignment="Right" 
                         FontWeight="bold" VerticalAlignment="Center" Foreground="{StaticResource BoldTitleForeground}"/>
 
-                    <Separator Grid.Row="1" Margin="0,1,0,1"/>
+                <Separator Grid.Row="1" Margin="0,1,0,1"/>
 
-                    <StackPanel Grid.Row="2" Orientation="Horizontal" VerticalAlignment="Center" >
-                        <TextBlock Text="Created: " FontWeight="demibold" Foreground="{StaticResource BoldTitleForeground}"/>
-                        <TextBlock Text="{Binding CreationDate,Converter={StaticResource ExpDateConv}}" d:Text="August 13, 2029"/>
-                    </StackPanel>
-                    
+                <StackPanel Grid.Row="2" Orientation="Horizontal" VerticalAlignment="Center" >
+                    <TextBlock Text="Created: " FontWeight="demibold" Foreground="{StaticResource BoldTitleForeground}"/>
+                    <TextBlock Text="{Binding CreationDate,Converter={StaticResource ExpDateConv}}" d:Text="August 13, 2029"/>
+                </StackPanel>
+
                 <StackPanel Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center" TextOptions.TextFormattingMode="Display" Margin="0,-2,0,0">
                     <TextBlock Text="{Binding Project.Title}" d:Text="Testproject" Foreground="#FF1818C3" FontWeight="demibold"  HorizontalAlignment="Center" FontSize="11"/>
                     <TextBlock Text="{Binding ProjFolder.FolderName}" d:Text="All Experiments" Foreground="#FF1818C3" FontSize="10.5" Margin="-2,1,0,0"
@@ -109,39 +109,51 @@
                       Background="transparent" BorderThickness="0" Margin="0,0,0,2"
                       SelectedIndex="{Binding Path=WorkflowState,Converter={StaticResource expStateIndexConv},Mode=OneWay}">
 
-                        <TabItem Visibility="Collapsed">
-                            <StackPanel Grid.Row="2" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right" >
-                                <TextBlock Text="Finalized: " FontWeight="demibold" Foreground="{StaticResource BoldTitleForeground}"/>
-                                <TextBlock Text="{Binding FinalizeDate,Converter={StaticResource ExpDateConv}, 
+                    <TabItem Visibility="Collapsed">
+                        <StackPanel Grid.Row="2" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right" >
+                            <TextBlock Text="Finalized: " FontWeight="demibold" Foreground="{StaticResource BoldTitleForeground}"/>
+                            <TextBlock Text="{Binding FinalizeDate,Converter={StaticResource ExpDateConv}, 
                                     ConverterParameter=In progress ...}" d:Text="August 13, 2029"/>
-                            </StackPanel>
-                        </TabItem>
-                        
-                        <TabItem Visibility="Collapsed">
-                            <Button Grid.Row="2" x:Name="btnFinalize" HorizontalAlignment="Right" Style="{StaticResource SimpleButton}" 
+                        </StackPanel>
+                    </TabItem>
+
+                    <TabItem Visibility="Collapsed">
+                        <Button Grid.Row="2" x:Name="btnFinalize" HorizontalAlignment="Right" Style="{StaticResource SimpleButton}" 
                                Margin="0,0,-2,0">
-                                <StackPanel Orientation="Horizontal">
-                                    <ContentControl Content="{StaticResource icoOkBullet}" Height="16" Margin="0,0,3,0" VerticalAlignment="Center"/>
-                                    <TextBlock Text="Finalize" FontStyle="Normal" VerticalAlignment="Center" />
-                                </StackPanel>
-                            </Button>
-                        </TabItem>
-                    </TabControl>
+                            <StackPanel Orientation="Horizontal">
+                                <ContentControl Content="{StaticResource icoOkBullet}" Height="16" Margin="0,0,3,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="Finalize" FontStyle="Normal" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                    </TabItem>
+                </TabControl>
+
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="1" Background="white" BorderBrush="#FFADADAD" BorderThickness="1,1,1,0" Margin="12,0,12,0">
+            <Grid>
                 
-                </Grid>
-            </Border>
+                <local:SketchArea x:Name="pnlSketch" ReactionSketch="{Binding RxnSketch}" Margin="12,8,12,6"/>
 
-            <Border Grid.Row="1" Background="white" BorderBrush="#FFADADAD" BorderThickness="1,1,1,0" Margin="12,0,12,0">
-                <Grid>
-                    <local:SketchArea x:Name="pnlSketch" ReactionSketch="{Binding RxnSketch}" Margin="12,8,12,6"/>
-                    <ContentControl x:Name="icoFinalized" Content="{StaticResource icoOkBullet}" Height="22" Margin="0,8,8,0" 
-                        Opacity="0.8" VerticalAlignment="Top" HorizontalAlignment="Right" Visibility="{Binding WorkflowState,
-                        Converter={StaticResource expStateVisConv}}"/>
-                </Grid>
-            </Border>
+                <ContentControl x:Name="icoFinalized" Content="{StaticResource icoOkBullet}" Height="22" Margin="0,0,6,0" 
+                    Opacity="0.8" VerticalAlignment="Top" HorizontalAlignment="Right" Visibility="{Binding WorkflowState,
+                    Converter={StaticResource expStateVisConv}}"/>
 
-            <local:Protocol x:Name="pnlProtocol" Grid.Row="2" Margin="12,0,12,12" />
+                <Button x:Name="btnSequences" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,2,2" Background="Transparent" BorderBrush="#FF82B7FF"
+                   ToolTip="Display all synthetic steps leading &#x0a;to this step and away from it." Visibility="collapsed" d:Visibility="visible" >
+                    <StackPanel Orientation="Horizontal" Margin="1,-2">
+                        <TextBlock Text="🠪" FontSize="14" Foreground="#FF6E6E6E"/>
+                        <TextBlock Text="⟐" FontSize="14" Foreground="#FF2684FF" Margin="0,0,0,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="🠪" FontSize="14" Foreground="#FF6E6E6E"/>
+                    </StackPanel>
+                </Button>
 
-        </Grid>
+            </Grid>
+        </Border>
+
+        <local:Protocol x:Name="pnlProtocol" Grid.Row="2" Margin="12,0,12,12" />
+
+    </Grid>
 
 </UserControl>

@@ -1,13 +1,14 @@
-﻿Imports ElnCoreModel
+﻿Imports System.Globalization
 Imports System.Windows.Data
 Imports System.Windows.Input
+Imports ElnBase.ELNEnumerations
+Imports ElnCoreModel
 
 Public Class StepExpSelector
 
     'DataContext is SequenceStep
 
     Public Shared Event RequestOpenExperiment(sender As Object, expEntry As tblExperiments, isFromServer As Boolean)
-
 
     Public Sub New()
 
@@ -27,6 +28,9 @@ Public Class StepExpSelector
 
         Dim seqStep = CType(Me.DataContext, SequenceStep)
 
+        ExpEntryEnabledConverter.IsServerExperiments = (dlgSequences.UseServerContext AndAlso dlgSequences.ServerContext IsNot Nothing)
+
+        'get all step experiments; unfinalized server experiments will be disabled later in the step exp list 
         Dim res = From exp In seqStep.GetStepExperiments Order By exp.Yield Descending
         lstStepExperiments.ItemsSource = res
 
@@ -35,7 +39,7 @@ Public Class StepExpSelector
 
     Private Sub ListBoxItem_Selected(sender As Object, e As MouseButtonEventArgs) Handles lstStepExperiments.PreviewMouseUp
 
-        Dim selExp = lstStepExperiments.SelectedItem
+        Dim selExp As tblExperiments = lstStepExperiments.SelectedItem
 
         If selExp IsNot Nothing Then
             lstStepExperiments.UnselectAll()
@@ -45,32 +49,29 @@ Public Class StepExpSelector
     End Sub
 
 
-    'Private Sub cboSortType_Changed() Handles cboSortType.SelectionChanged
-
-    '    If Me.IsInitialized Then
-
-    '        With cvsStepExperiments
-
-    '            .SortDescriptions.Clear()
-
-    '            Select Case cboSortType.SelectedIndex
-
-    '                Case 0  'by yield
-    '                    .SortDescriptions.Add(New SortDescription("Yield", ListSortDirection.Descending))
-
-    '                Case 1 'by scale
-    '                    .SortDescriptions.Add(New SortDescription("RefReactantGrams", ListSortDirection.Descending))
-
-    '            End Select
-
-    '            cvsStepExperiments.View.Refresh()
-
-    '        End With
-
-    '    End If
-
-    'End Sub
+End Class
 
 
+Public Class ExpEntryEnabledConverter
+
+    Implements IValueConverter
+
+    Public Shared Property IsServerExperiments As Boolean = False
+
+    Public Function Convert(value As Object, targetType As Type, parameter As Object, culture As CultureInfo) As Object Implements IValueConverter.Convert
+
+        Dim exp As tblExperiments = value
+
+        If IsServerExperiments AndAlso Not exp.WorkflowState = WorkflowStatus.Finalized Then
+            Return False
+        Else
+            Return True
+        End If
+
+    End Function
+
+    Public Function ConvertBack(value As Object, targetType As Type, parameter As Object, culture As CultureInfo) As Object Implements IValueConverter.ConvertBack
+        Throw New NotImplementedException()
+    End Function
 
 End Class

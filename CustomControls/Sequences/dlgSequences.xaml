@@ -3,10 +3,10 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:CustomControls"
+        xmlns:local="clr-namespace:CustomControls" xmlns:sys="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
-        Title="Synthetic Connections" Height="550" Width="900"  MinWidth="730" WindowStartupLocation="CenterScreen" 
-        ShowInTaskbar="False" >
+        Title="Synthetic Connections" Height="550" Width="900"  MinWidth="730" MinHeight="350" WindowStartupLocation="CenterScreen" 
+        ShowInTaskbar="False" Background="#FF2A2A2A" >
 
     <DockPanel>
 
@@ -14,26 +14,40 @@
 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                 <TextBlock Text="Synthetic Connections" FontWeight="bold" FontSize="16" HorizontalAlignment="Center" 
-                   Foreground="{StaticResource DialogTitleForeground}"/>
+                   Foreground="#FFD1FDFF"/>
                 <ContentControl x:Name="icoInfo" Content="{StaticResource icoInfo}" Cursor="Hand" Height="14" Margin="6,1,0,0"/>
             </StackPanel>
-            
-            <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
-                <TextBlock Text="Summarizes all synthetic steps leading to the "/>
-                <TextBlock x:Name="blkSeedExpId" d:Text=" &#10132; demo-00013 &#10132; " HorizontalAlignment="Center" Background="#FFECFBFF" 
-                  FontWeight="Demibold" Foreground="#FF212121"/>
-                <TextBlock Text=" step (upstream), and starting from it (downstream)."  />
-            </StackPanel>
-            
+
+            <Separator Margin="0,2,0,5"/>
+
+            <TextBlock Foreground="Lavender" Margin="0,6,0,0">
+                <Run Text="Summarizes all synthetic steps leading to the current"/>
+                <Run Text="Reference Step" Foreground="lightskyblue" Cursor="Hand" ToolTip="Click to select current reference step" PreviewMouseUp="lnkRefStep_PreviewMouseUp"/>
+                <Run Text="(upstream) and away from it (downstream)."/>
+            </TextBlock>
+
+            <ComboBox x:Name="cboDataContext" HorizontalAlignment="Center" Style="{StaticResource DarkComboBoxStyle}" d:SelectedIndex="0" 
+               FontSize="11.5" Margin="0,8,0,0" Padding="10,2,2,4">
+                <ComboBoxItem Content="Local Database" x:Name="cboItemLocal"/>
+                <ComboBoxItem Content="Server Database" x:Name="cboItemServer" IsEnabled="false"/>
+            </ComboBox>
+
         </StackPanel>
 
-        <Border BorderThickness="1,1,1,0" BorderBrush="#FFC1C1C1" Margin="16,8,16,12">
+     
+        <Border BorderThickness="1,1,1,0" BorderBrush="#FFC1C1C1" Margin="16,6,16,12">
 
             <DockPanel DockPanel.Dock="top">
 
-                <ScrollViewer DockPanel.Dock="Top" VerticalScrollBarVisibility="Auto" VerticalAlignment="Top" Margin="0,6,0,6"
-                   HorizontalScrollBarVisibility="Auto" MaxHeight="130">
+                <ScrollViewer DockPanel.Dock="Top" VerticalScrollBarVisibility="auto" Style="{StaticResource DarkScrollViewerStyle}" 
+                   VerticalAlignment="Top" Margin="0,6,0,6" HorizontalScrollBarVisibility="Auto" MaxHeight="130">
                     <Grid x:Name="pnlConnections" d:Width="300" d:Height="130" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+
+                    <ScrollViewer.Resources>
+                        <sys:Double x:Key="{x:Static SystemParameters.VerticalScrollBarWidthKey}">12</sys:Double>
+                        <sys:Double x:Key="{x:Static SystemParameters.HorizontalScrollBarHeightKey}">12</sys:Double>
+                    </ScrollViewer.Resources>
+
                 </ScrollViewer>
 
                 <Border BorderThickness="0,1,0,1" BorderBrush="#FFC1C1C1">
@@ -45,38 +59,38 @@
                             <ColumnDefinition Width="220"/>
                         </Grid.ColumnDefinitions>
 
-                        <StackPanel>
-
-                            <TextBlock x:Name="blkSequenceTitle" d:Text="Sequence 2a" HorizontalAlignment="Center" FontWeight="DemiBold" Margin="8,4,0,0"
-                              TextDecorations="Underline" Foreground="#FF2A2A2A"/>
-
-                            <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="auto" d:Height="200" VerticalAlignment="Top" Margin="0,12,12,0">
-                                <WrapPanel x:Name="pnlSeqStructures" HorizontalAlignment="Center"/>
-                            </ScrollViewer>
-                            
-                        </StackPanel>
+                        <ScrollViewer VerticalScrollBarVisibility="visible" Style="{StaticResource DarkScrollViewerStyle}" Grid.Column="0" Margin="0,4,1,0">
+                            <WrapPanel x:Name="pnlSeqStructures" HorizontalAlignment="Center"/>
+                        </ScrollViewer>
 
                         <Border Grid.Column="1" BorderThickness="1,0,0,0" BorderBrush="#FFC1C1C1" MinWidth="100" CornerRadius="0,0,0,0" 
                            Margin="0,0,0,0">
                             <DockPanel>
+                                
                                 <StackPanel HorizontalAlignment="Center" DockPanel.Dock="top" Orientation="Horizontal">
                                     <TextBlock x:Name="blkSeqTitle" d:Text="Sequence 2a" FontWeight="DemiBold" FontSize="12" HorizontalAlignment="Center"
-                                       VerticalAlignment="Center"/>
-                                    <TextBlock Text=">" Margin="4,0,4,0"/>
-                                    <TextBlock x:Name="lblStepName" d:Text="Step 2" FontWeight="DemiBold" Foreground="blue" FontSize="12" 
+                                       VerticalAlignment="Center" Foreground="Lavender"/>
+                                    <TextBlock Text=">" Margin="4,0,4,0" Foreground="lavender"/>
+                                    <TextBlock x:Name="lblStepName" d:Text="Step 2" FontWeight="DemiBold" Foreground="lightblue" FontSize="12" 
                                         Margin="0,0,0,0"/>
                                 </StackPanel>
+                                
                                 <Separator DockPanel.Dock="top" Background="#FFC1C1C1"/>
-                                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                                    <local:StepExpSelector x:Name="stepSelector" FontSize="11.5" Background="white" MinWidth="160" DockPanel.Dock="top"
-                                       HorizontalAlignment="Center"/>
-                                </ScrollViewer>
+
+                                <Grid>
+                                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                        <local:StepExpSelector x:Name="stepSelector" FontSize="11.5" Background="transparent" MinWidth="160" DockPanel.Dock="top"
+                                           HorizontalAlignment="Center"/>
+                                    </ScrollViewer>
+                                </Grid>
+
                             </DockPanel>
                         </Border>
                     </Grid>
                 </Border>
             </DockPanel>
         </Border>
+            
     </DockPanel>
 
 </Window>

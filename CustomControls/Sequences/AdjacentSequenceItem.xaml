@@ -20,13 +20,13 @@
                 </Border>
 
                 <!--upstream connector-->
-                <Rectangle x:Name="downConnector" Fill="BlueViolet" Width="12" Height="2" VerticalAlignment="Center" 
+                <Rectangle x:Name="downConnector" Fill="#FFC283FC" Width="12" Height="2" VerticalAlignment="Center" 
                     d:Visibility="visible" Visibility="Collapsed" Margin="2,0,-1,0"/>
 
             </StackPanel>
 
             <!--vertical connector right-->
-            <Rectangle x:Name="VerticalConnectorLeft" Width="2" Fill="BlueViolet" Margin="0,15,-2,15"
+            <Rectangle x:Name="VerticalConnectorLeft" Width="2" Fill="#FFC283FC" Margin="0,15,-2,15"
                 Visibility="{Binding ElementName=pnlConvergingDown, Path=Visibility}" HorizontalAlignment="Left"/>
 
             <StackPanel x:Name="pnlConvSequences" Grid.Column="1"  VerticalAlignment="Center" >
@@ -35,7 +35,7 @@
             </StackPanel>
 
             <!--vertical connector right-->
-            <Rectangle x:Name="VerticalConnectorRight" Width="2" Fill="BlueViolet" Margin="-2,15,0,15"
+            <Rectangle x:Name="VerticalConnectorRight" Width="2" Fill="#FFC283FC" Margin="-2,15,0,15"
                Visibility="{Binding ElementName=pnlConvergingDown, Path=Visibility}" HorizontalAlignment="Left"/>
 
             <StackPanel Name="pnlConvergingDown" Margin="0,0,0,0" VerticalAlignment="Center" Orientation="Horizontal" d:Visibility="Visible" 
@@ -43,8 +43,8 @@
 
                 <!--upstream connector-->
                 <StackPanel x:Name="upConnector" Orientation="Horizontal" Margin="0,0,1,0" VerticalAlignment="Center">
-                    <Rectangle Fill="BlueViolet" Width="12" Height="2" VerticalAlignment="Center" />
-                    <TextBlock Text="&#10148;" FontSize="12" Foreground="BlueViolet" VerticalAlignment="Center" Margin="-3,-2,0,0"/>
+                    <Rectangle Fill="#FFC283FC" Width="12" Height="2" VerticalAlignment="Center" />
+                    <TextBlock Text="&#10148;" FontSize="12" Foreground="#FFC283FC" VerticalAlignment="Center" Margin="-3,-2,0,0"/>
                 </StackPanel>
 
                 <!--common product/intermediate button-->
