@@ -417,11 +417,9 @@ Public Class SpellChecker
 
                     Dim errors = SpellChecker.GetSpellingErrors(text)
 
-                    If errors IsNot Nothing Then
+                    If errors.Count > 0 Then
                         Dim adornLayer = AdornerLayer.GetAdornerLayer(_parentRtb)
-                        For Each errorWord In errors
-                            HighlightWordOccurrences(errorWord, adornLayer)
-                        Next
+                        HighlightAllWordOccurrences(errors, adornLayer)
                     End If
 
                 End If
@@ -431,58 +429,73 @@ Public Class SpellChecker
         End Sub
 
 
-        ''' <summary>
-        ''' Highlights all occurrences of the specified errWord in the RichTextBox. Partial word matches are not highlighted.
-        ''' </summary>
-        ''' 
-        Private Sub HighlightWordOccurrences(errStr As String, adornLayer As AdornerLayer)
+        Private Sub HighlightAllWordOccurrences(errorWords As List(Of String), adornLayer As AdornerLayer)
 
+            Dim errorWordSet As New HashSet(Of String)(errorWords)
             Dim errRectangles As New List(Of Rect)
-            Dim startPointer = _parentRtb.Document.ContentStart
+            ErrorRanges.Clear()
 
-            While startPointer IsNot Nothing AndAlso startPointer.CompareTo(_parentRtb.Document.ContentEnd) < 0
+            Dim pointer = _parentRtb.Document.ContentStart
 
-                Dim parsedString As String = startPointer.GetTextInRun(LogicalDirection.Forward)
-                If parsedString <> "" Then
+            While pointer IsNot Nothing AndAlso pointer.CompareTo(_parentRtb.Document.ContentEnd) < 0
+                If pointer.GetPointerContext(LogicalDirection.Forward) = TextPointerContext.Text Then
+                    Dim textRun As String = pointer.GetTextInRun(LogicalDirection.Forward)
+                    Dim matches = Regex.Matches(textRun, "\b\w+\b")
 
-                    Dim errPositions = SpellChecker.FindFullWordIndices(parsedString, errStr)
-
-                    If errPositions.Count > 0 Then
-
-                        ' determine error wordStr ranges
-                        For Each errPos In errPositions
-                            Dim wordStartPtr = startPointer.GetPositionAtOffset(errPos)
-                            Dim wordEndPtr = wordStartPtr.GetPositionAtOffset(errStr.Length)
+                    For Each match As Match In matches
+                        Dim word = match.Value
+                        If errorWordSet.Contains(word) Then
+                            Dim wordStartPtr = pointer.GetPositionAtOffset(match.Index)
+                            Dim wordEndPtr = wordStartPtr.GetPositionAtOffset(word.Length)
                             Dim errWordRange As New TextRange(wordStartPtr, wordEndPtr)
                             ErrorRanges.Add(errWordRange)
-                        Next
 
-                        ' get bounding rectangles for all error ranges
-                        For Each errRange In ErrorRanges
-                            Dim rect1 = errRange.Start.GetCharacterRect(LogicalDirection.Forward)
-                            Dim rect2 = errRange.End.GetCharacterRect(LogicalDirection.Forward)
-                            If Not (rect1.IsEmpty OrElse rect2.IsEmpty) Then
-                                rect1.Width = rect2.Right - rect1.Left
-                                rect1.Offset(0, -2)
-                                errRectangles.Add(rect1)
-                            End If
-                        Next
+                            Dim start = wordStartPtr
 
-                    End If
+                            While start IsNot Nothing AndAlso start.CompareTo(wordEndPtr) < 0
 
+                                ' Find the end of the current line, or the word end, whichever comes first
+                                Dim lineEnd = start.GetLineStartPosition(1)
+                                If lineEnd Is Nothing OrElse lineEnd.CompareTo(wordEndPtr) > 0 Then
+                                    lineEnd = wordEndPtr
+                                Else
+                                    ' Move to the last character of the current line
+                                    lineEnd = lineEnd.GetPositionAtOffset(0, LogicalDirection.Backward)
+                                    If lineEnd Is Nothing OrElse lineEnd.CompareTo(start) <= 0 Then
+                                        lineEnd = wordEndPtr
+                                    End If
+                                End If
+
+                                ' Enumerate all rectangles for the word range (handles line wraps)
+                                Dim rectStart = start.GetCharacterRect(LogicalDirection.Forward)
+                                Dim rectEnd = lineEnd.GetCharacterRect(LogicalDirection.Backward)
+                                If Not rectStart.IsEmpty AndAlso Not rectEnd.IsEmpty Then
+                                    Dim rect As New Rect(rectStart.TopLeft, rectEnd.BottomRight)
+                                    rect.Offset(0, -2)
+                                    If rect.Width > 0 AndAlso rect.Height > 0 Then
+                                        errRectangles.Add(rect)
+                                    End If
+                                End If
+
+                                If lineEnd Is wordEndPtr Then
+                                    Exit While
+                                End If
+                                start = lineEnd
+
+                            End While
+                        End If
+                    Next
                 End If
-
-                startPointer = startPointer.GetNextContextPosition(LogicalDirection.Forward)
-
+                pointer = pointer.GetNextContextPosition(LogicalDirection.Forward)
             End While
 
-            ' add the custom underlineAdorner
             If errRectangles.Count > 0 Then
                 Dim underlineAdorner = New ErrorLineAdorner(_parentRtb, errRectangles)
                 adornLayer.Add(underlineAdorner)
             End If
 
         End Sub
+
 
 
         ''' <summary>
@@ -776,15 +789,11 @@ Public Class SpellChecker
                 Dim text As String = _parentTextBox.Text
 
                 If text IsNot Nothing Then
-
                     Dim errors = SpellChecker.GetSpellingErrors(text)
-                    If errors IsNot Nothing Then
+                    If errors IsNot Nothing AndAlso errors.Count > 0 Then
                         Dim adornLayer = AdornerLayer.GetAdornerLayer(_parentTextBox)
-                        For Each errorWord In errors
-                            HighlightWordOccurrences(errorWord, adornLayer)
-                        Next
+                        HighlightAllWordOccurrences(errors, adornLayer)
                     End If
-
                 End If
 
             End If
@@ -792,44 +801,42 @@ Public Class SpellChecker
         End Sub
 
 
-        ''' <summary>
-        ''' Highlights all occurrences of the specified errWord in the RichTextBox. Partial word matches are not highlighted.
-        ''' </summary>
-        ''' 
-        Private Sub HighlightWordOccurrences(errStr As String, adornLayer As AdornerLayer)
+        Private Sub HighlightAllWordOccurrences(errorWords As List(Of String), adornLayer As AdornerLayer)
 
+            Dim errorWordSet As New HashSet(Of String)(errorWords)
             Dim errRectangles As New List(Of Rect)
+            SpellErrors.Clear()
 
             Dim fullText = _parentTextBox.Text
-            Dim errPositions = SpellChecker.FindFullWordIndices(fullText, errStr)
+            If String.IsNullOrEmpty(fullText) OrElse errorWordSet.Count = 0 Then Return
 
-            If errPositions.Count > 0 Then
-
-                'TODO: Handle error word spanning two lines since too long
-                For Each errPos In errPositions
+            ' Use regex to find all words and their positions
+            Dim matches = Regex.Matches(fullText, "\b\w+\b")
+            For Each match As Match In matches
+                Dim word = match.Value
+                If errorWordSet.Contains(word) Then
                     Try
-                        Dim rect1 = _parentTextBox.GetRectFromCharacterIndex(errPos)
-                        Dim rect2 = _parentTextBox.GetRectFromCharacterIndex(errPos + errStr.Length)
+                        Dim rect1 = _parentTextBox.GetRectFromCharacterIndex(match.Index)
+                        Dim rect2 = _parentTextBox.GetRectFromCharacterIndex(match.Index + word.Length)
                         If Not rect1.IsEmpty AndAlso Not rect2.IsEmpty Then
                             rect1.Width = rect2.Right - rect1.Left
                             rect1.Offset(0, -2)
                             Dim errInfo As New SpellErrorInfo
                             With errInfo
                                 .ErrorRectangle = rect1
-                                .MisspelledWord = errStr
+                                .MisspelledWord = word
                                 SpellErrors.Add(errInfo)
                             End With
                             errRectangles.Add(rect1)
                         End If
                     Catch ex As Exception
                     End Try
-                Next
-
-                If errRectangles.Count > 0 Then
-                    Dim underlineAdorner = New ErrorLineAdorner(_parentTextBox, errRectangles)
-                    adornLayer.Add(underlineAdorner)
                 End If
+            Next
 
+            If errRectangles.Count > 0 Then
+                Dim underlineAdorner = New ErrorLineAdorner(_parentTextBox, errRectangles)
+                adornLayer.Add(underlineAdorner)
             End If
 
         End Sub

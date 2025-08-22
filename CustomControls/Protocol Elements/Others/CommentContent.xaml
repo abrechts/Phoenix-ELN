@@ -8,7 +8,7 @@
              mc:Ignorable="d"      
              d:DesignHeight="450" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance Type=data:tblComments}" DataContext="{Binding tblComments}" 
-             Background="transparent" HorizontalAlignment="Left" >
+             Background="transparent" HorizontalAlignment="Left">
 
     <UserControl.Resources>
 
@@ -57,6 +57,11 @@
 
     </UserControl.Resources>
 
+    <!--Catch pasted event-->
+    <UserControl.CommandBindings>
+        <CommandBinding Command="ApplicationCommands.Paste" Executed="PasteExecuted" />
+    </UserControl.CommandBindings>
+
     <Grid x:Name="sharedSizeGrid">
 
         <Grid.ColumnDefinitions>
@@ -66,7 +71,7 @@
         </Grid.ColumnDefinitions>
 
         <RichTextBox x:Name="rtbComments" Grid.Column="2" DataObject.Pasting="rtbComments_Pasting" BorderThickness="0" AllowDrop="False"         
-           local:RichTextBoxHelper.DocumentXaml="{Binding CommentFlowDoc}" Margin="-5,0,4,1" FontFamily="Segoe UI" FontSize="12.5">
+            local:RichTextBoxHelper.DocumentXaml="{Binding CommentFlowDoc}"  Margin="-5,0,4,1" FontFamily="Segoe UI" FontSize="12.5">
 
             <RichTextBox.Resources>
                 <!--ensures single line space after RETURN-->

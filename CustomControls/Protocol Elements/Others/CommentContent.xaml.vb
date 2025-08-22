@@ -1,11 +1,14 @@
-﻿Imports System.Text.RegularExpressions
+﻿Imports System.Globalization
+Imports System.IO
+Imports System.Text
+Imports System.Text.RegularExpressions
 Imports System.Windows
 Imports System.Windows.Controls
 Imports System.Windows.Documents
 Imports System.Windows.Input
 Imports System.Windows.Markup
 Imports System.Windows.Media
-
+Imports Clipboard = System.Windows.Clipboard
 
 
 Public Class CommentContent
@@ -60,11 +63,11 @@ Public Class CommentContent
 
 
     ''' <summary>
-    ''' The maximum allowed characters for user input. The default value 
-    ''' of zero means no restriction.
+    ''' The maximum allowed number of lines of comment text. This prevents print page break issues and also 
+    ''' ensures a balanced visual protocol layout.
     ''' </summary>
     ''' 
-    Private Const MaxCharacters As Integer = 16 * 1024 * 1024  '16 MB
+    Private Const MaxLines As Integer = 25
 
 
     ''' <summary>
@@ -79,15 +82,30 @@ Public Class CommentContent
 
     End Sub
 
-    Private Function GetDocLength() As Integer
 
-        ' Dim tr = New TextRange(rtbComments.Document.ContentStart, rtbComments.Document.ContentEnd)
-        ' Return tr.Text.Length
+    ''' <summary>
+    ''' Gets the current number of characters the XAML representation of the comment document contains.
+    ''' </summary>
+    ''' 
+    Private Function GetDocLength() As Integer
 
         Dim docXAML = XamlWriter.Save(rtbComments.Document)
         Return docXAML.Length
 
     End Function
+
+
+    ''' <summary>
+    ''' Performs spell checking after pasting
+    ''' </summary>
+    '''
+    Private Sub PasteExecuted(sender As Object, e As ExecutedRoutedEventArgs)   'XAML event
+
+        rtbSpellChecker.DoSpellCheck()
+
+    End Sub
+
+
 
     ''' <summary>
     ''' Disables all menu items that require text selection.
@@ -180,42 +198,266 @@ Public Class CommentContent
     End Sub
 
 
-    Private _IsPasting As Boolean = False
-
     ''' <summary>
     ''' Validates the content to be pasted
     ''' </summary>
     ''' 
     Private Sub rtbComments_Pasting(sender As Object, e As DataObjectPastingEventArgs)
 
-        Dim clipFormats = e.SourceDataObject.GetFormats()
-        _IsPasting = True
+        If Clipboard.ContainsData(DataFormats.Rtf) Then
 
-        If Clipboard.ContainsText Then    'pasting a copied image file is internally disabled in RichTextBox
+            ' Insert RTF content
+            '--------------------
 
-            If Clipboard.ContainsData(DataFormats.Rtf) Then
+            'detect embedded rtf graphics
+            Dim rtfText As String = Clipboard.GetData(DataFormats.Rtf) '.ToString()
+            Dim pictRegex As New Regex("\\pict", RegexOptions.IgnoreCase)
 
-                Dim rtfText As String = Clipboard.GetData(DataFormats.Rtf).ToString()
-                Dim pictRegex As New Regex("\\pict", RegexOptions.IgnoreCase)
-                Dim hasEmbeddedGraphics = pictRegex.IsMatch(rtfText)
+            If pictRegex.IsMatch(rtfText) Then
 
-                If hasEmbeddedGraphics Then
-                    ' cancel if embedded images in RTF
-                    e.CancelCommand()
-                    Dispatcher.BeginInvoke(CType(Function() MsgBox("Sorry, can't paste comments " + vbCrLf +
-                      "containing graphics!", MsgBoxStyle.Information, "Comment Validation"), Action))
-                    Exit Sub
-                End If
+                ' cancel if embedded images in RTF
+                Dispatcher.BeginInvoke(CType(Function() MsgBox("Sorry, can't paste comments " + vbCrLf +
+                        "containing graphics!", MsgBoxStyle.Information, "Comment Validation"), Action))
+                e.CancelCommand()
+                Exit Sub
 
-                Dim clipText = Clipboard.GetText()
-                If (GetDocLength() + rtfText.Length) <= MaxCharacters Then
-                    ' proceed with paste
-                    e.FormatToApply = DataFormats.Rtf
-                Else
-                    ' cancel if exceeding maximum length
-                    e.CancelCommand()
-                    Dispatcher.BeginInvoke(CType(Function() MsgBox("Pasting the clipboard content would exceed" + vbCrLf +
-                      "the maximum allowed text length!", MsgBoxStyle.Information, "Comment Validation"), Action))
+            End If
+
+            ' normalize content and insert into rtbComments (instead of paste)
+            InsertRTF(rtfText, rtbComments, MaxLines)
+            e.CancelCommand()
+
+
+        ElseIf Clipboard.ContainsData(DataFormats.Text) OrElse Clipboard.ContainsData(DataFormats.UnicodeText) Then
+
+            ' Insert plain or unicode text content
+            '-------------------------------------
+
+            Dim isUnicodeText = Clipboard.ContainsData(DataFormats.UnicodeText)
+
+            'check for max size limit
+            Dim clipText = If(isUnicodeText, Clipboard.GetData(DataFormats.UnicodeText), Clipboard.GetData(DataFormats.Text))
+
+            ' cancel if resulting in too many lines
+            If TooManyResultingLines(rtbComments, clipText, MaxLines) Then
+                Dispatcher.BeginInvoke(CType(Function() MsgBox("Sorry, pasting would exceed the " + vbCrLf +
+                    $"limit of {MaxLines} comment lines!", MsgBoxStyle.Information, "Comment Validation"), Action))
+                e.CancelCommand()
+                Exit Sub
+            End If
+
+            With rtbComments
+
+                .BeginChange()
+
+                Dim caretRange = New TextRange(.CaretPosition, .CaretPosition)
+                With caretRange
+                    .Text = clipText
+                    ' apply format changes in FlowDocument here ....
+                    .ApplyPropertyValue(TextElement.FontSizeProperty, rtbComments.FontSize)
+                    .ApplyPropertyValue(TextElement.FontFamilyProperty, rtbComments.FontFamily)
+                    .ApplyPropertyValue(TextElement.ForegroundProperty, Brushes.Black)  'required if formatted text of different foreground was pasted just before.
+                End With
+
+                ' apply default block line height
+                For Each block In .Document.Blocks
+                    If TypeOf block Is Paragraph Then
+                        block.Margin = New Thickness(0)
+                    End If
+                Next
+
+                rtbComments.CaretPosition = caretRange.End
+
+                .EndChange()
+
+            End With
+
+            e.FormatToApply = If(isUnicodeText, DataFormats.UnicodeText, DataFormats.Text)
+            e.CancelCommand()
+
+        Else
+
+            'skip any other format
+            e.CancelCommand()
+
+        End If
+
+    End Sub
+
+
+    ''' <summary>
+    ''' Converts the specified RTF string into a FlowDocument, normalizes it to fit the required font and line spacing 
+    ''' properties, and finally inserts the result into into targetRtb at its current caret position.
+    ''' </summary>
+    ''' <returns>False, if the resulting number of text lines would exceed the specified maxLines.</returns>
+    ''' 
+    Private Function InsertRTF(rtfText As String, targetRtb As RichTextBox, maxLines As Integer) As Boolean
+
+        Dim tmpRtb As New RichTextBox
+
+        ' load RTF into the temp document
+        Dim tmpRange = New TextRange(tmpRtb.Document.ContentStart, tmpRtb.Document.ContentEnd.GetInsertionPosition(LogicalDirection.Backward))
+        Using ms As New MemoryStream(Encoding.UTF8.GetBytes(rtfText))
+            tmpRange.Load(ms, DataFormats.Rtf)
+        End Using
+
+        Dim doc = tmpRtb.Document
+
+        ' apply format changes in FlowDocument here ....
+        tmpRange.ApplyPropertyValue(TextElement.FontSizeProperty, rtbComments.FontSize)
+        tmpRange.ApplyPropertyValue(TextElement.FontFamilyProperty, rtbComments.FontFamily)
+
+        ' remove trailing empty newline, if present 
+        If doc.Blocks.Count > 0 Then
+            Dim lastBlock = TryCast(doc.Blocks.LastBlock, Paragraph)
+            If lastBlock IsNot Nothing AndAlso String.IsNullOrEmpty(New TextRange(lastBlock.ContentStart, lastBlock.ContentEnd).Text.Trim()) Then
+                doc.Blocks.Remove(lastBlock)
+                tmpRange = New TextRange(tmpRtb.Document.ContentStart, tmpRtb.Document.ContentEnd.GetInsertionPosition(LogicalDirection.Backward))
+            End If
+        End If
+
+        ' cancel if table elements present
+        If doc.Blocks.OfType(Of Table).Any Then
+            Dispatcher.BeginInvoke(CType(Function() MsgBox("Sorry, can't paste table elements " + vbCrLf +
+               "(including from HTML content).", MsgBoxStyle.Information, "Comment Validation"), Action))
+            Return False
+        End If
+
+        ' cancel if resulting in too many rtbComments text lines
+        If TooManyResultingLines(rtbComments, tmpRange.Text, maxLines) Then
+            Dispatcher.BeginInvoke(CType(Function() MsgBox("Sorry, pasting would exceed the " + vbCrLf +
+                  $"limit of {maxLines} comment lines!", MsgBoxStyle.Information, "Comment Validation"), Action))
+            Return False
+        End If
+
+        ' apply default block line height
+        For Each block In doc.Blocks
+            If TypeOf block Is Paragraph Then
+                block.Margin = New Thickness(0)
+            End If
+        Next
+
+        ' apply default bullet list line height
+        For Each list As List In doc.Blocks.OfType(Of List)()
+            For Each listItem As ListItem In list.ListItems
+                For Each para As Paragraph In listItem.Blocks.OfType(Of Paragraph)()
+                    para.Margin = New Thickness(0)
+                Next
+            Next
+        Next
+
+        With targetRtb
+
+            .BeginChange()
+
+            Dim dstRange = New TextRange(.CaretPosition, .CaretPosition)
+            Using ms As New MemoryStream
+                tmpRange.Save(ms, DataFormats.XamlPackage)
+                ms.Seek(0, SeekOrigin.Begin)
+                dstRange.Load(ms, DataFormats.XamlPackage)
+            End Using
+
+            .CaretPosition = dstRange.End
+
+            ForceBlackTyping(rtbComments)
+
+            .EndChange()
+
+        End With
+
+        Return True
+
+    End Function
+
+
+    ''' <summary>
+    ''' Ensures that typing at the text caret position occurs in default font properties, including foreground color.
+    ''' </summary>
+    ''' 
+    Private Sub ForceBlackTyping(rtb As RichTextBox)
+
+        ' If already black, nothing to do
+        Dim current = rtb.Selection.GetPropertyValue(TextElement.ForegroundProperty)
+        If TypeOf current Is SolidColorBrush AndAlso DirectCast(current, SolidColorBrush).Color = Colors.Black Then
+            Exit Sub
+        End If
+
+        ' Locate the inline and its paragraph
+        Dim caret = rtb.CaretPosition
+        Dim inline = GetAncestorInline(caret)
+        Dim para As Paragraph = caret.Paragraph
+
+        If para Is Nothing AndAlso inline IsNot Nothing Then
+            para = TryCast(inline.Parent, Paragraph)
+        ElseIf para Is Nothing Then
+            para = New Paragraph()
+            rtb.Document.Blocks.Add(para)
+        End If
+
+        ' Create and insert the black Run
+        Dim blackRun = New Run With {
+            .Foreground = Brushes.Black,
+            .FontSize = rtbComments.FontSize,
+            .FontFamily = rtbComments.FontFamily
+        }
+
+        If inline IsNot Nothing Then
+            para.Inlines.InsertAfter(inline, blackRun)
+        Else
+            para.Inlines.Add(blackRun)
+        End If
+
+        ' Move caret into the new run
+        rtb.CaretPosition = blackRun.ContentEnd
+
+    End Sub
+
+
+    Private Function GetAncestorInline(pointer As TextPointer) As Inline
+
+        Dim d As DependencyObject = pointer.Parent
+        While d IsNot Nothing AndAlso TypeOf d IsNot Inline
+            If TypeOf d Is TextElement Then
+                d = DirectCast(d, TextElement).Parent
+            Else
+                Exit While
+            End If
+        End While
+
+        Return TryCast(d, Inline)
+
+    End Function
+
+
+    Private _wasKeyPressed As Boolean = False
+
+    Private Sub rtbComments_PreviewKeyDown(sender As Object, e As KeyEventArgs) Handles rtbComments.PreviewKeyDown
+
+        _wasKeyPressed = True
+
+        If Keyboard.Modifiers = ModifierKeys.Control Then
+
+            If e.Key = Key.L Then
+
+                ' bullet list item
+                EditingCommands.ToggleBullets.Execute(Nothing, rtbComments)
+
+            ElseIf e.Key = Key.Z OrElse e.Key = Key.Y Then
+
+                ' important for preventing double undo or redo!
+                e.Handled = True
+
+            End If
+
+        Else
+
+            ' cancel entering new line exceeding MaxLines
+            If e.Key = Key.Return OrElse e.Key = Key.Enter Then
+
+                If GetVisualLineCount(rtbComments) >= MaxLines Then
+                    MsgBox("Sorry, adding another line would exceed" + vbCrLf +
+                        $"the limit of {MaxLines} comment lines.", MsgBoxStyle.Information, "Comment Validation")
+                    e.Handled = True
                 End If
 
             End If
@@ -226,57 +468,32 @@ Public Class CommentContent
 
 
     ''' <summary>
-    ''' After completed pasting: Formats resulting text to fit current font size and family, as well as the default paragraph line spacing. 
+    ''' Catches rtb height changes caused by new lines appearing after word wrapping
     ''' </summary>
     ''' 
-    Private Sub rtbComments_TextChanged() Handles rtbComments.TextChanged
+    Private Sub rtbComments_SizeChanged(sender As Object, e As SizeChangedEventArgs) Handles rtbComments.SizeChanged
 
-        If _IsPasting Then
+        If _wasKeyPressed AndAlso e.NewSize.Height > e.PreviousSize.Height Then
 
-            With rtbComments
+            If GetVisualLineCount(rtbComments) > MaxLines Then
 
-                Dim docSel As New TextRange(.Document.ContentStart, .Document.ContentEnd)
+                'remove previously entered character
+                Dim prevPos As TextPointer = rtbComments.CaretPosition.GetPositionAtOffset(-1, LogicalDirection.Forward)
+                If prevPos IsNot Nothing Then
+                    Dim tr As New TextRange(prevPos, rtbComments.CaretPosition)
+                    tr.Text = String.Empty
+                End If
 
-                'apply standard font size and family
-                docSel.ApplyPropertyValue(TextElement.FontSizeProperty, .FontSize)
-                docSel.ApplyPropertyValue(TextElement.FontFamilyProperty, .FontFamily)
+                MsgBox($"Sorry, the maximum number of {MaxLines} comment " + vbCrLf +
+                        "lines would be exceed when inserting this " + vbCrLf +
+                       "character, due to word wrapping.", MsgBoxStyle.Information, "Comment Validation")
 
-                'apply default block line height
-                For Each block In .Document.Blocks
-                    If TypeOf block Is Paragraph Then
-                        block.Margin = New Thickness(0)
-                    End If
-                Next
-
-            End With
-
-            _IsPasting = False
-
-        End If
-
-    End Sub
-
-
-    Private Sub rtbComments_PreviewKeyDown(sender As Object, e As KeyEventArgs) Handles rtbComments.PreviewKeyDown
-
-        If Keyboard.Modifiers = ModifierKeys.Control Then
-
-            If e.Key = Key.L Then
-                'bullet list item
-                EditingCommands.ToggleBullets.Execute(Nothing, rtbComments)
-                Exit Sub
             End If
 
         End If
 
-        If (GetDocLength() >= MaxCharacters) Then
-
-            e.Handled = True
-            MsgBox("Maximum comment length reached!", MsgBoxStyle.Information, "Comment Validation")
-
-        End If
-
     End Sub
+
 
     Private Sub rtbComments_LostFocus() Handles rtbComments.LostFocus
 
@@ -290,6 +507,78 @@ Public Class CommentContent
         End With
 
     End Sub
+
+
+    ''' <summary>
+    ''' Gets if the maxNumber of text lines in the RichTextBox would be exceeded if the specified insertStr would be inserted.
+    ''' </summary>
+    ''' 
+    Private Function TooManyResultingLines(rtb As RichTextBox, insertStr As String, maxLines As Integer) As Boolean
+
+        ' MaxLines+1 is applied for compensating the line count overlap always resulting from inserting
+        ' into an existing original line (no matter if empty or not).
+
+        Return GetVisualLineCount(rtbComments) + GetInsertTextVisualLineCount(rtbComments, insertStr) > (maxLines + 1)
+
+    End Function
+
+
+    Private Function GetInsertTextVisualLineCount(targetRtb As RichTextBox, insertStr As String) As Integer
+
+        ' Create a temporary RichTextBox to measure the visual lines
+
+        Dim tempRtb As New RichTextBox()
+
+        With tempRtb
+
+            .FontSize = targetRtb.FontSize
+            .FontFamily = targetRtb.FontFamily
+            .Width = targetRtb.ActualWidth
+            .Padding = targetRtb.Padding
+
+            .Document.Blocks.Clear()
+            .Document.Blocks.Add(New Paragraph(New Run(insertStr)))
+
+            .Measure(New Size)
+            .Arrange(New Rect)
+
+            Return GetVisualLineCount(tempRtb)
+
+        End With
+
+    End Function
+
+
+
+    ''' <summary>
+    ''' Gets the number of lines actually present in the FlowDocument of the specified RichTextBox, including wrapped text.
+    ''' </summary>
+    ''' 
+    Private Function GetVisualLineCount(rtb As RichTextBox) As Integer
+
+        If Not rtb.IsLoaded Then
+            rtb.UpdateLayout()
+        End If
+
+        Dim pointer As TextPointer = rtb.Document.ContentStart.GetLineStartPosition(0)
+        Dim lastY As Double = -1
+        Dim count As Integer = 0
+
+        While pointer IsNot Nothing AndAlso pointer.CompareTo(rtb.Document.ContentEnd) < 0
+
+            Dim rect = pointer.GetCharacterRect(LogicalDirection.Forward)
+            If rect.Top > lastY Then
+                count += 1
+                lastY = rect.Top
+            End If
+
+            pointer = pointer.GetLineStartPosition(1)
+
+        End While
+
+        Return count
+
+    End Function
 
 
     Friend Sub HighlightBlue_Click(sender As Object, e As RoutedEventArgs)
