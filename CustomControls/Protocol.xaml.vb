@@ -1,5 +1,4 @@
-﻿Imports System.Formats
-Imports System.Globalization
+﻿Imports System.Globalization
 Imports System.IO
 Imports System.Windows
 Imports System.Windows.Controls
@@ -10,9 +9,6 @@ Imports ElnBase
 Imports ElnBase.ELNEnumerations
 Imports ElnCoreModel
 Imports GongSolutions.Wpf.DragDrop
-Imports Microsoft.EntityFrameworkCore
-Imports Microsoft.EntityFrameworkCore.Metadata.Internal
-Imports Microsoft.EntityFrameworkCore.Proxies.Internal
 Imports Microsoft.Win32
 
 
@@ -240,6 +236,8 @@ Public Class Protocol
         addToolbar.Visibility = Visibility.Collapsed
         pnlProtocol.Background = Brushes.Transparent
         scrlProtocol.Margin = New Thickness(4, 4, 4, 8)
+
+        scrlProtocol.VerticalScrollBarVisibility = ScrollBarVisibility.Auto 'effectively hides it for 'indefinite' printing height
 
         UnselectAll()
 

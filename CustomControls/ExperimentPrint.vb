@@ -115,7 +115,7 @@ Public Class ExperimentPrint
     Private Shared Function SetPrintTemplate(expEntry As tblExperiments, skArea As SketchArea, pageSize As PaperSize) As PrintPageTemplate
 
         Dim printExpContent As New ExperimentContent
-        printExpContent.Width = 686     'current UI display width of this data template
+        printExpContent.Width = 680     'current UI display width of this data template
         printExpContent.DataContext = expEntry
 
         WPFToolbox.WaitForPriority(Threading.DispatcherPriority.ContextIdle)

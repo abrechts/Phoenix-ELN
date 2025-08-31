@@ -73,7 +73,7 @@
             
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="20"/>
+                <ColumnDefinition Width="14"/>
             </Grid.ColumnDefinitions>
 
             <ContentControl x:Name="itemContent" Grid.Column="0" Content="{Binding}" ContentTemplateSelector="{StaticResource protocolTypeSel}"
@@ -96,7 +96,7 @@
                     </Style>
                 </Border.Style>
 
-                <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="#FF313131" FontSize="12" Text="☰"/>
+                <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="#FF636363" FontSize="12" Text="☰"/>
 
             </Border>
 

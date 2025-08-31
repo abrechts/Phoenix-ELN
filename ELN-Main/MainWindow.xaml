@@ -4,10 +4,11 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:custom="clr-namespace:CustomControls;assembly=CustomControls"
-        xmlns:data="clr-namespace:ElnCoreModel;assembly=ElnCoreModel" xmlns:componentModel="clr-namespace:System.ComponentModel;assembly=WindowsBase"
+        xmlns:data="clr-namespace:ElnCoreModel;assembly=ElnCoreModel" 
+        xmlns:componentModel="clr-namespace:System.ComponentModel;assembly=WindowsBase"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=data:tblUsers}"
-        Title="Phoenix ELN" Height="800" MinWidth="1326" MinHeight="800" d:Height="900" TextOptions.TextFormattingMode="Display" 
+        Title="Phoenix ELN" Height="800" MinWidth="1330" MinHeight="800" d:Height="900" TextOptions.TextFormattingMode="Display" 
         WindowStartupLocation="CenterScreen">
 
     <Window.Resources>
@@ -23,6 +24,7 @@
                     <componentModel:SortDescription PropertyName="SequenceNr" Direction="Ascending"/>
                 </CollectionViewSource.SortDescriptions>
             </CollectionViewSource>
+            
         </ResourceDictionary>
 
     </Window.Resources>
@@ -293,7 +295,7 @@
 
         <!--Experiment Content (center dock)-->
         
-       <Border x:Name="docBorder" Background="whitesmoke" BorderBrush="gray" BorderThickness="1" CornerRadius="8" Width="700" Margin="0,8">
+       <Border x:Name="docBorder" Background="whitesmoke" BorderBrush="gray" BorderThickness="1" CornerRadius="8" Width="706" Margin="0,8">
 
             <TabControl x:Name="tabExperiments" Background="Transparent" Margin="6">
                 <!--contains experiment content tabs-->
