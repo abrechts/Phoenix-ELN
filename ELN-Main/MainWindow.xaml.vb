@@ -39,7 +39,13 @@ Class MainWindow
             Application.Current.Shutdown()
         End If
 
-        SQLiteDbPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\Phoenix ELN Data\ElnData.db"
+        Dim dbFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\Phoenix ELN Data"
+        SQLiteDbPath = dbFolderPath + "\ElnData.db"
+
+        ' Create local data folder from code, if not created by installer for current user (e.g. after admin installation)
+        If Not Directory.Exists(dbFolderPath) Then
+            Directory.CreateDirectory(dbFolderPath)
+        End If
 
         ' Replace local database by demo database, if missing for some reason
         If Not File.Exists(SQLiteDbPath) Then
