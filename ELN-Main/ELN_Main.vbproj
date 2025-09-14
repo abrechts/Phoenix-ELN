@@ -15,11 +15,13 @@
     <PackageId>$(AssemblyName)</PackageId>
     <AssemblyName>PhoenixELN</AssemblyName>
     <ApplicationIcon>Resources\Application.ico</ApplicationIcon>
-    <StartupObject>Sub Main</StartupObject>
     <Version></Version>
     <Copyright>(c) Stefan Abrecht, ChemBytes</Copyright>
     <PackageProjectUrl></PackageProjectUrl>
+    <StartupObject>Sub Main</StartupObject>
   </PropertyGroup>
+
+  <ItemGroup />
 
   <ItemGroup>
     <Page Remove="App.xaml" />
@@ -42,6 +44,8 @@
     <Import Include="System.Windows.Shapes" />
     <Import Include="System.XML" />
   </ItemGroup>
+
+  <ItemGroup />
 
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.8">

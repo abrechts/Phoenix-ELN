@@ -1146,38 +1146,54 @@ Class MainWindow
 
                 '- experiment not yet present in tab
 
-                Dim leftmostExp = CType(tabExperiments.Items(0), tblExperiments)
-                Dim localStartIndex = If(leftmostExp.DisplayIndex = -2, 1, 0)   'displayIndex = -2 means server experiment (leftmost)
-                Dim firstLocalExp = CType(tabExperiments.Items(localStartIndex), tblExperiments)
+                If tabExperiments.Items.Count > 0 Then
 
-                If firstLocalExp IsNot Nothing Then
+                    Dim leftmostExp = CType(tabExperiments.Items(0), tblExperiments)
+                    Dim localStartIndex = If(leftmostExp.DisplayIndex = -2, 1, 0)   'displayIndex = -2 means server experiment (leftmost)
+                    Dim firstLocalExp = CType(tabExperiments.Items(localStartIndex), tblExperiments)
 
-                    Select Case firstLocalExp.DisplayIndex
+                    If firstLocalExp IsNot Nothing Then
 
-                        Case 0
+                        Select Case firstLocalExp.DisplayIndex
 
-                            'replace current leftmost exp tab
-                            firstLocalExp.DisplayIndex = Nothing
+                            Case 0
 
-                        Case -1
+                                'replace current leftmost exp tab
+                                firstLocalExp.DisplayIndex = Nothing
 
-                            'leftmost was pinned
-                            For i = localStartIndex + 1 To tabExperiments.Items.Count - 1
-                                Dim expItem = CType(tabExperiments.Items(i), tblExperiments)
-                                expItem.DisplayIndex += 1
-                            Next
-                            firstLocalExp.DisplayIndex = 1
+                            Case -1
 
-                    End Select
+                                'leftmost was pinned
+                                For i = localStartIndex + 1 To tabExperiments.Items.Count - 1
+                                    Dim expItem = CType(tabExperiments.Items(i), tblExperiments)
+                                    expItem.DisplayIndex += 1
+                                Next
+                                firstLocalExp.DisplayIndex = 1
 
-                    selExp.DisplayIndex = 0
+                        End Select
 
-                    UpdateExperimentTabs(selExp)
-                    DBContext.SaveChanges()     'no exp-level undo/redo required
+                        selExp.DisplayIndex = 0
+
+                        UpdateExperimentTabs(selExp)
+                        DBContext.SaveChanges()     'no exp-level undo/redo required
+
+                    End If
+
+                    tabExperiments.SelectedIndex = localStartIndex 'select first tab
+
+                Else
+
+                    ' no experiments present: rare special situation, but needs to be handled
+                    Try
+                        selExp.DisplayIndex = 0
+                        UpdateExperimentTabs(selExp)
+                        DBContext.SaveChanges()     'no exp-level undo/redo required
+                        tabExperiments.SelectedIndex = 0
+                    Catch ex As Exception
+                        'do nothing
+                    End Try
 
                 End If
-
-                tabExperiments.SelectedIndex = localStartIndex 'select first tab
 
             End If
         End If
