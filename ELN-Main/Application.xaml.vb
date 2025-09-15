@@ -12,8 +12,24 @@ Class Application
 
 
     Private Sub App_DispatcherUnhandledException(sender As Object, e As DispatcherUnhandledExceptionEventArgs)
-        MessageBox.Show("A system error occurred: " & e.Exception.Message, "Unhandled Error", MessageBoxButton.OK, MessageBoxImage.Error)
+
+        ' --> replace MsgBox by dialog with scrollable readonly textbox containing error stack inf
+
+        Dim errText = e.Exception.Message + vbCrLf + vbCrLf
+
+        Dim lstErrStack = e.Exception.StackTrace.Split(vbCrLf)
+        'take first 5 items with double newlines
+        errText += String.Join(vbCrLf + vbCrLf, lstErrStack.Take(5))
+
+        Dim crashDlg As New dlgCrashReport
+        With crashDlg
+            .txtErrLog.Text = errText
+            .ShowDialog()
+        End With
+
         e.Handled = True
+        Application.Current.Shutdown()
+
     End Sub
 
 End Class
