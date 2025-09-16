@@ -199,11 +199,11 @@ Public Class ExperimentBase
     ''' higher then the current client version, since there may be database structure changes across versions.
     ''' </remarks>
     ''' 
-    Public Shared Function ExportExperiment(expEntry As tblExperiments, exportFilePath As String, appVersion As String) As Boolean
+    Public Shared Function ExportExperiment(expEntry As tblExperiments, exportFilePath As String, appVersion As String, dbContext As ElnDbContext) As Boolean
 
         Try
 
-            Dim json = ExperimentToJsonString(expEntry, appVersion)
+            Dim json = ExperimentToJsonString(expEntry, appVersion, dbContext)
             File.WriteAllText(exportFilePath, json)
             Return True
 
@@ -225,50 +225,32 @@ Public Class ExperimentBase
     ''' higher then the current client version, since there may be database structure changes across versions.
     ''' </remarks>
     ''' 
-    Public Shared Function ExperimentToJsonString(expEntry As tblExperiments, appVersion As String) As String
+    Public Shared Function ExperimentToJsonString(expEntry As tblExperiments, appVersion As String, dbContext As ElnDbContext) As String
 
         Dim jsonOptions As New JsonSerializerOptions
         jsonOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles
         jsonOptions.WriteIndented = True
 
-        Dim res As New DefaultJsonTypeInfoResolver
-        res.Modifiers.Add(AddressOf ExcludeProperties)
+        ' clone current expEntry for subsequent changes
+        Dim expCopy = CType(dbContext.Entry(expEntry).CurrentValues.ToObject, tblExperiments)
 
-        jsonOptions.TypeInfoResolver = res
-
-        With expEntry
-
-            'serialize experiment
-            Dim jsonStr = JsonSerializer.Serialize(expEntry, jsonOptions)
-
-            'append app version property to ensure compatible import version
-            Dim jsonObject As JsonObject = JsonSerializer.Deserialize(Of JsonObject)(jsonStr)
-            jsonObject.Add("AppVersion", appVersion)
-            jsonStr = JsonSerializer.Serialize(jsonObject)
-
-            Return jsonStr
-
+        ' break upstream references of experiment to prevent serializing complete database
+        With expCopy
+            .UserID = Nothing
+            .ProjectID = Nothing
+            .ProjFolderID = Nothing
         End With
 
+        Dim jsonStr = JsonSerializer.Serialize(expCopy, jsonOptions)
+
+        'append app version property to ensure compatible import version
+        Dim jsonObject As JsonObject = JsonSerializer.Deserialize(Of JsonObject)(jsonStr)
+        jsonObject.Add("AppVersion", appVersion)
+        jsonStr = JsonSerializer.Serialize(jsonObject)
+
+        Return jsonStr
+
     End Function
-
-
-    Public Shared Sub ExcludeProperties(info As JsonTypeInfo)
-
-        If info.Kind = JsonTypeInfoKind.Object Then
-            If info.Type Is GetType(tblExperiments) Then
-                ' Exclude properties with specific names
-                For Each prop In info.Properties
-                    If prop.Name = "Project" OrElse prop.Name = "User" Then
-                        prop.ShouldSerialize = Function(obj, value) As Boolean
-                                                   Return False
-                                               End Function
-                    End If
-                Next
-            End If
-        End If
-
-    End Sub
 
 
     ''' <summary>

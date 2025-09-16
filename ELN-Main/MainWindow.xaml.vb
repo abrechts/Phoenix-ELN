@@ -1350,7 +1350,7 @@ Class MainWindow
             .Title = "Export current experiment as file ..."
 
             If .ShowDialog Then
-                ExperimentBase.ExportExperiment(currExp, .FileName, ApplicationVersion.ToString)
+                ExperimentBase.ExportExperiment(currExp, .FileName, ApplicationVersion.ToString, DBContext)
                 CustomControls.My.MySettings.Default.LastExportDir = IO.Path.GetDirectoryName(.FileName)
             End If
 

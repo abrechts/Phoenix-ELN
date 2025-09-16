@@ -1,5 +1,4 @@
 ﻿Imports ElnBase
-Imports Microsoft.Win32
 Imports System.Windows.Threading
 
 ''' <summary>
