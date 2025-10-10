@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="AdjacentSequenceItem"
+﻿<UserControl x:Class="ParallelSequenceItem"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -7,7 +7,7 @@
              mc:Ignorable="d">
     <Grid>
 
-        <StackPanel x:Name="pnlDownstream" Orientation="Horizontal" VerticalAlignment="Center"  HorizontalAlignment="Left" >
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Center"  HorizontalAlignment="Left" >
 
             <StackPanel x:Name="pnlConvergingUp" VerticalAlignment="Center" Orientation="Horizontal" Visibility="collapsed" 
                 d:Visibility="Visible" >
@@ -25,18 +25,10 @@
 
             </StackPanel>
 
-            <!--vertical connector right-->
-            <Rectangle x:Name="VerticalConnectorLeft" Width="2" Fill="#FFC283FC" Margin="0,15,-2,15"
-                Visibility="{Binding ElementName=pnlConvergingDown, Path=Visibility}" HorizontalAlignment="Left"/>
-
             <StackPanel x:Name="pnlConvSequences" Grid.Column="1"  VerticalAlignment="Center" >
-                <Button Content="dummy seq 1" Height="20" Margin="4" Width="120" d:Visibility="Visible" Visibility="Collapsed"/>
-                <Button Content="dummy seq 2" Height="20" Margin="4" Width="120" d:Visibility="Visible" Visibility="Collapsed"/>
+                <d:Button d:Content="dummy seq 1" MinHeight="22" Margin="4,4" Padding="2,0" FontSize="10" MinWidth="110"/>
+                <d:Button d:Content="dummy seq 2" MinHeight="22" Margin="4,4" Padding="2,0" FontSize="10" MinWidth="110"/>
             </StackPanel>
-
-            <!--vertical connector right-->
-            <Rectangle x:Name="VerticalConnectorRight" Width="2" Fill="#FFC283FC" Margin="-2,15,0,15"
-               Visibility="{Binding ElementName=pnlConvergingDown, Path=Visibility}" HorizontalAlignment="Left"/>
 
             <StackPanel Name="pnlConvergingDown" Margin="0,0,0,0" VerticalAlignment="Center" Orientation="Horizontal" d:Visibility="Visible" 
                Visibility="Collapsed">

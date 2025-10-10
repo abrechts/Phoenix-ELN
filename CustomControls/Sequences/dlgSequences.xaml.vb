@@ -88,10 +88,14 @@ Public Class dlgSequences
 
     Private Sub cboDataContext_SelectionChanged() Handles cboDataContext.SelectionChanged
 
-        UseServerContext = (cboDataContext.SelectedItem Is cboItemServer)
-        My.Settings.UseServerSequences = UseServerContext
+        If cboDataContext.IsMouseOver Then      'ensure user interaction, not from initializing code
 
-        BuildSequences(ReferenceExperiment)
+            UseServerContext = (cboDataContext.SelectedItem Is cboItemServer)
+            My.Settings.UseServerSequences = UseServerContext
+
+            BuildSequences(ReferenceExperiment)
+
+        End If
 
     End Sub
 

@@ -140,7 +140,7 @@
                     Opacity="0.8" VerticalAlignment="Top" HorizontalAlignment="Right" Visibility="{Binding WorkflowState,
                     Converter={StaticResource expStateVisConv}}"/>
 
-                <Button x:Name="btnSequences" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,2,2" Background="Transparent" BorderBrush="#FF82B7FF"
+                <Button x:Name="btnSequences" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,2,3" Background="Transparent" BorderBrush="#FF82B7FF"
                    ToolTip="Display all synthetic steps leading &#x0a;to this step and away from it." Visibility="collapsed" d:Visibility="visible" >
                     <StackPanel Orientation="Horizontal" Margin="1,-2">
                         <TextBlock Text="🠪" FontSize="14" Foreground="#FF6E6E6E"/>

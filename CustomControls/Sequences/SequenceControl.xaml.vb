@@ -1,5 +1,7 @@
 ﻿
 Imports System.Windows
+Imports System.Windows.Media
+Imports System.Windows.Shapes
 Imports ElnBase
 Imports ElnCoreModel
 
@@ -10,6 +12,34 @@ Public Class SequenceControl
         Downstream
         Upstream
     End Enum
+
+
+    ''' <summary>
+    ''' Sets or gets the current running upstream sequence number
+    ''' </summary>
+    ''' 
+    Public Shared Property UpstreamSequenceNr As Integer
+
+
+    ''' <summary>
+    ''' Sets or gets the current running downstream sequence number
+    ''' </summary>
+    ''' 
+    Public Shared Property DownstreamSequenceNr As Integer
+
+
+    ''' <summary>
+    ''' Sets or gets all sequences present in the downstream panel of this sequence
+    ''' </summary>
+    ''' 
+    Private DownstreamSequences As New List(Of SequenceControl)
+
+
+    ''' <summary>
+    ''' Sets or gets all sequences present in the upstream panel of this sequence
+    ''' </summary>
+    ''' 
+    Private UpstreamSequences As New List(Of SequenceControl)
 
 
     ''' <summary>
@@ -69,6 +99,22 @@ Public Class SequenceControl
 
 
     ''' <summary>
+    ''' Sets or gets a list of all downstream sequence groups which converge to their right to a 
+    ''' single sequence or material.
+    ''' </summary>
+    ''' 
+    Friend Property ConvergingDownstreamGroups As New List(Of List(Of SequenceControl))
+
+
+    ''' <summary>
+    ''' Sets or gets a list of all upstream sequence groups which converge to their left to a 
+    ''' single sequence or material.
+    ''' </summary>
+    ''' 
+    Friend Property ConvergingUpstreamGroups As New List(Of List(Of SequenceControl))
+
+
+    ''' <summary>
     ''' Occurs when this control is clicked
     ''' </summary>
     ''' 
@@ -113,8 +159,6 @@ Public Class SequenceControl
 
         SequenceTitle = "➤ Main Sequence"
 
-        UpdateLayout()
-
     End Sub
 
 
@@ -137,8 +181,12 @@ Public Class SequenceControl
         End If
 
         If direction = SequenceDirection.Downstream Then
+            DownstreamSequenceNr += 1
+            Me.SequenceTitle = "Sequence " + DownstreamSequenceNr.ToString
             AddDownstreamElements(connectingStep)
         Else
+            UpstreamSequenceNr -= 1
+            Me.SequenceTitle = "Sequence " + UpstreamSequenceNr.ToString
             AddUpstreamElements(connectingStep)
         End If
 
@@ -147,14 +195,116 @@ Public Class SequenceControl
 
     Private Sub Me_Loaded() Handles Me.Loaded
 
+        UpdateLayout()
+
+        CreateVerticalConnectorLines()
+
         AddHandler dlgSequences.ClearSequenceSelections, AddressOf dlgSequences_ClearSequenceSelections
 
     End Sub
 
 
-    Private UpstreamSequenceNr As Integer = 0
+    Public Sub CreateVerticalConnectorLines()
 
-    Private DownstreamSequenceNr As Integer = 0
+        If HasDownstreamConnections Then
+
+            VertPolylineRight.Points.Clear()
+
+            '  draw left vertical connect lines connecting all sequences
+            For Each seq In DownstreamSequences
+                Dim attachPointLeft = seq.GetVerticalAttachmentPointLeft
+                Dim attachPoint = seq.TranslatePoint(attachPointLeft, pnlDownstream)
+                If attachPoint.Y > 0 Then
+                    If seq IsNot DownstreamSequences.First Then
+                        attachPoint.Y += 2
+                    End If
+                    VertPolylineRight.Points.Add(attachPoint)
+                End If
+            Next
+
+            '  additionally draw vertical connect lines for connecting individual merging sequence groups to their right
+            For Each mergeGroup In ConvergingDownstreamGroups
+                Dim mergeLine As New Polyline With {.StrokeThickness = 2, .Stroke = New SolidColorBrush(ColorConverter.ConvertFromString("#FFC283FC"))}
+                For Each seq In mergeGroup
+                    Dim attachPointRight = seq.GetVerticalAttachmentPointRight
+                    Dim attachPoint = seq.TranslatePoint(attachPointRight, canvOverlayRight)
+                    If attachPoint.Y > 0 Then
+                        If seq IsNot DownstreamSequences.First Then
+                            attachPoint.Y += 2
+                        End If
+                        mergeLine.Points.Add(attachPoint)
+                    End If
+                Next
+                canvOverlayRight.Children.Add(mergeLine)
+            Next
+
+        End If
+
+
+        If HasUpstreamConnections Then
+
+            VertPolylineLeft.Points.Clear()
+
+            '  draw right vertical connect lines connecting all sequences
+            For Each seq In UpstreamSequences
+                Dim attachPointRight = seq.GetVerticalAttachmentPointRight
+                Dim attachPoint = seq.TranslatePoint(attachPointRight, canvOverlayLeft)
+                If attachPoint.Y > 0 Then
+                    If seq Is UpstreamSequences.Last Then
+                        attachPoint.Y += 2
+                    End If
+                    VertPolylineLeft.Points.Add(attachPoint)
+
+                    Debug.WriteLine(attachPoint.X.ToString + "; " + attachPoint.Y.ToString)
+
+                End If
+            Next
+
+            Debug.WriteLine("")
+
+            '  additionally draw vertical connect lines for connecting individual merging sequence groups to their left
+            For Each mergeGroup In ConvergingUpstreamGroups
+                Dim mergeLine As New Polyline With {.StrokeThickness = 2, .Stroke = New SolidColorBrush(ColorConverter.ConvertFromString("#FFC283FC"))}
+                For Each seq In mergeGroup
+                    Dim attachPointRight = seq.GetVerticalAttachmentPointLeft
+                    Dim attachPoint = seq.TranslatePoint(attachPointRight, canvOverlayLeft)
+                    If attachPoint.Y > 0 Then
+                        If seq IsNot UpstreamSequences.First Then
+                            attachPoint.Y += 2
+                        End If
+                        mergeLine.Points.Add(attachPoint)
+                    End If
+                Next
+                canvOverlayLeft.Children.Add(mergeLine)
+            Next
+
+        End If
+
+    End Sub
+
+
+    ''' <summary>
+    ''' Gets the attachment point of the horizontal upstream connector line in control coordinates, 
+    ''' or point value (0,0) if an error occurred.
+    ''' </summary>
+    '''
+    Public Function GetVerticalAttachmentPointLeft() As Point
+
+        Return horizConnLeft.TranslatePoint(New Point(0, 0), Me)
+
+    End Function
+
+
+    ''' <summary>
+    ''' Gets the attachment point of the horizontal downstream connector line in control coordinates, 
+    ''' or point value (0,0) if an error occurred.
+    ''' </summary>
+    '''
+    Public Function GetVerticalAttachmentPointRight() As Point
+
+        Return downConnector.TranslatePoint(New Point(downConnector.ActualWidth, 0), Me)
+
+    End Function
 
 
     ''' <summary>
@@ -163,7 +313,6 @@ Public Class SequenceControl
     ''' 
     Private Sub AddDownstreamElements(refStep As SequenceStep)
 
-        Dim downstreamSequences As New List(Of SequenceControl)
         Dim endReached As Boolean = False
 
         While Not endReached
@@ -194,43 +343,37 @@ Public Class SequenceControl
                 Case > 1 'multiple downstream connects -> branch off
 
                     HasDownstreamConnections = True
-                    VerticalConnectorRight.Visibility = Visibility.Visible
 
                     'create (recursive) downstream elements 
                     For Each connStep In nextConnects
-                        Dim downSequence As New SequenceControl(connStep, SequenceDirection.Downstream) 'recursive
+                        Dim downSequence As New SequenceControl(connStep, SequenceDirection.Downstream) 'recursive: constructor builds adjacent elements based on connStep
                         downSequence.ShowUpstreamConnector()
                         downSequence.HasUpstreamConnections = True
                         DownstreamSequences.Add(downSequence)   'add to list, not UI
                     Next
 
                     'detect converging downstream sequences
-                    Dim res = From seq In downstreamSequences Group By seq.EndInChIKey Into convergentGroups = Group
+                    Dim res = From seq In DownstreamSequences Group By seq.EndInChIKey Into convergentGroups = Group
 
                     For Each result In res
 
-                        Dim downStrElement As New AdjacentSequenceItem
+                        Dim downStrElement As New ParallelSequenceItem
 
                         If result.convergentGroups.Count = 1 Then
 
-                            'no convergence -> add next connecting sequence to downStream panel
+                            'no convergence -> add next connecting sequence to downstream panel
                             Dim seq = result.convergentGroups.First
                             downStrElement.pnlConvSequences.Children.Add(seq)
-                            DownstreamSequenceNr += 1
-                            seq.SequenceTitle = "Sequence " + DownstreamSequenceNr.ToString
 
                         Else
 
                             'convergent sequences -> add converging sequence group
 
-                            DownstreamSequenceNr += 1
+                            ConvergingDownstreamGroups.Add(result.convergentGroups.ToList)
 
-                            Dim pos As Integer = 0
                             For Each seq In result.convergentGroups
                                 seq.ShowDownstreamConnector()
                                 seq.HasDownstreamConnections = True
-                                seq.SequenceTitle = "Sequence " + DownstreamSequenceNr.ToString + NumberToCharacter(pos)
-                                pos += 1
                                 downStrElement.pnlConvSequences.Children.Add(seq)
                             Next
 
@@ -241,11 +384,7 @@ Public Class SequenceControl
 
                                 Dim connStep = finalStep.GetNextSteps.First
                                 Dim convergedSequence As New SequenceControl(connStep, SequenceDirection.Downstream) 'recursive
-                                With convergedSequence
-                                    DownstreamSequenceNr += 1
-                                    .HasUpstreamConnections = True
-                                    .SequenceTitle = "Sequence " + DownstreamSequenceNr.ToString
-                                End With
+                                convergedSequence.HasUpstreamConnections = True
 
                                 With downStrElement
                                     .pnlConvergingDown.Visibility = Visibility.Visible
@@ -296,7 +435,6 @@ Public Class SequenceControl
     ''' 
     Private Sub AddUpstreamElements(refStep As SequenceStep)
 
-        Dim upstreamSequences As New List(Of SequenceControl)
         Dim endReached As Boolean = False
 
         While Not endReached
@@ -327,7 +465,7 @@ Public Class SequenceControl
                 Case > 1 'multiple upstream connects -> branch off
 
                     HasUpstreamConnections = True
-                    VerticalConnectorLeft.Visibility = Visibility.Visible
+                    ' VerticalConnectorLeft.Visibility = Visibility.Visible
 
                     'create (recursive) upstream elements 
                     For Each connStep In prevConnects
@@ -342,28 +480,23 @@ Public Class SequenceControl
 
                     For Each result In res
 
-                        Dim upStrElement As New AdjacentSequenceItem
+                        Dim upStrElement As New ParallelSequenceItem
 
                         If result.convergentGroups.Count = 1 Then
 
                             'no convergence -> add next connecting sequence to downstream panel
                             Dim seq = result.convergentGroups.First
                             upStrElement.pnlConvSequences.Children.Add(seq)
-                            UpstreamSequenceNr -= 1
-                            seq.SequenceTitle = "Sequence " + UpstreamSequenceNr.ToString
 
                         Else
 
                             'convergent sequences -> add converging sequence group
 
-                            UpstreamSequenceNr -= 1
+                            ConvergingUpstreamGroups.Add(result.convergentGroups.ToList)
 
-                            Dim pos As Integer = 0
                             For Each seq In result.convergentGroups
                                 seq.ShowUpstreamConnector()
                                 seq.HasUpstreamConnections = True
-                                seq.SequenceTitle = "Sequence " + UpstreamSequenceNr.ToString + NumberToCharacter(pos)
-                                pos += 1
                                 upStrElement.pnlConvSequences.Children.Add(seq)
                             Next
 
@@ -377,12 +510,9 @@ Public Class SequenceControl
                                 With convergedSequence
                                     .ShowDownstreamConnector()
                                     .HasDownstreamConnections = True
-                                    UpstreamSequenceNr -= 1
-                                    .SequenceTitle = "Sequence " + UpstreamSequenceNr.ToString
                                 End With
 
                                 With upStrElement
-                                    .VerticalConnectorLeft.Visibility = Visibility.Visible
                                     .pnlConvergingUp.Visibility = Visibility.Visible
                                     .pnlConvergingUp.Children.Add(convergedSequence)
                                 End With
@@ -392,8 +522,8 @@ Public Class SequenceControl
                                 'merging to common product without further sequence
 
                                 With upStrElement
-                                    .btnMergeRightCenter.Visibility = Visibility.Visible
-                                    .pnlConvergingDown.Visibility = Visibility.Visible
+                                    .btnMergeLeftCenter.Visibility = Visibility.Visible
+                                    .pnlConvergingUp.Visibility = Visibility.Visible
                                 End With
 
                             End If
