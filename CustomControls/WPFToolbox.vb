@@ -325,7 +325,7 @@ Public Class WPFToolbox
 
     ''' <summary>
     ''' Gets the BitmapImage of the specified image file, corresponding to the original image reduced in 
-    ''' size to maxPixels. 
+    ''' size to maxPixels. Returns nothing if the file is not a valid image file. 
     ''' </summary>
     ''' <param name="filePath">Path to the image file. Does not check if the file actually is an image file.</param>
     ''' <param name="maxPixels">Optional: The  pixel count to reduce the image size to (width or height, 
@@ -336,23 +336,27 @@ Public Class WPFToolbox
 
         Dim imgBytes As Byte()
 
-        'get serialized image file
-        Using fs As New IO.FileStream(filePath, IO.FileMode.Open, IO.FileAccess.Read)
-            Using binReader As New IO.BinaryReader(fs)
+        ' get serialized image file
+        Using fs As New FileStream(filePath, IO.FileMode.Open, IO.FileAccess.Read)
+            Using binReader As New BinaryReader(fs)
                 imgBytes = binReader.ReadBytes(fs.Length)
             End Using
         End Using
 
-        'create temp bitmap for determining image width
+        ' create temp bitmap for determining image width
         Dim origBm As New BitmapImage
-        Using testMs As New IO.MemoryStream(imgBytes)
-            With origBm
-                .BeginInit()
-                .CacheOption = BitmapCacheOption.OnLoad
-                .StreamSource = testMs
-                .EndInit()
-            End With
-        End Using
+        Try
+            Using testMs As New IO.MemoryStream(imgBytes)
+                With origBm
+                    .BeginInit()
+                    .CacheOption = BitmapCacheOption.OnLoad
+                    .StreamSource = testMs
+                    .EndInit()
+                End With
+            End Using
+        Catch ex As Exception
+            Return Nothing 'invalid image file
+        End Try
 
         If maxPixels = Integer.MaxValue Then
             'original image size

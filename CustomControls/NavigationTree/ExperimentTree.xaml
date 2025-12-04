@@ -45,7 +45,7 @@
                 <HierarchicalDataTemplate DataType="{x:Type data:tblProjFolders}" ItemsSource="{Binding tblExperiments, 
                   Converter={StaticResource expCollectionViewConv}}">
                     <local:ProjFolderTreeHeader RequestAddExperiment="folderHeader_RequestAddExperiment" 
-                       RequestDeleteFolder="folderHeader_RequestDeleteFolder" />
+                       RequestDeleteFolder="folderHeader_RequestDeleteFolder" RequestArchiveFolder="folderHeader_RequestArchiveFolder" />
                 </HierarchicalDataTemplate>
 
                 <!--Experiment nodes-->

@@ -931,9 +931,9 @@ Public Class Protocol
                     Case EmbeddingResult.NoImageContent
                         errorList.Add("=> " + Path.GetFileName(filePath) + " - no valid image content.")
                 End Select
+            Else
+                insertPos += 1
             End If
-
-            insertPos += 1
 
         Next
 
@@ -971,7 +971,7 @@ Public Class Protocol
 
 
     ''' <summary>
-    ''' Embeds the specified file, if the file size restrictions are met.
+    ''' Embeds the specified file at the specified protocol item index, if the file size restrictions are met.
     ''' </summary>
     ''' 
     Private Function EmbedDocument(filePath As String, embedFileType As EmbeddedFileType,
@@ -1064,11 +1064,19 @@ Public Class Protocol
         Try
 
             If fileType = EmbeddedFileType.Document Then
+
                 Return File.ReadAllBytes(filePath)
+
             Else
+
                 Dim bmImage = WPFToolbox.BitmapImageFromFile(filePath, maxImagePixels)
-                isPortraitMode = If(bmImage.Width < bmImage.Height, 1, 0)
-                Return WPFToolbox.BitmapImageToBytes(bmImage, Path.GetExtension(filePath))
+                If bmImage IsNot Nothing Then
+                    isPortraitMode = If(bmImage.Width < bmImage.Height, 1, 0)
+                    Return WPFToolbox.BitmapImageToBytes(bmImage, Path.GetExtension(filePath))
+                Else
+                    Return Nothing
+                End If
+
             End If
 
         Catch ex As Exception
@@ -1077,15 +1085,22 @@ Public Class Protocol
             'just fine, so the file is copied to a temp file before serializing ... 
 
             Dim tmpPath = FileContent.TempDocsPath + "\copy.tmp"
-            Dim res As Byte()
+            Dim res As Byte() = Nothing
 
             File.Copy(filePath, tmpPath, True)
+
             If fileType = EmbeddedFileType.Document Then
+
                 res = File.ReadAllBytes(tmpPath)
+
             Else
+
                 Dim bmImage = WPFToolbox.BitmapImageFromFile(tmpPath, maxImagePixels)
-                isPortraitMode = If(bmImage.Width < bmImage.Height, 1, 0)
-                Return WPFToolbox.BitmapImageToBytes(bmImage, Path.GetExtension(tmpPath))
+                If bmImage IsNot Nothing Then
+                    isPortraitMode = If(bmImage.Width < bmImage.Height, 1, 0)
+                    res = WPFToolbox.BitmapImageToBytes(bmImage, Path.GetExtension(filePath))
+                End If
+
             End If
 
             File.Delete(tmpPath)

@@ -18,11 +18,16 @@
     
     <UserControl.ContextMenu>
         <ContextMenu TextOptions.TextFormattingMode="Display">
+            <Separator>
+                <Separator.Template>
+                    <ControlTemplate TargetType="Separator">
+                        <TextBlock Text="Project " Background="DimGray" Foreground="white" Padding="6,2,4,3"/>
+                    </ControlTemplate>
+                </Separator.Template>
+            </Separator>
             <MenuItem x:Name="mnuAddSubProject" Icon="{StaticResource icoGrayDot}" Header="Add Group"/>
             <Separator/>
-            <MenuItem x:Name="mnuDeleteProject" Icon="{StaticResource icoDelete}" Header="Delete Project">
-               
-            </MenuItem>
+            <MenuItem x:Name="mnuDeleteProject" Icon="{StaticResource icoDelete}" Header="Delete"/>
         </ContextMenu>
     </UserControl.ContextMenu>
 

@@ -5,8 +5,9 @@ Imports System.Windows.Controls
 
 Public Class ProjFolderTreeHeader
 
-    Public Event RequestAddExperiment(sender As Object, projectEntry As tblProjFolders)
-    Public Event RequestDeleteFolder(sender As Object, projectEntry As tblProjFolders)
+    Public Event RequestAddExperiment(sender As Object, folderEntry As tblProjFolders)
+    Public Event RequestDeleteFolder(sender As Object, folderEntry As tblProjFolders)
+    Public Event RequestArchiveFolder(sender As Object, folderEntry As tblProjFolders)
 
 
     Public Sub New()
@@ -101,6 +102,14 @@ Public Class ProjFolderTreeHeader
 
         Dim folderEntry = CType(DataContext, tblProjFolders)
         RaiseEvent RequestDeleteFolder(Me, folderEntry)
+
+    End Sub
+
+
+    Private Sub mnuArchiveFolder_Click(sender As Object, e As RoutedEventArgs) Handles mnuArchiveFolder.Click
+
+        Dim folderEntry = CType(DataContext, tblProjFolders)
+        RaiseEvent RequestArchiveFolder(Me, folderEntry)
 
     End Sub
 

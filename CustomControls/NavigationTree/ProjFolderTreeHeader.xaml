@@ -17,8 +17,17 @@
     </UserControl.Resources>
     
     <UserControl.ContextMenu>
-        <ContextMenu TextOptions.TextFormattingMode="Display">
-            <MenuItem x:Name="mnuDeleteFolder" Icon="{StaticResource icoDelete}" Header="Delete Group"/>
+        <ContextMenu SnapsToDevicePixels="True">
+            <Separator>
+                <Separator.Template>
+                    <ControlTemplate TargetType="Separator">
+                        <TextBlock Text="Experiment Group " Background="DimGray" Foreground="white" Padding="6,2,4,3"/>
+                    </ControlTemplate>
+                </Separator.Template>
+            </Separator>
+            <MenuItem x:Name="mnuArchiveFolder" Icon="{StaticResource icoAddToFolder}" Header="Archive"/>
+            <Separator/>
+            <MenuItem x:Name="mnuDeleteFolder" Icon="{StaticResource icoDelete}" Header="Delete"/>
         </ContextMenu>
     </UserControl.ContextMenu>
 

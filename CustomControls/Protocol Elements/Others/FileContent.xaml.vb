@@ -281,7 +281,7 @@ Public Class FileContent
 
             ActiveFileWatchers.Add(_fileWatcher)
 
-            End With
+        End With
 
     End Sub
 
@@ -332,18 +332,18 @@ Public Class FileContent
     '''
     Public Shared Function GetFileIconBytes(filePath) As Byte()
 
-        Dim iconImage = IconExtract.BitmapImageFromFile(filePath, IconExtract.IconFlags.iconLarge)
+        Dim iconImage = IconExtract.GetFileIconAsBitmapImage(filePath, largeIcon:=True)
+
         Dim buffer As Byte() = Nothing
 
         If iconImage IsNot Nothing Then
 
-            Dim imageSource = DirectCast(iconImage, BitmapImage)
             Dim encoder As New PngBitmapEncoder()
-            Dim bf As BitmapFrame = BitmapFrame.Create(imageSource)
+            Dim bf As BitmapFrame = BitmapFrame.Create(iconImage)
             bf.Freeze()
             encoder.Frames.Add(bf)
 
-            Using memstream As New System.IO.MemoryStream()
+            Using memstream As New MemoryStream()
                 encoder.Save(memstream)
                 buffer = memstream.GetBuffer()
             End Using

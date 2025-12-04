@@ -1,18 +1,31 @@
-﻿Imports ElnBase.ELNEnumerations
-Imports ElnCoreModel
-Imports Microsoft.Win32
-Imports Spire.Pdf
-Imports System.Drawing.Printing
+﻿Imports System.Drawing.Printing
 Imports System.Globalization
 Imports System.IO
+Imports System.IO.Compression
 Imports System.IO.Packaging
 Imports System.Threading
 Imports System.Windows
 Imports System.Windows.Controls
-Imports System.Windows.Documents
 Imports System.Windows.Input
+Imports ElnBase.ELNEnumerations
+Imports ElnCoreModel
+Imports Microsoft.Win32
+Imports Spire.Pdf
 
 Public Class ExperimentPrint
+
+
+    Public Shared Event PdfExportProgress(percent As Integer, pdfTitle As String)
+
+    Public Shared Event PDFExportCompleted(success As Boolean)
+
+
+    ''' <summary>
+    ''' Sets of gets if the bulk PDF export was cancelled
+    ''' </summary>
+    ''' 
+    Public Shared Property ExportCancelled As Boolean = False
+
 
     ''' <summary>
     ''' Prints the current experiment to the desired printer or to a PDF document, 
@@ -23,7 +36,6 @@ Public Class ExperimentPrint
     Public Shared Sub Print(expContent As ExperimentContent, printAsPDF As Boolean, appWindow As Window)
 
         Dim expEntry = expContent.DataContext
-        Dim origSketchArea = expContent.SketchPanel
         Dim pdfPath As String = ""
         Dim paperSize As PaperSize
 
@@ -61,7 +73,7 @@ Public Class ExperimentPrint
                 paperSize = New PaperSize("A4", 827, 1169)
             End If
 
-            Dim printTemplate = SetPrintTemplate(expEntry, origSketchArea, paperSize)
+            Dim printTemplate = SetPrintTemplate(expEntry, paperSize)
 
             ' create and store PDF doc with attachments
             Dim pdfDoc = PaginatorToPdfDoc(printTemplate.Paginator, printAsPDF)
@@ -91,7 +103,7 @@ Public Class ExperimentPrint
                 paperSize = New PaperSize(.PageMediaSizeName.ToString(), width, height)
             End With
 
-            Dim printTemplate = SetPrintTemplate(expEntry, origSketchArea, paperSize)
+            Dim printTemplate = SetPrintTemplate(expEntry, paperSize)
 
             Try
                 printDlg.PrintDocument(printTemplate.Paginator, "Printing " + expEntry.ExperimentID)
@@ -109,14 +121,100 @@ Public Class ExperimentPrint
 
 
     ''' <summary>
+    ''' Converts the speified list of experiment entries into PDF documents and combines them into a zip folder.
+    ''' </summary>
+    ''' <param name="expEntries">A list of tblExperiments entries to be part of the zip folder.</param>
+    ''' <param name="zipFolderPath">The fiull path of the desintation zip archive.</param>
+    ''' <returns>True, if successful</returns>
+    ''' 
+    Public Shared Function ExperimentsToPdfZip(expEntries As List(Of tblExperiments), zipFolderPath As String) As Boolean
+
+        ExperimentsToPdfZip = False
+        ExportCancelled = False
+
+        If expEntries IsNot Nothing Then
+
+            ' get current paper size
+
+            Dim printDoc = New PrintDocument()
+            Dim paperSize As PaperSize
+            If printDoc.PrinterSettings.IsValid Then
+                paperSize = printDoc.DefaultPageSettings.PaperSize
+            Else
+                paperSize = New PaperSize("A4", 827, 1169) 'fall back to A4 if no printer is installed
+            End If
+
+            ' create temporary pdf folder
+
+            Dim tempPdfFolderPath = Path.Combine(Path.GetTempPath(), "tmpPDF_" & Guid.NewGuid().ToString())
+            Directory.CreateDirectory(tempPdfFolderPath)
+
+            ' create PDFs in temp folder
+
+            SketchArea.DisableSketchSourceChangedEvent = True   'prevents updating side panel properties for each processed item
+
+            Dim expCount = expEntries.Count
+
+            For Each expEntry In expEntries
+
+                If Not ExportCancelled Then
+
+                    Dim expPdfPath = tempPdfFolderPath + "\" + expEntry.ExperimentID + ".pdf"
+                    Dim printTemplate = SetPrintTemplate(expEntry, paperSize)
+
+                    Dim pdfDoc = PaginatorToPdfDoc(printTemplate.Paginator, True)
+                    If CompletePDF(pdfDoc, expPdfPath, expEntry) Then 'add attachments, convert to PDF/A-3b
+                        Dim percent As Integer = 100 * (expEntries.IndexOf(expEntry) + 1) / expCount
+                        RaiseEvent PdfExportProgress(percent, expEntry.ExperimentID)
+                    End If
+
+                Else
+
+                    ' export was cancelled by user
+                    Directory.Delete(tempPdfFolderPath, True)
+                    Return False
+
+                End If
+
+            Next
+
+            SketchArea.DisableSketchSourceChangedEvent = False
+
+            ' create zip file
+
+            Try
+                If File.Exists(zipFolderPath) Then
+                    File.Delete(zipFolderPath)  'same as overwrite existing archive
+                End If
+                ZipFile.CreateFromDirectory(tempPdfFolderPath, zipFolderPath)
+                ExperimentsToPdfZip = True
+            Catch ex As Exception
+                'do nothing
+            Finally
+                ' delete temp folder
+                Try
+                    RaiseEvent PDFExportCompleted(ExperimentsToPdfZip)
+                    Directory.Delete(tempPdfFolderPath, True)
+                Catch ex As Exception
+                    'do nothing
+                End Try
+            End Try
+
+        End If
+
+    End Function
+
+
+    ''' <summary>
     ''' Creates and returns the PrintPageTemplate for the given experiment entry and sketch area.
     ''' </summary>
     ''' 
-    Private Shared Function SetPrintTemplate(expEntry As tblExperiments, skArea As SketchArea, pageSize As PaperSize) As PrintPageTemplate
+    Private Shared Function SetPrintTemplate(expEntry As tblExperiments, pageSize As PaperSize) As PrintPageTemplate
 
-        Dim printExpContent As New ExperimentContent
-        printExpContent.Width = 680     'current UI display width of this data template
-        printExpContent.DataContext = expEntry
+        Dim printExpContent As New ExperimentContent With {
+            .Width = 680,     'current UI display width of this data template
+            .DataContext = expEntry
+        }
 
         WPFToolbox.WaitForPriority(Threading.DispatcherPriority.ContextIdle)
 
@@ -127,7 +225,7 @@ Public Class ExperimentPrint
         With printExpContent
             .Measure(New Size)
             .Arrange(New Rect)
-            .SketchPanel.SetComponentLabels(skArea.ComponentFontSize, skArea.BottomOffset)
+            .SketchPanel.SetComponentLabels()
         End With
 
         Dim stackPrintTempl As New PrintPageTemplate(printStack, pageSize, 0.95)
@@ -234,7 +332,7 @@ Public Class ExperimentPrint
     ''' <param name="docPaginator">The paginator to convert.</param>
     ''' <returns>The resulting Spire.PdfDocument</returns>
     '''
-    Private Shared Function PaginatorToPdfDoc(docPaginator As DocumentPaginator, printAsPDF As Boolean) As PdfDocument
+    Private Shared Function PaginatorToPdfDoc(docPaginator As PrintPageTemplate.VisualPaginator, printAsPDF As Boolean) As PdfDocument
 
         Using xpsMemStream = New MemoryStream
 

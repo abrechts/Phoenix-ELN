@@ -6,7 +6,7 @@
     <FileVersion>0.9.0.0</FileVersion>
 
     <RootNamespace>CustomControls</RootNamespace>
-    <TargetFramework>net9.0-windows10.0.17763.0</TargetFramework>
+    <TargetFramework>net10.0-windows10.0.17763.0</TargetFramework>
     <RootNamespace>CustomControls</RootNamespace>
     <UseWPF>true</UseWPF>
     <ImportedNamespaces>ChemBytes.ChemBytesDraw=False,Microsoft.VisualBasic=True,System=True,System.Collections=True,System.Collections.Generic=True,System.Diagnostics=True,System.Linq=True,System.Xml.Linq=True,System.Threading.Tasks=True,CustomControls=True</ImportedNamespaces>
@@ -37,6 +37,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="dlgServerConflict.xaml.vb">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="dlgZipProgress.xaml.vb">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Material Dialogs\dlgEditProduct.xaml.vb">

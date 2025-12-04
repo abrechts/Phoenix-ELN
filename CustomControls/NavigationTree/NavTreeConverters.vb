@@ -8,7 +8,6 @@ Imports ElnBase.ELNEnumerations
 Imports ElnBase.ELNCalculations
 
 
-
 ''' <summary>
 ''' Sorts navigation tree projects in descending SequenceNr order. This converter type generally provides otherwise 
 ''' unavailable support for sorting Enums within HierarchicalDataTemplates.

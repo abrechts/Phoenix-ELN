@@ -13,6 +13,12 @@ Public Class SketchArea
 
     Public Shared Event SketchSourceChanged(sender As Object, sketchInfo As SketchResults)
 
+    ''' <summary>
+    ''' Sets or gets if the if the SketchSourceChangeEvent should fire.
+    ''' </summary>
+    '''
+    Public Shared Property DisableSketchSourceChangedEvent As Boolean = False
+
 
     Public Sub New()
 
@@ -56,7 +62,9 @@ Public Class SketchArea
                 .blkClickInfo.Visibility = Visibility.Visible
             End If
 
-            .RaiseSketchSourceChangedEvent()
+            If Not DisableSketchSourceChangedEvent Then
+                .RaiseSketchSourceChangedEvent()
+            End If
 
         End With
 

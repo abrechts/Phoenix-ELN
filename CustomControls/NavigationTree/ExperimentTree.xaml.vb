@@ -3,6 +3,7 @@ Imports System.Windows.Controls
 Imports System.Windows.Threading
 Imports ElnCoreModel
 Imports GongSolutions.Wpf.DragDrop
+Imports Microsoft.EntityFrameworkCore
 
 
 Public Class ExperimentTree
@@ -48,6 +49,11 @@ Public Class ExperimentTree
     End Sub
 
 
+    Private Sub folderHeader_RequestArchiveFolder(sender As Object, folderEntry As tblProjFolders)
+
+        ArchiveExpGroup(folderEntry)
+
+    End Sub
 
 
     ''' <summary>
@@ -161,6 +167,35 @@ Public Class ExperimentTree
             ExperimentContent.DbContext.SaveChanges()
 
         End If
+
+    End Sub
+
+
+    Private Sub ArchiveExpGroup(groupEntry As tblProjFolders)
+
+        ' file save dialog
+        Dim saveDlg As New Microsoft.Win32.SaveFileDialog With {
+            .Title = "Select destination ZIP archive file ...",
+            .Filter = "ZIP Archive (*.zip)|*.zip",
+            .FileName = groupEntry.Project.Title + "_" + groupEntry.FolderName + ".zip",
+            .DefaultExt = ".zip",
+            .InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop)
+        }
+
+        ' archival progress dialog
+        With saveDlg
+            If .ShowDialog(Application.Current.MainWindow) Then
+                Dim dstpath = .FileName
+                Dim expList = (From exp In groupEntry.tblExperiments Order By exp.ExperimentID Ascending).ToList
+                Dim zipDlg As New dlgZipProgress With {
+                    .Owner = Application.Current.MainWindow,
+                    .Title = "Archive Group Experiments ...",
+                    .ExperimentEntries = expList,
+                    .ZipFilePath = dstpath
+                }
+                zipDlg.ShowDialog()     'dialog contains archival logic
+            End If
+        End With
 
     End Sub
 
