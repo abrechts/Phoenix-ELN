@@ -3,11 +3,11 @@
 	<schema name="Default" >
 		<table name="sync_Tombstone" >
 			<comment><![CDATA[Contains a list of deleted items, to be removed during next sync.]]></comment>
-			<column name="GUID" type="TEXT" length="36" jt="-1" mandatory="y" />
-			<column name="DatabaseInfoID" prior="DatabaseID" type="TEXT" length="36" jt="-1" mandatory="y" />
-			<column name="TableName" type="TEXT" length="50" jt="-1" mandatory="y" />
-			<column name="PrimaryKeyVal" type="TEXT" length="50" jt="-1" mandatory="y" />
-			<column name="SyncState" type="INTEGER" jt="4" >
+			<column name="GUID" type="TEXT" length="36" mandatory="y" />
+			<column name="DatabaseInfoID" prior="DatabaseID" type="TEXT" length="36" mandatory="y" />
+			<column name="TableName" type="TEXT" length="50" mandatory="y" />
+			<column name="PrimaryKeyVal" type="TEXT" length="50" mandatory="y" />
+			<column name="SyncState" type="INTEGER" >
 				<defo><![CDATA[0]]></defo>
 			</column>
 			<index name="pk_sync_Tombstone" unique="PRIMARY_KEY" >
@@ -21,18 +21,18 @@
 			</fk>
 		</table>
 		<table name="tblAuxiliaries" spec="" >
-			<column name="GUID" type="TEXT" length="36" jt="-1" mandatory="y" />
-			<column name="ProtocolItemID" type="TEXT" length="36" jt="-1" mandatory="y" />
-			<column name="SpecifiedUnitType" type="INTEGER" jt="4" mandatory="y" />
-			<column name="IsDisplayAsVolume" type="INTEGER" jt="4" mandatory="y" >
+			<column name="GUID" type="TEXT" length="36" mandatory="y" />
+			<column name="ProtocolItemID" type="TEXT" length="36" mandatory="y" />
+			<column name="SpecifiedUnitType" type="INTEGER" mandatory="y" />
+			<column name="IsDisplayAsVolume" type="INTEGER" mandatory="y" >
 				<defo><![CDATA[0]]></defo>
 			</column>
-			<column name="Name" type="TEXT" length="50" jt="-1" mandatory="y" />
-			<column name="Source" type="TEXT" length="40" jt="-1" />
-			<column name="Grams" type="REAL" jt="8" mandatory="y" />
-			<column name="Equivalents" type="REAL" jt="8" mandatory="y" />
-			<column name="Density" type="REAL" jt="8" />
-			<column name="SyncState" type="INTEGER" jt="4" >
+			<column name="Name" type="TEXT" length="50" mandatory="y" />
+			<column name="Source" type="TEXT" length="40" />
+			<column name="Grams" type="REAL" mandatory="y" />
+			<column name="Equivalents" type="REAL" mandatory="y" />
+			<column name="Density" type="REAL" />
+			<column name="SyncState" type="INTEGER" >
 				<defo><![CDATA[0]]></defo>
 			</column>
 			<index name="pk_tblAuxiliaries" unique="PRIMARY_KEY" >
@@ -46,10 +46,10 @@
 			</fk>
 		</table>
 		<table name="tblComments" spec="" >
-			<column name="GUID" type="TEXT" length="36" jt="-1" mandatory="y" />
-			<column name="ProtocolItemID" type="TEXT" length="36" jt="-1" mandatory="y" />
-			<column name="CommentFlowDoc" type="TEXT" jt="-1" />
-			<column name="SyncState" type="INTEGER" jt="4" >
+			<column name="GUID" type="TEXT" length="36" mandatory="y" />
+			<column name="ProtocolItemID" type="TEXT" length="36" mandatory="y" />
+			<column name="CommentFlowDoc" type="TEXT" />
+			<column name="SyncState" type="INTEGER" >
 				<defo><![CDATA[0]]></defo>
 			</column>
 			<index name="pk_tblComments" unique="PRIMARY_KEY" >
@@ -63,12 +63,12 @@
 			</fk>
 		</table>
 		<table name="tblDatabaseInfo" spec="" >
-			<column name="GUID" type="TEXT" length="36" jt="-1" mandatory="y" />
-			<column name="CurrAppVersion" type="TEXT" length="16" jt="-1" />
-			<column name="CompanyLogo" type="BLOB" jt="2004" />
-			<column name="LastSyncID" type="TEXT" length="36" jt="-1" />
-			<column name="LastSyncTime" type="TEXT" length="30" jt="-1" />
-			<column name="SyncState" type="INTEGER" jt="4" >
+			<column name="GUID" type="TEXT" length="36" mandatory="y" />
+			<column name="CurrAppVersion" type="TEXT" length="16" />
+			<column name="CompanyLogo" type="BLOB" />
+			<column name="LastSyncID" type="TEXT" length="36" />
+			<column name="LastSyncTime" type="TEXT" length="30" />
+			<column name="SyncState" type="INTEGER" >
 				<defo><![CDATA[0]]></defo>
 			</column>
 			<index name="pk_tblDatabaseInfo" unique="PRIMARY_KEY" >
@@ -76,13 +76,13 @@
 			</index>
 		</table>
 		<table name="tblDbMaterialFiles" spec="" >
-			<column name="GUID" type="TEXT" length="36" jt="-1" mandatory="y" />
-			<column name="DbMaterialID" type="TEXT" length="36" jt="-1" mandatory="y" />
-			<column name="FileName" type="TEXT" length="50" jt="-1" mandatory="y" />
-			<column name="FileBytes" type="BLOB" jt="2004" mandatory="y" />
-			<column name="FileSizeMB" type="REAL" jt="8" />
-			<column name="IconImage" type="BLOB" jt="2004" />
-			<column name="SyncState" type="INTEGER" jt="4" >
+			<column name="GUID" type="TEXT" length="36" mandatory="y" />
+			<column name="DbMaterialID" type="TEXT" length="36" mandatory="y" />
+			<column name="FileName" type="TEXT" length="50" mandatory="y" />
+			<column name="FileBytes" type="BLOB" mandatory="y" />
+			<column name="FileSizeMB" type="REAL" />
+			<column name="IconImage" type="BLOB" />
+			<column name="SyncState" type="INTEGER" >
 				<defo><![CDATA[0]]></defo>
 			</column>
 			<index name="pk_tblDbMaterialFiles" unique="PRIMARY_KEY" >
@@ -96,25 +96,25 @@
 			</fk>
 		</table>
 		<table name="tblEmbeddedFiles" >
-			<column name="GUID" type="TEXT" length="36" jt="-1" mandatory="y" />
-			<column name="ProtocolItemID" type="TEXT" length="36" jt="-1" mandatory="y" />
-			<column name="FileType" type="INTEGER" jt="4" mandatory="y" >
+			<column name="GUID" type="TEXT" length="36" mandatory="y" />
+			<column name="ProtocolItemID" type="TEXT" length="36" mandatory="y" />
+			<column name="FileType" type="INTEGER" mandatory="y" >
 				<comment><![CDATA[0: Document
 1: Image]]></comment>
 			</column>
-			<column name="FileName" type="TEXT" length="50" jt="-1" mandatory="y" />
-			<column name="FileBytes" type="BLOB" jt="2004" mandatory="y" />
-			<column name="FileSizeMB" type="REAL" jt="8" />
-			<column name="FileComment" prior="FileTitle" type="TEXT" jt="-1" mandatory="y" />
-			<column name="SHA256Hash" type="TEXT" length="64" jt="-1" />
-			<column name="IconImage" type="BLOB" jt="2004" />
-			<column name="IsPortraitMode" prior="IsImageVertical" type="INTEGER" jt="4" >
+			<column name="FileName" type="TEXT" length="50" mandatory="y" />
+			<column name="FileBytes" type="BLOB" mandatory="y" />
+			<column name="FileSizeMB" type="REAL" />
+			<column name="FileComment" prior="FileTitle" type="TEXT" mandatory="y" />
+			<column name="SHA256Hash" type="TEXT" length="64" />
+			<column name="IconImage" type="BLOB" />
+			<column name="IsPortraitMode" prior="IsImageVertical" type="INTEGER" >
 				<defo><![CDATA[0]]></defo>
 			</column>
-			<column name="IsRotated" type="INTEGER" jt="4" >
+			<column name="IsRotated" type="INTEGER" >
 				<defo><![CDATA[0]]></defo>
 			</column>
-			<column name="SyncState" type="INTEGER" jt="4" >
+			<column name="SyncState" type="INTEGER" >
 				<defo><![CDATA[0]]></defo>
 			</column>
 			<index name="pk_tblEmbeddedFiles" unique="PRIMARY_KEY" >
@@ -131,46 +131,46 @@
 			</fk>
 		</table>
 		<table name="tblExperiments" spec="" >
-			<column name="ExperimentID" type="TEXT" length="25" jt="-1" mandatory="y" />
-			<column name="UserID" type="TEXT" length="25" jt="-1" mandatory="y" />
-			<column name="ProjectID" type="TEXT" length="36" jt="-1" mandatory="y" />
-			<column name="IsDesignView" type="INTEGER" jt="4" mandatory="y" >
+			<column name="ExperimentID" type="TEXT" length="25" mandatory="y" />
+			<column name="UserID" type="TEXT" length="25" mandatory="y" />
+			<column name="ProjectID" type="TEXT" length="36" mandatory="y" />
+			<column name="IsDesignView" type="INTEGER" mandatory="y" >
 				<defo><![CDATA[0]]></defo>
 			</column>
-			<column name="IsCurrent" type="INTEGER" jt="4" mandatory="y" >
+			<column name="IsCurrent" type="INTEGER" mandatory="y" >
 				<defo><![CDATA[0]]></defo>
 			</column>
-			<column name="RxnSketch" type="LONGTEXT" jt="-1" />
-			<column name="MDLRxnFileString" type="LONGTEXT" jt="-1" />
-			<column name="ReactantInChIKey" type="TEXT" length="27" jt="-1" />
-			<column name="ProductInChIKey" type="TEXT" length="27" jt="-1" />
-			<column name="WorkflowState" type="INTEGER" jt="4" >
+			<column name="RxnSketch" type="LONGTEXT" />
+			<column name="MDLRxnFileString" type="LONGTEXT" />
+			<column name="ReactantInChIKey" type="TEXT" length="27" />
+			<column name="ProductInChIKey" type="TEXT" length="27" />
+			<column name="WorkflowState" type="INTEGER" >
 				<defo><![CDATA[0]]></defo>
 			</column>
-			<column name="UserTag" type="INTEGER" jt="4" >
+			<column name="UserTag" type="INTEGER" >
 				<defo><![CDATA[0]]></defo>
 			</column>
-			<column name="Yield" type="REAL" jt="8" />
-			<column name="Purity" type="REAL" jt="8" />
-			<column name="RefReactantGrams" type="REAL" jt="8" />
-			<column name="RefReactantMMols" type="REAL" jt="8" />
-			<column name="RefYieldFactor" type="REAL" jt="8" mandatory="y" >
+			<column name="Yield" type="REAL" />
+			<column name="Purity" type="REAL" />
+			<column name="RefReactantGrams" type="REAL" />
+			<column name="RefReactantMMols" type="REAL" />
+			<column name="RefYieldFactor" type="REAL" mandatory="y" >
 				<defo><![CDATA[1]]></defo>
 				<comment><![CDATA[Defines the yield correction factor by stoichiometry. Default=1. For e.g. a dimerization the value is 0.5, for the monomerization of e.g. a trimer the value is 3.]]></comment>
 			</column>
-			<column name="CreationDate" type="TEXT" length="20" jt="-1" />
-			<column name="FinalizeDate" type="TEXT" length="20" jt="-1" />
-			<column name="DisplayIndex" type="INTEGER" jt="4" />
-			<column name="IsNodeExpanded" type="INTEGER" jt="4" >
+			<column name="CreationDate" type="TEXT" length="20" />
+			<column name="FinalizeDate" type="TEXT" length="20" />
+			<column name="DisplayIndex" type="INTEGER" />
+			<column name="IsNodeExpanded" type="INTEGER" >
 				<defo><![CDATA[0]]></defo>
 				<comment><![CDATA[Dummy field for preventing XAML binding errors.]]></comment>
 			</column>
-			<column name="SyncState" type="INTEGER" jt="4" >
+			<column name="SyncState" type="INTEGER" >
 				<defo><![CDATA[0]]></defo>
 			</column>
-			<column name="RxnIndigoObj" type="LONGBLOB" jt="-4" />
-			<column name="RxnFingerprint" type="BLOB" jt="2004" />
-			<column name="ProjFolderID" type="TEXT" length="36" jt="-1" />
+			<column name="RxnIndigoObj" type="LONGBLOB" />
+			<column name="RxnFingerprint" type="BLOB" />
+			<column name="ProjFolderID" type="TEXT" length="36" />
 			<index name="pk_tblExperiments" unique="PRIMARY_KEY" >
 				<column name="ExperimentID" />
 			</index>
@@ -194,31 +194,31 @@
 			</fk>
 		</table>
 		<table name="tblMaterials" spec="" >
-			<column name="GUID" type="TEXT" length="36" jt="-1" mandatory="y" />
-			<column name="DatabaseID" type="TEXT" length="36" jt="-1" mandatory="y" />
-			<column name="MatName" type="TEXT" length="150" jt="-1" mandatory="y" />
-			<column name="MatSource" type="TEXT" length="100" jt="-1" />
-			<column name="MatType" type="INTEGER" jt="4" mandatory="y" />
-			<column name="Molweight" type="REAL" jt="8" >
+			<column name="GUID" type="TEXT" length="36" mandatory="y" />
+			<column name="DatabaseID" type="TEXT" length="36" mandatory="y" />
+			<column name="MatName" type="TEXT" length="150" mandatory="y" />
+			<column name="MatSource" type="TEXT" length="100" />
+			<column name="MatType" type="INTEGER" mandatory="y" />
+			<column name="Molweight" type="REAL" >
 				<defo><![CDATA[(NULL)]]></defo>
 			</column>
-			<column name="Density" type="REAL" jt="8" >
+			<column name="Density" type="REAL" >
 				<defo><![CDATA[(NULL)]]></defo>
 			</column>
-			<column name="Purity" type="REAL" jt="8" >
+			<column name="Purity" type="REAL" >
 				<defo><![CDATA[(NULL)]]></defo>
 			</column>
-			<column name="Molarity" type="REAL" jt="8" >
+			<column name="Molarity" type="REAL" >
 				<defo><![CDATA[(NULL)]]></defo>
 			</column>
-			<column name="InChIKey" prior="InchiKey" type="TEXT" length="30" jt="-1" />
-			<column name="IsValidated" type="INTEGER" jt="4" >
+			<column name="InChIKey" prior="InchiKey" type="TEXT" length="30" />
+			<column name="IsValidated" type="INTEGER" >
 				<defo><![CDATA[0]]></defo>
 			</column>
-			<column name="SyncState" type="INTEGER" jt="4" >
+			<column name="SyncState" type="INTEGER" >
 				<defo><![CDATA[0]]></defo>
 			</column>
-			<column name="CurrDocIndex" type="INTEGER" jt="4" />
+			<column name="CurrDocIndex" type="INTEGER" />
 			<index name="pk_tblMaterials" unique="PRIMARY_KEY" >
 				<column name="GUID" />
 			</index>
@@ -239,22 +239,22 @@
 			</fk>
 		</table>
 		<table name="tblProducts" spec="" >
-			<column name="GUID" type="TEXT" length="36" jt="-1" mandatory="y" />
-			<column name="ProtocolItemID" type="TEXT" length="36" jt="-1" mandatory="y" />
-			<column name="ProductIndex" type="INTEGER" jt="4" mandatory="y" >
+			<column name="GUID" type="TEXT" length="36" mandatory="y" />
+			<column name="ProtocolItemID" type="TEXT" length="36" mandatory="y" />
+			<column name="ProductIndex" type="INTEGER" mandatory="y" >
 				<defo><![CDATA[0]]></defo>
 			</column>
-			<column name="Name" type="TEXT" length="50" jt="-1" mandatory="y" />
-			<column name="Grams" type="REAL" jt="8" mandatory="y" />
-			<column name="MolecularWeight" type="REAL" jt="8" mandatory="y" />
-			<column name="Yield" type="REAL" jt="8" mandatory="y" />
-			<column name="ExactMass" type="REAL" jt="8" />
-			<column name="ElementalFormula" type="TEXT" length="50" jt="-1" />
-			<column name="Purity" type="REAL" jt="8" />
-			<column name="ResinLoad" type="REAL" jt="8" />
-			<column name="BatchID" type="TEXT" length="40" jt="-1" />
-			<column name="InChIKey" type="TEXT" length="27" jt="-1" />
-			<column name="SyncState" type="INTEGER" jt="4" >
+			<column name="Name" type="TEXT" length="50" mandatory="y" />
+			<column name="Grams" type="REAL" mandatory="y" />
+			<column name="MolecularWeight" type="REAL" mandatory="y" />
+			<column name="Yield" type="REAL" mandatory="y" />
+			<column name="ExactMass" type="REAL" />
+			<column name="ElementalFormula" type="TEXT" length="50" />
+			<column name="Purity" type="REAL" />
+			<column name="ResinLoad" type="REAL" />
+			<column name="BatchID" type="TEXT" length="40" />
+			<column name="InChIKey" type="TEXT" length="27" />
+			<column name="SyncState" type="INTEGER" >
 				<defo><![CDATA[0]]></defo>
 			</column>
 			<index name="pk_tblProducts" unique="PRIMARY_KEY" >
@@ -268,14 +268,14 @@
 			</fk>
 		</table>
 		<table name="tblProjFolders" spec="" >
-			<column name="GUID" type="TEXT" length="36" jt="-1" mandatory="y" />
-			<column name="ProjectID" type="TEXT" length="36" jt="-1" mandatory="y" />
-			<column name="FolderName" type="ENUM" jt="12" mandatory="y" />
-			<column name="SequenceNr" type="INTEGER" jt="4" />
-			<column name="IsNodeExpanded" type="INTEGER" jt="4" >
+			<column name="GUID" type="TEXT" length="36" mandatory="y" />
+			<column name="ProjectID" type="TEXT" length="36" mandatory="y" />
+			<column name="FolderName" type="ENUM" mandatory="y" />
+			<column name="SequenceNr" type="INTEGER" />
+			<column name="IsNodeExpanded" type="INTEGER" >
 				<defo><![CDATA[0]]></defo>
 			</column>
-			<column name="SyncState" type="INTEGER" jt="4" >
+			<column name="SyncState" type="INTEGER" >
 				<defo><![CDATA[0]]></defo>
 			</column>
 			<index name="pk_tblProjFolders" unique="PRIMARY_KEY" >
@@ -286,14 +286,14 @@
 			</fk>
 		</table>
 		<table name="tblProjects" spec="" >
-			<column name="GUID" type="TEXT" jt="-1" mandatory="y" />
-			<column name="UserID" type="TEXT" jt="-1" mandatory="y" />
-			<column name="Title" type="TEXT" jt="-1" />
-			<column name="SequenceNr" type="INTEGER" jt="4" />
-			<column name="IsNodeExpanded" type="INTEGER" jt="4" mandatory="y" >
+			<column name="GUID" type="TEXT" mandatory="y" />
+			<column name="UserID" type="TEXT" mandatory="y" />
+			<column name="Title" type="TEXT" />
+			<column name="SequenceNr" type="INTEGER" />
+			<column name="IsNodeExpanded" type="INTEGER" mandatory="y" >
 				<defo><![CDATA[0]]></defo>
 			</column>
-			<column name="SyncState" type="INTEGER" jt="4" >
+			<column name="SyncState" type="INTEGER" >
 				<defo><![CDATA[0]]></defo>
 			</column>
 			<index name="pk_tblProjects" unique="PRIMARY_KEY" >
@@ -310,15 +310,15 @@
 			</fk>
 		</table>
 		<table name="tblProtocolItems" spec="" >
-			<column name="GUID" type="TEXT" length="36" jt="-1" mandatory="y" />
-			<column name="ExperimentID" type="TEXT" length="25" jt="-1" mandatory="y" />
-			<column name="ElementType" type="INTEGER" jt="4" mandatory="y" />
-			<column name="SequenceNr" type="INTEGER" jt="4" />
-			<column name="TempInfo" type="TEXT" jt="-1" />
-			<column name="IsSelected" type="INTEGER" jt="4" mandatory="y" >
+			<column name="GUID" type="TEXT" length="36" mandatory="y" />
+			<column name="ExperimentID" type="TEXT" length="25" mandatory="y" />
+			<column name="ElementType" type="INTEGER" mandatory="y" />
+			<column name="SequenceNr" type="INTEGER" />
+			<column name="TempInfo" type="TEXT" />
+			<column name="IsSelected" type="INTEGER" mandatory="y" >
 				<defo><![CDATA[0]]></defo>
 			</column>
-			<column name="SyncState" type="INTEGER" jt="4" >
+			<column name="SyncState" type="INTEGER" >
 				<defo><![CDATA[0]]></defo>
 			</column>
 			<index name="pk_tblProtocolItems" unique="PRIMARY_KEY" >
@@ -332,28 +332,28 @@
 			</fk>
 		</table>
 		<table name="tblReagents" spec="" >
-			<column name="GUID" type="TEXT" length="36" jt="-1" mandatory="y" />
-			<column name="ProtocolItemID" type="TEXT" length="36" jt="-1" mandatory="y" />
-			<column name="SpecifiedUnitType" type="INTEGER" jt="4" mandatory="y" >
+			<column name="GUID" type="TEXT" length="36" mandatory="y" />
+			<column name="ProtocolItemID" type="TEXT" length="36" mandatory="y" />
+			<column name="SpecifiedUnitType" type="INTEGER" mandatory="y" >
 				<defo><![CDATA[0]]></defo>
 			</column>
-			<column name="IsDisplayAsVolume" type="INTEGER" jt="4" mandatory="y" >
+			<column name="IsDisplayAsVolume" type="INTEGER" mandatory="y" >
 				<defo><![CDATA[0]]></defo>
 			</column>
-			<column name="MolecularWeight" type="REAL" jt="8" />
-			<column name="Name" type="TEXT" length="50" jt="-1" mandatory="y" />
-			<column name="Source" type="TEXT" length="50" jt="-1" />
-			<column name="Grams" type="REAL" jt="8" mandatory="y" />
-			<column name="MMols" type="REAL" jt="8" mandatory="y" />
-			<column name="Equivalents" type="REAL" jt="8" mandatory="y" />
-			<column name="Density" type="REAL" jt="8" />
-			<column name="Purity" type="REAL" jt="8" />
-			<column name="Molarity" type="REAL" jt="8" />
-			<column name="IsMolarity" type="INTEGER" jt="4" mandatory="y" >
+			<column name="MolecularWeight" type="REAL" />
+			<column name="Name" type="TEXT" length="50" mandatory="y" />
+			<column name="Source" type="TEXT" length="50" />
+			<column name="Grams" type="REAL" mandatory="y" />
+			<column name="MMols" type="REAL" mandatory="y" />
+			<column name="Equivalents" type="REAL" mandatory="y" />
+			<column name="Density" type="REAL" />
+			<column name="Purity" type="REAL" />
+			<column name="Molarity" type="REAL" />
+			<column name="IsMolarity" type="INTEGER" mandatory="y" >
 				<defo><![CDATA[0]]></defo>
 			</column>
-			<column name="ResinLoad" type="REAL" jt="8" />
-			<column name="SyncState" type="INTEGER" jt="4" >
+			<column name="ResinLoad" type="REAL" />
+			<column name="SyncState" type="INTEGER" >
 				<defo><![CDATA[0]]></defo>
 			</column>
 			<index name="pk_tblReagents" unique="PRIMARY_KEY" >
@@ -367,25 +367,25 @@
 			</fk>
 		</table>
 		<table name="tblRefReactants" spec="" >
-			<column name="GUID" type="TEXT" length="36" jt="-1" mandatory="y" />
-			<column name="ProtocolItemID" type="TEXT" length="36" jt="-1" mandatory="y" />
-			<column name="SpecifiedUnitType" type="INTEGER" jt="4" mandatory="y" >
+			<column name="GUID" type="TEXT" length="36" mandatory="y" />
+			<column name="ProtocolItemID" type="TEXT" length="36" mandatory="y" />
+			<column name="SpecifiedUnitType" type="INTEGER" mandatory="y" >
 				<defo><![CDATA[0]]></defo>
 			</column>
-			<column name="IsDisplayAsVolume" type="INTEGER" jt="4" mandatory="y" >
+			<column name="IsDisplayAsVolume" type="INTEGER" mandatory="y" >
 				<defo><![CDATA[0]]></defo>
 			</column>
-			<column name="Name" type="TEXT" length="50" jt="-1" mandatory="y" />
-			<column name="Source" type="TEXT" length="40" jt="-1" />
-			<column name="MolecularWeight" type="REAL" jt="8" mandatory="y" />
-			<column name="Grams" type="REAL" jt="8" mandatory="y" />
-			<column name="MMols" type="REAL" jt="8" mandatory="y" />
-			<column name="Equivalents" type="REAL" jt="8" mandatory="y" />
-			<column name="Density" type="REAL" jt="8" />
-			<column name="Purity" type="REAL" jt="8" />
-			<column name="ResinLoad" type="REAL" jt="8" />
-			<column name="InChIKey" type="TEXT" length="27" jt="-1" />
-			<column name="SyncState" type="INTEGER" jt="4" >
+			<column name="Name" type="TEXT" length="50" mandatory="y" />
+			<column name="Source" type="TEXT" length="40" />
+			<column name="MolecularWeight" type="REAL" mandatory="y" />
+			<column name="Grams" type="REAL" mandatory="y" />
+			<column name="MMols" type="REAL" mandatory="y" />
+			<column name="Equivalents" type="REAL" mandatory="y" />
+			<column name="Density" type="REAL" />
+			<column name="Purity" type="REAL" />
+			<column name="ResinLoad" type="REAL" />
+			<column name="InChIKey" type="TEXT" length="27" />
+			<column name="SyncState" type="INTEGER" >
 				<defo><![CDATA[0]]></defo>
 			</column>
 			<index name="pk_tblRefReactants" unique="PRIMARY_KEY" >
@@ -399,16 +399,16 @@
 			</fk>
 		</table>
 		<table name="tblSeparators" spec="" >
-			<column name="GUID" type="TEXT" length="36" jt="-1" mandatory="y" />
-			<column name="ProtocolItemID" type="TEXT" length="36" jt="-1" mandatory="y" />
-			<column name="ElementType" type="INTEGER" jt="4" mandatory="y" >
+			<column name="GUID" type="TEXT" length="36" mandatory="y" />
+			<column name="ProtocolItemID" type="TEXT" length="36" mandatory="y" />
+			<column name="ElementType" type="INTEGER" mandatory="y" >
 				<defo><![CDATA[0]]></defo>
 			</column>
-			<column name="DisplayType" type="INTEGER" jt="4" mandatory="y" >
+			<column name="DisplayType" type="INTEGER" mandatory="y" >
 				<defo><![CDATA[0]]></defo>
 			</column>
-			<column name="Title" type="TEXT" length="80" jt="-1" />
-			<column name="SyncState" type="INTEGER" jt="4" >
+			<column name="Title" type="TEXT" length="80" />
+			<column name="SyncState" type="INTEGER" >
 				<defo><![CDATA[0]]></defo>
 			</column>
 			<index name="pk_tblSeparators" unique="PRIMARY_KEY" >
@@ -422,23 +422,23 @@
 			</fk>
 		</table>
 		<table name="tblSolvents" spec="" >
-			<column name="GUID" type="TEXT" length="36" jt="-1" mandatory="y" />
-			<column name="ProtocolItemID" type="TEXT" length="36" jt="-1" mandatory="y" />
-			<column name="SpecifiedUnitType" type="INTEGER" jt="4" mandatory="y" >
+			<column name="GUID" type="TEXT" length="36" mandatory="y" />
+			<column name="ProtocolItemID" type="TEXT" length="36" mandatory="y" />
+			<column name="SpecifiedUnitType" type="INTEGER" mandatory="y" >
 				<defo><![CDATA[1]]></defo>
 			</column>
-			<column name="IsDisplayAsWeight" type="INTEGER" jt="4" mandatory="y" >
+			<column name="IsDisplayAsWeight" type="INTEGER" mandatory="y" >
 				<defo><![CDATA[0]]></defo>
 			</column>
-			<column name="Name" type="TEXT" length="50" jt="-1" mandatory="y" />
-			<column name="Source" type="TEXT" length="40" jt="-1" />
-			<column name="Milliliters" type="REAL" jt="8" mandatory="y" />
-			<column name="Density" type="REAL" jt="8" />
-			<column name="IsMolEquivalents" type="INTEGER" jt="4" mandatory="y" >
+			<column name="Name" type="TEXT" length="50" mandatory="y" />
+			<column name="Source" type="TEXT" length="40" />
+			<column name="Milliliters" type="REAL" mandatory="y" />
+			<column name="Density" type="REAL" />
+			<column name="IsMolEquivalents" type="INTEGER" mandatory="y" >
 				<defo><![CDATA[0]]></defo>
 			</column>
-			<column name="Equivalents" type="REAL" jt="8" mandatory="y" />
-			<column name="SyncState" type="INTEGER" jt="4" >
+			<column name="Equivalents" type="REAL" mandatory="y" />
+			<column name="SyncState" type="INTEGER" >
 				<defo><![CDATA[0]]></defo>
 			</column>
 			<index name="pk_tblSolvents" unique="PRIMARY_KEY" >
@@ -452,25 +452,25 @@
 			</fk>
 		</table>
 		<table name="tblUsers" spec="" >
-			<column name="UserID" type="TEXT" length="25" jt="-1" mandatory="y" />
-			<column name="DatabaseID" type="TEXT" length="36" jt="-1" mandatory="y" />
-			<column name="FirstName" type="TEXT" length="50" jt="-1" />
-			<column name="LastName" type="TEXT" length="50" jt="-1" />
-			<column name="CompanyName" type="TEXT" length="100" jt="-1" />
-			<column name="DepartmentName" type="TEXT" length="100" jt="-1" />
-			<column name="City" type="TEXT" length="50" jt="-1" />
-			<column name="PWHash" type="TEXT" length="64" jt="-1" />
-			<column name="PWHint" type="TEXT" length="80" jt="-1" />
-			<column name="IsSpellCheckEnabled" type="INTEGER" jt="4" mandatory="y" >
+			<column name="UserID" type="TEXT" length="25" mandatory="y" />
+			<column name="DatabaseID" type="TEXT" length="36" mandatory="y" />
+			<column name="FirstName" type="TEXT" length="50" />
+			<column name="LastName" type="TEXT" length="50" />
+			<column name="CompanyName" type="TEXT" length="100" />
+			<column name="DepartmentName" type="TEXT" length="100" />
+			<column name="City" type="TEXT" length="50" />
+			<column name="PWHash" type="TEXT" length="64" />
+			<column name="PWHint" type="TEXT" length="80" />
+			<column name="IsSpellCheckEnabled" type="INTEGER" mandatory="y" >
 				<defo><![CDATA[0]]></defo>
 			</column>
-			<column name="SyncState" type="INTEGER" jt="4" >
+			<column name="SyncState" type="INTEGER" >
 				<defo><![CDATA[0]]></defo>
 			</column>
-			<column name="IsCurrent" type="INTEGER" jt="4" >
+			<column name="IsCurrent" type="INTEGER" >
 				<defo><![CDATA[0]]></defo>
 			</column>
-			<column name="SequenceNr" type="INTEGER" jt="4" >
+			<column name="SequenceNr" type="INTEGER" >
 				<defo><![CDATA[0]]></defo>
 			</column>
 			<index name="pk_tblUsers" unique="PRIMARY_KEY" >
@@ -491,9 +491,9 @@
 		<entity schema="Default" name="tblDbMaterialFiles" color="3986C1" x="361" y="551" />
 		<entity schema="Default" name="sync_Tombstone" color="3986C1" x="361" y="380" />
 		<entity schema="Default" name="tblProjFolders" color="3986C1" x="684" y="304" />
-		<entity schema="Default" name="tblProtocolItems" color="3986C1" x="703" y="532" />
 		<entity schema="Default" name="tblProjects" color="3986C1" x="665" y="57" />
 		<entity schema="Default" name="tblExperiments" color="3986C1" x="969" y="57" />
+		<entity schema="Default" name="tblProtocolItems" color="3986C1" x="1292" y="304" />
 	</layout>
 	<layout name="Protocol Elements" id="Layout-16d" show_column_type="y" show_relation="cascade" >
 		<entity schema="Default" name="tblProducts" color="3986C1" x="855" y="342" />
