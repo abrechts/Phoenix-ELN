@@ -14,7 +14,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FreeSpire.PDF" Version="8.6.0" />
+    <PackageReference Include="FreeSpire.PDF" Version="11.11.0" />
     <PackageReference Include="gong-wpf-dragdrop" Version="4.0.0" />
     <PackageReference Include="SpellCheck.Dictionaries" Version="1.2.0" />
   </ItemGroup>
