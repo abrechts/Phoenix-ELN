@@ -6,7 +6,7 @@
     <FileVersion>0.9.0.0</FileVersion>
 
     <RootNamespace>ElnBase</RootNamespace>
-    <TargetFramework>net10.0-windows10.0.17763.0</TargetFramework>
+    <TargetFramework>net9.0-windows10.0.17763.0</TargetFramework>
     <RootNamespace>ElnBase</RootNamespace>
     <UseWPF>true</UseWPF>
     <ImportedNamespaces>Microsoft.VisualBasic=True,System=True,System.Collections=True,System.Collections.Generic=True,System.Diagnostics=True,System.Linq=True,System.Xml.Linq=True,System.Threading.Tasks=True,ElnBase=True</ImportedNamespaces>

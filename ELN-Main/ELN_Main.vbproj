@@ -6,7 +6,7 @@
     <FileVersion>3.1.2</FileVersion>
 
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net10.0-windows10.0.17763.0</TargetFramework>  
+    <TargetFramework>net9.0-windows10.0.17763.0</TargetFramework>  
     <RootNamespace>ChemBytes</RootNamespace>
     <UseWPF>true</UseWPF>
     <ImportedNamespaces>Spire=False,Spire.License=False,System.IO=False,System.Linq.Experessions=False,System.Windows=False,System.Windows.Controls=False,System.Windows.Data=False,System.Windows.Documents=False,System.Windows.Input=False,System.Windows.Media=False,System.Windows.Media.Imaging=False,System.Windows.Navigation=False,System.Windows.Shapes=False,System.XML=False,Microsoft.VisualBasic=True,System=True,System.Collections=True,System.Collections.Generic=True,System.Diagnostics=True,System.Linq=True,System.Xml.Linq=True,System.Threading.Tasks=True,ELN_Main=True</ImportedNamespaces>
@@ -20,8 +20,6 @@
     <PackageProjectUrl></PackageProjectUrl>
     <StartupObject>Sub Main</StartupObject>
   </PropertyGroup>
-
-  <ItemGroup />
 
   <ItemGroup>
     <Page Remove="App.xaml" />
@@ -45,13 +43,8 @@
     <Import Include="System.XML" />
   </ItemGroup>
 
-  <ItemGroup />
-
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.9">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
+    <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>
