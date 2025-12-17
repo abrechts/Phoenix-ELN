@@ -1,5 +1,4 @@
-﻿Imports CustomControls
-
+﻿
 Public Class dlgZipProgress
 
     Public Sub New()

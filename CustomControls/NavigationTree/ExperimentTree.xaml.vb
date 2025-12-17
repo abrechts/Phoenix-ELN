@@ -189,7 +189,7 @@ Public Class ExperimentTree
                 Dim expList = (From exp In groupEntry.tblExperiments Order By exp.ExperimentID Ascending).ToList
                 Dim zipDlg As New dlgZipProgress With {
                     .Owner = Application.Current.MainWindow,
-                    .Title = "Archive Group Experiments ...",
+                    .Title = "Archiving Group Experiments ...",
                     .ExperimentEntries = expList,
                     .ZipFilePath = dstpath
                 }
