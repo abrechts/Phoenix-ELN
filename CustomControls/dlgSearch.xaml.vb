@@ -4,6 +4,7 @@ Imports System.Windows
 Imports ElnBase
 Imports ElnCoreModel
 Imports System.Windows.Media
+Imports ChemBytes
 
 Public Class dlgSearch
 

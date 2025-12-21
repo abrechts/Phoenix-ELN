@@ -2,6 +2,7 @@
 Imports ElnBase
 Imports ElnBase.ELNCalculations
 Imports ElnCoreModel
+Imports ChemBytes
 
 
 Public Class dlgEditProduct
