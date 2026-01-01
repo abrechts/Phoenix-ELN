@@ -509,6 +509,18 @@ Namespace My
                 Me("dlgSequencesPosition") = value
             End Set
         End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("True")>  _
+        Public Property CbDrawBioSeqPinned() As Boolean
+            Get
+                Return CType(Me("CbDrawBioSeqPinned"),Boolean)
+            End Get
+            Set
+                Me("CbDrawBioSeqPinned") = value
+            End Set
+        End Property
     End Class
 End Namespace
 

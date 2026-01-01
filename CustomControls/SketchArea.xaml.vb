@@ -116,6 +116,7 @@ Public Class SketchArea
             .DialogSize = New Size(My.Settings.CbDrawDialogSize.Width, My.Settings.CbDrawDialogSize.Height)
             .LastOpenFilePath = My.Settings.CbDrawLastOpenPath
             .LastSaveFilePath = My.Settings.CbDrawLastSavePath
+            .IsBiosequencePanelPinned = My.Settings.CbDrawBioSeqPinned
             If Me.DataContext IsNot Nothing Then
                 .IsOkButtonDisabled = CType(Me.DataContext, tblExperiments).WorkflowState = WorkflowStatus.Finalized
             End If
@@ -130,6 +131,7 @@ Public Class SketchArea
             .CbDrawDialogSize = New System.Drawing.Size(cbDraw.DialogProperties.DialogSize.Width, cbDraw.DialogProperties.DialogSize.Height)
             .CbDrawLastOpenPath = cbDraw.DialogProperties.LastOpenFilePath
             .CbDrawLastSavePath = cbDraw.DialogProperties.LastSaveFilePath
+            .CbDrawBioSeqPinned = cbDraw.DialogProperties.IsBiosequencePanelPinned
         End With
 
         'editor not cancelled?
