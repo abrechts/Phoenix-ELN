@@ -92,6 +92,9 @@ Public Class ProjFolderTreeHeader
         'disable delete project if it contains experiments
         mnuDeleteFolder.IsEnabled = (folderEntry.tblExperiments.Count = 0) AndAlso (folderEntry.Project.tblProjFolders.Count > 1)
 
+        'disble archive project if it contains no experiments
+        mnuArchiveFolder.IsEnabled = (folderEntry.tblExperiments.Count > 0)
+
     End Sub
 
 

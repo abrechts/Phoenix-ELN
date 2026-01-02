@@ -50,7 +50,7 @@
 
                 </StackPanel>
 
-                <TextBlock Margin="2,2,0,1" Text="Subfolder:" VerticalAlignment="Top" HorizontalAlignment="Left" FontWeight="Bold" Foreground="DarkBlue"/>
+                <TextBlock Margin="2,2,0,1" VerticalAlignment="Top" HorizontalAlignment="Left" FontWeight="Bold" Foreground="DarkBlue"><Run Language="de-ch" Text="Project"/><Run Text=" Group:"/></TextBlock>
 
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top">
                     <local:ComboPlus x:Name="cboProjFolders" DisplayMemberPath="FolderName" CboBackground="white" MinWidth="200"
