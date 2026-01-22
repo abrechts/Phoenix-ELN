@@ -500,11 +500,11 @@
 		<entity schema="Default" name="tblProtocolItems" color="3986C1" x="57" y="266" />
 		<entity schema="Default" name="tblReagents" color="3986C1" x="589" y="76" />
 		<entity schema="Default" name="tblRefReactants" color="3986C1" x="323" y="76" />
-		<entity schema="Default" name="tblSolvents" color="3986C1" x="817" y="57" />
 		<entity schema="Default" name="tblEmbeddedFiles" color="C1D8EE" x="342" y="608" />
 		<entity schema="Default" name="tblSeparators" color="3986C1" x="608" y="494" />
 		<entity schema="Default" name="tblAuxiliaries" color="3986C1" x="665" y="684" />
 		<entity schema="Default" name="tblComments" color="3986C1" x="342" y="437" />
+		<entity schema="Default" name="tblSolvents" color="3986C1" x="855" y="57" />
 	</layout>
 	<layout name="Sqlite" id="Layout-1015" show_relation="cascade" />
 </project>

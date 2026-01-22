@@ -69,15 +69,28 @@
 
         <Separator Margin="12,4,12,8"/>
 
-        <TextBlock Margin="12,0,12,0" TextWrapping="wrap" HorizontalAlignment="left" FontStyle="Italic" IsHyphenationEnabled="true">
-            <Run FontWeight="DemiBold" FontSize="12" Foreground="#FF222222" Text="Existing Users"/><Run FontStyle="Normal" Text=": Restore from the backup."/>
+        <TextBlock Margin="12,0,12,0" TextWrapping="wrap" HorizontalAlignment="left"  IsHyphenationEnabled="true">
+            <Run Text="Existing Users" FontStyle="Italic" FontWeight="DemiBold" FontSize="12" Foreground="#FF222222" />
+            <Run Text=": Transfer your ELN data from a previous installation -" FontStyle="Normal" />
+            <Run x:Name="lnkTransferInfo" Text="more info." Foreground="Blue" TextDecorations="Underline" Cursor="Hand"/>
         </TextBlock>
+        
 
-        <StackPanel Orientation="Horizontal" Margin="12,2,22,6" HorizontalAlignment="Left">
+        <StackPanel Orientation="Horizontal" Margin="12,4,22,0" HorizontalAlignment="Left">
+            
+            <ContentControl Content="{StaticResource icoOpenFolder}" Height="20" Margin="0,0,5,0"/>
+
+            <TextBlock x:Name="lnkImportPackage" Text="Import transfer package" HorizontalAlignment="Center" Foreground="blue" 
+                Cursor="Hand" TextDecorations="Underline" VerticalAlignment="Center" FontSize="12.5"
+                ToolTip="Imports experiments and settings of an original &#x0a;ELN installation (preferred)."/>
+            
+        </StackPanel>
+
+        <StackPanel Orientation="Horizontal" Margin="12,0,22,6" HorizontalAlignment="Left">
             <ContentControl Content="{StaticResource icoFromServer}" Height="20" Margin="0,0,5,0"/>
             <TextBlock x:Name="lnkRestore" Text="Restore from server" HorizontalAlignment="Center" Foreground="blue" 
                 Cursor="Hand" TextDecorations="Underline" VerticalAlignment="Center" FontSize="12.5"
-                ToolTip="Replaces the demo database by your own experiments,&#x0a;e.g. after a fresh installation on a new machine."/>
+                ToolTip="Replaces the demo database by your own experiments,&#x0a;This is the method of choice if your original data are lost."/>
         </StackPanel>
 
         <Separator/>

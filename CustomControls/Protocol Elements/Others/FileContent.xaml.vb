@@ -216,7 +216,6 @@ Public Class FileContent
     End Sub
 
 
-
     ''' <summary>
     ''' Gets the path to the directory in the user's temp folder, in which temporary 
     ''' embedded docs created for viewing are stored.   

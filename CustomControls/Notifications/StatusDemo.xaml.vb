@@ -7,6 +7,7 @@ Public Class StatusDemo
 
     Public Shared Event RequestCreateFirstUser(sender As Object)
     Public Shared Event RequestRestoreServer(sender As Object)
+    Public Shared Event RequestTransferPackage(sender As Object)
 
     Public Sub New()
 
@@ -21,6 +22,22 @@ Public Class StatusDemo
     Private Sub btnNewUser_Click() Handles btnCreateUser.Click
 
         RaiseEvent RequestCreateFirstUser(Me)
+
+    End Sub
+
+
+    Private Sub lnkMoreInfo_Click() Handles lnkTransferInfo.MouseUp
+
+        Dim info As New ProcessStartInfo("https://abrechts.github.io/phoenix-eln-help.github.io/pages/ELNDataMigration.html")
+        info.UseShellExecute = True
+        Process.Start(info)
+
+    End Sub
+
+
+    Private Sub lnkImportPackage_Click() Handles lnkImportPackage.MouseUp
+
+        RaiseEvent RequestTransferPackage(Me)
 
     End Sub
 

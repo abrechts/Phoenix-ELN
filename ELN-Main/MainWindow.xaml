@@ -160,6 +160,11 @@
                               IsEnabled="{Binding ElementName=tabExperiments, Path=SelectedContent.UserID, Converter={StaticResource demoToBoolConv},
                                 ConverterParameter=invert}"/>
                             <MenuItem x:Name="btnRestore" Header="Restore from Server ..." Margin="0,0,0,2"/>
+                            <Separator/>
+                            <MenuItem Header="Transfer Package" Margin="0,2,0,0">
+                                <MenuItem x:Name="mnuCreatePackage" Header="Create Package ..."/>
+                                <MenuItem x:Name="mnuImportPackage" Header="Import Package..." />
+                            </MenuItem>
                         </MenuItem>
                     </Menu>
 
