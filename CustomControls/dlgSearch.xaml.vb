@@ -66,13 +66,13 @@ Public Class dlgSearch
 
             Case RssErrorType.TooManyHits
                 lstRssHitGroups.DataContext = Nothing
-                MsgBox("Too many hits expected - please" + vbCrLf +
+                cbMsgBox.Display("Too many hits expected - please" + vbCrLf +
                        "make your query more specific!", MsgBoxStyle.OkOnly + MsgBoxStyle.Information, "RSS query error")
                 Exit Sub
 
             Case RssErrorType.QueryStructureError
                 lstRssHitGroups.DataContext = Nothing
-                MsgBox("There's a structure error in your" + vbCrLf +
+                cbMsgBox.Display("There's a structure error in your" + vbCrLf +
                        "query sketch (stereochemistry?)." + vbCrLf +
                        "Please correct!", MsgBoxStyle.OkOnly + MsgBoxStyle.Information, "RSS query error")
                 Exit Sub

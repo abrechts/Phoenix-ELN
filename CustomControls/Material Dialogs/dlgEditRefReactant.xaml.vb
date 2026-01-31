@@ -139,33 +139,33 @@ Public Class dlgEditRefReactant
     Private Function ValidateData() As Boolean
 
         If numMatAmount.IsZeroOrNothing Then
-            MsgBox("Please specify a material amount.", MsgBoxStyle.OkOnly + MsgBoxStyle.Information, "Data Validation")
+            cbMsgBox.Display("Please specify a material amount.", MsgBoxStyle.OkOnly + MsgBoxStyle.Information, "Data Validation")
             numMatAmount.Focus()
             Return False
 
         ElseIf Trim(txtMatName.Text) = "" Then
-            MsgBox("Please specify a material name.", MsgBoxStyle.OkOnly + MsgBoxStyle.Information, "Data Validation")
+            cbMsgBox.Display("Please specify a material name.", MsgBoxStyle.OkOnly + MsgBoxStyle.Information, "Data Validation")
             txtMatName.Focus()
             Return False
 
         ElseIf SketchInfo.Reactants.First.IsAttachedToResin AndAlso Val(numResinLoad.Text) = 0 Then
-            MsgBox("Please specify a valid resin load.", MsgBoxStyle.OkOnly + MsgBoxStyle.Information, "Data Validation")
+            cbMsgBox.Display("Please specify a valid resin load.", MsgBoxStyle.OkOnly + MsgBoxStyle.Information, "Data Validation")
             numResinLoad.Focus()
             Return False
 
         ElseIf numDensity.Value = 0 OrElse numDensity.Value > 16 Then
-            MsgBox("The density must be in the range between 1 to 16.", MsgBoxStyle.OkOnly + MsgBoxStyle.Information, "Data Validation")
+            cbMsgBox.Display("The density must be in the range between 1 to 16.", MsgBoxStyle.OkOnly + MsgBoxStyle.Information, "Data Validation")
             numDensity.Focus()
             Return False
 
         ElseIf numDensity.IsZeroOrNothing AndAlso chkConvertVolWeight.IsChecked Then
-            MsgBox("A density is required for the desired " + vbCrLf +
+            cbMsgBox.Display("A density is required for the desired " + vbCrLf +
                    "weight/volume conversion.", MsgBoxStyle.OkOnly + MsgBoxStyle.Information, "Data Validation")
             numDensity.Focus()
             Return False
 
         ElseIf numPurity.Value = 0 OrElse numPurity.Value > 100 Then
-            MsgBox("The purity must be in the range between 1 to 100%.", MsgBoxStyle.OkOnly + MsgBoxStyle.Information, "Data Validation")
+            cbMsgBox.Display("The purity must be in the range between 1 to 100%.", MsgBoxStyle.OkOnly + MsgBoxStyle.Information, "Data Validation")
             numPurity.Focus()
             Return False
 

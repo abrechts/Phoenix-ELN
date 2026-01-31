@@ -147,22 +147,22 @@ Public Class dlgEditProduct
     Private Function ValidateData() As Boolean
 
         If numMatAmount.IsZeroOrNothing Then
-            MsgBox("Please specify a material amount.", MsgBoxStyle.OkOnly + MsgBoxStyle.Information, "Data Validation")
+            cbMsgBox.Display("Please specify a material amount.", MsgBoxStyle.OkOnly + MsgBoxStyle.Information, "Data Validation")
             numMatAmount.Focus()
             Return False
 
         ElseIf Trim(txtMatName.Text) = "" Then
-            MsgBox("Please specify a material name.", MsgBoxStyle.OkOnly + MsgBoxStyle.Information, "Data Validation")
+            cbMsgBox.Display("Please specify a material name.", MsgBoxStyle.OkOnly + MsgBoxStyle.Information, "Data Validation")
             txtMatName.Focus()
             Return False
 
         ElseIf numPurity.Value = 0 OrElse numPurity.Value > 100 Then
-            MsgBox("The purity must be in the range between 1 to 100%.", MsgBoxStyle.OkOnly + MsgBoxStyle.Information, "Data Validation")
+            cbMsgBox.Display("The purity must be in the range between 1 to 100%.", MsgBoxStyle.OkOnly + MsgBoxStyle.Information, "Data Validation")
             numPurity.Focus()
             Return False
 
         ElseIf numResinLoad.IsVisible AndAlso val(numResinLoad.Text) = 0 Then
-            MsgBox("Please specify a resin load.", MsgBoxStyle.OkOnly + MsgBoxStyle.Information, "Data Validation")
+            cbMsgBox.Display("Please specify a resin load.", MsgBoxStyle.OkOnly + MsgBoxStyle.Information, "Data Validation")
             numResinLoad.Focus()
             Return False
 

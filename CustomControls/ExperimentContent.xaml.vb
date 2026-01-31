@@ -271,7 +271,7 @@ Public Class ExperimentContent
 
             If currExp Is latestExp Then
                 'current exp is empty
-                MsgBox("Can't create another experiment while your" + vbCrLf +
+                cbMsgBox.Display("Can't create another experiment while your" + vbCrLf +
                        "most recent one is empty.", MsgBoxStyle.Information + MsgBoxStyle.OkCancel, "Experiment Creation")
                 Return False
             Else
@@ -366,7 +366,7 @@ Public Class ExperimentContent
 
                             newExpContent.pnlProtocol.UnselectAll()
 
-                            MsgBox("Cloning succeeded!", MsgBoxStyle.Information, "Cloning")
+                            cbMsgBox.Display("Cloning succeeded!", MsgBoxStyle.Information, "Cloning")
 
                         End If
 
@@ -416,7 +416,7 @@ Public Class ExperimentContent
                                 Dim newExpContent = WPFToolbox.FindVisualChild(Of ExperimentContent)(TabExperimentsPresenter)
                                 newExpContent.ExpProtocol.AutoSave(, noUndoPoint:=True)
 
-                                MsgBox("Import succeeded!", MsgBoxStyle.Information, "Cloning")
+                                cbMsgBox.Display("Import succeeded!", MsgBoxStyle.Information, "Cloning")
                                 result = True
 
                             End If

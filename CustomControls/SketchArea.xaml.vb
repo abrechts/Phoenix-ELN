@@ -165,7 +165,7 @@ Public Class SketchArea
 
             If Not rss.RegisterReactionRSS(currExp) Then
 
-                MsgBox("Your reaction sketch seems to have a structure" + vbCrLf +
+                cbMsgBox.Display("Your reaction sketch seems to have a structure" + vbCrLf +
                        "error (stereochemistry?) and therefore will not" + vbCrLf +
                        "not be searchable! - Please try to correct if " + vbCrLf +
                        "before continuing ... ",

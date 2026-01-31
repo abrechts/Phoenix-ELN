@@ -182,7 +182,7 @@ Public Class FileContent
 
             If .ShowDialog Then
                 File.WriteAllBytes(.FileName, fileEntry.FileBytes)
-                MsgBox("Document successfully saved.", MsgBoxStyle.Information, "File Export")
+                cbMsgBox.Display("Document successfully saved.", MsgBoxStyle.Information, "File Export")
             End If
 
         End With
@@ -255,7 +255,7 @@ Public Class FileContent
 
             Catch ex1 As Exception
 
-                MsgBox("Can't open this document, since it's already " + vbCrLf +
+                cbMsgBox.Display("Can't open this document, since it's already " + vbCrLf +
                        "opened by another application.", MsgBoxStyle.Information, "Embedded Document")
                 Exit Sub
 

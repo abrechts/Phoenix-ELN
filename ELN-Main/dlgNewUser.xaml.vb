@@ -1,5 +1,6 @@
 ﻿Imports System.Text.RegularExpressions
 Imports ElnCoreModel
+Imports CustomControls
 
 Public Class dlgNewUser
 
@@ -104,7 +105,7 @@ Public Class dlgNewUser
 
         With txtUserID
             If .Text.Length > 10 Then
-                MsgBox("The max. length of a user-ID is 10 characters!", MsgBoxStyle.Exclamation, "UserID")
+                cbMsgBox.Display("The max. length of a user-ID is 10 characters!", MsgBoxStyle.Exclamation, "UserID")
                 .Text = .Text.Substring(0, .Text.Length - 1)
             End If
         End With
@@ -123,7 +124,7 @@ Public Class dlgNewUser
         ' prevents creating a user-created demo user
 
         If LCase(txtUserID.Text) = "demo" Then
-            MsgBox("Sorry, the userID 'demo' cannot be used!", MsgBoxStyle.Information + MsgBoxStyle.OkOnly, "UserID Check")
+            cbMsgBox.Display("Sorry, the userID 'demo' cannot be used!", MsgBoxStyle.Information + MsgBoxStyle.OkOnly, "UserID Check")
             txtUserID.Focus()
             txtUserID.SelectAll()
             Exit Sub
@@ -146,10 +147,10 @@ Public Class dlgNewUser
         Else
 
             If localDuplicates.Any Then
-                MsgBox("Sorry, this userID already exists on your machine." + vbCrLf +
+                cbMsgBox.Display("Sorry, this userID already exists on your machine." + vbCrLf +
                        "Please specify another one!", MsgBoxStyle.Information + MsgBoxStyle.OkOnly, "Duplicate")
             Else
-                MsgBox("Sorry, this userID already exists on the." + vbCrLf +
+                cbMsgBox.Display("Sorry, this userID already exists on the." + vbCrLf +
                        "ELN server. Please specify another one!", MsgBoxStyle.Information + MsgBoxStyle.OkOnly, "Duplicate")
             End If
 

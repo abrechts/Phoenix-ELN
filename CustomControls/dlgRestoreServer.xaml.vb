@@ -41,7 +41,7 @@ Partial Public Class dlgRestoreServer
     Private Sub btnGoToRestore_Click() Handles btnGoToRestore.Click
 
         If LCase(txtUserID.Text) = "demo" Then
-            MsgBox("Sorry, the sandbox 'demo' user can't be restored!" + vbCrLf +
+            cbMsgBox.Display("Sorry, the sandbox 'demo' user can't be restored!" + vbCrLf +
                    "Please specify another username.", MsgBoxStyle.Information, "Restore")
             Exit Sub
         End If
@@ -57,7 +57,7 @@ Partial Public Class dlgRestoreServer
             If IsNothing(userEntry) Then
 
                 'userName not found
-                MsgBox("Sorry, the specified userID was not found on  " + vbCrLf +
+                cbMsgBox.Display("Sorry, the specified userID was not found on  " + vbCrLf +
                 "the server. - Please try again!", MsgBoxStyle.Exclamation, "Server")
 
             Else
@@ -65,7 +65,7 @@ Partial Public Class dlgRestoreServer
                 'database info was found -> check password
                 Dim pwHash = userEntry.PWHash
                 If pwHash <> ELNCryptography.GetSHA256Hash(pwBox.Password) Then
-                    MsgBox("Wrong password.- Use your personal Phoenix " + vbCrLf +
+                    cbMsgBox.Display("Wrong password.- Use your personal Phoenix " + vbCrLf +
                            "ELN password used for finalizing your" + vbCrLf +
                            "experiments.", MsgBoxStyle.Information, "Restore")
                     Me.ForceCursor = False
@@ -86,7 +86,7 @@ Partial Public Class dlgRestoreServer
 
         Else
 
-            MsgBox("Cannot proceed: Your server currently is unavailable! ", MsgBoxStyle.Exclamation, "Server")
+            cbMsgBox.Display("Cannot proceed: Your server currently is unavailable! ", MsgBoxStyle.Exclamation, "Server")
             Me.Close()
 
         End If

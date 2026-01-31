@@ -36,7 +36,7 @@ Public Class ProjectTreeHeader
 
             'check for empty project title
 
-            MsgBox("Please enter a project title!", MsgBoxStyle.OkOnly + MsgBoxStyle.Information, "Validation")
+            cbMsgBox.Display("Please enter a project title!", MsgBoxStyle.OkOnly + MsgBoxStyle.Information, "Validation")
             isValid = False
 
         Else
@@ -50,7 +50,7 @@ Public Class ProjectTreeHeader
 
                 Dim duplicates = From proj In projectEntry.User.tblProjects Where Trim(proj.Title.ToLower) = testTitle
                 If duplicates.Count > 1 Then
-                    MsgBox("A duplicate project name was entered." + vbCrLf +
+                    cbMsgBox.Display("A duplicate project name was entered." + vbCrLf +
                                 "Please choose another title ...", MsgBoxStyle.OkOnly + MsgBoxStyle.Information, "Validation")
                     isValid = False
                 Else

@@ -21,7 +21,7 @@ Public Class Users
             Return False
         End If
 
-        Dim res = MsgBox("You are about to create a personal, non-demo user for " + vbCrLf +
+        Dim res = cbMsgBox.Display("You are about to create a personal, non-demo user for " + vbCrLf +
                         "recording your 'real' experiments. - Please note that" + vbCrLf +
                         "this will delete all of your current 'demo' user" + vbCrLf +
                         "sandbox experiments! " + vbCrLf + vbCrLf +
@@ -155,7 +155,7 @@ Public Class Users
             Return Nothing
         End If
 
-        Dim res = MsgBox("This will add another user with its own userID to " + vbCrLf +
+        Dim res = cbMsgBox.Display("This will add another user with its own userID to " + vbCrLf +
                         "your local ELN database." + vbCrLf + vbCrLf +
                         "This is useful when sharing your machine with other" + vbCrLf +
                         "ELN users, or if you are working in multiple" + vbCrLf +

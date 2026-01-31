@@ -184,7 +184,7 @@ Public Class MatDocControl
     Private Sub btnAdd_Click() Handles btnAdd.PreviewMouseUp
 
         If Documents.Count >= MaxFileCount Then
-            MsgBox("Sorry, the maximum limit of " + MaxFileCount.ToString + " documents " + vbCrLf +
+            cbMsgBox.Display("Sorry, the maximum limit of " + MaxFileCount.ToString + " documents " + vbCrLf +
                "per material already is present!", MsgBoxStyle.OkOnly + MsgBoxStyle.Exclamation, "Documents Limit")
             Exit Sub
         End If
@@ -208,12 +208,12 @@ Public Class MatDocControl
 
                 Select Case res
                     Case EmbeddingResult.SizeExceeded
-                        MsgBox("File too large (" + MaxFileMB.ToString + " MB max)!", MsgBoxStyle.OkOnly + MsgBoxStyle.Exclamation,
+                        cbMsgBox.Display("File too large (" + MaxFileMB.ToString + " MB max)!", MsgBoxStyle.OkOnly + MsgBoxStyle.Exclamation,
                                "File Size Limitation")
                         Exit Sub
                     Case EmbeddingResult.FileNotFound
                         'this return value is a synonym for duplicate entry here ...
-                        MsgBox("Sorry, a document with the same name " + vbCrLf +
+                        cbMsgBox.Display("Sorry, a document with the same name " + vbCrLf +
                                 "is already present for this material!", MsgBoxStyle.OkOnly + MsgBoxStyle.Exclamation,
                                 "Duplicate Document")
                         Exit Sub
@@ -243,7 +243,7 @@ Public Class MatDocControl
 
     Private Sub cboItem_DelClick(sender As Object, e As MouseButtonEventArgs) 'XAML specified event
 
-        Dim res = MsgBox("Do you really want to remove this document?", MsgBoxStyle.OkCancel + MsgBoxStyle.DefaultButton2 + MsgBoxStyle.Question,
+        Dim res = cbMsgBox.Display("Do you really want to remove this document?", MsgBoxStyle.OkCancel + MsgBoxStyle.DefaultButton2 + MsgBoxStyle.Question,
           "Delete Document")
         If res = MsgBoxResult.Cancel Then
             Exit Sub
@@ -283,7 +283,7 @@ Public Class MatDocControl
 
             Catch ex1 As Exception
 
-                MsgBox("Can't open this document, since it's already " + vbCrLf +
+                cbMsgBox.Display("Can't open this document, since it's already " + vbCrLf +
                        "opened by another application.", MsgBoxStyle.Information, "Embedded Document")
                 Exit Sub
 

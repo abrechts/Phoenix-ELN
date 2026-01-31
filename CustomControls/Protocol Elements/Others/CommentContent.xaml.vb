@@ -216,7 +216,7 @@ Public Class CommentContent
             If pictRegex.IsMatch(rtfText) Then
 
                 ' cancel if embedded images in RTF
-                Dispatcher.BeginInvoke(CType(Function() MsgBox("Sorry, can't paste comments " + vbCrLf +
+                Dispatcher.BeginInvoke(CType(Function() cbMsgBox.Display("Sorry, can't paste comments " + vbCrLf +
                         "containing graphics!", MsgBoxStyle.Information, "Comment Validation"), Action))
                 e.CancelCommand()
                 Exit Sub
@@ -240,7 +240,7 @@ Public Class CommentContent
 
             ' cancel if resulting in too many lines
             If TooManyResultingLines(rtbComments, clipText, MaxLines) Then
-                Dispatcher.BeginInvoke(CType(Function() MsgBox("Sorry, pasting would exceed the " + vbCrLf +
+                Dispatcher.BeginInvoke(CType(Function() cbMsgBox.Display("Sorry, pasting would exceed the " + vbCrLf +
                     $"limit of {MaxLines} comment lines!", MsgBoxStyle.Information, "Comment Validation"), Action))
                 e.CancelCommand()
                 Exit Sub
@@ -318,14 +318,14 @@ Public Class CommentContent
 
         ' cancel if table elements present
         If doc.Blocks.OfType(Of Table).Any Then
-            Dispatcher.BeginInvoke(CType(Function() MsgBox("Sorry, can't paste table elements " + vbCrLf +
+            Dispatcher.BeginInvoke(CType(Function() cbMsgBox.Display("Sorry, can't paste table elements " + vbCrLf +
                "(including from HTML content).", MsgBoxStyle.Information, "Comment Validation"), Action))
             Return False
         End If
 
         ' cancel if resulting in too many rtbComments text lines
         If TooManyResultingLines(rtbComments, tmpRange.Text, maxLines) Then
-            Dispatcher.BeginInvoke(CType(Function() MsgBox("Sorry, pasting would exceed the " + vbCrLf +
+            Dispatcher.BeginInvoke(CType(Function() cbMsgBox.Display("Sorry, pasting would exceed the " + vbCrLf +
                   $"limit of {maxLines} comment lines!", MsgBoxStyle.Information, "Comment Validation"), Action))
             Return False
         End If
@@ -455,7 +455,7 @@ Public Class CommentContent
             If e.Key = Key.Return OrElse e.Key = Key.Enter Then
 
                 If GetVisualLineCount(rtbComments) >= MaxLines Then
-                    MsgBox("Sorry, adding another line would exceed" + vbCrLf +
+                    cbMsgBox.Display("Sorry, adding another line would exceed" + vbCrLf +
                         $"the limit of {MaxLines} comment lines.", MsgBoxStyle.Information, "Comment Validation")
                     e.Handled = True
                 End If
@@ -484,7 +484,7 @@ Public Class CommentContent
                     tr.Text = String.Empty
                 End If
 
-                MsgBox($"Sorry, the maximum number of {MaxLines} comment " + vbCrLf +
+                cbMsgBox.Display($"Sorry, the maximum number of {MaxLines} comment " + vbCrLf +
                         "lines would be exceed when inserting this " + vbCrLf +
                        "character, due to word wrapping.", MsgBoxStyle.Information, "Comment Validation")
 

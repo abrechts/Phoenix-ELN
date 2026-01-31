@@ -1,6 +1,7 @@
 ﻿Imports System.Text.RegularExpressions
 Imports ElnBase
 Imports ElnCoreModel
+Imports CustomControls
 
 Public Class dlgChangeUsername
 
@@ -50,7 +51,7 @@ Public Class dlgChangeUsername
     Private Sub btnOk_Click() Handles btnOK.Click
 
         If IsDuplicate(txtUsername.Text) Then
-            MsgBox("This user-ID already exists - please try again!", MsgBoxStyle.Information, "Duplicate UserI-D")
+            cbMsgBox.Display("This user-ID already exists - please try again!", MsgBoxStyle.Information, "Duplicate UserI-D")
             Exit Sub
         End If
 

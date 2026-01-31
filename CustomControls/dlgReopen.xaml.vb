@@ -29,7 +29,7 @@ Public Class dlgReopen
             DialogResult = True
             Me.Close()
         Else
-            MsgBox("Sorry, wrong user password. - Please try again!", MsgBoxStyle.Exclamation + MsgBoxStyle.OkOnly,
+            cbMsgBox.Display("Sorry, wrong user password. - Please try again!", MsgBoxStyle.Exclamation + MsgBoxStyle.OkOnly,
             "Password Error")
             passwordBox.Password = ""
             passwordBox.Focus()

@@ -108,7 +108,7 @@ Public Class ExperimentPrint
             Try
                 printDlg.PrintDocument(printTemplate.Paginator, "Printing " + expEntry.ExperimentID)
             Catch ex As Exception
-                MsgBox("Printing error. If using a printer driver generating an" + vbCrLf +
+                cbMsgBox.Display("Printing error. If using a printer driver generating an" + vbCrLf +
                        "output file (e.g. PDF), the specified file may currently" + vbCrLf +
                        "be in use by another application and can't be overwritten!",
                        MsgBoxStyle.Information + MsgBoxStyle.OkOnly, "Printing Error")
@@ -281,7 +281,7 @@ Public Class ExperimentPrint
 
                 'non-PDF/A-3b version
                 convertedPDF = origPDF
-                MsgBox("Unable to save your document in PDF/A3b format." + vbCrLf +
+                cbMsgBox.Display("Unable to save your document in PDF/A3b format." + vbCrLf +
                        "It will be saved as standard PDF instead.", MsgBoxStyle.Information, "PDF Export")
             End Try
 
@@ -299,7 +299,7 @@ Public Class ExperimentPrint
             Try
                 convertedPDF.SaveToFile(convPDFPath)
             Catch ex As Exception
-                MsgBox("Could not write PDF, since a document with the same" + vbCrLf +
+                cbMsgBox.Display("Could not write PDF, since a document with the same" + vbCrLf +
                "name Is currently open in a PDF viewer. ", MsgBoxStyle.Information, "PDF Export")
                 Return False
             End Try
@@ -347,7 +347,7 @@ Public Class ExperimentPrint
 
             'check for Spire.Pdf Free 10 page limit
             If printAsPDF AndAlso docPaginator.PageCount > 10 Then
-                MsgBox("Sorry, can't create PDF documents larger " + vbCrLf +
+                cbMsgBox.Display("Sorry, can't create PDF documents larger " + vbCrLf +
                        "than 10 pages.", MsgBoxStyle.Information, "PDF limits reached.")
                 Return Nothing
             End If

@@ -113,7 +113,7 @@ Public Class dlgServerConnection
 
     Private Sub btnDisconnect_Click() Handles btnDisconnect.Click
 
-        Dim res = MsgBox("Do you really want to disconnect from the server?", MsgBoxStyle.OkCancel + MsgBoxStyle.Exclamation, "Server Connection")
+        Dim res = cbMsgBox.Display("Do you really want to disconnect from the server?", MsgBoxStyle.OkCancel + MsgBoxStyle.Exclamation, "Server Connection")
         If res = MsgBoxResult.Ok Then
 
             My.Settings.IsServerOffByUser = True
@@ -129,7 +129,7 @@ Public Class dlgServerConnection
 
         'in case of replacing an already established server sync:
         If ServerSync.IsSynchronizing Then
-            MsgBox("A server synchronization currently is in progress." + vbCrLf +
+            cbMsgBox.Display("A server synchronization currently is in progress." + vbCrLf +
                    "Please try again in a moment ...", MsgBoxStyle.Information, "Server Connection")
             Exit Sub
         End If
@@ -161,7 +161,7 @@ Public Class dlgServerConnection
         Else
 
             'wrong connection data, password, etc. (does not close dialog)
-            MsgBox(ServerSync.CreationErrorMessage, MsgBoxStyle.Exclamation, "Server error")
+            cbMsgBox.Display(ServerSync.CreationErrorMessage, MsgBoxStyle.Exclamation, "Server error")
             Me.Cursor = Cursors.Arrow
 
         End If

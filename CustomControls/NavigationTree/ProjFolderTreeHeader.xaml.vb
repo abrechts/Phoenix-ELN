@@ -44,7 +44,7 @@ Public Class ProjFolderTreeHeader
 
             'check for empty project title
 
-            MsgBox("Please enter a group title!", MsgBoxStyle.OkOnly + MsgBoxStyle.Information, "Validation")
+            cbMsgBox.Display("Please enter a group title!", MsgBoxStyle.OkOnly + MsgBoxStyle.Information, "Validation")
             isValid = False
 
         Else
@@ -60,7 +60,7 @@ Public Class ProjFolderTreeHeader
                     Trim(folder.FolderName).Equals(testTitle, StringComparison.OrdinalIgnoreCase)
 
                 If duplicates.Count > 1 Then
-                    MsgBox("This group title already exists in the current." + vbCrLf +
+                    cbMsgBox.Display("This group title already exists in the current." + vbCrLf +
                            "project. Please choose another one ...", MsgBoxStyle.OkOnly + MsgBoxStyle.Information, "Validation")
                     isValid = False
                 Else

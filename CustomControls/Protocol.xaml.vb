@@ -420,7 +420,7 @@ Public Class Protocol
                     End If
                 End With
             Else
-                MsgBox("Cannot finalize an empty experiment!", MsgBoxStyle.Information, "Finalize Error")
+                cbMsgBox.Display("Cannot finalize an empty experiment!", MsgBoxStyle.Information, "Finalize Error")
             End If
 
         Else
@@ -940,7 +940,7 @@ Public Class Protocol
         If errorList.Count > 0 Then
             Dim errText = "Following file(s) could not be embedded:" + vbCrLf + vbCrLf
             errText += String.Join(vbCrLf, errorList)
-            MsgBox(errText, MsgBoxStyle.Information, "Embedding Errors")
+            cbMsgBox.Display(errText, MsgBoxStyle.Information, "Embedding Errors")
         End If
 
         If srcFiles.Count > errorList.Count Then
@@ -1362,7 +1362,7 @@ Public Class Protocol
 
             Else
 
-                MsgBox("Can't delete, since at least one" + vbCrLf +
+                cbMsgBox.Display("Can't delete, since at least one" + vbCrLf +
                         "reference reactant is required! ", MsgBoxStyle.Information + MsgBoxStyle.OkOnly, "Validation")
 
             End If

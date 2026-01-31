@@ -34,7 +34,7 @@ Class MainWindow
         'Prevent another instance of the application to be run
         If (Process.GetProcessesByName(Process.GetCurrentProcess().ProcessName).Length > 1) Then
             Me.Hide()
-            MsgBox("Phoenix ELN is already running! ", MsgBoxStyle.Information, "Phoenix ELN")
+            cbMsgBox.Display("Phoenix ELN is already running! ", MsgBoxStyle.Information, "Phoenix ELN")
             Me.Close()
             Application.Current.Shutdown()
         End If
@@ -83,7 +83,7 @@ Class MainWindow
                 Try
                     File.Move(tempPath, SQLiteDbPath, True)    'overwrite current working db
                 Catch ex As Exception
-                    MsgBox("Can't replace current experiments database for " + vbCrLf +
+                    cbMsgBox.Display("Can't replace current experiments database for " + vbCrLf +
                         "restore, since locked by another application!", MsgBoxStyle.Information, "Restore Error")
                 End Try
                 isRestoreFromServer = True
@@ -405,7 +405,7 @@ Class MainWindow
 
                     Else
 
-                        MsgBox("Server connection cancelled!", MsgBoxStyle.Information, "Phoenix ELN")
+                        cbMsgBox.Display("Server connection cancelled!", MsgBoxStyle.Information, "Phoenix ELN")
                         Return False  'resolution dialog cancelled
 
                     End If
@@ -486,7 +486,7 @@ Class MainWindow
         With restoreProgressDlg
             .Owner = Me
             .ShowDialog()
-            MsgBox("The application now will restart with " + vbCrLf +
+            cbMsgBox.Display("The application now will restart with " + vbCrLf +
                           "the restored database.", MsgBoxStyle.Information, "Restore from Server")
             CustomControls.My.MySettings.Default.RestoreFromServer = True
             Me.Close()
@@ -510,7 +510,7 @@ Class MainWindow
         For Each dupLocalUser In duplicateLocalUsers
 
             If Not isFirst Then
-                MsgBox("Continue to resolve another user-ID conflict:", MsgBoxStyle.Information, "Duplicate Username")
+                cbMsgBox.Display("Continue to resolve another user-ID conflict:", MsgBoxStyle.Information, "Duplicate Username")
             End If
 
             Dim dupServerUser = (From user In ServerDBContext.tblUsers Where user.UserID.ToLower = dupLocalUser.UserID.ToLower).First
@@ -530,7 +530,7 @@ Class MainWindow
 
         Next
 
-        MsgBox("User-ID reassignments complete. The application " + vbCrLf +
+        cbMsgBox.Display("User-ID reassignments complete. The application " + vbCrLf +
                "will restart now and upload your data.", MsgBoxStyle.Information, "Duplicate Resolution")
 
         CustomControls.My.MySettings.Default.Save()
@@ -569,7 +569,7 @@ Class MainWindow
                         .Owner = Me
                         If .ShowDialog() Then
                             'success
-                            MsgBox("The application now will restart with " + vbCrLf +
+                            cbMsgBox.Display("The application now will restart with " + vbCrLf +
                               "the restored database.", MsgBoxStyle.Information, "Restore from Server")
                             CustomControls.My.MySettings.Default.RestoreFromServer = True
                             Me.Close()
@@ -581,7 +581,7 @@ Class MainWindow
             _isRestoring = False
 
         Else
-            MsgBox("Retry in a moment, a server sync is currently ongoing!", MsgBoxStyle.Information, "Restore from Server")
+            cbMsgBox.Display("Retry in a moment, a server sync is currently ongoing!", MsgBoxStyle.Information, "Restore from Server")
         End If
 
     End Sub
@@ -600,7 +600,7 @@ Class MainWindow
             Dispatcher.Invoke(Sub() ServerWarningDelegate(isConnected))
 
             If Not CustomControls.My.MySettings.Default.IsServerOffByUser Then
-                MsgBox("The ELN server is unavailable!" + vbCrLf + "Changes currently are not backed up." + vbCrLf + vbCrLf +
+                cbMsgBox.Display("The ELN server is unavailable!" + vbCrLf + "Changes currently are not backed up." + vbCrLf + vbCrLf +
                    "Try to reconnect later ...", MsgBoxStyle.Information, "Server Sync")
             End If
 
@@ -767,7 +767,7 @@ Class MainWindow
                 expNavTree.SelectExperiment(currUser.tblExperiments.First)
                 cboUsers.SelectedItem = currUser
 
-                Dim res2 = MsgBox("Done! - If the optional Phoenix ELN server " + vbCrLf +
+                Dim res2 = cbMsgBox.Display("Done! - If the optional Phoenix ELN server " + vbCrLf +
                             "database is installed in your environment," + vbCrLf +
                             "would you like to connect to it now for  " + vbCrLf +
                             "backup and in-house data sharing?",
@@ -1017,7 +1017,7 @@ Class MainWindow
 
     Private Sub Warning_Delegate()
 
-        MsgBox("The demo experiments limit is reached." + vbCrLf + vbCrLf +
+        cbMsgBox.Display("The demo experiments limit is reached." + vbCrLf + vbCrLf +
                "Click the green 'Create User' button" + vbCrLf +
                "to start with a unique user now.", MsgBoxStyle.Information, "Demo Validation")
 
@@ -1074,7 +1074,7 @@ Class MainWindow
             If tabExperiments.Items.Count > 4 AndAlso Not ExpDisplayList.First.DisplayIndex = -2 Then
 
                 'warn for too many open exp tabs
-                Dim res = MsgBox("The maximum of 5 open experiments will be" + vbCrLf +
+                Dim res = cbMsgBox.Display("The maximum of 5 open experiments will be" + vbCrLf +
                                  "exceeded if opening the server experiment." + vbCrLf + vbCrLf +
                                  "Release the rightmost experiment?", MsgBoxStyle.OkCancel + MsgBoxStyle.Information, "Pin Limit")
                 If res = MsgBoxResult.Ok Then
@@ -1249,7 +1249,7 @@ Class MainWindow
 
                 Else
 
-                    MsgBox("Can't pin this experiment, since the maximum " + vbCrLf +
+                    cbMsgBox.Display("Can't pin this experiment, since the maximum " + vbCrLf +
                             "number of 4 pinned experiments already is" + vbCrLf +
                             "present.",
                             MsgBoxStyle.OkOnly + MsgBoxStyle.Information, "Pin Limit")
@@ -1318,7 +1318,7 @@ Class MainWindow
 
         If CType(SelectedExpContent.DataContext, tblExperiments).WorkflowState <> WorkflowStatus.Finalized Then
 
-            Dim res = MsgBox("Do you really want to delete all protocol" + vbCrLf +
+            Dim res = cbMsgBox.Display("Do you really want to delete all protocol" + vbCrLf +
                          "entries, except the reference reactant?",
                         MsgBoxStyle.OkCancel + MsgBoxStyle.DefaultButton2 + MsgBoxStyle.Exclamation, "Clear Protocol")
 
@@ -1424,17 +1424,17 @@ Class MainWindow
 
         Dim newVersionStr = Await PhpServices.GetLatestAppVersionAsync
         If newVersionStr = "" Then
-            MsgBox("Sorry, can 't access version server.", MsgBoxStyle.Information, "Update Check")
+            cbMsgBox.Display("Sorry, can 't access version server.", MsgBoxStyle.Information, "Update Check")
             Exit Sub 'server error
         End If
 
         Dim latestVersion = New Version(newVersionStr)
         If ApplicationVersion < latestVersion Then
             pnlStatus.ShowAvailableUpdate(newVersionStr)
-            MsgBox("An update is available! See the" + vbCrLf +
+            cbMsgBox.Display("An update is available! See the" + vbCrLf +
                    "info panel for details ...", MsgBoxStyle.Information, "Update Check")
         Else
-            MsgBox("Your application is up-to-date!", MsgBoxStyle.Information, "Update Check")
+            cbMsgBox.Display("Your application is up-to-date!", MsgBoxStyle.Information, "Update Check")
         End If
 
     End Sub
@@ -1566,7 +1566,7 @@ Class MainWindow
 
         If CType(Me.DataContext, tblUsers).UserID = "demo" AndAlso Not isRestore Then
 
-            MsgBox("Sorry, the 'demo' user can't connect " + vbCrLf +
+            cbMsgBox.Display("Sorry, the 'demo' user can't connect " + vbCrLf +
                    "to the server database.", MsgBoxStyle.Information, "Server Connect")
             Return False
 
