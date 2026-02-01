@@ -74,7 +74,7 @@ Public Class dlgSearch
                 lstRssHitGroups.DataContext = Nothing
                 cbMsgBox.Display("There's a structure error in your" + vbCrLf +
                        "query sketch (stereochemistry?)." + vbCrLf +
-                       "Please correct!", MsgBoxStyle.OkOnly + MsgBoxStyle.Information, "RSS query error")
+                       "Please correct.", MsgBoxStyle.OkOnly + MsgBoxStyle.Exclamation, "RSS query error")
                 Exit Sub
 
         End Select

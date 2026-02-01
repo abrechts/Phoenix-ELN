@@ -67,7 +67,7 @@ Partial Public Class dlgRestoreServer
                 If pwHash <> ELNCryptography.GetSHA256Hash(pwBox.Password) Then
                     cbMsgBox.Display("Wrong password.- Use your personal Phoenix " + vbCrLf +
                            "ELN password used for finalizing your" + vbCrLf +
-                           "experiments.", MsgBoxStyle.Information, "Restore")
+                           "experiments.", MsgBoxStyle.Exclamation, "Restore")
                     Me.ForceCursor = False
                     Me.Cursor = Cursors.Arrow
                     Exit Sub

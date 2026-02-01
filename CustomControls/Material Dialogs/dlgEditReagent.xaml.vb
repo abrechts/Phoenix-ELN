@@ -303,44 +303,44 @@ Public Class dlgEditReagent
     Private Function ValidateData() As Boolean
 
         If numMatAmount.IsZeroOrNothing Then
-            cbMsgBox.Display("Please specify a material amount.", MsgBoxStyle.OkOnly + MsgBoxStyle.Information, "Data Validation")
+            cbMsgBox.Display("Please specify a material amount.", MsgBoxStyle.OkOnly + MsgBoxStyle.Exclamation, "Data Validation")
             numMatAmount.Focus()
             Return False
 
         ElseIf Trim(cboSearch.Text) = "" Then
-            cbMsgBox.Display("Please specify a material name.", MsgBoxStyle.OkOnly + MsgBoxStyle.Information, "Data Validation")
+            cbMsgBox.Display("Please specify a material name.", MsgBoxStyle.OkOnly + MsgBoxStyle.Exclamation, "Data Validation")
             cboSearch.ActivateEdit()
             Return False
 
         ElseIf numMwMolar.IsZeroOrNothing Then
-            cbMsgBox.Display("Please specify a molecular weight or a molarity.", MsgBoxStyle.OkOnly + MsgBoxStyle.Information, "Data Validation")
+            cbMsgBox.Display("Please specify a molecular weight or a molarity.", MsgBoxStyle.OkOnly + MsgBoxStyle.Exclamation, "Data Validation")
             numMwMolar.Focus()
             Return False
 
         ElseIf cboMwMolarity.SelectedIndex = 1 AndAlso numMwMolar.Value > 20 Then
-            cbMsgBox.Display("The molarity can't be higher than 20.", MsgBoxStyle.OkOnly + MsgBoxStyle.Information, "Data Validation")
+            cbMsgBox.Display("The molarity can't be higher than 20.", MsgBoxStyle.OkOnly + MsgBoxStyle.Exclamation, "Data Validation")
             numMwMolar.Focus()
             Return False
 
         ElseIf numDensity.Value = 0 OrElse numDensity.Value > 16 Then
-            cbMsgBox.Display("The density must be in the range between 1 to 16.", MsgBoxStyle.OkOnly + MsgBoxStyle.Information, "Data Validation")
+            cbMsgBox.Display("The density must be in the range between 1 to 16.", MsgBoxStyle.OkOnly + MsgBoxStyle.Exclamation, "Data Validation")
             numDensity.Focus()
             Return False
 
         ElseIf numDensity.IsZeroOrNothing AndAlso chkConvertVolWeight.IsChecked Then
             cbMsgBox.Display("A density is required for the desired " + vbCrLf +
-                   "weight/volume conversion.", MsgBoxStyle.OkOnly + MsgBoxStyle.Information, "Data Validation")
+                   "weight/volume conversion.", MsgBoxStyle.OkOnly + MsgBoxStyle.Exclamation, "Data Validation")
             numDensity.Focus()
             Return False
 
         ElseIf numPurity.Value = 0 OrElse numPurity.Value > 100 Then
-            cbMsgBox.Display("The purity must be in the range between 1 to 100%.", MsgBoxStyle.OkOnly + MsgBoxStyle.Information, "Data Validation")
+            cbMsgBox.Display("The purity must be in the range between 1 to 100%.", MsgBoxStyle.OkOnly + MsgBoxStyle.Exclamation, "Data Validation")
             numPurity.Focus()
             Return False
 
         ElseIf numResinLoad.Value = 0 Then
             cbMsgBox.Display("The resin load can't be zero. Leave the field" + vbCrLf +
-                   "empty or enter a valid value", MsgBoxStyle.OkOnly + MsgBoxStyle.Information, "Data Validation")
+                   "empty or enter a valid value", MsgBoxStyle.OkOnly + MsgBoxStyle.Exclamation, "Data Validation")
             numResinLoad.Focus()
             Return False
 

@@ -51,7 +51,7 @@ Public Class dlgChangeUsername
     Private Sub btnOk_Click() Handles btnOK.Click
 
         If IsDuplicate(txtUsername.Text) Then
-            cbMsgBox.Display("This user-ID already exists - please try again!", MsgBoxStyle.Information, "Duplicate UserI-D")
+            cbMsgBox.Display("This user-ID already exists - please try again!", MsgBoxStyle.Exclamation, "Duplicate UserI-D")
             Exit Sub
         End If
 

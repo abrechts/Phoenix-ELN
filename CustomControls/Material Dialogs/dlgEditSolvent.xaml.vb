@@ -268,23 +268,23 @@ Public Class dlgEditSolvent
     Private Function ValidateData() As Boolean
 
         If numMatAmount.IsZeroOrNothing Then
-            cbMsgBox.Display("Please specify a material amount.", MsgBoxStyle.OkOnly + MsgBoxStyle.Information, "Data Validation")
+            cbMsgBox.Display("Please specify a material amount.", MsgBoxStyle.OkOnly + MsgBoxStyle.Exclamation, "Data Validation")
             numMatAmount.Focus()
             Return False
 
         ElseIf Trim(cboSearch.Text) = "" Then
-            cbMsgBox.Display("Please specify a material name.", MsgBoxStyle.OkOnly + MsgBoxStyle.Information, "Data Validation")
+            cbMsgBox.Display("Please specify a material name.", MsgBoxStyle.OkOnly + MsgBoxStyle.Exclamation, "Data Validation")
             cboSearch.ActivateEdit()
             Return False
 
         ElseIf numDensity.Value = 0 OrElse numDensity.Value > 16 Then
-            cbMsgBox.Display("The density must be in the range between 1 to 16.", MsgBoxStyle.OkOnly + MsgBoxStyle.Information, "Data Validation")
+            cbMsgBox.Display("The density must be in the range between 1 to 16.", MsgBoxStyle.OkOnly + MsgBoxStyle.Exclamation, "Data Validation")
             numDensity.Focus()
             Return False
 
         ElseIf numDensity.IsZeroOrNothing AndAlso chkConvertVolWeight.IsChecked Then
             cbMsgBox.Display("A density is required for the desired " + vbCrLf +
-                   "weight/volume conversion.", MsgBoxStyle.OkOnly + MsgBoxStyle.Information, "Data Validation")
+                   "weight/volume conversion.", MsgBoxStyle.OkOnly + MsgBoxStyle.Exclamation, "Data Validation")
             numDensity.Focus()
             Return False
 

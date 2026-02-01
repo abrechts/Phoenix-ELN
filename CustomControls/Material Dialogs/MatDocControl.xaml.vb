@@ -284,7 +284,7 @@ Public Class MatDocControl
             Catch ex1 As Exception
 
                 cbMsgBox.Display("Can't open this document, since it's already " + vbCrLf +
-                       "opened by another application.", MsgBoxStyle.Information, "Embedded Document")
+                       "used by another application.", MsgBoxStyle.Exclamation, "Embedded Document")
                 Exit Sub
 
             End Try

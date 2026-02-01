@@ -169,7 +169,7 @@ Public Class SketchArea
                        "error (stereochemistry?) and therefore will not" + vbCrLf +
                        "not be searchable! - Please try to correct if " + vbCrLf +
                        "before continuing ... ",
-                       MsgBoxStyle.OkOnly + MsgBoxStyle.Information, "Sketch Validation")
+                       MsgBoxStyle.OkOnly + MsgBoxStyle.Exclamation, "Sketch Validation")
             End If
 
             blkClickInfo.Visibility = Visibility.Collapsed

@@ -108,10 +108,10 @@ Public Class ExperimentPrint
             Try
                 printDlg.PrintDocument(printTemplate.Paginator, "Printing " + expEntry.ExperimentID)
             Catch ex As Exception
-                cbMsgBox.Display("Printing error. If using a printer driver generating an" + vbCrLf +
+                cbMsgBox.Display("Unable to print. If using a printer driver generating an" + vbCrLf +
                        "output file (e.g. PDF), the specified file may currently" + vbCrLf +
                        "be in use by another application and can't be overwritten!",
-                       MsgBoxStyle.Information + MsgBoxStyle.OkOnly, "Printing Error")
+                       MsgBoxStyle.Information + MsgBoxStyle.Exclamation, "Print Error")
 
             End Try
 
@@ -300,7 +300,7 @@ Public Class ExperimentPrint
                 convertedPDF.SaveToFile(convPDFPath)
             Catch ex As Exception
                 cbMsgBox.Display("Could not write PDF, since a document with the same" + vbCrLf +
-               "name Is currently open in a PDF viewer. ", MsgBoxStyle.Information, "PDF Export")
+               "name is currently open in a PDF viewer. ", MsgBoxStyle.Exclamation, "PDF Export")
                 Return False
             End Try
 

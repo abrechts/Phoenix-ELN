@@ -231,18 +231,18 @@ Public Class dlgEditAuxiliary
     Private Function ValidateData()
 
         If numMatAmount.IsZeroOrNothing Then
-            cbMsgBox.Display("Please specify a material amount!", MsgBoxStyle.OkOnly + MsgBoxStyle.Information, "Data Validation")
+            cbMsgBox.Display("Please specify a material amount!", MsgBoxStyle.OkOnly + MsgBoxStyle.Exclamation, "Data Validation")
             numMatAmount.Focus()
             Return False
 
         ElseIf Trim(cboSearch.Text) = "" Then
-            cbMsgBox.Display("Please specify a material name!", MsgBoxStyle.OkOnly + MsgBoxStyle.Information, "Data Validation")
+            cbMsgBox.Display("Please specify a material name!", MsgBoxStyle.OkOnly + MsgBoxStyle.Exclamation, "Data Validation")
             cboSearch.ActivateEdit()
             Return False
 
         ElseIf numDensity.IsZeroOrNothing AndAlso chkConvertVolWeight.IsChecked Then
             cbMsgBox.Display("A density is required for the desired " + vbCrLf +
-                   "weight/volume conversion.", MsgBoxStyle.OkOnly + MsgBoxStyle.Information, "Data Required")
+                   "weight/volume conversion.", MsgBoxStyle.OkOnly + MsgBoxStyle.Exclamation, "Data Required")
             numDensity.Focus()
             Return False
 

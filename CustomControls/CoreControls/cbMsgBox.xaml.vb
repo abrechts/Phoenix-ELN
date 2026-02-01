@@ -69,7 +69,7 @@ Public Class cbMsgBox
 
         InitializeComponent()
 
-        Me.Title = title
+        Me.Title = "Message"
         MessageText.Text = message
         TitleText.Text = title
 

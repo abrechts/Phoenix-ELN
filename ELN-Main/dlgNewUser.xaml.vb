@@ -124,7 +124,7 @@ Public Class dlgNewUser
         ' prevents creating a user-created demo user
 
         If LCase(txtUserID.Text) = "demo" Then
-            cbMsgBox.Display("Sorry, the userID 'demo' cannot be used!", MsgBoxStyle.Information + MsgBoxStyle.OkOnly, "UserID Check")
+            cbMsgBox.Display("Sorry, the userID 'demo' cannot be used!", MsgBoxStyle.Exclamation + MsgBoxStyle.OkOnly, "UserID Check")
             txtUserID.Focus()
             txtUserID.SelectAll()
             Exit Sub
@@ -148,10 +148,10 @@ Public Class dlgNewUser
 
             If localDuplicates.Any Then
                 cbMsgBox.Display("Sorry, this userID already exists on your machine." + vbCrLf +
-                       "Please specify another one!", MsgBoxStyle.Information + MsgBoxStyle.OkOnly, "Duplicate")
+                       "Please specify another one!", MsgBoxStyle.Exclamation + MsgBoxStyle.OkOnly, "Duplicate")
             Else
                 cbMsgBox.Display("Sorry, this userID already exists on the." + vbCrLf +
-                       "ELN server. Please specify another one!", MsgBoxStyle.Information + MsgBoxStyle.OkOnly, "Duplicate")
+                       "ELN server. Please specify another one!", MsgBoxStyle.Exclamation + MsgBoxStyle.OkOnly, "Duplicate")
             End If
 
             txtUserID.Focus()

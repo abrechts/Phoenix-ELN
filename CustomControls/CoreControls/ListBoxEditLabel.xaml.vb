@@ -203,7 +203,7 @@ Public Class ListBoxEditLabel
 
         Else
 
-            cbMsgBox.Display("Please enter some text!", MsgBoxStyle.Information, "Validation")
+            cbMsgBox.Display("Please enter some text!", MsgBoxStyle.Exclamation, "Validation")
             Return False
 
         End If

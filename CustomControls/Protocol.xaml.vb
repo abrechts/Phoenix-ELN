@@ -1363,7 +1363,7 @@ Public Class Protocol
             Else
 
                 cbMsgBox.Display("Can't delete, since at least one" + vbCrLf +
-                        "reference reactant is required! ", MsgBoxStyle.Information + MsgBoxStyle.OkOnly, "Validation")
+                        "reference reactant is required! ", MsgBoxStyle.Exclamation + MsgBoxStyle.OkOnly, "Validation")
 
             End If
 

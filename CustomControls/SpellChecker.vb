@@ -148,7 +148,7 @@ Public Class SpellChecker
                     Using File.Create(value)
                     End Using
                 Catch ex As Exception
-                    cbMsgBox.Display("Can't create custom dictionary file!", MsgBoxStyle.Information, "Spell Checker")
+                    cbMsgBox.Display("Can't create custom dictionary file!", MsgBoxStyle.Exclamation, "Spell Checker")
                     Exit Property
                 End Try
             End If

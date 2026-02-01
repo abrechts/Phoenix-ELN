@@ -113,7 +113,7 @@ Public Class dlgServerConnection
 
     Private Sub btnDisconnect_Click() Handles btnDisconnect.Click
 
-        Dim res = cbMsgBox.Display("Do you really want to disconnect from the server?", MsgBoxStyle.OkCancel + MsgBoxStyle.Exclamation, "Server Connection")
+        Dim res = cbMsgBox.Display("Do you really want to disconnect from the server?", MsgBoxStyle.OkCancel + MsgBoxStyle.Information, "Server Connection")
         If res = MsgBoxResult.Ok Then
 
             My.Settings.IsServerOffByUser = True

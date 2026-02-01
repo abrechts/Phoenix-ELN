@@ -216,7 +216,7 @@ Public Class dlgNewExperiment
         If CloneMethod = CloneType.FullExperiment AndAlso chkScale.IsChecked Then
 
             If numMatAmount.IsZeroOrNothing Then
-                cbMsgBox.Display("Please enter a valid scaling amount!", MsgBoxStyle.Information, "Validation")
+                cbMsgBox.Display("Please enter a valid scaling amount!", MsgBoxStyle.Exclamation, "Validation")
                 numMatAmount.Focus()
                 e.Handled = True
                 Exit Sub

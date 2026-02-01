@@ -39,7 +39,7 @@ Public Class dlgServerConflict
 
         cbMsgBox.Display("Wrong password.- Use the personal password" + vbCrLf +
                "originally used for finalizing your" + vbCrLf +
-               "experiments now present on the server.", MsgBoxStyle.Information, "Restore")
+               "experiments now present on the server.", MsgBoxStyle.Exclamation, "Restore")
         Me.ForceCursor = False
         Me.Cursor = Cursors.Arrow
 
