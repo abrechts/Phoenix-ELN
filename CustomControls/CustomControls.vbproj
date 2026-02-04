@@ -36,6 +36,12 @@
     <Compile Update="CoreControls\ListBoxEditLabel.xaml.vb">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="TransferPack\dlgImportTransferPack.xaml.vb">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="TransferPack\dlgCreateTransferPack.xaml.vb">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="dlgServerConflict.xaml.vb">
       <SubType>Code</SubType>
     </Compile>

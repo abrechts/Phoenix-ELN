@@ -24,6 +24,8 @@ Class MainWindow
 
     Private _IsVersionUpgrade As Boolean = False
 
+    Private _IsMigratingData As Boolean = False
+
 
     Public Sub New()
 
@@ -67,6 +69,16 @@ Class MainWindow
             '_IsVersionUpgrade = True
             '------------------------
 
+            'Check for pending transfer pack data migration
+            If .MigratingData = True Then
+                Threading.Thread.Sleep(50)  'allow previous instance to close
+                TransferPackage.PerformPendingMigration() 'also overwrites current settings
+                _IsMigratingData = True 'for use in Me_ContentRendered
+                .MigratingData = False
+                .RestoreFromServer = False
+                .Save()
+            End If
+
             'Apply settings
             If .StartupSize.Width > -1 Then
                 WindowStartupLocation = WindowStartupLocation.Manual
@@ -78,6 +90,7 @@ Class MainWindow
 
             'Check for pending restore
             If .RestoreFromServer = True Then
+
                 Threading.Thread.Sleep(50)  'allow previous instance to close
                 Dim tempPath = IO.Path.GetDirectoryName(SQLiteDbPath) + "\ElnData.tmp"
                 Try
@@ -89,9 +102,10 @@ Class MainWindow
                 isRestoreFromServer = True
                 .RestoreFromServer = False
                 .Save()
+
             End If
 
-            'Initialize the the spell checker
+            'Create the the spell checker
             SpellChecker.Initialize(.LastSpellCheckLocale, Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\Phoenix ELN Data\customWords.lex")
 
         End With
@@ -146,6 +160,7 @@ Class MainWindow
         AddHandler UndoRedo.CanRedoChanged, AddressOf UndoRedo_CanRedoChanged
         AddHandler StatusDemo.RequestCreateFirstUser, AddressOf DemoStatus_RequestCreateFirstUser
         AddHandler StatusDemo.RequestRestoreServer, AddressOf DemoStatus_RequestRestoreServer
+        AddHandler StatusDemo.RequestTransferPackage, AddressOf DemoStatus_RequestTransferPackage
         AddHandler ServerSync.ServerContextCreated, AddressOf ServerSync_ServerContextCreated
         AddHandler Protocol.ConnectedChanged, AddressOf Protocol_ConnectedChanged
         AddHandler ServerSync.SyncProgress, AddressOf ServerSync_SyncProgress
@@ -223,6 +238,23 @@ Class MainWindow
 
         'Regularly check for version updates (currently every 12 h)
         UpdateChecker = New UpdateCheck(ApplicationVersion, TimeSpan.FromHours(12))
+
+    End Sub
+
+
+    ''' <summary>
+    ''' Main window content rendered: Display startup messages here.
+    ''' </summary>
+    ''' 
+    Private Sub Me_ContentRendered() Handles Me.ContentRendered
+
+        If _IsMigratingData = True Then
+            cbMsgBox.Display("Your ELN data migration is complete now! " + vbCrLf + vbCrLf +
+                "The transfer package 'recovery.elnpkg' was placed " +
+                "on your desktop, which you can import for reverting " +
+                "this migration in case of any issues. You may delete it at any time.", MsgBoxStyle.Information, "Data Migration Complete")
+            _IsMigratingData = False
+        End If
 
     End Sub
 
@@ -708,6 +740,17 @@ Class MainWindow
     End Sub
 
 
+    ''' <summary>
+    ''' Handles info panel request to import a transfer package
+    ''' </summary>
+    ''' 
+    Private Sub DemoStatus_RequestTransferPackage(sender As Object)
+
+        mnuImportPackage_Click()
+
+    End Sub
+
+
     Private Sub cboUsers_SelectionChanged(sender As Object, e As SelectionChangedEventArgs) Handles cboUsers.SelectionChanged
 
         If cboUsers.SelectedItem IsNot Nothing Then
@@ -1006,8 +1049,8 @@ Class MainWindow
         'final save
         DBContext.SaveChanges()
 
-        'restart ELN if restoring from server
-        If CustomControls.My.MySettings.Default.RestoreFromServer = True Then
+        'restart ELN if restoring from server, or migrating data
+        If CustomControls.My.MySettings.Default.RestoreFromServer = True OrElse CustomControls.My.MySettings.Default.MigratingData Then
             Process.Start(Environment.ProcessPath())
             Process.GetCurrentProcess().Kill()
         End If
@@ -1395,6 +1438,27 @@ Class MainWindow
     Private Sub btnRestore_Click() Handles btnRestore.Click
 
         RestoreFromServer()
+
+    End Sub
+
+
+    Private Sub mnuCreatePackage_Click() Handles mnuCreatePackage.Click
+
+        Dim currUserID = CType(Me.DataContext, tblUsers).UserID
+        TransferPackage.Create(currUserID)
+
+    End Sub
+
+
+    Private Sub mnuImportPackage_Click() Handles mnuImportPackage.Click
+
+        Dim isDemo As Boolean = (CType(Me.DataContext, tblUsers).UserID = "demo")
+
+        If TransferPackage.InitializeImport(isDemo) Then
+            cbMsgBox.Display("Transfer package successfully imported!" + vbCrLf +
+               "The application will restart now.", MsgBoxStyle.Information + MsgBoxStyle.OkOnly, "Transfer Package")
+            Me.Close()
+        End If
 
     End Sub
 
