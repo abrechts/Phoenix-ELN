@@ -207,9 +207,21 @@
 
 
     Public Enum MaterialValidation
+
         None
         Preset
         User
+
+    End Enum
+
+
+    Public Enum MigrationType
+
+        None
+        ReplaceProductive
+        ReplaceDemo
+        Recovery
+
     End Enum
 
 End Class

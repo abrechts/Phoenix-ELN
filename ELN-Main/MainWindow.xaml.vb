@@ -24,7 +24,7 @@ Class MainWindow
 
     Private _IsVersionUpgrade As Boolean = False
 
-    Private _IsMigratingData As Boolean = False
+    Private _MigrationType As Integer = MigrationType.None
 
 
     Public Sub New()
@@ -70,11 +70,11 @@ Class MainWindow
             '------------------------
 
             'Check for pending transfer pack data migration
-            If .MigratingData = True Then
+            If .DataMigrationType <> MigrationType.None Then
                 Threading.Thread.Sleep(50)  'allow previous instance to close
-                TransferPackage.PerformPendingMigration() 'also overwrites current settings
-                _IsMigratingData = True 'for use in Me_ContentRendered
-                .MigratingData = False
+                _MigrationType = .DataMigrationType         'for use in Me_ContentRendered
+                TransferPackage.PerformPendingMigration()   'overwrites current settings
+                .DataMigrationType = MigrationType.None
                 .RestoreFromServer = False
                 .Save()
             End If
@@ -248,13 +248,33 @@ Class MainWindow
     ''' 
     Private Sub Me_ContentRendered() Handles Me.ContentRendered
 
-        If _IsMigratingData = True Then
-            cbMsgBox.Display("Your ELN data migration is complete now! " + vbCrLf + vbCrLf +
-                "The transfer package 'recovery.elnpkg' was placed " +
-                "on your desktop, which you can import for reverting " +
-                "this migration in case of any issues. You may delete it at any time.", MsgBoxStyle.Information, "Data Migration Complete")
-            _IsMigratingData = False
-        End If
+        ' determine if a data migration was performed
+
+        Select Case _MigrationType
+
+            Case MigrationType.ReplaceProductive
+
+                cbMsgBox.Display("Your ELN data migration is complete now! " + vbCrLf + vbCrLf +
+                    "The transfer package 'recovery.elnpkg' was placed " +
+                    "on your desktop, which you can import for reverting " +
+                    "this migration in case of any issues." + vbCrLf + vbCrLf +
+                    "It is recommended to delete this file after successful migration for preventing accidental restore operations.",
+                    MsgBoxStyle.Information, "Data Migration Complete")
+                _MigrationType = MigrationType.None
+
+            Case MigrationType.ReplaceDemo
+
+                cbMsgBox.Display("Your ELN data migration is complete now! " + vbCrLf + vbCrLf +
+                    "You now can continue to use your previous ELN environment.", MsgBoxStyle.Information, "Data Migration Complete")
+                _MigrationType = MigrationType.None
+
+            Case MigrationType.Recovery
+
+                cbMsgBox.Display("Your ELN data migration was reverted successfully! " + vbCrLf + vbCrLf +
+                    "You now can use your recovered ELN environment.", MsgBoxStyle.Information, "Data Migration Reverted")
+                _MigrationType = MigrationType.None
+
+        End Select
 
     End Sub
 
@@ -1050,7 +1070,7 @@ Class MainWindow
         DBContext.SaveChanges()
 
         'restart ELN if restoring from server, or migrating data
-        If CustomControls.My.MySettings.Default.RestoreFromServer = True OrElse CustomControls.My.MySettings.Default.MigratingData Then
+        If CustomControls.My.MySettings.Default.RestoreFromServer = True OrElse CustomControls.My.MySettings.Default.DataMigrationType Then
             Process.Start(Environment.ProcessPath())
             Process.GetCurrentProcess().Kill()
         End If
@@ -1455,9 +1475,19 @@ Class MainWindow
         Dim isDemo As Boolean = (CType(Me.DataContext, tblUsers).UserID = "demo")
 
         If TransferPackage.InitializeImport(isDemo) Then
-            cbMsgBox.Display("Transfer package successfully imported!" + vbCrLf +
-               "The application will restart now.", MsgBoxStyle.Information + MsgBoxStyle.OkOnly, "Transfer Package")
+
+            Select Case CustomControls.My.MySettings.Default.DataMigrationType
+
+                Case MigrationType.ReplaceProductive
+                    cbMsgBox.Display("Transfer package successfully imported!" + vbCrLf +
+                        "The application will restart now to complete the data migration.", MsgBoxStyle.Information + MsgBoxStyle.OkOnly, "Transfer Package")
+                Case Else
+                    cbMsgBox.Display("Recovery file successfully imported!" + vbCrLf +
+                        "The application will restart now to complete the recovery.", MsgBoxStyle.Information + MsgBoxStyle.OkOnly, "Transfer Package")
+            End Select
+
             Me.Close()
+
         End If
 
     End Sub

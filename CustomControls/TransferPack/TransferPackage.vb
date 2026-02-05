@@ -3,6 +3,7 @@ Imports System.IO
 Imports System.IO.Compression
 Imports System.Text.Json
 Imports System.Windows
+Imports ElnBase.ELNEnumerations
 Imports Microsoft.Win32
 
 Public Class TransferPackage
@@ -64,6 +65,7 @@ Public Class TransferPackage
         Try
 
             ZipFile.CreateFromDirectory(tempDir, dstFilePath)
+
             If Not silentMode Then
                 cbMsgBox.Display("Transfer package successfully created!" + vbCrLf + vbCrLf +
                     "You now can import this package from within your new ELN " + vbCrLf +
@@ -135,7 +137,6 @@ Public Class TransferPackage
                 Dim recoveryPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\" + "recovery.elnpkg"
 
                 ' create temp folder and extract zip contents there
-
                 Dim tempDir = Path.Combine(Path.GetTempPath(), "PhoenixElnTempExtractFolder")
                 If Directory.Exists(tempDir) Then
                     Directory.Delete(tempDir, recursive:=True)
@@ -149,14 +150,15 @@ Public Class TransferPackage
 
                     Dim settingsFilePath = Path.Combine(tempDir, "_MySettings.json")
                     Dim dbFilePath = Path.Combine(tempDir, "ElnData.db")
+
                     If Not File.Exists(settingsFilePath) OrElse Not File.Exists(dbFilePath) Then
                         cbMsgBox.Display("The selected transfer package is invalid (missing components).", MsgBoxStyle.Exclamation, "Transfer Package Error")
                         Return False
                     End If
 
-                    ' Create a recovery file, except if already importing a recovery file
+                    If Not isDemo AndAlso Not String.Equals(.FileName, recoveryPath, StringComparison.InvariantCultureIgnoreCase) Then
 
-                    If Not String.Equals(.FileName, recoveryPath, StringComparison.InvariantCultureIgnoreCase) Then
+                        ' Create recovery file if replacing non-demo experiments with a non-recovery migration (default).
 
                         If Not PackElnData(recoveryPath, silentMode:=True) Then
                             cbMsgBox.Display("Could not create recovery transfer package. Import cancelled.", MsgBoxStyle.Exclamation, "Transfer Package Error")
@@ -164,7 +166,22 @@ Public Class TransferPackage
                             Return False
                         End If
 
+                        My.Settings.DataMigrationType = MigrationType.ReplaceProductive
+
+                    Else
+
+                        ' No recovery file is created if replacing demo experiments, or already in recovery process
+
+                        If isDemo Then
+                            My.Settings.DataMigrationType = MigrationType.ReplaceDemo
+                        Else
+                            My.Settings.DataMigrationType = MigrationType.Recovery
+                        End If
+
                     End If
+
+                    My.Settings.Save()
+                    Return True
 
                 Catch ex As Exception
 
@@ -172,12 +189,6 @@ Public Class TransferPackage
                     Return False
 
                 End Try
-
-                My.Settings.MigratingData = True
-                My.Settings.Save()
-
-
-                Return True
 
             Else
 

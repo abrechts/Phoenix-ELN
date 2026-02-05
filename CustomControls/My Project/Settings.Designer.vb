@@ -524,13 +524,13 @@ Namespace My
         
         <Global.System.Configuration.UserScopedSettingAttribute(),  _
          Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.Configuration.DefaultSettingValueAttribute("False")>  _
-        Public Property MigratingData() As Boolean
+         Global.System.Configuration.DefaultSettingValueAttribute("0")>  _
+        Public Property DataMigrationType() As Integer
             Get
-                Return CType(Me("MigratingData"),Boolean)
+                Return CType(Me("DataMigrationType"),Integer)
             End Get
             Set
-                Me("MigratingData") = value
+                Me("DataMigrationType") = value
             End Set
         End Property
     End Class
