@@ -90,7 +90,7 @@
             <ContentControl Content="{StaticResource icoFromServer}" Height="20" Margin="0,0,5,0"/>
             <TextBlock x:Name="lnkRestore" Text="Restore from server" HorizontalAlignment="Center" Foreground="blue" 
                 Cursor="Hand" TextDecorations="Underline" VerticalAlignment="Center" FontSize="12.5"
-                ToolTip="Replaces the demo database by your own experiments.&#x0a;This is the method of choice if your original data were lost."/>
+                ToolTip="Replaces the demo database experiments with your own experiments.&#x0a;This is the method of choice if your original data were lost."/>
         </StackPanel>
 
         <Separator/>
