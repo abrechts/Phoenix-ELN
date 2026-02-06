@@ -16,12 +16,12 @@
 
             <TextBlock Margin="0,4,0,2" TextWrapping="Wrap">
                 <Run Text="Caution:" TextDecorations="Underline"/>
-                <Run Text="This will irreversibly"/>
+                <Run Text="This will"/>
                 <Run FontWeight="Bold" Text="replace"/>
                 <Run Text="all experiments and settings present in your current ELN installation!"/>
             </TextBlock>
 
-            <Separator Margin="0,12,0,12"/>
+            <Separator Margin="0,18,0,18"/>
 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,2,0,0">
                 

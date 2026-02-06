@@ -41,7 +41,7 @@ Public Class TransferPackage
     ''' Packs the current ELN experiments and settings into a package specified by the specified dstFilePath.
     ''' </summary>
     ''' 
-    Private Shared Function PackElnData(dstFilePath As String, Optional silentMode As Boolean = False) As Boolean
+    Private Shared Function PackElnData(dstFilePath As String, Optional isRecoveryFile As Boolean = False) As Boolean
 
         Dim dbFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\Phoenix ELN Data"
         Dim tempDir = Path.Combine(Path.GetTempPath(), "PhoenixElnTempFolder")
@@ -57,6 +57,12 @@ Public Class TransferPackage
         Dim settingsFilePath = Path.Combine(tempDir, "_MySettings.json")
         ExportMySettings(settingsFilePath)
 
+        ' add a recovery file marker if applicable
+        If isRecoveryFile Then
+            Dim recoveryMarkerPath = Path.Combine(tempDir, "_isRecoveryFile.txt")
+            File.WriteAllText(recoveryMarkerPath, DateTime.Now.ToString())
+        End If
+
         If File.Exists(dstFilePath) Then
             File.Delete(dstFilePath)
         End If
@@ -66,7 +72,7 @@ Public Class TransferPackage
 
             ZipFile.CreateFromDirectory(tempDir, dstFilePath)
 
-            If Not silentMode Then
+            If Not isRecoveryFile Then
                 cbMsgBox.Display("Transfer package successfully created!" + vbCrLf + vbCrLf +
                     "You now can import this package from within your new ELN " + vbCrLf +
                     "installation via Tools > Transfer Package > Import.", MsgBoxStyle.Information, "Transfer Package")
@@ -150,32 +156,41 @@ Public Class TransferPackage
 
                     Dim settingsFilePath = Path.Combine(tempDir, "_MySettings.json")
                     Dim dbFilePath = Path.Combine(tempDir, "ElnData.db")
+                    Dim recoveryMarkerPath = Path.Combine(tempDir, "_isRecoveryFile.txt")
+
+                    Dim isRecovery As Boolean = False
+                    If File.Exists(recoveryMarkerPath) Then
+                        isRecovery = True
+                        File.Delete(recoveryMarkerPath) 'remove the marker file after detection
+                    End If
 
                     If Not File.Exists(settingsFilePath) OrElse Not File.Exists(dbFilePath) Then
                         cbMsgBox.Display("The selected transfer package is invalid (missing components).", MsgBoxStyle.Exclamation, "Transfer Package Error")
                         Return False
                     End If
 
-                    If Not isDemo AndAlso Not String.Equals(.FileName, recoveryPath, StringComparison.InvariantCultureIgnoreCase) Then
+                    If Not isDemo AndAlso Not isRecovery Then
 
                         ' Create recovery file if replacing non-demo experiments with a non-recovery migration (default).
 
-                        If Not PackElnData(recoveryPath, silentMode:=True) Then
+                        If Not PackElnData(recoveryPath, isRecoveryFile:=True) Then
+
                             cbMsgBox.Display("Could not create recovery transfer package. Import cancelled.", MsgBoxStyle.Exclamation, "Transfer Package Error")
                             Directory.Delete(tempDir, recursive:=True)
                             Return False
+
                         End If
 
                         My.Settings.DataMigrationType = MigrationType.ReplaceProductive
 
                     Else
 
-                        ' No recovery file is created if replacing demo experiments, or already in recovery process
+                        ' No recovery file is created if replacing demo experiments, or if already within recovery process
 
-                        If isDemo Then
-                            My.Settings.DataMigrationType = MigrationType.ReplaceDemo
-                        Else
+                        If isRecovery Then
                             My.Settings.DataMigrationType = MigrationType.Recovery
+                        Else
+                            My.Settings.DataMigrationType = MigrationType.ReplaceDemo
                         End If
 
                     End If

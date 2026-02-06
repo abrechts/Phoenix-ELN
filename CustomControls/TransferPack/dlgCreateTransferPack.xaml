@@ -8,13 +8,13 @@
     <Grid>
         <StackPanel Margin="30,15,26,20">
 
-            <TextBlock FontWeight="Bold" FontSize="13.5" FontStyle="Italic"  Foreground="{StaticResource DialogTitleForeground}" 
+            <TextBlock FontWeight="Bold" FontSize="13.5"  Foreground="{StaticResource DialogTitleForeground}" 
                 Text="ELN Data Migration" />
 
             <TextBlock Margin="0,8,0,2" TextWrapping="Wrap" 
                 Text="Creating a transfer package allows to seamlessly transfer your current ELN data and settings from a computer to be replaced to a new one."/>
 
-            <Separator Margin="0,16,0,16"/>
+            <Separator Margin="0,18,0,18"/>
 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,2,0,0">
                 

@@ -258,20 +258,19 @@ Class MainWindow
                     "The transfer package 'recovery.elnpkg' was placed " +
                     "on your desktop, which you can import for reverting " +
                     "this migration in case of any issues." + vbCrLf + vbCrLf +
-                    "It is recommended to delete this file after successful migration for preventing accidental restore operations.",
+                    "It is recommended to delete this file after successful migration.",
                     MsgBoxStyle.Information, "Data Migration Complete")
                 _MigrationType = MigrationType.None
 
             Case MigrationType.ReplaceDemo
 
-                cbMsgBox.Display("Your ELN data migration is complete now! " + vbCrLf + vbCrLf +
-                    "You now can continue to use your previous ELN environment.", MsgBoxStyle.Information, "Data Migration Complete")
+                cbMsgBox.Display("Your ELN data migration is complete now! ", MsgBoxStyle.Information, "Data Migration")
                 _MigrationType = MigrationType.None
 
             Case MigrationType.Recovery
 
-                cbMsgBox.Display("Your ELN data migration was reverted successfully! " + vbCrLf + vbCrLf +
-                    "You now can use your recovered ELN environment.", MsgBoxStyle.Information, "Data Migration Reverted")
+                cbMsgBox.Display("Your ELN data migration was successfully reverted! " + vbCrLf + vbCrLf +
+                    "It is recommended to now delete the recovery file 'recovery.elnpkg', located on your desktop.", MsgBoxStyle.Information, "Data Migration")
                 _MigrationType = MigrationType.None
 
         End Select
