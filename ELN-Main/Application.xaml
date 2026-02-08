@@ -65,7 +65,7 @@
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="ToolTip">
-                            <Border Background="#FF686868" CornerRadius="6" BorderThickness="1" BorderBrush="#FF9A9A9A" 
+                            <Border Background="#FF606060" CornerRadius="6" BorderThickness="1" BorderBrush="white" 
                                TextBlock.FontStyle="Normal" TextBlock.Foreground="white">
                                 <ContentPresenter Margin="8,6" HorizontalAlignment="Center" VerticalAlignment="Top"/>
                             </Border>

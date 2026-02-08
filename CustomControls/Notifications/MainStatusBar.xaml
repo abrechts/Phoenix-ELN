@@ -15,7 +15,7 @@
 
         <StackPanel Orientation="horizontal" HorizontalAlignment="left" VerticalAlignment="Top">
 
-            <Border x:Name="lblSaving" CornerRadius="6" Margin="0,1,4,0" Background="lightgreen"  BorderBrush="gray" Opacity="0"           
+            <Border x:Name="lblSaving" CornerRadius="6" Margin="0,1,4,0" Background="#FFC3FCC3"  BorderBrush="dimgray" Opacity="0"           
                 d:Opacity="1" BorderThickness="1" VerticalAlignment="Center" Width="12" Height="12" ToolTip="Auto-Save"/>
 
             <StackPanel x:Name="pnlServerState" Orientation="Horizontal" d:Visibility="visible" 
@@ -23,18 +23,20 @@
 
                 <StackPanel x:Name="pnlServerOk" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,4,0" Visibility="Collapsed" 
                    d:Visibility="visible" ToolTip="Connected to ELN server.">
-                    <ContentControl Content="{StaticResource icoDatabaseRunning}" Height="20" VerticalContentAlignment="Center" 
-                      Opacity="0.9" Margin="2,1,1,0"/>
+                    
+                    <ContentControl Content="{StaticResource icoDatabaseRunning_Dark}" Height="20" VerticalContentAlignment="Center" 
+                      Opacity="0.9" Margin="2,0,1,0"/>
+                    
                 </StackPanel>
 
                 <StackPanel x:Name="pnlServerError" Orientation="Horizontal" VerticalAlignment="Center" d:Visibility="visible" Visibility="Collapsed">
-                    <ContentControl x:Name="icoServerError" Content="{StaticResource icoDatabaseWarning}"  Height="18" VerticalContentAlignment="Center" Margin="2,0,3,0"/>
-                    <TextBlock x:Name="lnkReconnects" Text="Reconnect" Foreground="blue" TextDecorations="Underline" Cursor="Hand" Margin="0,0,4,0"
+                    <ContentControl x:Name="icoServerError" Content="{StaticResource icoDatabaseWarning_Dark}" Height="18"
+                       VerticalContentAlignment="Center" Margin="2,0,3,0"/>
+                    <TextBlock x:Name="lnkReconnects" Text="Reconnect" Foreground="#FFB2D8F0" TextDecorations="Underline" Cursor="Hand" Margin="0,0,4,0"
                        FontFamily="Arial" VerticalAlignment="Center"/>
                 </StackPanel>
 
               
-
             </StackPanel>
 
         </StackPanel>

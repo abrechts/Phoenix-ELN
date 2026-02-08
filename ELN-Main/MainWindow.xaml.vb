@@ -702,7 +702,6 @@ Class MainWindow
 
     Private Sub ExperimentContent_ContextChanged(sender As Object, newExpEntry As tblExperiments)
         btnClear.IsEnabled = (newExpEntry.WorkflowState <> WorkflowStatus.Finalized)
-        mnuSpelling.IsEnabled = (newExpEntry.WorkflowState <> WorkflowStatus.Finalized)
     End Sub
 
 

@@ -24,43 +24,64 @@
                     <componentModel:SortDescription PropertyName="SequenceNr" Direction="Ascending"/>
                 </CollectionViewSource.SortDescriptions>
             </CollectionViewSource>
-            
+
         </ResourceDictionary>
 
     </Window.Resources>
-     
-    
+
+
     <DockPanel Background="#FF979797">
-        
+
         <Border DockPanel.Dock="top" BorderBrush="gray" Margin="0,0,0,-1" >
 
             <Grid>
-                <ToolBar x:Name="mainToolbar" Focusable="true" Style="{StaticResource ToolBarWithoutOverflowBarStyle}"
-                   FontFamily="Verdana" FontSize="12" Margin="-2,0,1,0" Padding="0,1,0,0">
 
+                <ToolBar x:Name="mainToolbar" Focusable="true" Style="{StaticResource ToolBarWithoutOverflowBarStyle}"
+                   FontFamily="Verdana" FontSize="12" Margin="-4,0,1,0" Padding="0,1,0,0" Background="#FF4F4F4F">
+
+                    <!--disabled button styles-->
+                    <ToolBar.Resources>
+
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="White"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsEnabled" Value="false">
+                                    <Setter Property="Opacity" Value="0.5"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+
+                        <Style TargetType="ContentControl">
+                            <Setter Property="Foreground" Value="White"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsEnabled" Value="false">
+                                    <Setter Property="Opacity" Value="0.6"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+
+                    </ToolBar.Resources>
+                  
                     <Button x:Name="btnPrint" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="4,0,0,0">
                         <StackPanel Orientation="Horizontal">
-                            <ContentControl Content="{StaticResource icoPrint}" Height="16" Margin="2,0,4,0" Background="white"/>
-                            <TextBlock Text="Print" Margin="0,1,2,0"/>
+                            <TextBlock Text="🖶" FontSize="18" Margin="2,-2" Foreground="#FFA8DCFC"  />
+                            <TextBlock Text="Print" Margin="0,1,2,0" VerticalAlignment="Center" />
                         </StackPanel>
                     </Button>
 
-                    <Button x:Name="btnPDF" HorizontalAlignment="Left" VerticalAlignment="Center" ToolTip="Save experiment to PDF">
-                        <StackPanel Orientation="Horizontal">
-                            <ContentControl Height="16" Margin="2,0,4,0">
-                                <Border Background="#FFF3F0F0" CornerRadius="3" BorderThickness="1" BorderBrush="#005dba" >
-                                    <TextBlock Text="PDF" FontSize="10" Foreground="#FF2C2C2C" FontWeight="demiBold" Margin="3,1,3,2" 
-                                FontFamily="Calibri" VerticalAlignment="top" />
-                                </Border>
-                            </ContentControl>
-                        </StackPanel>
+                    <Button x:Name="btnPDF" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ToolTip="Save experiment to PDF" >
+                        <ContentControl Height="16" Margin="2,-1,4,-2">
+                            <Border Background="#FF5B5B5B" CornerRadius="3" BorderThickness="1" BorderBrush="LightSkyBlue" >
+                                <TextBlock Text="PDF" FontSize="10" FontWeight="demiBold" Margin="4,0,3,0" Foreground="White"
+                            FontFamily="Calibri" VerticalAlignment="Center" />
+                            </Border>
+                        </ContentControl>
                     </Button>
-
 
                     <Button x:Name="btnExport" HorizontalAlignment="Left" VerticalAlignment="Center" 
                       ToolTip="Export experiment for import by another user">
                         <StackPanel Orientation="Horizontal">
-                            <ContentControl Content="{StaticResource icoExport}" Height="16" Margin="0,0,4,0"/>
+                            <TextBlock Text="⤓" FontSize="18" Margin="0,-2,2,-2" Foreground="lightskyblue" FontWeight="demibold"/>
                             <TextBlock Text="Export" Margin="0,0,2,0" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
@@ -78,17 +99,7 @@
                     <Button x:Name="btnClear" HorizontalAlignment="Left" VerticalAlignment="Center" 
                         ToolTip="Deletes all protocol entries, except the reference reactant.">
                         <StackPanel Orientation="Horizontal">
-                            <ContentControl Content="{StaticResource icoDeleteListItem}" Height="16" Margin="0,0,3,0">
-                                <ContentControl.Style>
-                                    <Style TargetType="ContentControl">
-                                        <Style.Triggers>
-                                            <Trigger Property="IsEnabled" Value="false">
-                                                <Setter Property="Opacity" Value="0.5"/>
-                                            </Trigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </ContentControl.Style>
-                            </ContentControl>
+                            <ContentControl Content="{StaticResource icoDeleteListItem_Dark}" Height="16" Margin="0,0,3,0"/>
                             <TextBlock Text="Clear" Margin="0,0,2,0" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
@@ -97,35 +108,14 @@
 
                     <Button x:Name="btnUndo" HorizontalAlignment="Left" IsEnabled="false" VerticalAlignment="Center" ToolTip="Undo">
                         <StackPanel Orientation="Horizontal">
-                            <ContentControl Content="{StaticResource icoUndo}" Height="14" Margin="0,0,2,0">
-                                <ContentControl.Style>
-                                    <Style TargetType="ContentControl">
-                                        <Style.Triggers>
-                                            <Trigger Property="IsEnabled" Value="false">
-                                                <Setter Property="Opacity" Value="0.5"/>
-                                            </Trigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </ContentControl.Style>
-                            </ContentControl>
+                            <ContentControl Content="{StaticResource icoUndo_Dark}" Height="14" Margin="0,0,2,0"/>
                             <TextBlock Text="Undo" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
 
                     <Button x:Name="btnRedo" HorizontalAlignment="Left" IsEnabled="false" ToolTip="Undo">
                         <StackPanel Orientation="Horizontal">
-                            <ContentControl Content="{StaticResource icoRedo}" Height="14" Margin="0,0,2,0">
-                                <ContentControl.Style>
-                                    <Style TargetType="ContentControl">
-                                        <Style.Triggers>
-                                            <Trigger Property="IsEnabled" Value="false">
-                                                <Setter Property="Opacity" Value="0.6"/>
-                                            </Trigger>
-
-                                        </Style.Triggers>
-                                    </Style>
-                                </ContentControl.Style>
-                            </ContentControl>
+                            <ContentControl Content="{StaticResource icoRedo_Dark}" Height="14" Margin="0,0,2,0"/>
                             <TextBlock Text="Redo" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
@@ -135,66 +125,68 @@
                     <Button x:Name="btnSearch" HorizontalAlignment="Left" VerticalAlignment="Center" ToolTip="Find experiments" d:Visibility="Visible"
                         Visibility="Visible">
                         <StackPanel Orientation="Horizontal">
-                            <ContentControl Content="{StaticResource icoSearch}" Height="16" Margin="0,1,3,0"/>
+                            <ContentControl Content="{StaticResource icoSearch_Dark}" Height="16" Margin="0,1,4,0"/>
                             <TextBlock Text="Search" Margin="0,0,2,0" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
 
-                    <Separator/>
+                    <Separator Margin="2,2,0,2"/>
 
-                    <Menu x:Name="mnuTools" TextBlock.FontFamily="Verdana" Background="White" VerticalAlignment="Center">
-                        <MenuItem VerticalAlignment="Center" Padding="4,2">
-                            <MenuItem.Header>
-                                <StackPanel Orientation="Horizontal" Margin="-8,0,0,0" VerticalAlignment="bottom" >
-                                    <TextBlock Text="Tools" />
-                                    <Path VerticalAlignment="Center" Margin="4,2,0,0" Fill="Black" Data="M 0 0 L 3 3 L 6 0 Z"/>
-                                </StackPanel>
-                            </MenuItem.Header>
+                    <Menu x:Name="mnuTools" TextBlock.FontFamily="Verdana" Background="transparent" VerticalAlignment="Center" Margin="3,0,0,0">
+                        
+                        <Menu.Resources>
+                            <Style TargetType="{x:Type MenuItem}" BasedOn="{StaticResource DarkModeMenuStyle}"/>
+                        </Menu.Resources>
+
+                        <MenuItem Header="Tools" Margin="1,0,1,0">
+
                             <MenuItem.Icon>
-                                <ContentControl Content="{StaticResource icoSettings}" Height="14" Opacity="0.8"/>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="center">
+                                    <TextBlock Text="⚙" FontSize="13" Foreground="lightskyblue"/>
+                                </StackPanel>
                             </MenuItem.Icon>
-                            <MenuItem x:Name="btnEditUser" Header="User Properties ..." Icon="{StaticResource icoEditUser}" Margin="0,3,0,0"/>
-                            <MenuItem x:Name="btnAddUser" Header="Add a User ..." Icon="{StaticResource icoAddUser2}" Margin="0,0,0,2"/>
+
+                            <MenuItem x:Name="btnEditUser" Header="User Properties ..." Icon="{StaticResource icoEditUser_Dark}" Margin="0,3,0,0"/>
+                            <MenuItem x:Name="btnAddUser" Header="Add a User ..." Icon="{StaticResource icoAddUser2_Dark}" Margin="0,0,0,2"/>
+                            
                             <Separator/>
+                            
                             <MenuItem x:Name="btnConnect" Header="Server Connection ..." Margin="0,2,0,-1" 
-                              IsEnabled="{Binding ElementName=tabExperiments, Path=SelectedContent.UserID, Converter={StaticResource demoToBoolConv},
+                                    IsEnabled="{Binding ElementName=tabExperiments, Path=SelectedContent.UserID, Converter={StaticResource demoToBoolConv},
                                 ConverterParameter=invert}"/>
                             <MenuItem x:Name="btnRestore" Header="Restore from Server ..." Margin="0,0,0,2"/>
+
                             <Separator/>
+
                             <MenuItem Header="ELN Data Migration" Margin="0,2,0,0">
-                                <MenuItem x:Name="mnuCreatePackage" Header="Create Transfer Package ..."/>
-                                <MenuItem x:Name="mnuImportPackage" Header="Import Transfer Package..." />
+                                <MenuItem x:Name="mnuCreatePackage" Header="Create Transfer Pack ..."/>
+                                <MenuItem x:Name="mnuImportPackage" Header="Import Transfer Pack ..." />
                             </MenuItem>
+
                         </MenuItem>
                     </Menu>
 
                     <Separator/>
 
-                    <Menu x:Name="mnuSpelling" TextBlock.FontFamily="Verdana" Background="White" Padding="1,0,0,0" FontSize="11.5">
-                        <MenuItem VerticalAlignment="Center" Padding="2,2,2,4" ToolTip="Spell checking language">
+                    <Menu x:Name="mnuSpelling" TextBlock.FontFamily="Verdana" Background="Transparent" Padding="1,0,0,1" FontSize="11.5">
+
+                        <Menu.Resources>
+                            <Style TargetType="{x:Type MenuItem}" BasedOn="{StaticResource DarkModeMenuStyle}"/>
+                        </Menu.Resources>
+
+                        <MenuItem VerticalAlignment="Center" Padding="2,2" ToolTip="Spell checking language" Margin="2,2,2,0">
+
+                            <MenuItem.Icon>
+                                <ContentControl x:Name="imgSpell" Content="{StaticResource icoSpellCheck_Dark}"/>
+                            </MenuItem.Icon>
                             <MenuItem.Header>
-                                <StackPanel Orientation="Horizontal" >
-                                    <ContentControl x:Name="imgSpell" Content="{StaticResource icoSpellCheck}" Height="16" Margin="0,0,3,0">
-                                       <ContentControl.Style>
-                                           <Style TargetType="ContentControl">
-                                               <Style.Triggers>
-                                                   <Trigger Property="IsEnabled" Value="false">
-                                                       <Setter Property="Opacity" Value="0.6"/>
-                                                   </Trigger>
-                                                   <Trigger Property="IsEnabled" Value="true">
-                                                       <Setter Property="Opacity" Value="1.0"/>
-                                                   </Trigger>
-                                               </Style.Triggers>
-                                           </Style>
-                                       </ContentControl.Style>
-                                    </ContentControl>
-                                    <TextBlock x:Name="txtSpellHeader" Text="Off" Margin="0,0,0,0" VerticalAlignment="Center" />
-                                    <Path VerticalAlignment="Center" Margin="5,0,0,0" Fill="Black" Data="M 0 0 L 3 3 L 6 0 Z" 
-                                       Opacity="{Binding ElementName=imgSpell, Path=Opacity}"/>
-                                </StackPanel>
+                                <TextBlock x:Name="txtSpellHeader" Text="Off" VerticalAlignment="Center" Margin="0,0,2,0"/>
                             </MenuItem.Header>
+                            
                             <MenuItem x:Name="mnuSpellOff" Header="Off" Tag="" Margin="0,1" ToolTip="No spell checking"/>
-                            <Separator/>
+
+                            <Separator Style="{StaticResource DarkMenuSeparatorStyle}"/>
+                            
                             <MenuItem x:Name="mnuSpellDE" Header="DE" Tag="de-DE" Margin="0,1" ToolTip="German"/>
                             <MenuItem x:Name="mnuSpellEnUS" Header="EN(US)" Tag="en-US" Margin="0,1" ToolTip="English (US)"/>
                             <MenuItem x:Name="mnuSpellEnGB" Header="EN(GB)" Tag="en-GB" Margin="0,1" ToolTip="English (GB)"/>
@@ -202,8 +194,8 @@
                             <MenuItem x:Name="mnuSpellFR" Header="FR" Tag="fr-FR" Margin="0,1" ToolTip="French"/>
                             <MenuItem x:Name="mnuSpellIT" Header="IT" Tag="it-IT" Margin="0,1" ToolTip="Italian"/>
                             <MenuItem x:Name="mnuSpellPT" Header="PT" Tag="pt-PT" Margin="0,1" ToolTip="Portugiese"/>
-                            
-                            <Separator/>
+
+                            <Separator Style="{StaticResource DarkMenuSeparatorStyle}"/>
 
                             <MenuItem x:Name="mnuDict" Header="Custom Dictionary ..." Margin="0,1"/>
 
@@ -212,15 +204,19 @@
 
                     <Separator/>
 
-                    <Menu TextBlock.FontFamily="Verdana" Background="White" Padding="1,0,0,0" VerticalAlignment="Center">
-                        <MenuItem VerticalAlignment="Center" Padding="2,2,4,2">
-                            <MenuItem.Header>
+                    <Menu TextBlock.FontFamily="Verdana" Background="Transparent" Padding="1,0,0,0" VerticalAlignment="Center">
+                        <Menu.Resources>
+                            <Style TargetType="{x:Type MenuItem}" BasedOn="{StaticResource DarkModeMenuStyle}"/>
+                        </Menu.Resources>
+
+                        <MenuItem Header="Help" VerticalAlignment="Center" Padding="2,0,4,0" Margin="1,0,1,0">
+                            
+                            <MenuItem.Icon>
                                 <StackPanel Orientation="Horizontal" >
-                                    <ContentControl Content="{StaticResource icoHelpMenu}" Height="16" Margin="0,0,2,0"/>
-                                    <TextBlock Text="Help" Margin="0,0,0,0" />
-                                    <Path VerticalAlignment="Center" Margin="4,0,0,0" Fill="Black" Data="M 0 0 L 3 3 L 6 0 Z"/>
+                                    <TextBlock Text="🛈" FontSize="18" Margin="0,0,3,0" Foreground="LightSkyBlue" VerticalAlignment="Center" />
                                 </StackPanel>
-                            </MenuItem.Header>
+                            </MenuItem.Icon>
+                            
                             <MenuItem x:Name="mnuHelp" Header="Help Docs..." Margin="0,0">
                                 <MenuItem.Icon>
                                     <ContentControl Content="{StaticResource icoInfo}" Height="16"/>

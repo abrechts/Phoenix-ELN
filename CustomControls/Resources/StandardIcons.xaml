@@ -280,6 +280,24 @@
         </Rectangle>
     </Viewbox>
 
+    <Viewbox x:Key="icoUndo_Dark" x:Shared="false">
+        <Rectangle Width="16" Height="16">
+            <Rectangle.Fill>
+                <DrawingBrush>
+                    <DrawingBrush.Drawing>
+                        <DrawingGroup>
+                            <DrawingGroup.Children>
+                                <GeometryDrawing Brush="#00FFFFFF" Geometry="F1M16,16L0,16 0,0 16,0z" />
+                                <GeometryDrawing Brush="transparent" Geometry="F1M14.9941,6C14.9941,7.754,14.2301,9.416,12.8981,10.557L6.7601,16 6.4351,16 3.9291,13.166 10.2721,7.542C10.7361,7.142 10.9961,6.584 10.9961,6 10.9961,5.296 10.6321,4.676 10.0811,4.32L6.4041,8 0.9941,8 0.9941,2.586 3.5771,0 4.9921,0 4.9921,1.534 5.1211,1.425C6.1981,0.507 7.5771,0 8.9991,0 12.3051,0 14.9941,2.691 14.9941,6" />
+                                <GeometryDrawing Brush="LightSkyBlue" Geometry="F1M13.9941,6C13.9941,7.461,13.3581,8.846,12.2481,9.797L6.6641,14.748 5.3401,13.252 10.9351,8.29C11.6131,7.708 11.9961,6.877 11.9961,6 11.9961,4.346 10.6511,3 8.9991,3 8.2891,3 7.6001,3.253 7.0601,3.713L5.5401,5 7.9881,5 5.9901,7 1.9941,7 1.9941,6 1.9941,5 1.9941,3 3.9921,1 3.9921,3.692 5.7671,2.188C6.6661,1.422 7.8141,1 8.9991,1 11.7531,1 13.9941,3.243 13.9941,6" />
+                            </DrawingGroup.Children>
+                        </DrawingGroup>
+                    </DrawingBrush.Drawing>
+                </DrawingBrush>
+            </Rectangle.Fill>
+        </Rectangle>
+    </Viewbox>
+
     <Viewbox x:Key="icoRedo" x:Shared="false">
         <Rectangle Width="16" Height="16">
             <Rectangle.Fill>
@@ -290,6 +308,24 @@
                                 <GeometryDrawing Brush="#00FFFFFF" Geometry="F1M16,16L0,16 0,0 16,0z" />
                                 <GeometryDrawing Brush="#FFF6F6F6" Geometry="F1M6.9893,0C8.4113,0,9.7903,0.507,10.8673,1.425L10.9963,1.534 10.9963,0 12.4113,0 14.9943,2.586 14.9943,8 9.5843,8 5.9073,4.32C5.3563,4.676 4.9923,5.296 4.9923,6 4.9923,6.584 5.2523,7.143 5.7163,7.541L12.0593,13.166 9.5523,16 9.2283,16 3.0903,10.557C1.7583,9.416 0.9943,7.754 0.9943,6 0.9943,2.691 3.6833,0 6.9893,0" />
                                 <GeometryDrawing Brush="#FF00539C" Geometry="F1M6.9893,1C8.1743,1,9.3223,1.422,10.2203,2.188L11.9963,3.692 11.9963,1 13.9943,3 13.9943,5 13.9943,6 13.9943,7 9.9983,7 8.0003,5 10.4483,5 8.9273,3.713C8.3883,3.253 7.6993,3 6.9893,3 5.3373,3 3.9923,4.346 3.9923,6 3.9923,6.877 4.3753,7.707 5.0523,8.289L10.6483,13.252 9.3243,14.748 3.7403,9.797C2.6303,8.846 1.9943,7.461 1.9943,6 1.9943,3.243 4.2353,1 6.9893,1" />
+                            </DrawingGroup.Children>
+                        </DrawingGroup>
+                    </DrawingBrush.Drawing>
+                </DrawingBrush>
+            </Rectangle.Fill>
+        </Rectangle>
+    </Viewbox>
+
+    <Viewbox x:Key="icoRedo_Dark" x:Shared="false">
+        <Rectangle Width="16" Height="16">
+            <Rectangle.Fill>
+                <DrawingBrush>
+                    <DrawingBrush.Drawing>
+                        <DrawingGroup>
+                            <DrawingGroup.Children>
+                                <GeometryDrawing Brush="#00FFFFFF" Geometry="F1M16,16L0,16 0,0 16,0z" />
+                                <GeometryDrawing Brush="Transparent" Geometry="F1M6.9893,0C8.4113,0,9.7903,0.507,10.8673,1.425L10.9963,1.534 10.9963,0 12.4113,0 14.9943,2.586 14.9943,8 9.5843,8 5.9073,4.32C5.3563,4.676 4.9923,5.296 4.9923,6 4.9923,6.584 5.2523,7.143 5.7163,7.541L12.0593,13.166 9.5523,16 9.2283,16 3.0903,10.557C1.7583,9.416 0.9943,7.754 0.9943,6 0.9943,2.691 3.6833,0 6.9893,0" />
+                                <GeometryDrawing Brush="LightSkyBlue" Geometry="F1M6.9893,1C8.1743,1,9.3223,1.422,10.2203,2.188L11.9963,3.692 11.9963,1 13.9943,3 13.9943,5 13.9943,6 13.9943,7 9.9983,7 8.0003,5 10.4483,5 8.9273,3.713C8.3883,3.253 7.6993,3 6.9893,3 5.3373,3 3.9923,4.346 3.9923,6 3.9923,6.877 4.3753,7.707 5.0523,8.289L10.6483,13.252 9.3243,14.748 3.7403,9.797C2.6303,8.846 1.9943,7.461 1.9943,6 1.9943,3.243 4.2353,1 6.9893,1" />
                             </DrawingGroup.Children>
                         </DrawingGroup>
                     </DrawingBrush.Drawing>
@@ -568,6 +604,31 @@
                 <SolidColorBrush x:Key="canvas" Opacity="0" />
                 <SolidColorBrush x:Key="light-defaultgrey-10" Color="lightskyblue" Opacity="0.4" />
                 <SolidColorBrush x:Key="light-defaultgrey" Color="#FF2D2D2D" Opacity="0.8"/>
+            </Rectangle.Resources>
+            <Rectangle.Fill>
+                <DrawingBrush Stretch="None">
+                    <DrawingBrush.Drawing>
+                        <DrawingGroup>
+                            <DrawingGroup>
+                                <GeometryDrawing Brush="{DynamicResource canvas}" Geometry="F1M16,16H0V0H16Z" />
+                            </DrawingGroup>
+                            <DrawingGroup>
+                                <GeometryDrawing Brush="{DynamicResource light-defaultgrey-10}" Geometry="F1M14.5,6A4.5,4.5,0,1,1,10,1.5,4.5,4.5,0,0,1,14.5,6Z" />
+                                <GeometryDrawing Brush="{DynamicResource light-defaultgrey}" Geometry="F1M10,1A5.006,5.006,0,0,0,5,6,4.955,4.955,0,0,0,6.163,9.167L1.177,14.152l.707.707L6.874,9.87A4.946,4.946,0,0,0,10,11,5,5,0,0,0,10,1Zm0,9a4,4,0,1,1,4-4A4,4,0,0,1,10,10Z" />
+                            </DrawingGroup>
+                        </DrawingGroup>
+                    </DrawingBrush.Drawing>
+                </DrawingBrush>
+            </Rectangle.Fill>
+        </Rectangle>
+    </Viewbox>
+
+    <Viewbox x:Key="icoSearch_Dark" x:Shared="false">
+        <Rectangle Width="16 " Height="16">
+            <Rectangle.Resources>
+                <SolidColorBrush x:Key="canvas" Opacity="0" />
+                <SolidColorBrush x:Key="light-defaultgrey-10" Color="lightskyblue" Opacity="1" />
+                <SolidColorBrush x:Key="light-defaultgrey" Color="#FFE0DFDF" Opacity="0.8"/>
             </Rectangle.Resources>
             <Rectangle.Fill>
                 <DrawingBrush Stretch="None">

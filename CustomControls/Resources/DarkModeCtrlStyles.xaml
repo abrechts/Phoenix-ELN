@@ -1,8 +1,177 @@
-﻿
-    
-<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
     xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    
+    <!--Dark mode Menu and MenuItem Styles-->
+    <!--==================================-->
+
+
+    <!--common dark mode background-->
+    <SolidColorBrush x:Key="mnuDarkBackground" Color="#FF4F4F4F"/>
+
+
+    <Style x:Key="DarkModeMenuStyle" TargetType="{x:Type MenuItem}">
+        
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type MenuItem}">
+
+                    <Border x:Name="templateRoot"        
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="3"
+                        SnapsToDevicePixels="True">
+
+                        <Grid>
+
+                            <Grid x:Name="SubmenuPresenter">
+
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition x:Name="IconColumn" Width="Auto" SharedSizeGroup="MenuIcon"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <ContentPresenter x:Name="Icon"
+                                    ContentSource="Icon"
+                                    MaxWidth="16" Height="16"
+                                    Margin="4,2,2,2"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"/>
+
+                                <ContentPresenter x:Name="menuHeaderContainer"
+                                    Grid.Column="2"
+                                    ContentSource="Header"
+                                    ContentTemplate="{TemplateBinding HeaderTemplate}"
+                                    ContentStringFormat="{TemplateBinding HeaderStringFormat}"
+                                    Margin="6,3,6,3"
+                                    RecognizesAccessKey="True"
+                                    VerticalAlignment="Center"/>
+
+                                <Path x:Name="rightArrow"
+                                    Grid.Column="3"
+                                    Data="M 0 0 L 4 3.5 L 0 7 Z"
+                                    Fill="White"
+                                    Margin="10,0,4,0"
+                                    VerticalAlignment="Center"
+                                    Visibility="Collapsed"/>
+
+                                <Path x:Name="downArrow"
+                                      Grid.Column="3"
+                                      Data="M 0 0 L 3 3 L 6 0 Z"
+                                      VerticalAlignment="Center" 
+                                      Margin="-2,2,4,0" 
+                                      Fill="White" 
+                                      Visibility="Collapsed"/>
+
+                            </Grid>
+
+                            <Popup x:Name="PART_Popup"
+                                AllowsTransparency="True"
+                                Focusable="False"
+                                PlacementTarget="{Binding RelativeSource={RelativeSource TemplatedParent}}"
+                                PopupAnimation="{DynamicResource {x:Static SystemParameters.MenuPopupAnimationKey}}"
+                                IsOpen="{Binding IsSubmenuOpen, RelativeSource={RelativeSource TemplatedParent}}">
+
+                                <Border Background="#FF4F4F4F"
+                                    BorderBrush="#FF6F6F6F"
+                                    BorderThickness="1"
+                                    Padding="4,2,4,4"
+                                    Margin="0,0,8,8">
+                                    <Border.Effect>
+                                        <DropShadowEffect ShadowDepth="5" BlurRadius="7" Color="Black" Opacity="0.45" />
+                                    </Border.Effect>
+                                    <ScrollViewer Style="{DynamicResource {ComponentResourceKey ResourceId=MenuScrollViewer, TypeInTargetAssembly={x:Type FrameworkElement}}}">
+                                        <Grid RenderOptions.ClearTypeHint="Enabled">
+                                            <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Cycle"
+                                                KeyboardNavigation.TabNavigation="Cycle"
+                                                Grid.IsSharedSizeScope="True"/>
+                                        </Grid>
+                                    </ScrollViewer>
+                                </Border>
+
+                            </Popup>
+                        </Grid>
+                    </Border>
+
+                    <ControlTemplate.Triggers>
+
+                        <Trigger Property="Role" Value="TopLevelHeader">
+                            <Setter Property="Padding" Value="7,2"/>
+                            <Setter TargetName="Icon" Property="Margin" Value="2,2,-2,2"/>
+                            <Setter TargetName="downArrow" Property="Visibility" Value="Visible"/>
+                            <Setter TargetName="PART_Popup" Property="Placement" Value="Bottom"/>
+                        </Trigger>
+
+                        <Trigger Property="Role" Value="SubmenuHeader">
+                            <Setter TargetName="rightArrow" Property="Visibility" Value="Visible"/>
+                            <Setter TargetName="PART_Popup" Property="Placement" Value="Right"/>
+                            <Setter Property="Background" Value="{StaticResource mnuDarkBackground}"/>
+                        </Trigger>
+
+                        <Trigger Property="Icon" Value="{x:Null}">
+                            <Setter TargetName="Icon" Property="Visibility" Value="Collapsed"/>
+                            <Setter TargetName="IconColumn" Property="Width" Value="0"/>
+                        </Trigger>
+
+                        <Trigger Property="Role" Value="SubmenuItem">
+                            <Setter Property="Background" Value="{StaticResource mnuDarkBackground}"/>
+                            <Setter Property="Padding" Value="0,3"/>
+                        </Trigger>
+
+                        <Trigger Property="IsHighlighted" Value="True">
+                            <Setter TargetName="templateRoot" Property="Background" Value="#FF5F5F5F"/>
+                            <Setter TargetName="templateRoot" Property="BorderBrush" Value="LightSkyBlue"/>
+                        </Trigger>
+
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.5"/>
+                        </Trigger>
+
+                    </ControlTemplate.Triggers>
+
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+
+    <!-- Dark mode Separator Style for Menus -->
+    <Style x:Key="DarkMenuSeparatorStyle" TargetType="{x:Type Separator}">
+        <Setter Property="Height" Value="7"/>
+        <Setter Property="Margin" Value="0"/>
+        <Setter Property="Background" Value="{StaticResource mnuDarkBackground}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Separator}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="MenuIcon"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <!-- Separator line spans all columns -->
+                        <Border Grid.ColumnSpan="4"
+                                Height="1" 
+                                Background="#FFA0A0A0"
+                                Margin="8,0"
+                                VerticalAlignment="Center"
+                                SnapsToDevicePixels="True"/>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+
 
     <!-- Dark Mode ComboBox Style -->
     <!--==========================-->
@@ -23,7 +192,7 @@
 
     <SolidColorBrush x:Key="cboDropDownBackground" Color="#FF2A2A2A"/>
     <SolidColorBrush x:Key="cboDropDownBorderBrush" Color="gray"/>
-    
+
 
     <!-- ToggleButton Template for ComboBox (substyle) -->
     
@@ -248,8 +417,6 @@
             </Setter.Value>
         </Setter>
     </Style>
-
-
 
 
 </ResourceDictionary>
