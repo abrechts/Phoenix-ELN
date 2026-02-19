@@ -185,7 +185,7 @@
                             
                             <MenuItem x:Name="mnuSpellOff" Header="Off" Tag="" Margin="0,1" ToolTip="No spell checking"/>
 
-                            <Separator Style="{StaticResource DarkMenuSeparatorStyle}"/>
+                            <Separator Style="{StaticResource DarkMenuNoIconsSeparatorStyle}"/>
                             
                             <MenuItem x:Name="mnuSpellDE" Header="DE" Tag="de-DE" Margin="0,1" ToolTip="German"/>
                             <MenuItem x:Name="mnuSpellEnUS" Header="EN(US)" Tag="en-US" Margin="0,1" ToolTip="English (US)"/>
@@ -195,7 +195,7 @@
                             <MenuItem x:Name="mnuSpellIT" Header="IT" Tag="it-IT" Margin="0,1" ToolTip="Italian"/>
                             <MenuItem x:Name="mnuSpellPT" Header="PT" Tag="pt-PT" Margin="0,1" ToolTip="Portugiese"/>
 
-                            <Separator Style="{StaticResource DarkMenuSeparatorStyle}"/>
+                            <Separator Style="{StaticResource DarkMenuNoIconsSeparatorStyle}"/>
 
                             <MenuItem x:Name="mnuDict" Header="Custom Dictionary ..." Margin="0,1"/>
 

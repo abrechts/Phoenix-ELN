@@ -143,8 +143,10 @@
     </Style>
 
 
-    <!-- Dark mode Separator Style for Menus -->
-    <Style x:Key="DarkMenuSeparatorStyle" TargetType="{x:Type Separator}">
+    <!-- Dark mode Separator Style for menus and submenus containing no icons. 
+         Note: To be applied in combination with above DarkModeMenuStyle -->
+    
+    <Style x:Key="DarkMenuNoIconsSeparatorStyle" TargetType="{x:Type Separator}">
         <Setter Property="Height" Value="7"/>
         <Setter Property="Margin" Value="0"/>
         <Setter Property="Background" Value="{StaticResource mnuDarkBackground}"/>
