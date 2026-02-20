@@ -5,7 +5,9 @@
 project Flags=0x20 {
 	notes {"(Project notes go here)\r\n\r\nTo get started:\r\n(1) Add your files on the Files page\r\n(2) Press F7 to build your installer"}
 	product Flags=0x2;
-	sysreq CpuSupport=0x101, ExeSupport=0x101, ExeMatch=0, Condition="VersionNT >= 1000", Display=0, Colors=0, MemorySize=32;
+	sysreq CpuSupport=0x101, ExeSupport=0x101, ExeMatch=0, Condition="VersionNT64 >= 1000", Display=0, Colors=0, MemorySize=0 {
+		str Message: Default="Sorry, a 64-bit version of Windows 10, or higher is required for installation!";
+	}
 	languages Default=1033, DefaultUI=1033 {
 		language __label="Englisch (Vereinigte Staaten)", ID=1033;
 	}
@@ -285,13 +287,13 @@ project Flags=0x20 {
 			str Value: Default="<$ifte(`<$sysval(11)> = 12`, 1, 0)>";
 		}
 		var BuildBase: Flags=0x5, Type=0, Description="Build target base name" {
-			str Value: Default="Phoenix ELN-3.2.1-Setup";
+			str Value: Default="Phoenix ELN-test-3.3.1-Setup";
 		}
 		var BuildDate: Flags=0x5, Type=0, Description="Build date as YYYYMMDD" {
-			str Value: Default=20260204;
+			str Value: Default=20260223;
 		}
 		var BuildDayNo: Flags=0x5, Type=0, Description="Build day number, starting from 1 January 2000" {
-			str Value: Default=9532;
+			str Value: Default=9551;
 		}
 		var BuildFolder: Flags=0x5, Type=1, Description="Folder containing the build target" {
 			str Value: Default="F:\\Benutzer\\Stefan\\Documents\\WPF_Projekte\\Phoenix ELN\\Deployment\\Phoenix ELN\\Phoenix-ELN";
@@ -303,10 +305,10 @@ project Flags=0x20 {
 			str Value: Default="Serial# 374FB77D8C9303AD-05010103";
 		}
 		var BuildTarget: Flags=0x5, Type=1, Description="Build target file path" {
-			str Value: Default="F:\\Benutzer\\Stefan\\Documents\\WPF_Projekte\\Phoenix ELN\\Deployment\\Phoenix ELN\\Phoenix-ELN\\Phoenix ELN-3.2.1-Setup.exe";
+			str Value: Default="F:\\Benutzer\\Stefan\\Documents\\WPF_Projekte\\Phoenix ELN\\Deployment\\Phoenix ELN\\Phoenix-ELN\\Phoenix ELN-test-3.3.1-Setup.exe";
 		}
 		var BuildTime: Flags=0x5, Type=0, Description="Build time as HHMMSS" {
-			str Value: Default=100446;
+			str Value: Default=063551;
 		}
 		var BuildType: Flags=0x5, Type=0, Description="Build type: always TSU" {
 			str Value: Default=TSU;
@@ -602,7 +604,7 @@ project Flags=0x20 {
 			str Value: Default="<MSOfficeDir14=MSOfficeDir12=MSOfficeDir11=MSOfficeDir10=MSOfficeDir9=MSOfficeDir8=!<ProgramFilesFolder>\\Microsoft Office\\Office>";
 		}
 		var PackageCode: Flags=0x205, Type=0, Description="Distribution package GUID" {
-			str Value: Default="{7A0D9AE7-1F6F-46F8-1404-731CF8452A2F}";
+			str Value: Default="{A6ABC74A-2208-4724-15D8-4E7B24E37782}";
 		}
 		var PersonalFolder: Flags=0x244, Type=1, Description="Current User Documents folder" {
 			str Value: Default="<$shpath(5)=@<ShellFoldersCU>\\Personal=_LocPersonalFolder>";
@@ -636,10 +638,10 @@ project Flags=0x20 {
 			str Value: Default="<UILangID>";
 		}
 		var ProductName: Flags=0x204, Type=0, Description="Product name" {
-			str Value: Default="Phoenix ELN";
+			str Value: Default="Phoenix ELN-test";
 		}
 		var ProductVersion: Flags=0x204, Type=0, Description="Product version" {
-			str Value: Default="3.3.0";
+			str Value: Default="3.3.1";
 		}
 		var ProfileFolder: Flags=0x244, Type=1, Description="Current User profile base folder" {
 			str Value: Default="<$syspath(7)=$shpath(40)=%USERPROFILE=_LocProfileFolder>";
@@ -773,7 +775,7 @@ project Flags=0x20 {
 			str Value: Default="<$sysval(4)>";
 		}
 		var SessionID: Flags=0x204, Type=0, Description="Pseudo-random 8-character session identifier" {
-			str Value: Default=B87C4047;
+			str Value: Default="1B752488";
 		}
 		var ShellFoldersCU: Flags=0x20C, Type=2, Description="Current User Shell folders registry key" {
 			str Value: Default="<HKCU>\\<WinCurVer>\\Explorer\\Shell Folders";
@@ -3785,237 +3787,53 @@ project Flags=0x20 {
 		}
 	}
 	components {
-		component __label="Phoenix ELN Install Files", Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
-			str DisplayName: Flags=0x40000, Default="Phoenix ELN Install Files";
+		component Product: Flags=0x40, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
+			str DisplayName: Flags=0x40000, Default=Product;
 			str Description: Flags=0x40000;
-			component Watch_20240215094524: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
-				str DisplayName: Flags=0x40000, Default=Watch_20240215094524;
+			component Watch_20260222143026: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
+				str DisplayName: Flags=0x40000, Default=Watch_20260222143026;
 				str Description: Flags=0x40000;
 			}
-			component Dropped_20240215133900: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
-				str DisplayName: Flags=0x40000, Default=Dropped_20240215133900;
+			component Watch_20260222151832: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
+				str DisplayName: Flags=0x40000, Default=Watch_20260222151832;
 				str Description: Flags=0x40000;
 			}
-			component Dropped_20240215170855: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
-				str DisplayName: Flags=0x40000, Default=Dropped_20240215170855;
+			component Watch_20260222153403: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
+				str DisplayName: Flags=0x40000, Default=Watch_20260222153403;
 				str Description: Flags=0x40000;
 			}
-			component Watch_20240216075527: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
-				str DisplayName: Flags=0x40000, Default=Watch_20240216075527;
+			component Watch_20260222154038: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
+				str DisplayName: Flags=0x40000, Default=Watch_20260222154038;
 				str Description: Flags=0x40000;
 			}
-			component Watch_20240221154112: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
-				str DisplayName: Flags=0x40000, Default=Watch_20240221154112;
+			component Watch_20260222154039: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
+				str DisplayName: Flags=0x40000, Default=Watch_20260222154039;
 				str Description: Flags=0x40000;
 			}
-			component Watch_20240228151035: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
-				str DisplayName: Flags=0x40000, Default=Watch_20240228151035;
+			component Watch_20260222154456: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
+				str DisplayName: Flags=0x40000, Default=Watch_20260222154456;
 				str Description: Flags=0x40000;
 			}
-			component Watch_20240313063514: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
-				str DisplayName: Flags=0x40000, Default=Watch_20240313063514;
+			component Watch_20260222160437: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
+				str DisplayName: Flags=0x40000, Default=Watch_20260222160437;
 				str Description: Flags=0x40000;
 			}
-			component Watch_20240326100818: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
-				str DisplayName: Flags=0x40000, Default=Watch_20240326100818;
+			component Watch_20260222160744: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
+				str DisplayName: Flags=0x40000, Default=Watch_20260222160744;
 				str Description: Flags=0x40000;
 			}
-			component Watch_20240402184716: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
-				str DisplayName: Flags=0x40000, Default=Watch_20240402184716;
+			component Watch_20260222161011: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
+				str DisplayName: Flags=0x40000, Default=Watch_20260222161011;
 				str Description: Flags=0x40000;
 			}
-			component Watch_20240415145206: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
-				str DisplayName: Flags=0x40000, Default=Watch_20240415145206;
+			component Watch_20260222162101: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
+				str DisplayName: Flags=0x40000, Default=Watch_20260222162101;
 				str Description: Flags=0x40000;
 			}
-			component Watch_20240504060935: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
-				str DisplayName: Flags=0x40000, Default=Watch_20240504060935;
+			component Watch_20260223070519: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
+				str DisplayName: Flags=0x40000, Default=Watch_20260223070519;
 				str Description: Flags=0x40000;
 			}
-			component Watch_20240621064053: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
-				str DisplayName: Flags=0x40000, Default=Watch_20240621064053;
-				str Description: Flags=0x40000;
-			}
-			component Watch_20240824161417: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
-				str DisplayName: Flags=0x40000, Default=Watch_20240824161417;
-				str Description: Flags=0x40000;
-			}
-			component Watch_20240926134136: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
-				str DisplayName: Flags=0x40000, Default=Watch_20240926134136;
-				str Description: Flags=0x40000;
-			}
-			component Watch_20241006065736: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
-				str DisplayName: Flags=0x40000, Default=Watch_20241006065736;
-				str Description: Flags=0x40000;
-			}
-			component Watch_20241101082322: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
-				str DisplayName: Flags=0x40000, Default=Watch_20241101082322;
-				str Description: Flags=0x40000;
-			}
-			component Watch_20241117125920: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
-				str DisplayName: Flags=0x40000, Default=Watch_20241117125920;
-				str Description: Flags=0x40000;
-			}
-			component Watch_20241231161106: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
-				str DisplayName: Flags=0x40000, Default=Watch_20241231161106;
-				str Description: Flags=0x40000;
-			}
-			component Watch_20250107072731: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
-				str DisplayName: Flags=0x40000, Default=Watch_20250107072731;
-				str Description: Flags=0x40000;
-			}
-			component Watch_20250107075936: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
-				str DisplayName: Flags=0x40000, Default=Watch_20250107075936;
-				str Description: Flags=0x40000;
-			}
-			component Watch_20250107133505: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
-				str DisplayName: Flags=0x40000, Default=Watch_20250107133505;
-				str Description: Flags=0x40000;
-			}
-			component Watch_20250108073624: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
-				str DisplayName: Flags=0x40000, Default=Watch_20250108073624;
-				str Description: Flags=0x40000;
-			}
-			component Watch_20250108073653: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
-				str DisplayName: Flags=0x40000, Default=Watch_20250108073653;
-				str Description: Flags=0x40000;
-			}
-			component Watch_20250108080346: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
-				str DisplayName: Flags=0x40000, Default=Watch_20250108080346;
-				str Description: Flags=0x40000;
-			}
-			component Watch_20250108093554: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
-				str DisplayName: Flags=0x40000, Default=Watch_20250108093554;
-				str Description: Flags=0x40000;
-			}
-			component Watch_20250108093710: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
-				str DisplayName: Flags=0x40000, Default=Watch_20250108093710;
-				str Description: Flags=0x40000;
-			}
-			component Watch_20250108124358: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
-				str DisplayName: Flags=0x40000, Default=Watch_20250108124358;
-				str Description: Flags=0x40000;
-			}
-			component Watch_20250108124837: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
-				str DisplayName: Flags=0x40000, Default=Watch_20250108124837;
-				str Description: Flags=0x40000;
-			}
-			component Watch_20250108125403: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
-				str DisplayName: Flags=0x40000, Default=Watch_20250108125403;
-				str Description: Flags=0x40000;
-			}
-			component Watch_20250108130051: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
-				str DisplayName: Flags=0x40000, Default=Watch_20250108130051;
-				str Description: Flags=0x40000;
-			}
-			component Watch_20250109064934: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
-				str DisplayName: Flags=0x40000, Default=Watch_20250109064934;
-				str Description: Flags=0x40000;
-			}
-			component Watch_20250109071425: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
-				str DisplayName: Flags=0x40000, Default=Watch_20250109071425;
-				str Description: Flags=0x40000;
-			}
-			component Watch_20250109072347: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
-				str DisplayName: Flags=0x40000, Default=Watch_20250109072347;
-				str Description: Flags=0x40000;
-			}
-			component Watch_20250109072703: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
-				str DisplayName: Flags=0x40000, Default=Watch_20250109072703;
-				str Description: Flags=0x40000;
-			}
-			component Watch_20250109085024: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
-				str DisplayName: Flags=0x40000, Default=Watch_20250109085024;
-				str Description: Flags=0x40000;
-			}
-			component Watch_20250129094916: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
-				str DisplayName: Flags=0x40000, Default=Watch_20250129094916;
-				str Description: Flags=0x40000;
-			}
-			component Watch_20250311062259: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
-				str DisplayName: Flags=0x40000, Default=Watch_20250311062259;
-				str Description: Flags=0x40000;
-			}
-			component Watch_20250311075916: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
-				str DisplayName: Flags=0x40000, Default=Watch_20250311075916;
-				str Description: Flags=0x40000;
-			}
-			component Watch_20250410071642: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
-				str DisplayName: Flags=0x40000, Default=Watch_20250410071642;
-				str Description: Flags=0x40000;
-			}
-			component Watch_20250511073018: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
-				str DisplayName: Flags=0x40000, Default=Watch_20250511073018;
-				str Description: Flags=0x40000;
-			}
-			component Watch_20250608124746: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
-				str DisplayName: Flags=0x40000, Default=Watch_20250608124746;
-				str Description: Flags=0x40000;
-			}
-			component Watch_20250702163312: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
-				str DisplayName: Flags=0x40000, Default=Watch_20250702163312;
-				str Description: Flags=0x40000;
-			}
-			component Watch_20250831080851: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
-				str DisplayName: Flags=0x40000, Default=Watch_20250831080851;
-				str Description: Flags=0x40000;
-			}
-			component Watch_20250914135836: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
-				str DisplayName: Flags=0x40000, Default=Watch_20250914135836;
-				str Description: Flags=0x40000;
-			}
-			component Watch_20250916150151: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
-				str DisplayName: Flags=0x40000, Default=Watch_20250916150151;
-				str Description: Flags=0x40000;
-			}
-			component Watch_20251005072551: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
-				str DisplayName: Flags=0x40000, Default=Watch_20251005072551;
-				str Description: Flags=0x40000;
-			}
-			component Watch_20251112060609: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
-				str DisplayName: Flags=0x40000, Default=Watch_20251112060609;
-				str Description: Flags=0x40000;
-			}
-			component Watch_20251211071336: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
-				str DisplayName: Flags=0x40000, Default=Watch_20251211071336;
-				str Description: Flags=0x40000;
-			}
-			component Watch_20260106154836: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
-				str DisplayName: Flags=0x40000, Default=Watch_20260106154836;
-				str Description: Flags=0x40000;
-			}
-			component Watch_20260106161328: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
-				str DisplayName: Flags=0x40000, Default=Watch_20260106161328;
-				str Description: Flags=0x40000;
-			}
-			component Watch_20260119072848: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
-				str DisplayName: Flags=0x40000, Default=Watch_20260119072848;
-				str Description: Flags=0x40000;
-			}
-			component Watch_20260120094711: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
-				str DisplayName: Flags=0x40000, Default=Watch_20260120094711;
-				str Description: Flags=0x40000;
-			}
-			component Watch_20260124150651: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
-				str DisplayName: Flags=0x40000, Default=Watch_20260124150651;
-				str Description: Flags=0x40000;
-			}
-			component Watch_20260204080014: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
-				str DisplayName: Flags=0x40000, Default=Watch_20260204080014;
-				str Description: Flags=0x40000;
-			}
-			component Watch_20260204100211: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
-				str DisplayName: Flags=0x40000, Default=Watch_20260204100211;
-				str Description: Flags=0x40000;
-			}
-			component Watch_20260213073024: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
-				str DisplayName: Flags=0x40000, Default=Watch_20260213073024;
-				str Description: Flags=0x40000;
-			}
-		}
-		component Folder1_A8A264769C3704B4: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
-			str DisplayName: Flags=0x40000, Default=Folder1_Files;
-			str Description: Flags=0x40000;
 		}
 	}
 	files TARGETDIR: Flags=0x0, Traits=0x6F07, InstallAction=0, RemoveAction=0 {
@@ -4100,7 +3918,7 @@ project Flags=0x20 {
 					str Name: Flags=0x50000, PhraseID=Folder.Desktop.User, Default=Desktop {
 						xlat ID=1033 {"Desktop"}
 					}
-					shlink Shortcut1_0CD4D7350095EFBC: Flags=0x0, TargetPath="<#PhoenixELN.exe_4A53056892744322>", WorkDir="<INSTALLDIR>", IconIndex=0, ShowCmd=0 {
+					shlink Shortcut1_0CD4D7350095EFBC: Flags=0x0, TargetPath="<#PhoenixELN.exe_05FB637C989F85D2>", WorkDir="<INSTALLDIR>", IconIndex=0, ShowCmd=0 {
 						str Title: Default="Phoenix ELN";
 					}
 				}
@@ -4296,472 +4114,6 @@ project Flags=0x20 {
 					}
 				}
 			}
-			folder INSTALLDIR: Flags=0x0, Traits=0x80000000, InstallAction=0, RemoveAction=1 {
-				str Name: Default="<ProductName>";
-				wlist Watchlist_FF5B2057B5E221F6: Flags=0xE000003F, Path="..\\ELN-Main\\bin\\Release\\Publish", Filter="*.*", Exclude="*.pdb;*.bak;*.tmp;*.lnk;*.log;*.acl;*.gid;*.fts;*.pnf;*.oca;*.scc;*.$*;*.~*;.svn";
-				file Castle.Core.dll_FF43A65370F33496: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\Castle.Core.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
-					str Name: Default=Castle.Core.dll;
-				}
-				file ChemBytesDraw.dll_BF9398D900AD0F37: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\ChemBytesDraw.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
-					str Name: Default=ChemBytesDraw.dll;
-				}
-				file CustomControls.dll.config_3CD9113E5440A53F: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\CustomControls.dll.config", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
-					str Name: Default=CustomControls.dll.config;
-				}
-				file CustomControls.dll_17DEB185784E0921: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\CustomControls.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
-					str Name: Default=CustomControls.dll;
-				}
-				file ElnBase.dll_D6BB71774ECFF661: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\ElnBase.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
-					str Name: Default=ElnBase.dll;
-				}
-				file ElnCoreModel.dll_3793A7EE4D0EC784: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\ElnCoreModel.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
-					str Name: Default=ElnCoreModel.dll;
-				}
-				folder Folder1_40053762E24C7C21: Flags=0x0, Component="Phoenix ELN Install Files", Traits=0x80000000, InstallAction=0, RemoveAction=1 {
-					str Name: Default="DB-Seed";
-					file ElnData.db_95898C0D8117EF08: Flags=0x0, Path="..\\References\\DB-Seed\\ElnData.db", Attributes=0x0, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
-						str Name: Default=ElnData.db;
-					}
-				}
-				file GongSolutions.WPF.DragDrop.dll_73CF61F01107D745: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\GongSolutions.WPF.DragDrop.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
-					str Name: Default=GongSolutions.WPF.DragDrop.dll;
-				}
-				file HarfBuzzSharp.dll_A66B95455AAD7A2E: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\HarfBuzzSharp.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
-					str Name: Default=HarfBuzzSharp.dll;
-				}
-				file Indigo.Net.dll_E4A79CB88E455FF4: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\Indigo.Net.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
-					str Name: Default=Indigo.Net.dll;
-				}
-				folder libinchi_00FF7FEC82A3FACA: Flags=0x0, Component="Phoenix ELN Install Files", Traits=0x80000000, InstallAction=1, RemoveAction=1 {
-					str Name: Default=libinchi;
-					folder _2bit_FECA841ECDA2D723: Flags=0x0, Traits=0x80000000, InstallAction=1, RemoveAction=1 {
-						str Name: Default="32bit";
-						file libinchi.dll_6B5FAE66D474FAC7: Flags=0x0, Path="..\\References\\libinchi\\32bit\\libinchi.dll", Attributes=0x0, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
-							str Name: Default=libinchi.dll;
-						}
-					}
-					folder _4bit_0418DD9431D31A92: Flags=0x0, Traits=0x80000000, InstallAction=1, RemoveAction=1 {
-						str Name: Default="64bit";
-						file libinchi.dll_3CE2963BC5691488: Flags=0x0, Path="..\\References\\libinchi\\64bit\\libinchi.dll", Attributes=0x0, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
-							str Name: Default=libinchi.dll;
-						}
-					}
-					file Readme.txt_D63D1063F0C4DF11: Flags=0x0, Path="..\\References\\libinchi\\Readme.txt", Attributes=0x0, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
-						str Name: Default=Readme.txt;
-					}
-				}
-				file Markdig.dll_EBEC2A92AA4BB687: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\Markdig.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
-					str Name: Default=Markdig.dll;
-				}
-				file Microsoft.Data.Sqlite.dll_78718C02D0C1A239: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.Data.Sqlite.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
-					str Name: Default=Microsoft.Data.Sqlite.dll;
-				}
-				file Microsoft.EntityFrameworkCore.Abstractions.dll_0F9948E08315FC3A: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.EntityFrameworkCore.Abstractions.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
-					str Name: Default=Microsoft.EntityFrameworkCore.Abstractions.dll;
-				}
-				file Microsoft.EntityFrameworkCore.dll_1F285FBD77A281EE: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.EntityFrameworkCore.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
-					str Name: Default=Microsoft.EntityFrameworkCore.dll;
-				}
-				file Microsoft.EntityFrameworkCore.Proxies.dll_674251C871EAAF86: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.EntityFrameworkCore.Proxies.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
-					str Name: Default=Microsoft.EntityFrameworkCore.Proxies.dll;
-				}
-				file Microsoft.EntityFrameworkCore.Relational.dll_64A450F2663957FC: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.EntityFrameworkCore.Relational.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
-					str Name: Default=Microsoft.EntityFrameworkCore.Relational.dll;
-				}
-				file Microsoft.EntityFrameworkCore.Sqlite.dll_4A5E2F27D51C98E2: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.EntityFrameworkCore.Sqlite.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
-					str Name: Default=Microsoft.EntityFrameworkCore.Sqlite.dll;
-				}
-				file Microsoft.Extensions.Caching.Abstractions.dll_4EF9A80EA0624473: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.Extensions.Caching.Abstractions.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
-					str Name: Default=Microsoft.Extensions.Caching.Abstractions.dll;
-				}
-				file Microsoft.Extensions.Caching.Memory.dll_429108D3A366A27A: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.Extensions.Caching.Memory.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
-					str Name: Default=Microsoft.Extensions.Caching.Memory.dll;
-				}
-				file Microsoft.Extensions.Configuration.Abstractions.dll_CC1CC49A13794FDA: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.Extensions.Configuration.Abstractions.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
-					str Name: Default=Microsoft.Extensions.Configuration.Abstractions.dll;
-				}
-				file Microsoft.Extensions.DependencyInjection.Abstractions.d_CE8EEEB09DBEF526: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.Extensions.DependencyInjection.Abstractions.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
-					str Name: Default=Microsoft.Extensions.DependencyInjection.Abstractions.dll;
-				}
-				file Microsoft.Extensions.DependencyInjection.dll_672CDA36C4C73F60: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.Extensions.DependencyInjection.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
-					str Name: Default=Microsoft.Extensions.DependencyInjection.dll;
-				}
-				file Microsoft.Extensions.DependencyModel.dll_D14BD9556AF48643: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.Extensions.DependencyModel.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
-					str Name: Default=Microsoft.Extensions.DependencyModel.dll;
-				}
-				file Microsoft.Extensions.Logging.Abstractions.dll_E7AA96C575AD1BC2: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.Extensions.Logging.Abstractions.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
-					str Name: Default=Microsoft.Extensions.Logging.Abstractions.dll;
-				}
-				file Microsoft.Extensions.Logging.dll_0A376224F1709825: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.Extensions.Logging.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
-					str Name: Default=Microsoft.Extensions.Logging.dll;
-				}
-				file Microsoft.Extensions.Options.dll_31A50288E6D2B229: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.Extensions.Options.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
-					str Name: Default=Microsoft.Extensions.Options.dll;
-				}
-				file Microsoft.Extensions.Primitives.dll_0692C0310DD52EC1: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.Extensions.Primitives.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
-					str Name: Default=Microsoft.Extensions.Primitives.dll;
-				}
-				file Microsoft.Windows.SDK.NET.dll_C29A43CFB7548A0D: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.Windows.SDK.NET.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
-					str Name: Default=Microsoft.Windows.SDK.NET.dll;
-				}
-				file MySqlConnector.dll_FAB6BF9C53DCF11B: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\MySqlConnector.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
-					str Name: Default=MySqlConnector.dll;
-				}
-				file PhoenixELN.deps.json_5DB42AD0498CE4A2: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\PhoenixELN.deps.json", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
-					str Name: Default=PhoenixELN.deps.json;
-				}
-				file PhoenixELN.dll_046DE6637CEC7B45: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\PhoenixELN.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=2000, Packaging=0 {
-					str Name: Default=PhoenixELN.dll;
-				}
-				file PhoenixELN.exe_4A53056892744322: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\PhoenixELN.exe", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=2000, Packaging=0 {
-					str Name: Default=PhoenixELN.exe;
-				}
-				file PhoenixELN.runtimeconfig.json_A78521296E82E9D5: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\PhoenixELN.runtimeconfig.json", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
-					str Name: Default=PhoenixELN.runtimeconfig.json;
-				}
-				file Pomelo.EntityFrameworkCore.MySql.dll_B6A4BD9E5424B9DD: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\Pomelo.EntityFrameworkCore.MySql.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
-					str Name: Default=Pomelo.EntityFrameworkCore.MySql.dll;
-				}
-				folder runtimes_FD61D8B648050762: Flags=0x0, Component=Watch_20250109072703, Traits=0x80000000, WatchList=1, InstallAction=1, RemoveAction=1 {
-					str Name: Default=runtimes;
-					folder browser_wasm_51AD810B4784AE6C: Flags=0x0, Component=Watch_20250109072703, Traits=0x80000000, WatchList=1, InstallAction=1, RemoveAction=1 {
-						str Name: Default="browser-wasm";
-						folder nativeassets_C85FE75581DB672B: Flags=0x0, Component=Watch_20250109072703, Traits=0x80000000, WatchList=1, InstallAction=1, RemoveAction=1 {
-							str Name: Default=nativeassets;
-							folder net9.0_18FA94123AD568DF: Flags=0x0, Component=Watch_20250109072703, Traits=0x80000000, WatchList=1, InstallAction=1, RemoveAction=1 {
-								str Name: Default=net9.0;
-								file e_sqlite3.a_6A6C3E234729A906: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\runtimes\\browser-wasm\\nativeassets\\net9.0\\e_sqlite3.a", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
-									str Name: Default=e_sqlite3.a;
-								}
-							}
-						}
-					}
-					folder linux_arm64_1717E03585020E29: Flags=0x0, Component=Watch_20250109072703, Traits=0x80000000, WatchList=1, InstallAction=1, RemoveAction=1 {
-						str Name: Default="linux-arm64";
-						folder native_0F09788700DA1A26: Flags=0x0, Component=Watch_20250109072703, Traits=0x80000000, WatchList=1, InstallAction=1, RemoveAction=1 {
-							str Name: Default=native;
-							file libbingo_nosql.so_7F9265B065616FA6: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\runtimes\\linux-arm64\\native\\libbingo-nosql.so", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
-								str Name: Default="libbingo-nosql.so";
-							}
-							file libe_sqlite3.so_CFA614E11D0B427A: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\runtimes\\linux-arm64\\native\\libe_sqlite3.so", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
-								str Name: Default=libe_sqlite3.so;
-							}
-							file libindigo.so_7BFD22A4A11C180D: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\runtimes\\linux-arm64\\native\\libindigo.so", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
-								str Name: Default=libindigo.so;
-							}
-							file libindigo_inchi.so_30967098E93EFB77: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\runtimes\\linux-arm64\\native\\libindigo-inchi.so", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
-								str Name: Default="libindigo-inchi.so";
-							}
-							file libindigo_renderer.so_6A9FD555227D5ABB: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\runtimes\\linux-arm64\\native\\libindigo-renderer.so", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
-								str Name: Default="libindigo-renderer.so";
-							}
-						}
-					}
-					folder linux_arm_3E805C962E0690F6: Flags=0x0, Component=Watch_20250109072703, Traits=0x80000000, WatchList=1, InstallAction=1, RemoveAction=1 {
-						str Name: Default="linux-arm";
-						folder native_16C6B7A0DD2819DC: Flags=0x0, Component=Watch_20250109072703, Traits=0x80000000, WatchList=1, InstallAction=1, RemoveAction=1 {
-							str Name: Default=native;
-							file libe_sqlite3.so_59ECA559AC116C3A: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\runtimes\\linux-arm\\native\\libe_sqlite3.so", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
-								str Name: Default=libe_sqlite3.so;
-							}
-						}
-					}
-					folder linux_armel_FCA491D94198ED0F: Flags=0x0, Component=Watch_20250109072703, Traits=0x80000000, WatchList=1, InstallAction=1, RemoveAction=1 {
-						str Name: Default="linux-armel";
-						folder native_265DD1CD82C1F907: Flags=0x0, Component=Watch_20250109072703, Traits=0x80000000, WatchList=1, InstallAction=1, RemoveAction=1 {
-							str Name: Default=native;
-							file libe_sqlite3.so_85D9AE82663A97EC: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\runtimes\\linux-armel\\native\\libe_sqlite3.so", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
-								str Name: Default=libe_sqlite3.so;
-							}
-						}
-					}
-					folder linux_mips64_4472FBE54589365D: Flags=0x0, Component=Watch_20250109072703, Traits=0x80000000, WatchList=1, InstallAction=1, RemoveAction=1 {
-						str Name: Default="linux-mips64";
-						folder native_1BABE355E6D6545E: Flags=0x0, Component=Watch_20250109072703, Traits=0x80000000, WatchList=1, InstallAction=1, RemoveAction=1 {
-							str Name: Default=native;
-							file libe_sqlite3.so_1B456AF40843E49C: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\runtimes\\linux-mips64\\native\\libe_sqlite3.so", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
-								str Name: Default=libe_sqlite3.so;
-							}
-						}
-					}
-					folder linux_musl_arm64_B9997BC1F6C83F78: Flags=0x0, Component=Watch_20250109072703, Traits=0x80000000, WatchList=1, InstallAction=1, RemoveAction=1 {
-						str Name: Default="linux-musl-arm64";
-						folder native_F1C2411204079CD0: Flags=0x0, Component=Watch_20250109072703, Traits=0x80000000, WatchList=1, InstallAction=1, RemoveAction=1 {
-							str Name: Default=native;
-							file libe_sqlite3.so_E0598CB15D693647: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\runtimes\\linux-musl-arm64\\native\\libe_sqlite3.so", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
-								str Name: Default=libe_sqlite3.so;
-							}
-						}
-					}
-					folder linux_musl_arm_3CF154AE703A91D7: Flags=0x0, Component=Watch_20250109072703, Traits=0x80000000, WatchList=1, InstallAction=1, RemoveAction=1 {
-						str Name: Default="linux-musl-arm";
-						folder native_496ED4534CFBE821: Flags=0x0, Component=Watch_20250109072703, Traits=0x80000000, WatchList=1, InstallAction=1, RemoveAction=1 {
-							str Name: Default=native;
-							file libe_sqlite3.so_191B4E0E11D22690: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\runtimes\\linux-musl-arm\\native\\libe_sqlite3.so", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
-								str Name: Default=libe_sqlite3.so;
-							}
-						}
-					}
-					folder linux_musl_s390x_37CC7B47AECCE0F1: Flags=0x0, Component=Watch_20250109072703, Traits=0x80000000, WatchList=1, InstallAction=1, RemoveAction=1 {
-						str Name: Default="linux-musl-s390x";
-						folder native_942D430646DC7874: Flags=0x0, Component=Watch_20250109072703, Traits=0x80000000, WatchList=1, InstallAction=1, RemoveAction=1 {
-							str Name: Default=native;
-							file libe_sqlite3.so_CDD723AF3B0EC6D0: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\runtimes\\linux-musl-s390x\\native\\libe_sqlite3.so", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
-								str Name: Default=libe_sqlite3.so;
-							}
-						}
-					}
-					folder linux_musl_x64_DA3EF09AA670D644: Flags=0x0, Component=Watch_20250109072703, Traits=0x80000000, WatchList=1, InstallAction=1, RemoveAction=1 {
-						str Name: Default="linux-musl-x64";
-						folder native_CCE235167E47302B: Flags=0x0, Component=Watch_20250109072703, Traits=0x80000000, WatchList=1, InstallAction=1, RemoveAction=1 {
-							str Name: Default=native;
-							file libe_sqlite3.so_BFC6ADE8A1CD6FDD: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\runtimes\\linux-musl-x64\\native\\libe_sqlite3.so", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
-								str Name: Default=libe_sqlite3.so;
-							}
-						}
-					}
-					folder linux_ppc64le_8A07F48C58B0906D: Flags=0x0, Component=Watch_20250109072703, Traits=0x80000000, WatchList=1, InstallAction=1, RemoveAction=1 {
-						str Name: Default="linux-ppc64le";
-						folder native_1BE679FC579EF04F: Flags=0x0, Component=Watch_20250109072703, Traits=0x80000000, WatchList=1, InstallAction=1, RemoveAction=1 {
-							str Name: Default=native;
-							file libe_sqlite3.so_AB565E18878690F7: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\runtimes\\linux-ppc64le\\native\\libe_sqlite3.so", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
-								str Name: Default=libe_sqlite3.so;
-							}
-						}
-					}
-					folder linux_s390x_006B4B903CCAA95D: Flags=0x0, Component=Watch_20250109072703, Traits=0x80000000, WatchList=1, InstallAction=1, RemoveAction=1 {
-						str Name: Default="linux-s390x";
-						folder native_D15C227D884A7B22: Flags=0x0, Component=Watch_20250109072703, Traits=0x80000000, WatchList=1, InstallAction=1, RemoveAction=1 {
-							str Name: Default=native;
-							file libe_sqlite3.so_B5DDD0EB3966E868: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\runtimes\\linux-s390x\\native\\libe_sqlite3.so", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
-								str Name: Default=libe_sqlite3.so;
-							}
-						}
-					}
-					folder linux_x64_D1D545B79253FE30: Flags=0x0, Component=Watch_20250109072703, Traits=0x80000000, WatchList=1, InstallAction=1, RemoveAction=1 {
-						str Name: Default="linux-x64";
-						folder native_AB13FE6912BE90AB: Flags=0x0, Component=Watch_20250109072703, Traits=0x80000000, WatchList=1, InstallAction=1, RemoveAction=1 {
-							str Name: Default=native;
-							file libbingo_nosql.so_273347821A77C3DD: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\runtimes\\linux-x64\\native\\libbingo-nosql.so", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
-								str Name: Default="libbingo-nosql.so";
-							}
-							file libe_sqlite3.so_430543C38936B134: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\runtimes\\linux-x64\\native\\libe_sqlite3.so", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
-								str Name: Default=libe_sqlite3.so;
-							}
-							file libindigo.so_D505978540D8825A: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\runtimes\\linux-x64\\native\\libindigo.so", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
-								str Name: Default=libindigo.so;
-							}
-							file libindigo_inchi.so_A3E2688DD04CB05A: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\runtimes\\linux-x64\\native\\libindigo-inchi.so", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
-								str Name: Default="libindigo-inchi.so";
-							}
-							file libindigo_renderer.so_18A68A3827F1E988: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\runtimes\\linux-x64\\native\\libindigo-renderer.so", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
-								str Name: Default="libindigo-renderer.so";
-							}
-						}
-					}
-					folder linux_x86_A2F6BF8E7A1AA640: Flags=0x0, Component=Watch_20250109072703, Traits=0x80000000, WatchList=1, InstallAction=1, RemoveAction=1 {
-						str Name: Default="linux-x86";
-						folder native_0A8BDA5D05E575DD: Flags=0x0, Component=Watch_20250109072703, Traits=0x80000000, WatchList=1, InstallAction=1, RemoveAction=1 {
-							str Name: Default=native;
-							file libe_sqlite3.so_12D677C0CBD884F1: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\runtimes\\linux-x86\\native\\libe_sqlite3.so", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
-								str Name: Default=libe_sqlite3.so;
-							}
-						}
-					}
-					folder maccatalyst_arm64_4B5A2E02318FA04E: Flags=0x0, Component=Watch_20250109072703, Traits=0x80000000, WatchList=1, InstallAction=1, RemoveAction=1 {
-						str Name: Default="maccatalyst-arm64";
-						folder native_39D43246365E0F55: Flags=0x0, Component=Watch_20250109072703, Traits=0x80000000, WatchList=1, InstallAction=1, RemoveAction=1 {
-							str Name: Default=native;
-							file libe_sqlite3.dylib_037B263E4645EB4E: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\runtimes\\maccatalyst-arm64\\native\\libe_sqlite3.dylib", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
-								str Name: Default=libe_sqlite3.dylib;
-							}
-						}
-					}
-					folder maccatalyst_x64_94F7E4993A5BFA0C: Flags=0x0, Component=Watch_20250109072703, Traits=0x80000000, WatchList=1, InstallAction=1, RemoveAction=1 {
-						str Name: Default="maccatalyst-x64";
-						folder native_1FB23C1421744237: Flags=0x0, Component=Watch_20250109072703, Traits=0x80000000, WatchList=1, InstallAction=1, RemoveAction=1 {
-							str Name: Default=native;
-							file libe_sqlite3.dylib_64DFA101AA0ECDCA: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\runtimes\\maccatalyst-x64\\native\\libe_sqlite3.dylib", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
-								str Name: Default=libe_sqlite3.dylib;
-							}
-						}
-					}
-					folder osx_5124B73DA35BA752: Flags=0x0, Component=Watch_20260106154836, Traits=0x80000000, WatchList=1, InstallAction=1, RemoveAction=1 {
-						str Name: Default=osx;
-						folder native_FF7440B36B82F9EA: Flags=0x0, Component=Watch_20260106154836, Traits=0x80000000, WatchList=1, InstallAction=1, RemoveAction=1 {
-							str Name: Default=native;
-							file libHarfBuzzSharp.dylib_AE0E5F4B3D1B4BA5: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\runtimes\\osx\\native\\libHarfBuzzSharp.dylib", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
-								str Name: Default=libHarfBuzzSharp.dylib;
-							}
-							file libSkiaSharp.dylib_697DABBB4381C92D: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\runtimes\\osx\\native\\libSkiaSharp.dylib", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
-								str Name: Default=libSkiaSharp.dylib;
-							}
-						}
-					}
-					folder osx_arm64_E90E06E0E5FC5EAD: Flags=0x0, Component=Watch_20250109072703, Traits=0x80000000, WatchList=1, InstallAction=1, RemoveAction=1 {
-						str Name: Default="osx-arm64";
-						folder native_61864D162339F8B1: Flags=0x0, Component=Watch_20250109072703, Traits=0x80000000, WatchList=1, InstallAction=1, RemoveAction=1 {
-							str Name: Default=native;
-							file libbingo_nosql.dylib_38FB0B1B5C8F4F03: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\runtimes\\osx-arm64\\native\\libbingo-nosql.dylib", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
-								str Name: Default="libbingo-nosql.dylib";
-							}
-							file libe_sqlite3.dylib_3D8381A32A0D3053: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\runtimes\\osx-arm64\\native\\libe_sqlite3.dylib", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
-								str Name: Default=libe_sqlite3.dylib;
-							}
-							file libindigo.dylib_F8ABA47C5EA71BED: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\runtimes\\osx-arm64\\native\\libindigo.dylib", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
-								str Name: Default=libindigo.dylib;
-							}
-							file libindigo_inchi.dylib_7E81A6CC6307DA25: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\runtimes\\osx-arm64\\native\\libindigo-inchi.dylib", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
-								str Name: Default="libindigo-inchi.dylib";
-							}
-							file libindigo_renderer.dylib_26B42D7E8458EA43: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\runtimes\\osx-arm64\\native\\libindigo-renderer.dylib", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
-								str Name: Default="libindigo-renderer.dylib";
-							}
-						}
-					}
-					folder osx_x64_1CC8B901DF527B4B: Flags=0x0, Component=Watch_20250109072703, Traits=0x80000000, WatchList=1, InstallAction=1, RemoveAction=1 {
-						str Name: Default="osx-x64";
-						folder native_E97C8E0F834A16AC: Flags=0x0, Component=Watch_20250109072703, Traits=0x80000000, WatchList=1, InstallAction=1, RemoveAction=1 {
-							str Name: Default=native;
-							file libbingo_nosql.dylib_5D3D34C19C963650: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\runtimes\\osx-x64\\native\\libbingo-nosql.dylib", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
-								str Name: Default="libbingo-nosql.dylib";
-							}
-							file libe_sqlite3.dylib_2BFE8376051D93E6: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\runtimes\\osx-x64\\native\\libe_sqlite3.dylib", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
-								str Name: Default=libe_sqlite3.dylib;
-							}
-							file libindigo.dylib_37D987CBB983B33C: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\runtimes\\osx-x64\\native\\libindigo.dylib", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
-								str Name: Default=libindigo.dylib;
-							}
-							file libindigo_inchi.dylib_D5EB062B5D30DA60: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\runtimes\\osx-x64\\native\\libindigo-inchi.dylib", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
-								str Name: Default="libindigo-inchi.dylib";
-							}
-							file libindigo_renderer.dylib_A2D00B581E556ECD: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\runtimes\\osx-x64\\native\\libindigo-renderer.dylib", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
-								str Name: Default="libindigo-renderer.dylib";
-							}
-						}
-					}
-					folder win_arm64_401F9BC2A109B2F5: Flags=0x0, Component=Watch_20250109072703, Traits=0x80000000, WatchList=1, InstallAction=1, RemoveAction=1 {
-						str Name: Default="win-arm64";
-						folder native_6DB3F650D9AB2B0E: Flags=0x0, Component=Watch_20250109072703, Traits=0x80000000, WatchList=1, InstallAction=1, RemoveAction=1 {
-							str Name: Default=native;
-							file e_sqlite3.dll_BAB125975C64EA66: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\runtimes\\win-arm64\\native\\e_sqlite3.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
-								str Name: Default=e_sqlite3.dll;
-							}
-							file libHarfBuzzSharp.dll_565DC76538E32F44: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\runtimes\\win-arm64\\native\\libHarfBuzzSharp.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
-								str Name: Default=libHarfBuzzSharp.dll;
-							}
-							file libSkiaSharp.dll_D6C9BA1969237297: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\runtimes\\win-arm64\\native\\libSkiaSharp.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
-								str Name: Default=libSkiaSharp.dll;
-							}
-						}
-					}
-					folder win_arm_CFD7B125E90A1E79: Flags=0x0, Component=Watch_20250109072703, Traits=0x80000000, WatchList=1, InstallAction=1, RemoveAction=1 {
-						str Name: Default="win-arm";
-						folder native_50A3F87E6422F847: Flags=0x0, Component=Watch_20250109072703, Traits=0x80000000, WatchList=1, InstallAction=1, RemoveAction=1 {
-							str Name: Default=native;
-							file e_sqlite3.dll_1E402F17AD3A4A0C: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\runtimes\\win-arm\\native\\e_sqlite3.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
-								str Name: Default=e_sqlite3.dll;
-							}
-						}
-					}
-					folder win_x64_D6F237CDC354CEA3: Flags=0x0, Component=Watch_20250109072703, Traits=0x80000000, WatchList=1, InstallAction=1, RemoveAction=1 {
-						str Name: Default="win-x64";
-						folder native_4BAA15E84E4E6335: Flags=0x0, Component=Watch_20250109072703, Traits=0x80000000, WatchList=1, InstallAction=1, RemoveAction=1 {
-							str Name: Default=native;
-							file bingo_nosql.dll_61357A185DF13998: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\runtimes\\win-x64\\native\\bingo-nosql.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
-								str Name: Default="bingo-nosql.dll";
-							}
-							file e_sqlite3.dll_ADD2AC9C9B6EF49B: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\runtimes\\win-x64\\native\\e_sqlite3.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
-								str Name: Default=e_sqlite3.dll;
-							}
-							file indigo.dll_25B0CD15664FCD5E: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\runtimes\\win-x64\\native\\indigo.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
-								str Name: Default=indigo.dll;
-							}
-							file indigo_inchi.dll_4964DA4EA19D511D: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\runtimes\\win-x64\\native\\indigo-inchi.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
-								str Name: Default="indigo-inchi.dll";
-							}
-							file indigo_renderer.dll_AE6F2AC94938CAA5: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\runtimes\\win-x64\\native\\indigo-renderer.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
-								str Name: Default="indigo-renderer.dll";
-							}
-							file libHarfBuzzSharp.dll_9A4D686D0840AF62: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\runtimes\\win-x64\\native\\libHarfBuzzSharp.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
-								str Name: Default=libHarfBuzzSharp.dll;
-							}
-							file libSkiaSharp.dll_FFF233264433319F: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\runtimes\\win-x64\\native\\libSkiaSharp.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
-								str Name: Default=libSkiaSharp.dll;
-							}
-							file msvcp140.dll_EB0F0D60CECCF53F: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\runtimes\\win-x64\\native\\msvcp140.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
-								str Name: Default=msvcp140.dll;
-							}
-							file vcruntime140.dll_352CC44306F2C88C: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\runtimes\\win-x64\\native\\vcruntime140.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
-								str Name: Default=vcruntime140.dll;
-							}
-							file vcruntime140_1.dll_7D21BA11B791253E: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\runtimes\\win-x64\\native\\vcruntime140_1.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
-								str Name: Default=vcruntime140_1.dll;
-							}
-						}
-					}
-					folder win_x86_16778319B349C02F: Flags=0x0, Component=Watch_20250109072703, Traits=0x80000000, WatchList=1, InstallAction=1, RemoveAction=1 {
-						str Name: Default="win-x86";
-						folder native_62070C8E1BE272BE: Flags=0x0, Component=Watch_20250109072703, Traits=0x80000000, WatchList=1, InstallAction=1, RemoveAction=1 {
-							str Name: Default=native;
-							file bingo_nosql.dll_A278F41C4C187A2F: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\runtimes\\win-x86\\native\\bingo-nosql.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
-								str Name: Default="bingo-nosql.dll";
-							}
-							file e_sqlite3.dll_748AD35B10F1A0B5: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\runtimes\\win-x86\\native\\e_sqlite3.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
-								str Name: Default=e_sqlite3.dll;
-							}
-							file indigo.dll_C0F9B2246997D0F6: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\runtimes\\win-x86\\native\\indigo.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
-								str Name: Default=indigo.dll;
-							}
-							file indigo_inchi.dll_C23FA2D6EC158020: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\runtimes\\win-x86\\native\\indigo-inchi.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
-								str Name: Default="indigo-inchi.dll";
-							}
-							file indigo_renderer.dll_11BD79645756D109: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\runtimes\\win-x86\\native\\indigo-renderer.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
-								str Name: Default="indigo-renderer.dll";
-							}
-							file libHarfBuzzSharp.dll_447849025DAF703D: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\runtimes\\win-x86\\native\\libHarfBuzzSharp.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
-								str Name: Default=libHarfBuzzSharp.dll;
-							}
-							file libSkiaSharp.dll_D1E39ED2F128C212: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\runtimes\\win-x86\\native\\libSkiaSharp.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
-								str Name: Default=libSkiaSharp.dll;
-							}
-							file msvcp140.dll_EA25E5CE8AE8BD91: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\runtimes\\win-x86\\native\\msvcp140.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
-								str Name: Default=msvcp140.dll;
-							}
-							file vcruntime140.dll_48356A103B7E2E60: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\runtimes\\win-x86\\native\\vcruntime140.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
-								str Name: Default=vcruntime140.dll;
-							}
-						}
-					}
-				}
-				file SkiaSharp.dll_CB53EBE03CDC4ACD: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\SkiaSharp.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
-					str Name: Default=SkiaSharp.dll;
-				}
-				file SpellCheck.Dictionaries.dll_B6CEFD56A0CA8CCF: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\SpellCheck.Dictionaries.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
-					str Name: Default=SpellCheck.Dictionaries.dll;
-				}
-				file SpellCheck.Simple.dll_FE9A06D75F0F2BEE: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\SpellCheck.Simple.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
-					str Name: Default=SpellCheck.Simple.dll;
-				}
-				file Spire.Pdf.dll_C4A39A13DD4FAABC: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\Spire.Pdf.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
-					str Name: Default=Spire.Pdf.dll;
-				}
-				file SQLitePCLRaw.batteries_v2.dll_9209C9F5AB04681B: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\SQLitePCLRaw.batteries_v2.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
-					str Name: Default=SQLitePCLRaw.batteries_v2.dll;
-				}
-				file SQLitePCLRaw.core.dll_89E0777BA844C336: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\SQLitePCLRaw.core.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
-					str Name: Default=SQLitePCLRaw.core.dll;
-				}
-				file SQLitePCLRaw.provider.e_sqlite3.dll_A9DEC25E911B9F3C: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\SQLitePCLRaw.provider.e_sqlite3.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
-					str Name: Default=SQLitePCLRaw.provider.e_sqlite3.dll;
-				}
-				file WeCantSpell.Hunspell.dll_BB9A892AF2A44BDC: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\WeCantSpell.Hunspell.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
-					str Name: Default=WeCantSpell.Hunspell.dll;
-				}
-				file WinRT.Runtime.dll_58078B417B89C7A9: Flags=0x0, Component=Watch_20260213073024, Path="..\\ELN-Main\\bin\\Release\\Publish\\WinRT.Runtime.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
-					str Name: Default=WinRT.Runtime.dll;
-				}
-			}
 		}
 		folder ProgramFilesFolder: Flags=0x0, Traits=0x14670F, InstallAction=0, RemoveAction=0 {
 			str Name: Flags=0x50000, PhraseID=Folder.ProgramFiles32, Default="Program Files (32-bit)" {
@@ -4795,6 +4147,172 @@ project Flags=0x20 {
 				}
 				folder CommonSystemXFolder: Flags=0x0, Traits=0x80000000, InstallAction=0, RemoveAction=0 {
 					str Name: Default=System;
+				}
+			}
+			folder INSTALLDIR: Flags=0x0, Traits=0x80000000, InstallAction=0, RemoveAction=1 {
+				str Name: Default="<ProductName>";
+				wlist Watchlist_182BA515DEBA6299: Flags=0xE000000F, Path="..\\ELN-Main\\bin\\Release\\Publish", Filter="*.*", Exclude="*.bak;*.tmp;*.lnk;*.log;*.acl;*.gid;*.fts;*.pnf;*.oca;*.scc;*.$*;*.~*;.svn;*.pdb;";
+				file bingo_nosql.dll_C35BE657F2EE0A01: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\bingo-nosql.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+					str Name: Default="bingo-nosql.dll";
+				}
+				file Castle.Core.dll_DE520BBD1FFB43CA: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\Castle.Core.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+					str Name: Default=Castle.Core.dll;
+				}
+				file ChemBytesDraw.dll_2206C188164A34FF: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\ChemBytesDraw.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+					str Name: Default=ChemBytesDraw.dll;
+				}
+				file CustomControls.dll.config_B7D4621C1A9EC98A: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\CustomControls.dll.config", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
+					str Name: Default=CustomControls.dll.config;
+				}
+				file CustomControls.dll_CF3B92798AF74611: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\CustomControls.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+					str Name: Default=CustomControls.dll;
+				}
+				file e_sqlite3.dll_D163DCE928FCE985: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\e_sqlite3.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+					str Name: Default=e_sqlite3.dll;
+				}
+				file ElnBase.dll_D7FD47CA1A49003E: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\ElnBase.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+					str Name: Default=ElnBase.dll;
+				}
+				file ElnCoreModel.dll_855333EABB186729: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\ElnCoreModel.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+					str Name: Default=ElnCoreModel.dll;
+				}
+				file ElnData_Seed.db_0A70275BF957EF2E: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\ElnData_Seed.db", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
+					str Name: Default=ElnData_Seed.db;
+				}
+				file GongSolutions.WPF.DragDrop.dll_CE50EF35E1DFBB6E: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\GongSolutions.WPF.DragDrop.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+					str Name: Default=GongSolutions.WPF.DragDrop.dll;
+				}
+				file HarfBuzzSharp.dll_856E289D8381C868: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\HarfBuzzSharp.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
+					str Name: Default=HarfBuzzSharp.dll;
+				}
+				file indigo.dll_C88A86AE12DDB153: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\indigo.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+					str Name: Default=indigo.dll;
+				}
+				file Indigo.Net.dll_436416CB5F2AC112: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\Indigo.Net.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+					str Name: Default=Indigo.Net.dll;
+				}
+				file indigo_inchi.dll_44493175BF187066: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\indigo-inchi.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+					str Name: Default="indigo-inchi.dll";
+				}
+				file indigo_renderer.dll_B739D4B5C56D5B72: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\indigo-renderer.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+					str Name: Default="indigo-renderer.dll";
+				}
+				file libHarfBuzzSharp.dll_62A581A97E3D2FF7: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\libHarfBuzzSharp.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+					str Name: Default=libHarfBuzzSharp.dll;
+				}
+				file libinchi.dll_DBDD196B305D3868: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\libinchi.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+					str Name: Default=libinchi.dll;
+				}
+				file libSkiaSharp.dll_CA9788A3DDF3B241: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\libSkiaSharp.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+					str Name: Default=libSkiaSharp.dll;
+				}
+				file Markdig.dll_30DB28ECB5183E8E: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\Markdig.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+					str Name: Default=Markdig.dll;
+				}
+				file Microsoft.Data.Sqlite.dll_BA5BFC57FF9F76B5: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.Data.Sqlite.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
+					str Name: Default=Microsoft.Data.Sqlite.dll;
+				}
+				file Microsoft.EntityFrameworkCore.Abstractions.dll_BDDC9722EB5105EB: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.EntityFrameworkCore.Abstractions.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
+					str Name: Default=Microsoft.EntityFrameworkCore.Abstractions.dll;
+				}
+				file Microsoft.EntityFrameworkCore.dll_548EA21AC376478D: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.EntityFrameworkCore.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
+					str Name: Default=Microsoft.EntityFrameworkCore.dll;
+				}
+				file Microsoft.EntityFrameworkCore.Proxies.dll_848C9BAA03389D1B: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.EntityFrameworkCore.Proxies.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
+					str Name: Default=Microsoft.EntityFrameworkCore.Proxies.dll;
+				}
+				file Microsoft.EntityFrameworkCore.Relational.dll_85128C4691DDE308: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.EntityFrameworkCore.Relational.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
+					str Name: Default=Microsoft.EntityFrameworkCore.Relational.dll;
+				}
+				file Microsoft.EntityFrameworkCore.Sqlite.dll_7360646924C42700: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.EntityFrameworkCore.Sqlite.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
+					str Name: Default=Microsoft.EntityFrameworkCore.Sqlite.dll;
+				}
+				file Microsoft.Extensions.Caching.Abstractions.dll_818DDD703B7FF578: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.Extensions.Caching.Abstractions.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
+					str Name: Default=Microsoft.Extensions.Caching.Abstractions.dll;
+				}
+				file Microsoft.Extensions.Caching.Memory.dll_FC4CFE7D0E3117B0: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.Extensions.Caching.Memory.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
+					str Name: Default=Microsoft.Extensions.Caching.Memory.dll;
+				}
+				file Microsoft.Extensions.Configuration.Abstractions.dll_365F1578EF7BC4BF: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.Extensions.Configuration.Abstractions.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
+					str Name: Default=Microsoft.Extensions.Configuration.Abstractions.dll;
+				}
+				file Microsoft.Extensions.DependencyInjection.Abstractions.d_F48D8B70485C3927: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.Extensions.DependencyInjection.Abstractions.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
+					str Name: Default=Microsoft.Extensions.DependencyInjection.Abstractions.dll;
+				}
+				file Microsoft.Extensions.DependencyInjection.dll_4304C42033821DD1: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.Extensions.DependencyInjection.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
+					str Name: Default=Microsoft.Extensions.DependencyInjection.dll;
+				}
+				file Microsoft.Extensions.DependencyModel.dll_F9B76238A4A3783E: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.Extensions.DependencyModel.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
+					str Name: Default=Microsoft.Extensions.DependencyModel.dll;
+				}
+				file Microsoft.Extensions.Logging.Abstractions.dll_6D19DAC85FDB9884: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.Extensions.Logging.Abstractions.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
+					str Name: Default=Microsoft.Extensions.Logging.Abstractions.dll;
+				}
+				file Microsoft.Extensions.Logging.dll_20188E2FC36C7C6B: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.Extensions.Logging.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
+					str Name: Default=Microsoft.Extensions.Logging.dll;
+				}
+				file Microsoft.Extensions.Options.dll_5021D9B56E6E6788: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.Extensions.Options.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
+					str Name: Default=Microsoft.Extensions.Options.dll;
+				}
+				file Microsoft.Extensions.Primitives.dll_F760B5072D7F7DB1: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.Extensions.Primitives.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
+					str Name: Default=Microsoft.Extensions.Primitives.dll;
+				}
+				file Microsoft.Windows.SDK.NET.dll_9DFFE9E3BAABDB8A: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.Windows.SDK.NET.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
+					str Name: Default=Microsoft.Windows.SDK.NET.dll;
+				}
+				file msvcp140.dll_A8CBD65CAFA4CE42: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\msvcp140.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
+					str Name: Default=msvcp140.dll;
+				}
+				file MySqlConnector.dll_221B0F9DB191E0D3: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\MySqlConnector.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+					str Name: Default=MySqlConnector.dll;
+				}
+				file PhoenixELN.deps.json_8581EC4E3D6D00E7: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\PhoenixELN.deps.json", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
+					str Name: Default=PhoenixELN.deps.json;
+				}
+				file PhoenixELN.dll_CE801F32F8D37A3A: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\PhoenixELN.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=2000, Packaging=0 {
+					str Name: Default=PhoenixELN.dll;
+				}
+				file PhoenixELN.exe_05FB637C989F85D2: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\PhoenixELN.exe", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=2000, Packaging=0 {
+					str Name: Default=PhoenixELN.exe;
+				}
+				file PhoenixELN.runtimeconfig.json_199128FD67767E79: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\PhoenixELN.runtimeconfig.json", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
+					str Name: Default=PhoenixELN.runtimeconfig.json;
+				}
+				file Pomelo.EntityFrameworkCore.MySql.dll_456451AB7CEA70E3: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\Pomelo.EntityFrameworkCore.MySql.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+					str Name: Default=Pomelo.EntityFrameworkCore.MySql.dll;
+				}
+				file SkiaSharp.dll_AB953BEA4B931255: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\SkiaSharp.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
+					str Name: Default=SkiaSharp.dll;
+				}
+				file SpellCheck.Dictionaries.dll_2E7009C5C7642FE1: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\SpellCheck.Dictionaries.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+					str Name: Default=SpellCheck.Dictionaries.dll;
+				}
+				file SpellCheck.Simple.dll_95BF8ECF5D66BEE2: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\SpellCheck.Simple.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+					str Name: Default=SpellCheck.Simple.dll;
+				}
+				file Spire.Pdf.dll_735280BD1774B3F5: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\Spire.Pdf.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+					str Name: Default=Spire.Pdf.dll;
+				}
+				file SQLitePCLRaw.batteries_v2.dll_95A6AF48F64AF999: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\SQLitePCLRaw.batteries_v2.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+					str Name: Default=SQLitePCLRaw.batteries_v2.dll;
+				}
+				file SQLitePCLRaw.core.dll_24DFE5DBDA6184F2: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\SQLitePCLRaw.core.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+					str Name: Default=SQLitePCLRaw.core.dll;
+				}
+				file SQLitePCLRaw.provider.e_sqlite3.dll_3AA12A1638E5DE27: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\SQLitePCLRaw.provider.e_sqlite3.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+					str Name: Default=SQLitePCLRaw.provider.e_sqlite3.dll;
+				}
+				file vcruntime140.dll_B696ECDC399B7C6B: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\vcruntime140.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
+					str Name: Default=vcruntime140.dll;
+				}
+				file vcruntime140_1.dll_1906F7825F03DFB0: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\vcruntime140_1.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
+					str Name: Default=vcruntime140_1.dll;
+				}
+				file WeCantSpell.Hunspell.dll_BD67EB4B9C52BC4F: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\WeCantSpell.Hunspell.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+					str Name: Default=WeCantSpell.Hunspell.dll;
+				}
+				file WinRT.Runtime.dll_749132C2A5A53F2D: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\WinRT.Runtime.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
+					str Name: Default=WinRT.Runtime.dll;
 				}
 			}
 		}

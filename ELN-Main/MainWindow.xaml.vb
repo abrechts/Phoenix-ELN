@@ -51,7 +51,7 @@ Class MainWindow
 
         ' Replace local database by demo database, if missing for some reason
         If Not File.Exists(SQLiteDbPath) Then
-            File.Copy("DB-Seed\ElnData.db", SQLiteDbPath)
+            File.Copy("ElnData_Seed.db", SQLiteDbPath)
             DbUpgradeLocal.Upgrade(SQLiteDbPath)
         End If
 

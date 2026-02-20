@@ -24,15 +24,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="ChemBytesDraw">
-      <HintPath>..\References\ChemBytesDraw.dll</HintPath>
-      <Private>True</Private>
-      <EmbedInteropTypes>False</EmbedInteropTypes>
-      <SpecificVersion>False</SpecificVersion>
-    </Reference>
-  </ItemGroup>
-
-  <ItemGroup>
     <Compile Update="CoreControls\ListBoxEditLabel.xaml.vb">
       <SubType>Code</SubType>
     </Compile>
@@ -99,6 +90,12 @@
 
   <ItemGroup>
     <Import Include="ChemBytes.ChemBytesDraw" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="ChemBytesDraw">
+      <HintPath>..\References\ChemBytesDraw.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>
