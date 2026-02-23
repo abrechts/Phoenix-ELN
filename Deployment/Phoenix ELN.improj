@@ -638,7 +638,7 @@ project Flags=0x20 {
 			str Value: Default="<UILangID>";
 		}
 		var ProductName: Flags=0x204, Type=0, Description="Product name" {
-			str Value: Default="Phoenix ELN-test";
+			str Value: Default="Phoenix ELN";
 		}
 		var ProductVersion: Flags=0x204, Type=0, Description="Product version" {
 			str Value: Default="3.3.1";
@@ -3834,6 +3834,10 @@ project Flags=0x20 {
 				str DisplayName: Flags=0x40000, Default=Watch_20260223070519;
 				str Description: Flags=0x40000;
 			}
+			component Watch_20260223081715: Flags=0x0, CpuSupport=0x301, ExeSupport=0x301, ExeMatch=0, Packaging=0, Languages="0=", State0=3, State1=3, ExtraSize=0 {
+				str DisplayName: Flags=0x40000, Default=Watch_20260223081715;
+				str Description: Flags=0x40000;
+			}
 		}
 	}
 	files TARGETDIR: Flags=0x0, Traits=0x6F07, InstallAction=0, RemoveAction=0 {
@@ -4152,166 +4156,166 @@ project Flags=0x20 {
 			folder INSTALLDIR: Flags=0x0, Traits=0x80000000, InstallAction=0, RemoveAction=1 {
 				str Name: Default="<ProductName>";
 				wlist Watchlist_182BA515DEBA6299: Flags=0xE000000F, Path="..\\ELN-Main\\bin\\Release\\Publish", Filter="*.*", Exclude="*.bak;*.tmp;*.lnk;*.log;*.acl;*.gid;*.fts;*.pnf;*.oca;*.scc;*.$*;*.~*;.svn;*.pdb;";
-				file bingo_nosql.dll_C35BE657F2EE0A01: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\bingo-nosql.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+				file bingo_nosql.dll_C35BE657F2EE0A01: Flags=0x0, Component=Watch_20260223081715, Path="..\\ELN-Main\\bin\\Release\\Publish\\bingo-nosql.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
 					str Name: Default="bingo-nosql.dll";
 				}
-				file Castle.Core.dll_DE520BBD1FFB43CA: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\Castle.Core.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+				file Castle.Core.dll_DE520BBD1FFB43CA: Flags=0x0, Component=Watch_20260223081715, Path="..\\ELN-Main\\bin\\Release\\Publish\\Castle.Core.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
 					str Name: Default=Castle.Core.dll;
 				}
-				file ChemBytesDraw.dll_2206C188164A34FF: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\ChemBytesDraw.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+				file ChemBytesDraw.dll_2206C188164A34FF: Flags=0x0, Component=Watch_20260223081715, Path="..\\ELN-Main\\bin\\Release\\Publish\\ChemBytesDraw.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
 					str Name: Default=ChemBytesDraw.dll;
 				}
-				file CustomControls.dll.config_B7D4621C1A9EC98A: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\CustomControls.dll.config", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
+				file CustomControls.dll.config_B7D4621C1A9EC98A: Flags=0x0, Component=Watch_20260223081715, Path="..\\ELN-Main\\bin\\Release\\Publish\\CustomControls.dll.config", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
 					str Name: Default=CustomControls.dll.config;
 				}
-				file CustomControls.dll_CF3B92798AF74611: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\CustomControls.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+				file CustomControls.dll_CF3B92798AF74611: Flags=0x0, Component=Watch_20260223081715, Path="..\\ELN-Main\\bin\\Release\\Publish\\CustomControls.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
 					str Name: Default=CustomControls.dll;
 				}
-				file e_sqlite3.dll_D163DCE928FCE985: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\e_sqlite3.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+				file e_sqlite3.dll_D163DCE928FCE985: Flags=0x0, Component=Watch_20260223081715, Path="..\\ELN-Main\\bin\\Release\\Publish\\e_sqlite3.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
 					str Name: Default=e_sqlite3.dll;
 				}
-				file ElnBase.dll_D7FD47CA1A49003E: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\ElnBase.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+				file ElnBase.dll_D7FD47CA1A49003E: Flags=0x0, Component=Watch_20260223081715, Path="..\\ELN-Main\\bin\\Release\\Publish\\ElnBase.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
 					str Name: Default=ElnBase.dll;
 				}
-				file ElnCoreModel.dll_855333EABB186729: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\ElnCoreModel.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+				file ElnCoreModel.dll_855333EABB186729: Flags=0x0, Component=Watch_20260223081715, Path="..\\ELN-Main\\bin\\Release\\Publish\\ElnCoreModel.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
 					str Name: Default=ElnCoreModel.dll;
 				}
-				file ElnData_Seed.db_0A70275BF957EF2E: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\ElnData_Seed.db", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
+				file ElnData_Seed.db_0A70275BF957EF2E: Flags=0x0, Component=Watch_20260223081715, Path="..\\ELN-Main\\bin\\Release\\Publish\\ElnData_Seed.db", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
 					str Name: Default=ElnData_Seed.db;
 				}
-				file GongSolutions.WPF.DragDrop.dll_CE50EF35E1DFBB6E: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\GongSolutions.WPF.DragDrop.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+				file GongSolutions.WPF.DragDrop.dll_CE50EF35E1DFBB6E: Flags=0x0, Component=Watch_20260223081715, Path="..\\ELN-Main\\bin\\Release\\Publish\\GongSolutions.WPF.DragDrop.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
 					str Name: Default=GongSolutions.WPF.DragDrop.dll;
 				}
-				file HarfBuzzSharp.dll_856E289D8381C868: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\HarfBuzzSharp.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
+				file HarfBuzzSharp.dll_856E289D8381C868: Flags=0x0, Component=Watch_20260223081715, Path="..\\ELN-Main\\bin\\Release\\Publish\\HarfBuzzSharp.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
 					str Name: Default=HarfBuzzSharp.dll;
 				}
-				file indigo.dll_C88A86AE12DDB153: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\indigo.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+				file indigo.dll_C88A86AE12DDB153: Flags=0x0, Component=Watch_20260223081715, Path="..\\ELN-Main\\bin\\Release\\Publish\\indigo.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
 					str Name: Default=indigo.dll;
 				}
-				file Indigo.Net.dll_436416CB5F2AC112: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\Indigo.Net.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+				file Indigo.Net.dll_436416CB5F2AC112: Flags=0x0, Component=Watch_20260223081715, Path="..\\ELN-Main\\bin\\Release\\Publish\\Indigo.Net.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
 					str Name: Default=Indigo.Net.dll;
 				}
-				file indigo_inchi.dll_44493175BF187066: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\indigo-inchi.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+				file indigo_inchi.dll_44493175BF187066: Flags=0x0, Component=Watch_20260223081715, Path="..\\ELN-Main\\bin\\Release\\Publish\\indigo-inchi.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
 					str Name: Default="indigo-inchi.dll";
 				}
-				file indigo_renderer.dll_B739D4B5C56D5B72: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\indigo-renderer.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+				file indigo_renderer.dll_B739D4B5C56D5B72: Flags=0x0, Component=Watch_20260223081715, Path="..\\ELN-Main\\bin\\Release\\Publish\\indigo-renderer.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
 					str Name: Default="indigo-renderer.dll";
 				}
-				file libHarfBuzzSharp.dll_62A581A97E3D2FF7: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\libHarfBuzzSharp.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+				file libHarfBuzzSharp.dll_62A581A97E3D2FF7: Flags=0x0, Component=Watch_20260223081715, Path="..\\ELN-Main\\bin\\Release\\Publish\\libHarfBuzzSharp.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
 					str Name: Default=libHarfBuzzSharp.dll;
 				}
-				file libinchi.dll_DBDD196B305D3868: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\libinchi.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+				file libinchi.dll_DBDD196B305D3868: Flags=0x0, Component=Watch_20260223081715, Path="..\\ELN-Main\\bin\\Release\\Publish\\libinchi.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
 					str Name: Default=libinchi.dll;
 				}
-				file libSkiaSharp.dll_CA9788A3DDF3B241: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\libSkiaSharp.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+				file libSkiaSharp.dll_CA9788A3DDF3B241: Flags=0x0, Component=Watch_20260223081715, Path="..\\ELN-Main\\bin\\Release\\Publish\\libSkiaSharp.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
 					str Name: Default=libSkiaSharp.dll;
 				}
-				file Markdig.dll_30DB28ECB5183E8E: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\Markdig.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+				file Markdig.dll_30DB28ECB5183E8E: Flags=0x0, Component=Watch_20260223081715, Path="..\\ELN-Main\\bin\\Release\\Publish\\Markdig.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
 					str Name: Default=Markdig.dll;
 				}
-				file Microsoft.Data.Sqlite.dll_BA5BFC57FF9F76B5: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.Data.Sqlite.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
+				file Microsoft.Data.Sqlite.dll_BA5BFC57FF9F76B5: Flags=0x0, Component=Watch_20260223081715, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.Data.Sqlite.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
 					str Name: Default=Microsoft.Data.Sqlite.dll;
 				}
-				file Microsoft.EntityFrameworkCore.Abstractions.dll_BDDC9722EB5105EB: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.EntityFrameworkCore.Abstractions.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
+				file Microsoft.EntityFrameworkCore.Abstractions.dll_BDDC9722EB5105EB: Flags=0x0, Component=Watch_20260223081715, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.EntityFrameworkCore.Abstractions.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
 					str Name: Default=Microsoft.EntityFrameworkCore.Abstractions.dll;
 				}
-				file Microsoft.EntityFrameworkCore.dll_548EA21AC376478D: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.EntityFrameworkCore.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
+				file Microsoft.EntityFrameworkCore.dll_548EA21AC376478D: Flags=0x0, Component=Watch_20260223081715, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.EntityFrameworkCore.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
 					str Name: Default=Microsoft.EntityFrameworkCore.dll;
 				}
-				file Microsoft.EntityFrameworkCore.Proxies.dll_848C9BAA03389D1B: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.EntityFrameworkCore.Proxies.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
+				file Microsoft.EntityFrameworkCore.Proxies.dll_848C9BAA03389D1B: Flags=0x0, Component=Watch_20260223081715, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.EntityFrameworkCore.Proxies.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
 					str Name: Default=Microsoft.EntityFrameworkCore.Proxies.dll;
 				}
-				file Microsoft.EntityFrameworkCore.Relational.dll_85128C4691DDE308: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.EntityFrameworkCore.Relational.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
+				file Microsoft.EntityFrameworkCore.Relational.dll_85128C4691DDE308: Flags=0x0, Component=Watch_20260223081715, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.EntityFrameworkCore.Relational.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
 					str Name: Default=Microsoft.EntityFrameworkCore.Relational.dll;
 				}
-				file Microsoft.EntityFrameworkCore.Sqlite.dll_7360646924C42700: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.EntityFrameworkCore.Sqlite.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
+				file Microsoft.EntityFrameworkCore.Sqlite.dll_7360646924C42700: Flags=0x0, Component=Watch_20260223081715, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.EntityFrameworkCore.Sqlite.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
 					str Name: Default=Microsoft.EntityFrameworkCore.Sqlite.dll;
 				}
-				file Microsoft.Extensions.Caching.Abstractions.dll_818DDD703B7FF578: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.Extensions.Caching.Abstractions.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
+				file Microsoft.Extensions.Caching.Abstractions.dll_818DDD703B7FF578: Flags=0x0, Component=Watch_20260223081715, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.Extensions.Caching.Abstractions.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
 					str Name: Default=Microsoft.Extensions.Caching.Abstractions.dll;
 				}
-				file Microsoft.Extensions.Caching.Memory.dll_FC4CFE7D0E3117B0: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.Extensions.Caching.Memory.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
+				file Microsoft.Extensions.Caching.Memory.dll_FC4CFE7D0E3117B0: Flags=0x0, Component=Watch_20260223081715, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.Extensions.Caching.Memory.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
 					str Name: Default=Microsoft.Extensions.Caching.Memory.dll;
 				}
-				file Microsoft.Extensions.Configuration.Abstractions.dll_365F1578EF7BC4BF: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.Extensions.Configuration.Abstractions.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
+				file Microsoft.Extensions.Configuration.Abstractions.dll_365F1578EF7BC4BF: Flags=0x0, Component=Watch_20260223081715, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.Extensions.Configuration.Abstractions.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
 					str Name: Default=Microsoft.Extensions.Configuration.Abstractions.dll;
 				}
-				file Microsoft.Extensions.DependencyInjection.Abstractions.d_F48D8B70485C3927: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.Extensions.DependencyInjection.Abstractions.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
+				file Microsoft.Extensions.DependencyInjection.Abstractions.d_F48D8B70485C3927: Flags=0x0, Component=Watch_20260223081715, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.Extensions.DependencyInjection.Abstractions.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
 					str Name: Default=Microsoft.Extensions.DependencyInjection.Abstractions.dll;
 				}
-				file Microsoft.Extensions.DependencyInjection.dll_4304C42033821DD1: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.Extensions.DependencyInjection.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
+				file Microsoft.Extensions.DependencyInjection.dll_4304C42033821DD1: Flags=0x0, Component=Watch_20260223081715, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.Extensions.DependencyInjection.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
 					str Name: Default=Microsoft.Extensions.DependencyInjection.dll;
 				}
-				file Microsoft.Extensions.DependencyModel.dll_F9B76238A4A3783E: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.Extensions.DependencyModel.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
+				file Microsoft.Extensions.DependencyModel.dll_F9B76238A4A3783E: Flags=0x0, Component=Watch_20260223081715, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.Extensions.DependencyModel.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
 					str Name: Default=Microsoft.Extensions.DependencyModel.dll;
 				}
-				file Microsoft.Extensions.Logging.Abstractions.dll_6D19DAC85FDB9884: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.Extensions.Logging.Abstractions.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
+				file Microsoft.Extensions.Logging.Abstractions.dll_6D19DAC85FDB9884: Flags=0x0, Component=Watch_20260223081715, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.Extensions.Logging.Abstractions.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
 					str Name: Default=Microsoft.Extensions.Logging.Abstractions.dll;
 				}
-				file Microsoft.Extensions.Logging.dll_20188E2FC36C7C6B: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.Extensions.Logging.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
+				file Microsoft.Extensions.Logging.dll_20188E2FC36C7C6B: Flags=0x0, Component=Watch_20260223081715, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.Extensions.Logging.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
 					str Name: Default=Microsoft.Extensions.Logging.dll;
 				}
-				file Microsoft.Extensions.Options.dll_5021D9B56E6E6788: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.Extensions.Options.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
+				file Microsoft.Extensions.Options.dll_5021D9B56E6E6788: Flags=0x0, Component=Watch_20260223081715, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.Extensions.Options.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
 					str Name: Default=Microsoft.Extensions.Options.dll;
 				}
-				file Microsoft.Extensions.Primitives.dll_F760B5072D7F7DB1: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.Extensions.Primitives.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
+				file Microsoft.Extensions.Primitives.dll_F760B5072D7F7DB1: Flags=0x0, Component=Watch_20260223081715, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.Extensions.Primitives.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
 					str Name: Default=Microsoft.Extensions.Primitives.dll;
 				}
-				file Microsoft.Windows.SDK.NET.dll_9DFFE9E3BAABDB8A: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.Windows.SDK.NET.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
+				file Microsoft.Windows.SDK.NET.dll_9DFFE9E3BAABDB8A: Flags=0x0, Component=Watch_20260223081715, Path="..\\ELN-Main\\bin\\Release\\Publish\\Microsoft.Windows.SDK.NET.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
 					str Name: Default=Microsoft.Windows.SDK.NET.dll;
 				}
-				file msvcp140.dll_A8CBD65CAFA4CE42: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\msvcp140.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
+				file msvcp140.dll_A8CBD65CAFA4CE42: Flags=0x0, Component=Watch_20260223081715, Path="..\\ELN-Main\\bin\\Release\\Publish\\msvcp140.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
 					str Name: Default=msvcp140.dll;
 				}
-				file MySqlConnector.dll_221B0F9DB191E0D3: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\MySqlConnector.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+				file MySqlConnector.dll_221B0F9DB191E0D3: Flags=0x0, Component=Watch_20260223081715, Path="..\\ELN-Main\\bin\\Release\\Publish\\MySqlConnector.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
 					str Name: Default=MySqlConnector.dll;
 				}
-				file PhoenixELN.deps.json_8581EC4E3D6D00E7: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\PhoenixELN.deps.json", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
+				file PhoenixELN.deps.json_8581EC4E3D6D00E7: Flags=0x0, Component=Watch_20260223081715, Path="..\\ELN-Main\\bin\\Release\\Publish\\PhoenixELN.deps.json", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
 					str Name: Default=PhoenixELN.deps.json;
 				}
-				file PhoenixELN.dll_CE801F32F8D37A3A: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\PhoenixELN.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=2000, Packaging=0 {
+				file PhoenixELN.dll_CE801F32F8D37A3A: Flags=0x0, Component=Watch_20260223081715, Path="..\\ELN-Main\\bin\\Release\\Publish\\PhoenixELN.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=2000, Packaging=0 {
 					str Name: Default=PhoenixELN.dll;
 				}
-				file PhoenixELN.exe_05FB637C989F85D2: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\PhoenixELN.exe", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=2000, Packaging=0 {
+				file PhoenixELN.exe_05FB637C989F85D2: Flags=0x0, Component=Watch_20260223081715, Path="..\\ELN-Main\\bin\\Release\\Publish\\PhoenixELN.exe", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=2000, Packaging=0 {
 					str Name: Default=PhoenixELN.exe;
 				}
-				file PhoenixELN.runtimeconfig.json_199128FD67767E79: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\PhoenixELN.runtimeconfig.json", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
+				file PhoenixELN.runtimeconfig.json_199128FD67767E79: Flags=0x0, Component=Watch_20260223081715, Path="..\\ELN-Main\\bin\\Release\\Publish\\PhoenixELN.runtimeconfig.json", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=0, Packaging=0 {
 					str Name: Default=PhoenixELN.runtimeconfig.json;
 				}
-				file Pomelo.EntityFrameworkCore.MySql.dll_456451AB7CEA70E3: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\Pomelo.EntityFrameworkCore.MySql.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+				file Pomelo.EntityFrameworkCore.MySql.dll_456451AB7CEA70E3: Flags=0x0, Component=Watch_20260223081715, Path="..\\ELN-Main\\bin\\Release\\Publish\\Pomelo.EntityFrameworkCore.MySql.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
 					str Name: Default=Pomelo.EntityFrameworkCore.MySql.dll;
 				}
-				file SkiaSharp.dll_AB953BEA4B931255: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\SkiaSharp.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
+				file SkiaSharp.dll_AB953BEA4B931255: Flags=0x0, Component=Watch_20260223081715, Path="..\\ELN-Main\\bin\\Release\\Publish\\SkiaSharp.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
 					str Name: Default=SkiaSharp.dll;
 				}
-				file SpellCheck.Dictionaries.dll_2E7009C5C7642FE1: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\SpellCheck.Dictionaries.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+				file SpellCheck.Dictionaries.dll_2E7009C5C7642FE1: Flags=0x0, Component=Watch_20260223081715, Path="..\\ELN-Main\\bin\\Release\\Publish\\SpellCheck.Dictionaries.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
 					str Name: Default=SpellCheck.Dictionaries.dll;
 				}
-				file SpellCheck.Simple.dll_95BF8ECF5D66BEE2: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\SpellCheck.Simple.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+				file SpellCheck.Simple.dll_95BF8ECF5D66BEE2: Flags=0x0, Component=Watch_20260223081715, Path="..\\ELN-Main\\bin\\Release\\Publish\\SpellCheck.Simple.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
 					str Name: Default=SpellCheck.Simple.dll;
 				}
-				file Spire.Pdf.dll_735280BD1774B3F5: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\Spire.Pdf.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+				file Spire.Pdf.dll_735280BD1774B3F5: Flags=0x0, Component=Watch_20260223081715, Path="..\\ELN-Main\\bin\\Release\\Publish\\Spire.Pdf.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
 					str Name: Default=Spire.Pdf.dll;
 				}
-				file SQLitePCLRaw.batteries_v2.dll_95A6AF48F64AF999: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\SQLitePCLRaw.batteries_v2.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+				file SQLitePCLRaw.batteries_v2.dll_95A6AF48F64AF999: Flags=0x0, Component=Watch_20260223081715, Path="..\\ELN-Main\\bin\\Release\\Publish\\SQLitePCLRaw.batteries_v2.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
 					str Name: Default=SQLitePCLRaw.batteries_v2.dll;
 				}
-				file SQLitePCLRaw.core.dll_24DFE5DBDA6184F2: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\SQLitePCLRaw.core.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+				file SQLitePCLRaw.core.dll_24DFE5DBDA6184F2: Flags=0x0, Component=Watch_20260223081715, Path="..\\ELN-Main\\bin\\Release\\Publish\\SQLitePCLRaw.core.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
 					str Name: Default=SQLitePCLRaw.core.dll;
 				}
-				file SQLitePCLRaw.provider.e_sqlite3.dll_3AA12A1638E5DE27: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\SQLitePCLRaw.provider.e_sqlite3.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+				file SQLitePCLRaw.provider.e_sqlite3.dll_3AA12A1638E5DE27: Flags=0x0, Component=Watch_20260223081715, Path="..\\ELN-Main\\bin\\Release\\Publish\\SQLitePCLRaw.provider.e_sqlite3.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
 					str Name: Default=SQLitePCLRaw.provider.e_sqlite3.dll;
 				}
-				file vcruntime140.dll_B696ECDC399B7C6B: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\vcruntime140.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
+				file vcruntime140.dll_B696ECDC399B7C6B: Flags=0x0, Component=Watch_20260223081715, Path="..\\ELN-Main\\bin\\Release\\Publish\\vcruntime140.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
 					str Name: Default=vcruntime140.dll;
 				}
-				file vcruntime140_1.dll_1906F7825F03DFB0: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\vcruntime140_1.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
+				file vcruntime140_1.dll_1906F7825F03DFB0: Flags=0x0, Component=Watch_20260223081715, Path="..\\ELN-Main\\bin\\Release\\Publish\\vcruntime140_1.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
 					str Name: Default=vcruntime140_1.dll;
 				}
-				file WeCantSpell.Hunspell.dll_BD67EB4B9C52BC4F: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\WeCantSpell.Hunspell.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
+				file WeCantSpell.Hunspell.dll_BD67EB4B9C52BC4F: Flags=0x0, Component=Watch_20260223081715, Path="..\\ELN-Main\\bin\\Release\\Publish\\WeCantSpell.Hunspell.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=1000, Packaging=0 {
 					str Name: Default=WeCantSpell.Hunspell.dll;
 				}
-				file WinRT.Runtime.dll_749132C2A5A53F2D: Flags=0x0, Component=Watch_20260223070519, Path="..\\ELN-Main\\bin\\Release\\Publish\\WinRT.Runtime.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
+				file WinRT.Runtime.dll_749132C2A5A53F2D: Flags=0x0, Component=Watch_20260223081715, Path="..\\ELN-Main\\bin\\Release\\Publish\\WinRT.Runtime.dll", Attributes=0x0, WatchList=1, InstallAction=4, RemoveAction=2, Registration=0, RegOrder=400, Packaging=0 {
 					str Name: Default=WinRT.Runtime.dll;
 				}
 			}

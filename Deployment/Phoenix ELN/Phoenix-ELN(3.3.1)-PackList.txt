@@ -1,6 +1,6 @@
-﻿2026-02-23 07:05:26|                  |       89159|-R-S|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\Deployment\Phoenix ELN\Phoenix-ELN\Phoenix ELN-test-3.3.1-Setup.dat
+﻿2026-02-23 08:19:37|                  |       89271|-R-S|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\Deployment\Phoenix ELN\Phoenix-ELN\Phoenix ELN-3.3.1-Setup.dat
 2015-09-08 13:36:32|                  |       23558|-R-S|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\Deployment\blankcd.ico
-2026-02-23 07:05:28|                  |        2080|-R-S|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\Deployment\Phoenix ELN\Phoenix-ELN\Readme.txt
+2026-02-23 08:19:39|                  |        2060|-R-S|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\Deployment\Phoenix ELN\Phoenix-ELN\Readme.txt
 2025-06-25 04:52:49|                  |     2334720|----|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\ELN-Main\bin\Release\Publish\ElnData_Seed.db
 2024-11-11 18:26:40|     10.0.17763.55|    23637048|----|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\ELN-Main\bin\Release\Publish\Microsoft.Windows.SDK.NET.dll
 2025-11-14 09:47:20|      11.11.0.1420|    22247400|----|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\ELN-Main\bin\Release\Publish\Spire.Pdf.dll
@@ -8,8 +8,8 @@
 2025-08-20 06:26:30|           9.0.9.0|     2692168|----|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\ELN-Main\bin\Release\Publish\Microsoft.EntityFrameworkCore.dll
 2025-08-20 06:26:50|           9.0.9.0|     2143264|----|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\ELN-Main\bin\Release\Publish\Microsoft.EntityFrameworkCore.Relational.dll
 2024-11-12 13:50:58|           2.4.0.0|      857448|----|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\ELN-Main\bin\Release\Publish\MySqlConnector.dll
-2026-02-23 06:30:29|           4.0.0.0|      719360|----|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\ELN-Main\bin\Release\Publish\ChemBytesDraw.dll
-2026-02-23 07:03:20|           1.0.0.0|      677888|----|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\ELN-Main\bin\Release\Publish\CustomControls.dll
+2026-02-23 07:46:14|           4.0.0.1|      719360|----|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\ELN-Main\bin\Release\Publish\ChemBytesDraw.dll
+2026-02-23 07:47:46|           1.0.0.0|      677888|----|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\ELN-Main\bin\Release\Publish\CustomControls.dll
 2024-11-11 18:26:40|       2.2.0.48161|      528944|----|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\ELN-Main\bin\Release\Publish\WinRT.Runtime.dll
 2025-08-17 23:09:22|           9.0.0.0|      526848|----|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\ELN-Main\bin\Release\Publish\Pomelo.EntityFrameworkCore.MySql.dll
 2024-12-04 22:56:22|         3.116.1.0|      481848|----|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\ELN-Main\bin\Release\Publish\SkiaSharp.dll
@@ -47,9 +47,9 @@
 2024-09-11 21:05:00|                  |     1759232|----|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\ELN-Main\bin\Release\Publish\e_sqlite3.dll
 2026-02-18 15:15:48|           1.0.7.4|     1453344|----|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\ELN-Main\bin\Release\Publish\libinchi.dll
 2025-11-03 15:53:02|     14.44.35211.0|      557728|----|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\ELN-Main\bin\Release\Publish\msvcp140.dll
-2026-02-23 07:04:18|           3.3.1.0|      334336|----|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\ELN-Main\bin\Release\Publish\PhoenixELN.exe
+2026-02-23 07:47:48|           3.3.1.0|      334336|----|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\ELN-Main\bin\Release\Publish\PhoenixELN.exe
 2025-11-03 15:53:02|                  |      330240|----|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\ELN-Main\bin\Release\Publish\indigo-inchi.dll
-2026-02-23 07:04:18|           3.3.1.0|      288256|----|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\ELN-Main\bin\Release\Publish\PhoenixELN.dll
+2026-02-23 07:47:48|           3.3.1.0|      288256|----|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\ELN-Main\bin\Release\Publish\PhoenixELN.dll
 2025-11-03 15:53:02|     14.44.35211.0|      124544|----|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\ELN-Main\bin\Release\Publish\vcruntime140.dll
 2025-11-03 15:53:02|     14.44.35211.0|       49792|----|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\ELN-Main\bin\Release\Publish\vcruntime140_1.dll
 2026-02-05 05:40:22|                  |        5724|----|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\ELN-Main\bin\Release\Publish\CustomControls.dll.config

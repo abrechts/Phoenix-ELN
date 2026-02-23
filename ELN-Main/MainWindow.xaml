@@ -8,7 +8,7 @@
         xmlns:componentModel="clr-namespace:System.ComponentModel;assembly=WindowsBase"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=data:tblUsers}"
-        Title="Phoenix ELN" Width="1310" MinWidth="1310" Height="900" MinHeight="850" TextOptions.TextFormattingMode="Display" 
+        Title="Phoenix ELN" Width="1310" MinWidth="1310" Height="950" MinHeight="850" TextOptions.TextFormattingMode="Display" 
         WindowStartupLocation="CenterScreen">
 
     <Window.Resources>
