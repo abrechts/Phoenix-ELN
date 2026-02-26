@@ -492,8 +492,8 @@
 		<entity schema="Default" name="sync_Tombstone" color="3986C1" x="361" y="380" />
 		<entity schema="Default" name="tblProjFolders" color="3986C1" x="684" y="304" />
 		<entity schema="Default" name="tblProjects" color="3986C1" x="665" y="57" />
-		<entity schema="Default" name="tblExperiments" color="3986C1" x="969" y="57" />
 		<entity schema="Default" name="tblProtocolItems" color="3986C1" x="1292" y="304" />
+		<entity schema="Default" name="tblExperiments" color="3986C1" x="969" y="57" />
 	</layout>
 	<layout name="Protocol Elements" id="Layout-16d" show_column_type="y" show_relation="cascade" >
 		<entity schema="Default" name="tblProducts" color="3986C1" x="855" y="342" />

@@ -1,4 +1,4 @@
-﻿Imports System.Windows.Documents
+﻿
 Imports com.epam.indigo
 Imports ElnBase.ELNEnumerations
 Imports ElnCoreModel
@@ -13,6 +13,7 @@ Public Enum RssErrorType
     None
     TooManyHits
     QueryStructureError
+    NoHitsFound
 
 End Enum
 
@@ -46,7 +47,7 @@ Public Class RxnSubstructure
     ''' ignored in this mode.</param>
     ''' <returns>Query hits as IEnumerable of tblExperiments, or empty IEnumerable if not hits found.</returns>
     ''' 
-    Public Function PerformRssQuery(queryRxnStr As String, dbContext As ElnDataContext, isFromServer As Boolean) As RssQueryResult
+    Public Function PerformRssQuery(queryRxnStr As String, srcExperiments As IEnumerable(Of tblExperiments), isFromServer As Boolean) As RssQueryResult
 
         Dim rssResult As New RssQueryResult
 
@@ -65,10 +66,10 @@ Public Class RxnSubstructure
 
         Dim fpRes As IEnumerable(Of tblExperiments)
         If Not isFromServer Then
-            fpRes = From exp In dbContext.tblExperiments.AsEnumerable Where MatchRxnFingerpint(exp.RxnFingerprint, queryFp)
+            fpRes = From exp In srcExperiments Where MatchRxnFingerprint(exp.RxnFingerprint, queryFp)
         Else
-            fpRes = From exp In dbContext.tblExperiments.AsEnumerable Where exp.WorkflowState = WorkflowStatus.Finalized AndAlso
-              MatchRxnFingerpint(exp.RxnFingerprint, queryFp)
+            fpRes = From exp In srcExperiments Where exp.WorkflowState = WorkflowStatus.Finalized AndAlso
+              MatchRxnFingerprint(exp.RxnFingerprint, queryFp)
         End If
 
         If fpRes.Any Then
@@ -99,7 +100,7 @@ Public Class RxnSubstructure
             'no fingerprint hits found
             With rssResult
                 .ExperimentHits = fpRes 'empty IEnumerable
-                .ErrorType = RssErrorType.None  'no hits is not an error ....
+                .ErrorType = RssErrorType.NoHitsFound
             End With
             Return rssResult
 
@@ -157,7 +158,7 @@ Public Class RxnSubstructure
     ''' Gets if specified source reaction fingerprint matches the specified query reaction fingerprint.
     ''' </summary>
     ''' 
-    Private Function MatchRxnFingerpint(fpSourceArr As Byte(), fpQuery As IndigoObject) As Boolean
+    Private Function MatchRxnFingerprint(fpSourceArr As Byte(), fpQuery As IndigoObject) As Boolean
 
         If fpSourceArr IsNot Nothing Then
 

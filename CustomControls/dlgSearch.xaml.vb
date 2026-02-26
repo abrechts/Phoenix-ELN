@@ -1,9 +1,12 @@
-﻿Imports System.Windows.Controls
+﻿Imports System.Windows
+Imports System.Windows.Controls
 Imports System.Windows.Input
-Imports System.Windows
-Imports ElnBase
-Imports ElnCoreModel
 Imports System.Windows.Media
+Imports ElnBase
+Imports ElnBase.Search
+Imports ElnCoreModel
+Imports Microsoft.EntityFrameworkCore.Diagnostics
+Imports Windows.System
 
 Public Class dlgSearch
 
@@ -24,7 +27,7 @@ Public Class dlgSearch
 
     Private Sub Me_Loaded() Handles Me.Loaded
 
-        CurrentDbContext = LocalDBContext
+        SearchContext = LocalDBContext
 
         If ServerDBContext Is Nothing Then
             IsServerQuery = False
@@ -40,7 +43,7 @@ Public Class dlgSearch
 
     Public Property ServerDBContext As ElnDbContext
 
-    Private Property CurrentDbContext As ElnDbContext   'assigned rdoLocal and rdoServer setting
+    Private Property SearchContext As ElnDbContext   'assigned rdoLocal and rdoServer setting
 
     Private Property QueryRxnFileString As String
 
@@ -53,71 +56,77 @@ Public Class dlgSearch
     End Sub
 
 
+    Private Sub btnSearch_Click() Handles btnSearch.Click
+
+        PerformQuery(QueryRxnFileString)
+
+    End Sub
+
+
     Private Sub PerformQuery(rxnFileStr As String)
 
-        Dim rxnSub As New RxnSubstructure
-        Dim expHitInfo = rxnSub.PerformRssQuery(rxnFileStr, CurrentDbContext, IsServerQuery)
+        'testing only
+        Dim queryFilters = New RSSQueryFilters With {
+            .UserID = "seqTest",
+            .ProjectName = "Project 1",
+            .ExpGroupName = "",
+            .MinYield = Double.MinValue,
+            .MaxYield = Double.MaxValue,
+            .MinScale = Double.MinValue,
+            .MaxScale = Double.MaxValue,
+            .MinDate = Date.MinValue,
+            .MaxDate = Date.MaxValue
+        }
 
-        Select Case expHitInfo.ErrorType
+        Dim newRssQuery As New Search(SearchContext, IsServerQuery)
+        Dim hitExp = newRssQuery.FilteredRssQuery(rxnFileStr, queryFilters)
 
-            Case RssErrorType.None
-                'do nothing and proceed
+        If Not hitExp.Any Then
+            lstRssHitGroups.DataContext = Nothing
+            cbMsgBox.Display("No experiments found matching the query criteria.", MsgBoxStyle.OkOnly + MsgBoxStyle.Information, "No hits")
+            Exit Sub
+        End If
 
-            Case RssErrorType.TooManyHits
-                lstRssHitGroups.DataContext = Nothing
-                cbMsgBox.Display("Too many hits expected - please" + vbCrLf +
-                       "make your query more specific!", MsgBoxStyle.OkOnly + MsgBoxStyle.Information, "RSS query error")
-                Exit Sub
-
-            Case RssErrorType.QueryStructureError
-                lstRssHitGroups.DataContext = Nothing
-                cbMsgBox.Display("There's a structure error in your" + vbCrLf +
-                       "query sketch (stereochemistry?)." + vbCrLf +
-                       "Please correct.", MsgBoxStyle.OkOnly + MsgBoxStyle.Exclamation, "RSS query error")
-                Exit Sub
-
-        End Select
+        'the multi-property grouping criterion is implemented by concatenating the reactant and product InChIKeys 
+        Dim sameRxnGroups = hitExp.GroupBy(Function(item) item.ReactantInChIKey + "/" + item.ProductInChIKey) _
+                                 .Select(Function(group) New With {
+                                     .MaxYield = group.Max(Function(item) item.Yield),
+                                     .ExpEntries = group.OrderByDescending(Function(exp) exp.Yield)
+                                 }).OrderByDescending(Function(group) group.MaxYield)
 
         'set global component structure color for obtained results
         SketchResults.ComponentStructureColor = Brushes.Black
 
-        'the multi-property grouping criterion is achieved by concatenating the reactant and product InChIKeys 
-        Dim sameRxnGroups = expHitInfo.ExperimentHits.GroupBy(Function(item) item.ReactantInChIKey + "/" + item.ProductInChIKey) _
-                             .Select(Function(group) New With {
-                                 .MaxYield = group.Max(Function(item) item.Yield),
-                                 .ExpEntries = group.OrderByDescending(Function(exp) exp.Yield)
-                             }).OrderByDescending(Function(group) group.MaxYield)
+            Dim rssGroups As New List(Of RssRxnGroup)
+            Dim index As Integer = 1
 
-        Dim rssGroups As New List(Of RssRxnGroup)
-        Dim index As Integer = 1
+            For Each grp In sameRxnGroups
+                Dim firstExp = grp.ExpEntries.First
+                Dim rssRxnGroup As New RssRxnGroup
+                With rssRxnGroup
+                    Dim cbDrawInfo = DrawingEditor.GetSketchInfo(firstExp.RxnSketch)
+                    .GroupTitle = "Reaction " + index.ToString
+                    .ReactCanvas = cbDrawInfo.Reactants.First.StructureCanvas
+                    .ProdCanvas = cbDrawInfo.Products.First.StructureCanvas
+                    .MaxYield = grp.MaxYield
+                    .ExpItems = grp.ExpEntries
+                End With
+                rssGroups.Add(rssRxnGroup)
+                index += 1
+            Next
 
-        For Each grp In sameRxnGroups
-            Dim firstExp = grp.ExpEntries.First
-            Dim rssRxnGroup As New RssRxnGroup
-            With rssRxnGroup
-                Dim cbDrawInfo = DrawingEditor.GetSketchInfo(firstExp.RxnSketch)
-                .GroupTitle = "Reaction " + index.ToString
-                .ReactCanvas = cbDrawInfo.Reactants.First.StructureCanvas
-                .ProdCanvas = cbDrawInfo.Products.First.StructureCanvas
-                .MaxYield = grp.MaxYield
-                .ExpItems = grp.ExpEntries
-            End With
-            rssGroups.Add(rssRxnGroup)
-            index += 1
-        Next
+            Me.Top = Owner.Top + 5
+            Me.Left = Owner.Left + Owner.ActualWidth - Me.ActualWidth - 5
+            Me.MaxHeight = Owner.ActualHeight - 20
+            Me.Height = Me.MaxHeight
 
-        Me.Top = Owner.Top + 5
-        Me.Left = Owner.Left + Owner.ActualWidth - Me.ActualWidth - 5
-        Me.MaxHeight = Owner.ActualHeight - 20
-        Me.Height = Me.MaxHeight
+            Me.UpdateLayout()
 
-        Me.UpdateLayout()
+            blkResultsTitle.Visibility = Visibility.Visible
+            lstRssHitGroups.Visibility = Visibility.Visible
+            pnlNoHits.Visibility = If(rssGroups.Count > 0, Visibility.Collapsed, Visibility.Visible)
 
-        blkResultsTitle.Visibility = Visibility.Visible
-        lstRssHitGroups.Visibility = Visibility.Visible
-        pnlNoHits.Visibility = If(rssGroups.Count > 0, Visibility.Collapsed, Visibility.Visible)
-
-        lstRssHitGroups.DataContext = rssGroups
+            lstRssHitGroups.DataContext = rssGroups
 
     End Sub
 
@@ -126,7 +135,7 @@ Public Class dlgSearch
 
         If rdoLocal.IsInitialized Then
 
-            CurrentDbContext = If(rdoLocal.IsChecked, LocalDBContext, ServerDBContext)
+            SearchContext = If(rdoLocal.IsChecked, LocalDBContext, ServerDBContext)
 
             IsServerQuery = Not rdoLocal.IsChecked
 
@@ -171,6 +180,7 @@ Public Class dlgSearch
 
         If e.Key = Key.Escape Then
             Me.Close()
+            Me.Hide()
         End If
 
     End Sub

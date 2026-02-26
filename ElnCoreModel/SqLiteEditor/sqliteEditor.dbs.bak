@@ -48,7 +48,7 @@
 		<table name="tblComments" spec="" >
 			<column name="GUID" type="TEXT" length="36" mandatory="y" />
 			<column name="ProtocolItemID" type="TEXT" length="36" mandatory="y" />
-			<column name="CommentFlowDoc" type="TEXT" />
+			<column name="CommentFlowDoc" type="MEDIUMTEXT" />
 			<column name="SyncState" type="INTEGER" >
 				<defo><![CDATA[0]]></defo>
 			</column>
@@ -503,8 +503,8 @@
 		<entity schema="Default" name="tblEmbeddedFiles" color="C1D8EE" x="342" y="608" />
 		<entity schema="Default" name="tblSeparators" color="3986C1" x="608" y="494" />
 		<entity schema="Default" name="tblAuxiliaries" color="3986C1" x="665" y="684" />
-		<entity schema="Default" name="tblComments" color="3986C1" x="342" y="437" />
 		<entity schema="Default" name="tblSolvents" color="3986C1" x="855" y="57" />
+		<entity schema="Default" name="tblComments" color="3986C1" x="342" y="437" />
 	</layout>
 	<layout name="Sqlite" id="Layout-1015" show_relation="cascade" />
 </project>
