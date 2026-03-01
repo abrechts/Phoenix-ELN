@@ -1,8 +1,6 @@
-﻿Imports System.ComponentModel
+﻿
 Imports System.Windows
-Imports ElnCoreModel
 Imports System.Windows.Controls
-Imports ElnBase.ELNEnumerations
 
 
 Public Class SketchAreaRSS

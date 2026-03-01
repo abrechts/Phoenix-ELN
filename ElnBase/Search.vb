@@ -14,7 +14,7 @@ Public Class Search
 
         Public Property UserID As String = ""
         Public Property ProjectName As String = ""
-        Public Property ExpGroupName As String = ""
+        Public Property ProjectGroupName As String = ""
         Public Property MinYield As Double = Double.MinValue
         Public Property MaxYield As Double = Double.MaxValue
         Public Property MinScale As Double = Double.MinValue
@@ -57,8 +57,8 @@ Public Class Search
             End If
 
             ' experiment group name
-            If Not String.IsNullOrEmpty(.ExpGroupName) Then
-                expHits = expHits.Where(Function(x) x.ProjFolder.FolderName = .ExpGroupName)
+            If expHits.Any AndAlso Not String.IsNullOrEmpty(.ProjectGroupName) Then
+                expHits = expHits.Where(Function(x) x.ProjFolder.FolderName = .ProjectGroupName)
             End If
 
             ' creation date range

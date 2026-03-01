@@ -1,12 +1,11 @@
 ﻿Imports System.Windows
 Imports System.Windows.Controls
+Imports System.Windows.Data
 Imports System.Windows.Input
 Imports System.Windows.Media
 Imports ElnBase
 Imports ElnBase.Search
 Imports ElnCoreModel
-Imports Microsoft.EntityFrameworkCore.Diagnostics
-Imports Windows.System
 
 Public Class dlgSearch
 
@@ -25,6 +24,18 @@ Public Class dlgSearch
     Public Shared Property IsServerQuery As Boolean = False
 
 
+    Public Property LocalDBContext As ElnDbContext
+
+    Public Property ServerDBContext As ElnDbContext
+
+    Private Property SearchContext As ElnDbContext   'assigned rdoLocal and rdoServer setting
+
+    Private Property QueryRxnFileString As String
+
+    Private Property _cvsUsers As CollectionViewSource
+    Private Property _cvsProjects As CollectionViewSource
+
+
     Private Sub Me_Loaded() Handles Me.Loaded
 
         SearchContext = LocalDBContext
@@ -36,16 +47,12 @@ Public Class dlgSearch
             rdoServer.IsChecked = IsServerQuery
         End If
 
+        _cvsUsers = Me.FindResource("UsersView")
+        _cvsProjects = Me.FindResource("ProjectsView")
+
+        RefreshFilters()
+
     End Sub
-
-
-    Public Property LocalDBContext As ElnDbContext
-
-    Public Property ServerDBContext As ElnDbContext
-
-    Private Property SearchContext As ElnDbContext   'assigned rdoLocal and rdoServer setting
-
-    Private Property QueryRxnFileString As String
 
 
     Private Sub pnlQuerySketch_SketchEdited(sender As Object, skInfo As SketchResults) Handles pnlQuerySketch.SketchEdited
@@ -69,7 +76,7 @@ Public Class dlgSearch
         Dim queryFilters = New RSSQueryFilters With {
             .UserID = "seqTest",
             .ProjectName = "Project 1",
-            .ExpGroupName = "",
+            .ProjectGroupName = "",
             .MinYield = Double.MinValue,
             .MaxYield = Double.MaxValue,
             .MinScale = Double.MinValue,
@@ -78,12 +85,14 @@ Public Class dlgSearch
             .MaxDate = Date.MaxValue
         }
 
+        ' perform filtered RSS query
         Dim newRssQuery As New Search(SearchContext, IsServerQuery)
         Dim hitExp = newRssQuery.FilteredRssQuery(rxnFileStr, queryFilters)
 
         If Not hitExp.Any Then
             lstRssHitGroups.DataContext = Nothing
-            cbMsgBox.Display("No experiments found matching the query criteria.", MsgBoxStyle.OkOnly + MsgBoxStyle.Information, "No hits")
+            Dim finalizedStr = If(Not rdoServer.IsChecked, " - Only FINALIZED server experiments are listed.", "")
+            cbMsgBox.Display("No matching experiments found." + finalizedStr, MsgBoxStyle.OkOnly + MsgBoxStyle.Information, "No hits found")
             Exit Sub
         End If
 
@@ -97,36 +106,31 @@ Public Class dlgSearch
         'set global component structure color for obtained results
         SketchResults.ComponentStructureColor = Brushes.Black
 
-            Dim rssGroups As New List(Of RssRxnGroup)
-            Dim index As Integer = 1
+        Dim rssGroups As New List(Of RssRxnGroup)
+        Dim index As Integer = 1
 
-            For Each grp In sameRxnGroups
-                Dim firstExp = grp.ExpEntries.First
-                Dim rssRxnGroup As New RssRxnGroup
-                With rssRxnGroup
-                    Dim cbDrawInfo = DrawingEditor.GetSketchInfo(firstExp.RxnSketch)
-                    .GroupTitle = "Reaction " + index.ToString
-                    .ReactCanvas = cbDrawInfo.Reactants.First.StructureCanvas
-                    .ProdCanvas = cbDrawInfo.Products.First.StructureCanvas
-                    .MaxYield = grp.MaxYield
-                    .ExpItems = grp.ExpEntries
-                End With
-                rssGroups.Add(rssRxnGroup)
-                index += 1
-            Next
+        For Each grp In sameRxnGroups
+            Dim firstExp = grp.ExpEntries.First
+            Dim rssRxnGroup As New RssRxnGroup
+            With rssRxnGroup
+                Dim cbDrawInfo = DrawingEditor.GetSketchInfo(firstExp.RxnSketch)
+                .GroupTitle = "Reaction " + index.ToString
+                .ReactCanvas = cbDrawInfo.Reactants.First.StructureCanvas
+                .ProdCanvas = cbDrawInfo.Products.First.StructureCanvas
+                .MaxYield = grp.MaxYield
+                .ExpItems = grp.ExpEntries
+            End With
+            rssGroups.Add(rssRxnGroup)
+            index += 1
+        Next
 
-            Me.Top = Owner.Top + 5
-            Me.Left = Owner.Left + Owner.ActualWidth - Me.ActualWidth - 5
-            Me.MaxHeight = Owner.ActualHeight - 20
-            Me.Height = Me.MaxHeight
 
-            Me.UpdateLayout()
+        '  Me.UpdateLayout()
 
-            blkResultsTitle.Visibility = Visibility.Visible
-            lstRssHitGroups.Visibility = Visibility.Visible
-            pnlNoHits.Visibility = If(rssGroups.Count > 0, Visibility.Collapsed, Visibility.Visible)
+        blkResultsTitle.Visibility = Visibility.Visible
+        lstRssHitGroups.Visibility = Visibility.Visible
 
-            lstRssHitGroups.DataContext = rssGroups
+        lstRssHitGroups.DataContext = rssGroups
 
     End Sub
 
@@ -136,10 +140,9 @@ Public Class dlgSearch
         If rdoLocal.IsInitialized Then
 
             SearchContext = If(rdoLocal.IsChecked, LocalDBContext, ServerDBContext)
+            RefreshFilters()
 
             IsServerQuery = Not rdoLocal.IsChecked
-
-            blkFinalizedInfo.Visibility = If(IsServerQuery, Visibility.Visible, Visibility.Collapsed)
 
             If QueryRxnFileString <> "" Then
                 PerformQuery(QueryRxnFileString)
@@ -150,6 +153,24 @@ Public Class dlgSearch
     End Sub
 
 
+    Private Sub RefreshFilters()
+
+        _cvsUsers.Source = SearchContext.tblUsers _
+            .Select(Function(p) p.UserID) _
+            .OrderBy(Function(t) t) _ 'orders the list elements (strings) in ascending order directly
+            .ToList()
+
+        _cvsProjects.Source = SearchContext.tblProjects _
+            .Select(Function(p) p.Title) _
+            .ToList() _
+            .Distinct(StringComparer.OrdinalIgnoreCase) _
+            .OrderBy(Function(t) t) _
+            .ToList()
+
+    End Sub
+
+
+
     ''' <summary>
     ''' Allows the use of the MouseWheel for results scrolling
     ''' </summary>
@@ -158,9 +179,10 @@ Public Class dlgSearch
 
         e.Handled = True
 
-        Dim e2 As New MouseWheelEventArgs(e.MouseDevice, e.Timestamp, e.Delta)
-        e2.RoutedEvent = ListBox.MouseWheelEvent
-        e2.Source = e.Source
+        Dim e2 As New MouseWheelEventArgs(e.MouseDevice, e.Timestamp, e.Delta) With {
+            .RoutedEvent = ListBox.MouseWheelEvent,
+            .Source = e.Source
+        }
 
         lstRssHitGroups.RaiseEvent(e2)
 
@@ -184,7 +206,6 @@ Public Class dlgSearch
         End If
 
     End Sub
-
 
 End Class
 
