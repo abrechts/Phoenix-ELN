@@ -185,12 +185,12 @@
     <SolidColorBrush x:Key="cboBorderBrush" Color="#FF8FC4F8"/>
     <SolidColorBrush x:Key="cboDropDownArrowBrush" Color="WhiteSmoke"/>
     
-    <SolidColorBrush x:Key="cboItemHighlightForeground" Color="LightSkyBlue"/>
+    <SolidColorBrush x:Key="cboItemHighlightForeground" Color="White"/>
     <SolidColorBrush x:Key="cboItemHighlightBackground" Color="#FF444444"/>
-    <SolidColorBrush x:Key="cboItemHighlightBorderBrush" Color="LightGray"/>
+    <SolidColorBrush x:Key="cboItemHighlightBorderBrush" Color="LightBlue"/>
 
     <SolidColorBrush x:Key="cboItemSelectedForeground" Color="LightSkyBlue"/>
-    <SolidColorBrush x:Key="cboItemSelectedBackground" Color="#FF222255"/>
+    <SolidColorBrush x:Key="cboItemSelectedBackground" Color="#FF545454"/>
 
     <SolidColorBrush x:Key="cboDropDownBackground" Color="#FF2A2A2A"/>
     <SolidColorBrush x:Key="cboDropDownBorderBrush" Color="gray"/>
@@ -201,7 +201,8 @@
     <ControlTemplate x:Key="ComboBoxToggleButton" TargetType="ToggleButton">
         <Grid>
             <Border x:Name="Border" Background="{DynamicResource cboBackground}" BorderBrush="{DynamicResource cboBorderBrush}" BorderThickness="1" CornerRadius="6"/>
-            <Path x:Name="Arrow" HorizontalAlignment="Right" Margin="0,0,8,0" VerticalAlignment="Center" Data="M 0 0 L 4 4 L 8 0 Z" Fill="{DynamicResource cboDropDownArrowBrush}"/>
+            <Path x:Name="Arrow" HorizontalAlignment="Right" Margin="0,0,8,0" VerticalAlignment="Center" Data="M 0 0 L 4 4 L 8 0 Z" 
+                Fill="{DynamicResource cboDropDownArrowBrush}"/>
         </Grid>
     </ControlTemplate>
     
@@ -254,7 +255,7 @@
                     
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsEnabled" Value="False">
-                            <Setter Property="Foreground" Value="#FF888888"/>
+                            <Setter Property="Opacity" Value="0.6"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                     

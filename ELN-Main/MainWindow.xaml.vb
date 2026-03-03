@@ -1132,33 +1132,41 @@ Class MainWindow
 
             '-- server experiment
 
-            If tabExperiments.Items.Count > 4 AndAlso Not ExpDisplayList.First.DisplayIndex = -2 Then
+            If ExpDisplayList.Contains(targetExp) Then
 
-                'warn for too many open exp tabs
-                Dim res = cbMsgBox.Display("The maximum of 5 open experiments will be" + vbCrLf +
-                                 "exceeded if opening the server experiment." + vbCrLf + vbCrLf +
-                                 "Release the rightmost experiment?", MsgBoxStyle.OkCancel + MsgBoxStyle.Information, "Pin Limit")
-                If res = MsgBoxResult.Ok Then
-                    Dim lastIndex = tabExperiments.Items.Count - 1
-                    CType(tabExperiments.Items(lastIndex), tblExperiments).DisplayIndex = Nothing
-                Else
-                    Exit Sub
+                ' experiment already displayed in a tab
+                Dim thisTab As TabItem = tabExperiments.ItemContainerGenerator.ContainerFromItem(targetExp)
+                thisTab.IsSelected = True
+
+            Else
+
+                ' warn for too many open exp tabs
+                If tabExperiments.Items.Count > 4 AndAlso Not ExpDisplayList.First.DisplayIndex = -2 Then
+                    Dim res = cbMsgBox.Display("The maximum of 5 open experiments will be" + vbCrLf +
+                                     "exceeded if opening the server experiment." + vbCrLf + vbCrLf +
+                                     "Release the rightmost experiment?", MsgBoxStyle.OkCancel + MsgBoxStyle.Information, "Pin Limit")
+                    If res = MsgBoxResult.Ok Then
+                        Dim lastIndex = tabExperiments.Items.Count - 1
+                        CType(tabExperiments.Items(lastIndex), tblExperiments).DisplayIndex = Nothing
+                    Else
+                        Exit Sub
+                    End If
                 End If
 
+                'replace previous leftmost server exp, if present
+                Dim leftmostExp = CType(tabExperiments.Items(0), tblExperiments)
+                If leftmostExp.DisplayIndex = -2 Then
+                    leftmostExp.DisplayIndex = Nothing
+                End If
+
+                ''add to experiments tab
+                targetExp.DisplayIndex = -2
+                UpdateExperimentTabs(targetExp)
+
+                'select leftmost experiments tab containing this server exp
+                tabExperiments.SelectedIndex = 0
+
             End If
-
-            'replace previous leftmost server exp, if present
-            Dim leftmostExp = CType(tabExperiments.Items(0), tblExperiments)
-            If leftmostExp.DisplayIndex = -2 Then
-                leftmostExp.DisplayIndex = Nothing
-            End If
-
-            ''add to experiments tab
-            targetExp.DisplayIndex = -2
-            UpdateExperimentTabs(targetExp)
-
-            'select leftmost experiments tab containing this server exp
-            tabExperiments.SelectedIndex = 0
 
         End If
 
