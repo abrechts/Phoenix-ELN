@@ -50,9 +50,9 @@ Public Class dlgSearch
 
         If ServerDBContext Is Nothing Then
             IsServerQuery = False
-            rdoServer.IsEnabled = False
+            chkServerSearch.IsEnabled = False
         Else
-            rdoServer.IsChecked = IsServerQuery
+            chkServerSearch.IsChecked = IsServerQuery
         End If
 
         RefreshFilters()
@@ -86,12 +86,8 @@ Public Class dlgSearch
             .UserID = If(cboUsers.SelectedIndex > 0, CStr(cboUsers.SelectedItem), String.Empty),
             .ProjectName = If(cboProjects.SelectedIndex > 0, CStr(cboProjects.SelectedItem), String.Empty),
             .ProjectGroupName = If(cboProjGroups.SelectedIndex > 0, CStr(cboProjGroups.SelectedItem), String.Empty),
-            .MinYield = Double.MinValue,
-            .MaxYield = Double.MaxValue,
-            .MinScale = Double.MinValue,
-            .MaxScale = Double.MaxValue,
-            .MinDate = Date.MinValue,
-            .MaxDate = Date.MaxValue
+            .MinYield = If(txtYield.Value, Double.MinValue),
+            .MinScale = If(txtScale.Value, Double.MinValue)
         }
 
         ' perform filtered RSS query
@@ -100,7 +96,7 @@ Public Class dlgSearch
 
         If Not hitExp.Any Then
             lstRssHitGroups.DataContext = Nothing
-            Dim finalizedStr = If(Not rdoServer.IsChecked, " - Only FINALIZED server experiments are listed.", "")
+            Dim finalizedStr = If(IsServerQuery, " - Only FINALIZED server experiments are listed.", "")
             cbMsgBox.Display("No matching experiments found." + finalizedStr, MsgBoxStyle.OkOnly + MsgBoxStyle.Information, "No hits found")
             Exit Sub
         End If
@@ -144,14 +140,14 @@ Public Class dlgSearch
     End Sub
 
 
-    Private Sub rdoLocal_CheckedChanged() Handles rdoLocal.Checked, rdoLocal.Unchecked
+    Private Sub chkServerSearch_CheckedChanged() Handles chkServerSearch.Checked, chkServerSearch.Unchecked
 
-        If rdoLocal.IsInitialized Then
+        If chkServerSearch.IsInitialized Then
 
-            SearchContext = If(rdoLocal.IsChecked, LocalDBContext, ServerDBContext)
+            SearchContext = If(chkServerSearch.IsChecked, ServerDBContext, LocalDBContext)
             RefreshFilters()
 
-            IsServerQuery = Not rdoLocal.IsChecked
+            IsServerQuery = chkServerSearch.IsChecked
 
             PerformQuery(QueryRxnFileString)
 
@@ -200,17 +196,6 @@ Public Class dlgSearch
         End If
 
     End Sub
-
-
-    'Private Sub cboProjGroups_SelectionChanged() Handles cboProjGroups.SelectionChanged
-
-    '    If cboProjGroups.IsInitialized Then
-
-    '        PerformQuery(QueryRxnFileString)
-
-    '    End If
-
-    'End Sub
 
 
     Private Sub RefreshFilters()

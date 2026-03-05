@@ -715,7 +715,7 @@ Public Class ELNCalculations
     ''' then all digits except the fractional part are returned.
     ''' </returns>
     ''' 
-    Public Shared Function SignificantDigitsString(ByVal val As Double, ByVal sigDigits As Integer) As String
+    Public Shared Function SignificantDigitsString(ByVal val As Double, ByVal sigDigits As Integer, Optional useGroupingSep As Boolean = True) As String
 
         Dim currDecSeparator As String = Globalization.CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator().ToString
         Dim upperLimit As Integer = Math.Pow(10, sigDigits)
@@ -764,8 +764,12 @@ Public Class ELNCalculations
 
             Case Else
 
-                'display larger values with all digits except omitted decimals, and thousands separator
-                Return Format(val, "N0")
+                'display larger values with all digits except omitted decimals, and grouping separator as specified by useGroupingSep
+                If useGroupingSep Then
+                    Return Format(val, "N0")
+                Else
+                    Return Format(val, "F0")
+                End If
 
         End Select
 

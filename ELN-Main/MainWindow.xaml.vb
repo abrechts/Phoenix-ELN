@@ -1549,7 +1549,7 @@ Class MainWindow
             .ServerDBContext = ServerDBContext
             With CustomControls.My.MySettings.Default
                 dlgSearch.IsServerQuery = .IsServerQuery
-                searchDlg.ShowDialog()
+                searchDlg.Show()
                 .IsServerQuery = dlgSearch.IsServerQuery
             End With
         End With

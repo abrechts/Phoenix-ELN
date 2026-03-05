@@ -4,6 +4,13 @@ Imports System.Windows.Controls
 Imports System.Windows.Input
 Imports ElnBase
 
+''' <summary>
+''' A WPF <see cref="TextBox"/> derived control that restricts input to numeric values only.
+''' Supports optional constraints such as positive-only or integer-only input, and provides 
+''' formatting options including a fixed number of decimal places or significant digits.
+''' Handles keyboard input, paste operations, and exposes the entered value as a nullable 
+''' </summary>
+
 Public Class NumericTextBox
 
     Inherits TextBox
@@ -15,12 +22,31 @@ Public Class NumericTextBox
     End Sub
 
 
+    ''' <summary>
+    ''' Only positive numbers are allowed if set to true.
+    ''' </summary>
+    ''' 
     Public Property PositiveNumbersOnly As Boolean = False
 
+    ''' <summary>
+    ''' Only integer numbers are allowed if set to true.
+    ''' </summary>
+    '''
     Public Property IntegersOnly As Boolean = False
 
+    ''' <summary>
+    ''' Sets or gets the number of digits after the decimal separator the resulting string must contain. 
+    ''' If set to smaller than 0, the unformatted string is returned. 
+    ''' </summary>
+    ''' 
     Public Property DecimalCount As Integer = -1
 
+    ''' <summary>
+    ''' Sets or gets the number of significant digits the resulting string must contain. If set to smaller 
+    ''' than 1, or if converting an integer value, then the unformatted string is returned. 
+    ''' </summary>
+    ''' <remarks>Significant digits override DecimalCount if both are set.</remarks>
+    ''' 
     Public Property SignificantDigits As Integer = 0
 
 
@@ -31,15 +57,34 @@ Public Class NumericTextBox
     Public Property Value As Double?
 
         Get
+
             Return StringToDouble(Me.Text)
+
         End Get
 
         Set(value As Double?)
-            If value IsNot Nothing Then
-                Me.Text = DoubleToString(value, DecimalCount, SignificantDigits)
-            Else
+
+            If value Is Nothing Then
+
                 Me.Text = ""
+
+            ElseIf SignificantDigits > 0 Then
+
+                ' significant digits override decimal count if both are set
+                Me.Text = DoubleToSignificantDigitsString(value, SignificantDigits)
+
+            ElseIf DecimalCount >= 0 Then
+
+                ' the specified number of digits after the decimal separator is set, but only if SignificantDigits is unset. 
+                Me.Text = DoubleToFixedDecimalString(value, DecimalCount)
+
+            Else
+
+                'default: no formatting specified
+                Me.Text = Format(value)
+
             End If
+
         End Set
 
     End Property
@@ -67,11 +112,9 @@ Public Class NumericTextBox
         End If
 
         If PositiveNumbersOnly Then
-            res = From myChar In inputStr Where Not (Char.IsDigit(myChar) OrElse myChar = "." _
-            OrElse myChar = ",")
+            res = From myChar In inputStr Where Not (Char.IsDigit(myChar) OrElse myChar = "." OrElse myChar = ",")
         Else
-            res = From myChar In inputStr Where Not (Char.IsDigit(myChar) OrElse myChar = "-" OrElse myChar = "." _
-            OrElse myChar = ",")
+            res = From myChar In inputStr Where Not (Char.IsDigit(myChar) OrElse myChar = "-" OrElse myChar = "." OrElse myChar = ",")
         End If
 
         Return Not res.Any
@@ -80,15 +123,27 @@ Public Class NumericTextBox
 
 
     ''' <summary>
+    ''' Gets a list of valid decimal separators
+    ''' </summary>
+    ''' 
+    Private Shared ReadOnly DecimalSeparators As Char() = {"."c, ","c}
+
+
+    ''' <summary>
     ''' Prevent non-numeric text input
     ''' </summary>
     ''' 
     Private Sub Me_PreviewTextInput(sender As Object, e As TextCompositionEventArgs) Handles Me.PreviewTextInput
 
-        Dim currText = e.OriginalSource.Text
+        Dim currText As String = e.OriginalSource.Text
 
-        'prevent double decimal separator
-        If (e.Text.Contains("."c) OrElse e.Text.Contains(","c)) AndAlso (currText.Contains(".") OrElse currText.Contains(",")) Then
+        'check if valid number string
+        If Not IsValidNumericText(e.Text) Then
+            e.Handled = True
+        End If
+
+        'prevent multiple decimal separators
+        If e.Text.IndexOfAny(DecimalSeparators) >= 0 AndAlso currText.IndexOfAny(DecimalSeparators) >= 0 Then
             e.Handled = True
             Exit Sub
         End If
@@ -99,9 +154,43 @@ Public Class NumericTextBox
             Exit Sub
         End If
 
-        'check if otherwise valid number string
-        If Not IsValidNumericText(e.Text) Then
-            e.Handled = True
+        ' construct the proposed text
+        Dim tb = DirectCast(e.OriginalSource, TextBox)
+        Dim proposedText = String.Concat(currText.AsSpan(0, tb.SelectionStart), e.Text, currText.AsSpan(tb.SelectionStart + tb.SelectionLength))
+
+        ' enforce the specified number of significant digits for fractional values (i.e. containing a decimal separator)
+        If SignificantDigits > 0 Then
+
+            Dim digitCount = proposedText.Replace(".", "").Replace(",", "").Replace("-", "").TrimStart("0"c).Length
+            Dim separatorPos = proposedText.IndexOfAny(DecimalSeparators)
+
+            If separatorPos >= 0 AndAlso digitCount >= SignificantDigits AndAlso
+               (digitCount > SignificantDigits OrElse separatorPos = proposedText.Length - 1) Then
+
+                'If exceeding digit limits: replace proposed text by a significant digits compliant one
+                Dim caretPos = tb.CaretIndex
+                Dim calcStr = ELNCalculations.SignificantDigitsString(CDbl(proposedText), SignificantDigits, useGroupingSep:=False)
+                Dim corrText = calcStr
+                tb.Text = corrText
+                tb.CaretIndex = caretPos + 1
+
+                e.Handled = True
+                Exit Sub
+
+            End If
+
+        End If
+
+        '  prevent more than the specified number of digits after the decimal separator, if specified
+        If DecimalCount >= 0 Then
+            Dim decSepPos As Integer = proposedText.IndexOfAny(DecimalSeparators)
+            If decSepPos >= 0 Then
+                Dim digitsAfterDecimal As Integer = proposedText.Length - decSepPos - 1
+                If digitsAfterDecimal > DecimalCount Then
+                    e.Handled = True
+                    Exit Sub
+                End If
+            End If
         End If
 
     End Sub
@@ -170,20 +259,44 @@ Public Class NumericTextBox
 
 
     ''' <summary>
-    ''' Converts a double value to a string utilizing the currently set decimal separator.
+    ''' Converts a double value to a string containing the specified number of significant digits. 
     ''' </summary>
     ''' <param name="val">The double value to convert to string.</param>
-    ''' <param name="decCount">The number of digits after the decimal to create. A negative value  
-    ''' indicates not to perform any decimal digits formatting (original digits kept).</param>
-    ''' <returns>A string representing the passed single value with correct decimal separator and 
-    ''' specified digits after the decimal (if required)</returns>
+    ''' <param name="sigDigCount">Specifies the number of significant digits the resulting string contains.
+    ''' If set to smaller than 1, the unformatted string is returned.</param>
+    ''' <returns>
+    ''' A string containing the specified digits after the decimal separator.
+    ''' </returns>
     ''' 
-    Public Shared Function DoubleToString(val As Double, decCount As Integer, sigDigCount As Integer) As String
+    Public Shared Function DoubleToSignificantDigitsString(val As Double, sigDigCount As Integer) As String
 
         Try
             If sigDigCount > 0 Then
                 Return ELNCalculations.SignificantDigitsString(val, sigDigCount)
-            ElseIf decCount >= 0 Then
+            Else
+                Return Format(val)
+            End If
+        Catch ex As Exception
+            Return ""
+        End Try
+
+    End Function
+
+
+    ''' <summary>
+    ''' Converts a double value to a string containing the specified number of digits after the decimal separator. 
+    ''' </summary>
+    ''' <param name="val">The value to convert to string.</param>
+    ''' <param name="decCount">The number of digits after the decimal separator in the resulting string. If 
+    ''' set to smaller than 0, the unformatted string is returned.</param>
+    ''' <returns> 
+    ''' A string containing the specified digits after the decimal separator. 
+    '''</returns>
+    ''' 
+    Public Shared Function DoubleToFixedDecimalString(val As Double, decCount As Integer) As String
+
+        Try
+            If decCount >= 0 Then
                 Return Format(val, "F" + decCount.ToString)   'the F format does not create group separators (like N)
             Else
                 Return Format(val)
