@@ -10,13 +10,13 @@
 
     <UserControl.Resources>
 
-        <DataTemplate x:Key="expTreeItem">
-            <local:ExpTreeHeader Margin="0,-1"/>
+        <DataTemplate x:Key="hitGroupItem">
+            <local:ExpTreeHeader Margin="6"/>
         </DataTemplate>
 
     </UserControl.Resources>
 
-    <Border BorderThickness="1" BorderBrush="#FFADADAD" CornerRadius="6" Margin="0,0,0,4">
+    <Border BorderThickness="1" BorderBrush="#FFADADAD" CornerRadius="6" Margin="0,0,0,4" Background="white">
         
         <StackPanel Margin="2">
             
@@ -28,7 +28,7 @@
                        HorizontalContentAlignment="Center" BorderThickness="0,0,0,1" Padding="2,0,2,1" Background="white" Foreground="black"
                        BorderBrush="gray" FontSize="11.5"/>
 
-                    <ListBox x:Name="lstRssHits" ItemTemplate="{StaticResource expTreeItem}" MinWidth="200" MinHeight="20" FontSize="11.5"
+                    <ListBox x:Name="lstRssHits" ItemTemplate="{StaticResource hitGroupItem}" MinWidth="200" MinHeight="20" FontSize="11.5"
                        ItemsSource="{Binding ExpItems}" BorderThickness="0" HorizontalAlignment="Left" />
 
                 </StackPanel>

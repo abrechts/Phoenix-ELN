@@ -5,10 +5,12 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CustomControls" 
         xmlns:elnCoreModel="clr-namespace:ElnCoreModel;assembly=ElnCoreModel" 
-        xmlns:scm ="clr-namespace:System.ComponentModel;assembly=WindowsBase" xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        xmlns:scm ="clr-namespace:System.ComponentModel;assembly=WindowsBase"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+ 
         mc:Ignorable="d"
         Title="Substructure Search" TextOptions.TextFormattingMode="Display" WindowStartupLocation="CenterOwner" ShowInTaskbar="False" 
-        Width="780" Height="1000" MinHeight="800" MaxWidth="850" MinWidth="760" Background="#FF3D3C3C" SizeToContent="Height" >
+        Height="800" MinHeight="300" Width="770" MaxWidth="850" MinWidth="770" Background="#FF3D3C3C">
 
     <Window.Resources>
 
@@ -17,6 +19,7 @@
         </DataTemplate>
 
         <local:BooleanInvertConverter x:Key="boolInvertConv"/>
+        <local:IntegerToVisibilityConverter x:Key="intToVisibilityConv"/>
 
         <CollectionViewSource x:Key="UsersView" CollectionViewType="{x:Type ListCollectionView}"/>
         <CollectionViewSource x:Key="ProjectsView" CollectionViewType="{x:Type ListCollectionView}"/>
@@ -46,22 +49,68 @@
 
     </Window.Resources>
 
-    <Grid>
+    <Grid Margin="0,8,0,0">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="5*"/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
 
-        <StackPanel>
+        <Grid Grid.ColumnSpan="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
 
-            <StackPanel>
+            <StackPanel Grid.Row="0">
 
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,12,0,4">
+                <Grid>
 
-                    <TextBlock Text="Find Reactions" FontWeight="Bold"  HorizontalAlignment="Center" FontStyle="Italic" 
-                       FontSize="13" Foreground="LightBlue"/>
+                    <StackPanel  Orientation="Horizontal" Margin="24,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center">
 
-                    <ContentControl x:Name="icoInfo" Content="{StaticResource icoInfo}" Cursor="Hand" Height="14" Margin="6,1,0,0"/>
+                        <TextBlock Text="Find Reactions" FontWeight="Bold" HorizontalAlignment="Center" FontStyle="Italic" 
+                           FontSize="14" Foreground="LightBlue"/>
 
-                </StackPanel>
+                        <ContentControl x:Name="icoInfo" Content="{StaticResource icoInfo}" Cursor="Hand" Height="14" Margin="6,1,0,0"
+                           Opacity="0.9"/>
 
-                <Border Grid.Row="1" Background="transparent" BorderBrush="#FFADADAD" BorderThickness="1" Margin="12,0,12,12" CornerRadius="6" >
+                    </StackPanel>
+
+                    <ToolBar Style="{StaticResource ToolBarWithoutOverflowBarStyle}"  Background="Transparent" HorizontalAlignment="left"
+                       BorderThickness="0" Margin="8,4,12,2" >
+
+                        <Button x:Name="btnSaveQuery" Padding="2,2,3,3" Foreground="White">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center" >
+                                <ContentControl Content="{StaticResource icoSave_Dark}" Height="14" Margin="2,0,4,-1"/>
+                                <TextBlock Text="Save Query" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+
+                        <Separator/>
+
+                        <Button x:Name="btnLoadQuery" Padding="2,2,3,3" Foreground="White">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center" >
+                                <ContentControl Content="{StaticResource icoOpenFolder_Dark}" Height="16" Margin="2,0,4,-1"/>
+                                <TextBlock Text="Open Query" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+
+                        <Separator/>
+
+                    </ToolBar>
+
+                    <ToolBar Style="{StaticResource ToolBarWithoutOverflowBarStyle}"  Background="Transparent" HorizontalAlignment="right"
+                        BorderThickness="0" Margin="8,4,12,2">
+                        <Button x:Name="btnResetFilters" Padding="2,2,3,3" Foreground="White" ToolTip="Reset all filters to their default values">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center" >
+                                <ContentControl Content="{StaticResource icoUndo_Dark}" Height="14" Margin="1,0,3,-1"/>
+                                <TextBlock Text="Reset Filters" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                    </ToolBar>
+
+                </Grid>
+
+                <Border Grid.Row="1" Background="transparent" BorderBrush="#FFADADAD" BorderThickness="1" Margin="12,2,12,12" CornerRadius="6" >
 
                     <Grid >
 
@@ -71,7 +120,7 @@
                         </Grid.RowDefinitions>
 
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="135*"/>
+                            <ColumnDefinition Width="120*"/>
                             <ColumnDefinition Width="5*"/>
                             <ColumnDefinition Width="420"/>
                             <ColumnDefinition Width="120*"/>
@@ -79,16 +128,11 @@
 
                         <StackPanel Orientation="Vertical" Grid.Row="1" Grid.Column="0" Margin="6,8,4,0" VerticalAlignment="Center" >
                             
-                            <!--<StackPanel Orientation="Horizontal" Margin="0,0,0,8" HorizontalAlignment="Center">
-                                <RadioButton x:Name="rdoLocal" IsChecked="True" Content="Local search" Foreground="white" Margin="2,0,4,2"/>
-                                <RadioButton x:Name="rdoServer" Content="Server search"  Foreground="white" Margin="2,0,0,0"/>
-                            </StackPanel>-->
+                            <!-- users ComboBox -->
 
-                            <!-- users ComboBox --> 
-                            
-                            <ComboBox x:Name="cboUsers" Style="{StaticResource DarkComboBoxStyle}" Margin="0,0,0,5" 
-                                SelectedIndex="0" MinWidth="100" VerticalContentAlignment="Center" >
-                                
+                            <ComboBox x:Name="cboUsers" Style="{StaticResource DarkComboBoxStyle}" Margin="0,0,0,5" MaxHeight="300"
+                                SelectedIndex="0" MinWidth="100" VerticalContentAlignment="Center" Grid.IsSharedSizeScope="True">
+
                                 <ComboBox.ItemsSource>
                                     <CompositeCollection>
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -96,10 +140,10 @@
                                             <TextBlock Text="All Users" Margin="4,0,0,0" VerticalAlignment="Center" Foreground="white"/>
                                         </StackPanel>
                                         <Separator Background="LightGray" Height="0.8" Margin="0,-3"/>
-                                        <CollectionContainer Collection="{Binding Source={StaticResource UsersView}}"/>
+                                        <CollectionContainer x:Name="usersContainer" Collection="{Binding Source={StaticResource UsersView}}"/>
                                     </CompositeCollection>
                                 </ComboBox.ItemsSource>
-                                
+
                                 <ComboBox.Resources>
                                     <DataTemplate DataType="{x:Type sys:String}">
                                         <StackPanel Orientation="Horizontal" Margin="0,-2,0,0" >
@@ -108,13 +152,13 @@
                                         </StackPanel>
                                     </DataTemplate>
                                 </ComboBox.Resources>
-                                
+
                             </ComboBox>
 
                             <!-- projects ComboBox -->
 
                             <ComboBox x:Name="cboProjects" Style="{StaticResource DarkComboBoxStyle}" Margin="0,0,0,5"
-                               SelectedIndex="0">
+                               SelectedIndex="0" MaxHeight="300">
 
                                 <ComboBox.ItemsSource>
                                     <CompositeCollection>
@@ -123,7 +167,7 @@
                                             <TextBlock Text="All Projects" Margin="4,0,0,0" VerticalAlignment="Center" Foreground="white"/>
                                         </StackPanel>
                                         <Separator Background="LightGray" Height="0.8" Margin="0,-3"/>
-                                        <CollectionContainer Collection="{Binding Source={StaticResource ProjectsView}}"/>
+                                        <CollectionContainer x:Name="projectsContainer" Collection="{Binding Source={StaticResource ProjectsView}}"/>
                                     </CompositeCollection>
                                 </ComboBox.ItemsSource>
 
@@ -140,7 +184,7 @@
 
                             <!-- project group ComboBox -->
 
-                            <ComboBox x:Name="cboProjGroups" Style="{StaticResource DarkComboBoxStyle}" SelectedIndex="0" 
+                            <ComboBox x:Name="cboProjGroups" Style="{StaticResource DarkComboBoxStyle}" SelectedIndex="0" MaxHeight="300"
                                IsEnabled="{Binding ElementName=cboProjects, Path=SelectedIndex, Converter={StaticResource IntToBooleanConv}}" Margin="0,0,0,6">
 
                                 <ComboBox.ItemsSource>
@@ -150,7 +194,7 @@
                                             <TextBlock Text="All Groups" Margin="4,0,0,0" VerticalAlignment="Center" Foreground="white"/>
                                         </StackPanel>
                                         <Separator Background="LightGray" Height="0.8" Margin="0,-3"/>
-                                        <CollectionContainer Collection="{Binding Source={StaticResource ProjFoldersView}}"/>
+                                        <CollectionContainer  x:Name="projectGroupsContainer" Collection="{Binding Source={StaticResource ProjFoldersView}}"/>
                                     </CompositeCollection>
                                 </ComboBox.ItemsSource>
 
@@ -165,58 +209,72 @@
 
                             </ComboBox>
 
-                            <!--<StackPanel Orientation="Horizontal" Margin="0,8,0,8" HorizontalAlignment="Center">
-                                <RadioButton x:Name="rdoLocal" Content="Local Search" Foreground="white" Margin="2,0,5,2" 
-                                    Padding="1,0,0,0" VerticalContentAlignment="center"/>
-                                <RadioButton x:Name="rdoServer" Content="Server Search"  Foreground="white" Margin="2,0,0,0"
-                                    Padding="1,0,0,0" VerticalContentAlignment="center"/>
-                            </StackPanel>-->
-
                         </StackPanel>
 
                         <Border Grid.Column="2" Grid.Row="1" CornerRadius="6" BorderBrush="#FF54A2D1" BorderThickness="1" Padding="3"  
                            VerticalAlignment="Top" Margin="0,6,0,6" Width="420" Height="150">
-                            <local:SketchAreaRSS x:Name="pnlQuerySketch" ReactionSketch="{Binding}" Margin="4,2,4,2"/>
+                            
+                            <local:SketchAreaRSS x:Name="pnlQuerySketch" ReactionSketch="{Binding}" ShrinkThreshold="700"/>
+                            
                         </Border>
 
                         <StackPanel Grid.Column="3" Grid.Row="1" Margin="6,0,6,0" VerticalAlignment="Center" HorizontalAlignment="center">
 
                             <!--yield filter-->
-                            
+
                             <Border BorderBrush="#FF01ABE3" BorderThickness="1" CornerRadius="4" Padding="4" Margin="0,6,0,4" Background="Transparent" >
 
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                    
-                                    <TextBlock Text="Yield >=" FontWeight="DemiBold" Foreground="lightblue" Margin="0,0,3,0"/>
-                                    <local:NumericTextBox x:Name="txtYield" IntegersOnly="true" PositiveNumbersOnly="True" d:Text="56" MinWidth="36"
-                                        Margin="0,0,2,0" HorizontalContentAlignment="Center" CaretBrush="White" Foreground="white" Background="Transparent" 
-                                        BorderThickness="1" BorderBrush="lightgray" VerticalContentAlignment="Center" Padding="0,-1,0,0" />
-                                    <TextBlock Text="%" Margin="1,0,0,0" VerticalAlignment="Center" Foreground="white"/>
-                                    
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="left">
+
+                                    <TextBlock Text="Yield" FontWeight="DemiBold" Foreground="lightblue" Margin="2,0,0,0" VerticalAlignment="Center"/>
+
+                                    <ComboBox x:Name="cboYieldComparer" VerticalAlignment="Center" SelectedIndex="0" FontWeight="demibold" Padding="1,2,1,3"     
+                                       Foreground="LightBlue" BorderBrush="Transparent" Background="Transparent" Style="{StaticResource DarkComboBoxStyle}" 
+                                       ToolTip="{Binding SelectedItem.ToolTip, RelativeSource={RelativeSource Self}}">
+                                        <ComboBoxItem Content=" ≥ " ToolTip="larger or equal"/>
+                                        <ComboBoxItem Content=" ≤ " ToolTip="smaller or equal"/>
+                                    </ComboBox>
+
+                                    <StackPanel x:Name="pnlYield" Orientation="Horizontal" Margin="1,0,0,0">
+                                        <local:NumericTextBox x:Name="txtYield" IntegersOnly="true" PositiveNumbersOnly="True" d:Text="56" MinWidth="30"
+                                            Margin="0,0,2,0" HorizontalContentAlignment="center" CaretBrush="White" Foreground="white" Background="Transparent" 
+                                            BorderThickness="1" BorderBrush="lightgray" VerticalContentAlignment="Center" Padding="2,0,0,0" />
+                                        <TextBlock Text="%" Margin="1,0,0,0" VerticalAlignment="Center" Foreground="white"/>
+                                    </StackPanel>
+
                                 </StackPanel>
-                                
                             </Border>
 
                             <!--scale filter-->
-                            
+
                             <Border BorderBrush="#FF01ABE3" BorderThickness="1" CornerRadius="4" Padding="4" Margin="0,0,0,10" Background="transparent">
-                                
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                    
-                                    <TextBlock Text="Scale >=" FontWeight="DemiBold" Foreground="lightBlue" Margin="2,0,3,0" />
-                                    <local:NumericTextBox x:Name="txtScale" SignificantDigits="3" PositiveNumbersOnly="True" d:Text="200" MinWidth="46" Margin="0,0,2,0" 
-                                        HorizontalContentAlignment="Center" CaretBrush="White" Foreground="white" Background="Transparent" BorderThickness="1"
-                                        BorderBrush="lightgray" VerticalContentAlignment="Center" Padding="0,-1,0,0"/>
-                                    <TextBlock Text="g" Margin="2,0,2,0" VerticalAlignment="Center" Foreground="white"/>
-                                    
+
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="left">
+
+                                    <TextBlock Text="Scale" FontWeight="DemiBold" Foreground="lightBlue" Margin="3,1,1,0" VerticalAlignment="Center" />
+
+                                    <ComboBox x:Name="cboScaleComparer" VerticalAlignment="Center" SelectedIndex="0" FontWeight="demibold" Padding="0,2,1,3"     
+                                       Foreground="LightBlue" BorderBrush="Transparent" Background="Transparent" Style="{StaticResource DarkComboBoxStyle}" 
+                                       ToolTip="{Binding SelectedItem.ToolTip, RelativeSource={RelativeSource Self}}">
+                                        <ComboBoxItem Content=" ≥ " ToolTip="larger or equal"/>
+                                        <ComboBoxItem Content=" ≤ " ToolTip="smaller or equal"/>
+                                    </ComboBox>
+
+                                    <local:NumericTextBox x:Name="txtScale" SignificantDigits="3" MaxLength="5" PositiveNumbersOnly="True"
+                                        d:Text="200" MinWidth="40" CaretBrush="White" Foreground="white" Background="Transparent"  
+                                        HorizontalContentAlignment="Center" BorderThickness="1" Margin="1,0,2,0" Padding="0,0,0,1"
+                                        BorderBrush="lightgray" VerticalContentAlignment="Center"/>
+
+                                    <TextBlock Text="g" Margin="2,0,3,0" VerticalAlignment="Center" Foreground="white"/>
+
                                 </StackPanel>
-                                
+
                             </Border>
 
                             <CheckBox x:Name="chkServerSearch" Content="Server Search" Foreground="white" HorizontalAlignment="Center"/>
 
                             <Button x:Name="btnSearch" Content="Search" HorizontalAlignment="left" Padding="20,2,20,3" Margin="24,10,0,4"/>
-                            
+
                         </StackPanel>
 
                     </Grid>
@@ -225,28 +283,42 @@
 
             </StackPanel>
 
-            <Border  Margin="160,0,0,14" >
+            <Border Grid.Row="1" Margin="0,0,0,14" HorizontalAlignment="Center">
 
-                <StackPanel>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
 
-                    <TextBlock x:Name="blkResultsTitle" Text="Results" HorizontalAlignment="Left" FontWeight="Bold" 
-                        FontSize="13" Foreground="LightBlue" FontStyle="Italic" d:Visibility="visible" Visibility="collapsed" Margin="180,0,0,2" />
+                    <StackPanel Grid.Row="0">
+                       <TextBlock x:Name="blkResultsTitle" Text="Results" HorizontalAlignment="Center" FontWeight="Bold" 
+                           FontSize="13" Foreground="LightBlue" FontStyle="Italic"/>
+                        <Separator Margin="0,2,0,2" Background="#FFA1A0A0" Height="1"/>
+                    </StackPanel>
+                  
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" MinHeight="80" Padding="4">
 
-                    <ScrollViewer VerticalScrollBarVisibility="Auto" MinHeight="80">
+                        <Grid>
 
-                        <ListBox x:Name="lstRssHitGroups" ItemsSource="{Binding}" ItemTemplate="{StaticResource expTreeItem}" BorderThickness="0"
-                            ItemContainerStyle="{StaticResource ListBoxNoHighlight}"  HorizontalAlignment="left" MinWidth="400"
-                            HorizontalContentAlignment="left" ScrollViewer.VerticalScrollBarVisibility="Disabled"
-                            d:Visibility="visible" Visibility="Collapsed"/>
+                            <ListBox x:Name="lstRssHitGroups" ItemsSource="{Binding}" ItemTemplate="{StaticResource expTreeItem}" BorderThickness="0"
+                                ItemContainerStyle="{StaticResource ListBoxNoHighlight}"  HorizontalAlignment="left" MinWidth="400" Padding="6"
+                                HorizontalContentAlignment="left" ScrollViewer.VerticalScrollBarVisibility="Disabled" Background="Transparent" />
+
+                            <TextBlock x:Name="blkNoHitsFound" Text="---  nothing found  ---" Foreground="LightGray" HorizontalAlignment="Center"
+                                VerticalAlignment="top" Margin="0,60,0,0" FontStyle="Italic" FontSize="11"  d:Visibility="Visible"
+                                Visibility="{Binding ElementName=lstRssHitGroups, Path=Items.Count,
+                                  Converter={StaticResource intToVisibilityConv},ConverterParameter=invert}"/>
+
+                        </Grid>
 
                     </ScrollViewer>
 
-                </StackPanel>
+                </Grid>
 
             </Border>
 
-        </StackPanel>
-        <Ellipse HorizontalAlignment="Left" Height="100" Margin="980,113,0,0" Stroke="Black" VerticalAlignment="Top" Width="100"/>
+        </Grid>
 
     </Grid>
 </Window>

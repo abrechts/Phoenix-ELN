@@ -1,11 +1,10 @@
 ﻿Imports System.Globalization
-Imports System.Windows
 Imports System.Windows.Controls
 Imports System.Windows.Data
 Imports System.Windows.Input
 Imports System.Windows.Media
 Imports ElnBase
-Imports ElnBase.Search
+Imports ElnBase.ReactionQuery
 Imports ElnCoreModel
 
 Public Class dlgSearch
@@ -24,25 +23,27 @@ Public Class dlgSearch
     '''
     Public Shared Property IsServerQuery As Boolean = False
 
-
     Public Property LocalDBContext As ElnDbContext
-
     Public Property ServerDBContext As ElnDbContext
+    Private Property SearchContext As ElnDbContext
 
-    Private Property SearchContext As ElnDbContext   'assigned rdoLocal and rdoServer setting
+    Private Property QueryInfo As RSSQueryParameters
+    Private Property RxnFileString As String
 
-    Private Property QueryRxnFileString As String
+    Private Property RssHits As IEnumerable(Of tblExperiments)
 
     Private _cvsUsers As CollectionViewSource
     Private _cvsProjects As CollectionViewSource
     Private _cvsProjFolders As CollectionViewSource
 
-    Private _suppressQuery As Boolean = False
+    Private _suppressUIEvents As Boolean = False
 
 
     Private Sub Me_Loaded() Handles Me.Loaded
 
         SearchContext = LocalDBContext
+
+        QueryInfo = New RSSQueryParameters
 
         _cvsUsers = Me.FindResource("UsersView")
         _cvsProjects = Me.FindResource("ProjectsView")
@@ -55,54 +56,93 @@ Public Class dlgSearch
             chkServerSearch.IsChecked = IsServerQuery
         End If
 
-        RefreshFilters()
+        UpdateUsersFilter()
 
     End Sub
 
 
     Private Sub pnlQuerySketch_SketchEdited(sender As Object, skInfo As SketchResults) Handles pnlQuerySketch.SketchEdited
 
-        QueryRxnFileString = skInfo.MDLRxnFileString
-        PerformQuery(skInfo.MDLRxnFileString)
+        QueryInfo.ReactionSketchXml = skInfo.NativeReactionXML
+
+        RssHits = PerformRssQuery(skInfo.MDLRxnFileString)
+        DisplayFilteredRss()
 
     End Sub
 
 
     Private Sub btnSearch_Click() Handles btnSearch.Click
 
-        PerformQuery(QueryRxnFileString)
+        DisplayFilteredRss()
 
     End Sub
 
 
-    Private Sub PerformQuery(rxnFileStr As String)
+    ''' <summary>
+    ''' Performs the RSS query based on the provided MDL reactionFile string. No filters are applied at this stage.
+    ''' </summary>
+    '''
+    Private Function PerformRssQuery(rxnFileString As String) As IEnumerable(Of tblExperiments)
 
-        If _suppressQuery = True OrElse String.IsNullOrEmpty(rxnFileStr) Then
-            Exit Sub
+        If String.IsNullOrEmpty(rxnFileString) Then
+            Return Nothing
         End If
 
-        'testing only
-        Dim queryFilters = New RSSQueryFilters With {
-            .UserID = If(cboUsers.SelectedIndex > 0, CStr(cboUsers.SelectedItem), String.Empty),
-            .ProjectName = If(cboProjects.SelectedIndex > 0, CStr(cboProjects.SelectedItem), String.Empty),
-            .ProjectGroupName = If(cboProjGroups.SelectedIndex > 0, CStr(cboProjGroups.SelectedItem), String.Empty),
-            .MinYield = If(txtYield.Value, Double.MinValue),
-            .MinScale = If(txtScale.Value, Double.MinValue)
-        }
+        Dim rxnSub As New RxnSubstructure
+        Dim rssRes = rxnSub.PerformRssQuery(rxnFileString, SearchContext, IsServerQuery)
 
-        ' perform filtered RSS query
-        Dim newRssQuery As New Search(SearchContext, IsServerQuery)
-        Dim hitExp = newRssQuery.FilteredRssQuery(rxnFileStr, queryFilters)
+        ' check for RSS-specific errors
 
-        If Not hitExp.Any Then
-            lstRssHitGroups.DataContext = Nothing
-            Dim finalizedStr = If(IsServerQuery, " - Only FINALIZED server experiments are listed.", "")
-            cbMsgBox.Display("No matching experiments found." + finalizedStr, MsgBoxStyle.OkOnly + MsgBoxStyle.Information, "No hits found")
-            Exit Sub
-        End If
+        Select Case rssRes.ErrorType
+
+            Case RssErrorType.None
+
+                'all good
+
+            Case RssErrorType.NoHitsFound
+
+                'no substructure hits found 
+                lstRssHitGroups.DataContext = Nothing
+
+                Return Nothing
+
+            Case RssErrorType.TooManyRxnHits
+
+                'substructure search has too many fingerprint hits already
+                cbMsgBox.Display("The query reaction sketch is too generic and would result in too many hits. Please refine the sketch and try again.",
+                    MsgBoxStyle.OkOnly + MsgBoxStyle.Exclamation, "Too many hits")
+                lstRssHitGroups.DataContext = Nothing
+
+                Return Nothing
+
+            Case RssErrorType.QueryStructureError
+
+                'substructure search has too many fingerprint hits already
+                cbMsgBox.Display("There was an error with the query reaction sketch. Please check the structure and try again.",
+                    MsgBoxStyle.OkOnly + MsgBoxStyle.Exclamation, "Query structure error")
+                lstRssHitGroups.DataContext = Nothing
+
+                Return Nothing
+
+        End Select
+
+        Return rssRes.ExperimentHits
+
+
+    End Function
+
+
+    Private Sub DisplayFilteredRss()
+
+        ' build query info object based on the current UI settings (sketch and filters)
+        UpdateQueryInfo()
+
+        ' filter the current RSS hits based on the applied filters in the UI (user, project, group, yield and scale filters)
+        Dim newRssQuery As New ReactionQuery(SearchContext, IsServerQuery)
+        Dim filteredRssExp = newRssQuery.FilterRssHits(RssHits, QueryInfo)
 
         'the multi-property grouping criterion is implemented by concatenating the reactant and product InChIKeys 
-        Dim sameRxnGroups = hitExp.GroupBy(Function(item) item.ReactantInChIKey + "/" + item.ProductInChIKey) _
+        Dim sameRxnGroups = filteredRssExp.GroupBy(Function(item) item.ReactantInChIKey + "/" + item.ProductInChIKey) _
                                  .Select(Function(group) New With {
                                      .MaxYield = group.Max(Function(item) item.Yield),
                                      .ExpEntries = group.OrderByDescending(Function(exp) exp.Yield)
@@ -129,28 +169,200 @@ Public Class dlgSearch
             index += 1
         Next
 
-
-        '  Me.UpdateLayout()
-
-        blkResultsTitle.Visibility = Visibility.Visible
-        lstRssHitGroups.Visibility = Visibility.Visible
-
         lstRssHitGroups.DataContext = rssGroups
+
+    End Sub
+
+
+    ''' <summary>
+    ''' Saves the current query parameters (including the reaction sketch and applied filters) 
+    ''' </summary>
+    ''' 
+    Private Sub btnSaveQuery_Click() Handles btnSaveQuery.Click
+
+        Dim saveFileDlg As New Microsoft.Win32.SaveFileDialog With {
+            .Title = "Save the current query",
+            .Filter = "Phoenix ELN queries (*.elnquery)|*.elnquery",
+            .DefaultExt = "elnquery"
+        }
+
+        If saveFileDlg.ShowDialog() Then
+            UpdateQueryInfo() 'ensure that the QueryInfo properties are up to date with the current UI settings before saving
+            ReactionQuery.Save(QueryInfo, saveFileDlg.FileName)
+        End If
+
+    End Sub
+
+
+    ''' <summary>
+    ''' Loads query parameters (including the reaction sketch and applied filters) and performs the query
+    ''' </summary>
+    ''' 
+    Private Sub btnLoadQuery_Click() Handles btnLoadQuery.Click
+
+        Dim openFileDlg As New Microsoft.Win32.OpenFileDialog With {
+            .Title = "Load a stored query",
+            .Filter = "Phoenix ELN queries (*.elnquery)|*.elnquery",
+            .DefaultExt = "elnquery"
+        }
+
+        If openFileDlg.ShowDialog() Then
+            LoadQueryInfo(openFileDlg.FileName)
+        End If
+
+    End Sub
+
+
+    ''' <summary>
+    ''' Resets all filters to their default state ("any") and performs the query with the current sketch and default filters.
+    ''' </summary>
+    ''' 
+    Private Sub btnResetFilters_Click() Handles btnResetFilters.Click
+
+        _suppressUIEvents = True
+
+        cboUsers.SelectedIndex = 0
+        cboProjects.SelectedIndex = 0
+        cboProjGroups.SelectedIndex = 0
+        cboYieldComparer.SelectedIndex = 0
+        txtYield.Value = Nothing
+        cboScaleComparer.SelectedIndex = 0
+        txtScale.Value = Nothing
+
+        _suppressUIEvents = False
+
+        UpdateQueryInfo()
+        DisplayFilteredRss()
+
+    End Sub
+
+
+    ''' <summary>
+    ''' Sets the QueryInfo properties based on the current UI settings (sketch and filters).
+    ''' </summary>
+    ''' 
+    Private Sub UpdateQueryInfo()
+
+        With QueryInfo
+
+            .UserID = If(cboUsers.SelectedIndex > 0, CStr(cboUsers.SelectedItem), String.Empty)
+            .ProjectName = If(cboProjects.SelectedIndex > 0, CStr(cboProjects.SelectedItem), String.Empty)
+            .ProjectGroupName = If(cboProjGroups.SelectedIndex > 0, CStr(cboProjGroups.SelectedItem), String.Empty)
+
+            .YieldValue = If(txtYield.Value, Nothing)
+            .IsYieldSmallerOrEqual = (cboYieldComparer.SelectedIndex = 1)
+
+            .ScaleValue = If(txtScale.Value, Nothing)
+            .IsScaleSmallerOrEqual = (cboScaleComparer.SelectedIndex = 1)
+
+            .IsServerQuery = IsServerQuery  'for determining the context (server vs local) of stored queries
+
+        End With
+
+    End Sub
+
+
+    Private Sub LoadQueryInfo(filePath As String)
+
+        Dim isServerMissing As Boolean = False
+
+        Dim loadedQueryInfo = ReactionQuery.Load(SearchContext, filePath)
+
+        If loadedQueryInfo IsNot Nothing Then
+
+            QueryInfo = loadedQueryInfo
+
+            With QueryInfo
+
+                'determine if the loaded query is server-based but but no server connection is present.
+                If .IsServerQuery AndAlso Not chkServerSearch.IsEnabled Then
+                    cbMsgBox.Display("The loaded query is based on a server search, but no server connection is currently available." +
+                        vbCrLf + vbCrLf + "The filters for user, project and group are reset to default.",
+                        MsgBoxStyle.OkOnly + MsgBoxStyle.Exclamation, "Search context mismatch")
+                    isServerMissing = True
+                Else
+                    _suppressUIEvents = True
+                    chkServerSearch.IsChecked = .IsServerQuery
+                    _suppressUIEvents = False
+                End If
+
+                'populate the user, project and group filters and resets them to "any"
+                InitializeSearchContext(.IsServerQuery AndAlso Not isServerMissing)
+
+                'draw query sketch and get MDL reaction file
+                pnlQuerySketch.ReactionSketch = .ReactionSketchXml
+                RxnFileString = DrawingEditor.GetSketchInfo(.ReactionSketchXml).MDLRxnFileString
+
+                cboYieldComparer.SelectedIndex = If(.IsYieldSmallerOrEqual, 1, 0)
+                txtYield.Value = .YieldValue
+                cboScaleComparer.SelectedIndex = If(.IsScaleSmallerOrEqual, 1, 0)
+                txtScale.Value = .ScaleValue
+
+                'select navigation filters
+
+                If Not isServerMissing Then
+
+                    If .UserID IsNot String.Empty Then
+                        Dim index = usersContainer.Collection.Cast(Of String)().ToList().
+                            FindIndex(Function(x) String.Equals(x, .UserID, StringComparison.OrdinalIgnoreCase))
+                        cboUsers.SelectedIndex = If(index >= 0, index + 2, 0)
+                    End If
+
+                    If .ProjectName IsNot String.Empty Then
+                        Dim index = projectsContainer.Collection.Cast(Of String)().ToList().
+                            FindIndex(Function(x) String.Equals(x, .ProjectName, StringComparison.OrdinalIgnoreCase))
+                        cboProjects.SelectedIndex = If(index >= 0, index + 2, 0)
+                    End If
+
+                    If .ProjectGroupName IsNot String.Empty Then
+                        Dim index = projectGroupsContainer.Collection.Cast(Of String)().ToList().
+                            FindIndex(Function(x) String.Equals(x, .ProjectGroupName, StringComparison.OrdinalIgnoreCase))
+                        cboProjGroups.SelectedIndex = If(index >= 0, index + 2, 0)
+                    End If
+
+                End If
+
+            End With
+
+            RssHits = PerformRssQuery(RxnFileString)
+            DisplayFilteredRss()
+
+
+        Else
+
+            cbMsgBox.Display("The selected file could not be loaded as a query. Please make sure to open a valid .elnquery file.",
+            MsgBoxStyle.OkOnly + MsgBoxStyle.Exclamation, "Error loading query")
+
+        End If
+
+    End Sub
+
+
+    Private Sub InitializeSearchContext(isServerContext As Boolean)
+
+        SearchContext = If(isServerContext, ServerDBContext, LocalDBContext)
+
+        'reset all navigation filters since the search context changes
+        _suppressUIEvents = True
+        cboUsers.SelectedIndex = 0
+        cboProjects.SelectedIndex = 0
+        cboProjGroups.SelectedIndex = 0
+        _suppressUIEvents = False
+
+        ' cascades to update the other filters as well
+        UpdateUsersFilter()
+
+        IsServerQuery = isServerContext
+        QueryInfo.IsServerQuery = isServerContext
 
     End Sub
 
 
     Private Sub chkServerSearch_CheckedChanged() Handles chkServerSearch.Checked, chkServerSearch.Unchecked
 
-        If chkServerSearch.IsInitialized Then
-
-            SearchContext = If(chkServerSearch.IsChecked, ServerDBContext, LocalDBContext)
-            RefreshFilters()
-
-            IsServerQuery = chkServerSearch.IsChecked
-
-            PerformQuery(QueryRxnFileString)
-
+        If chkServerSearch.IsInitialized AndAlso Not _suppressUIEvents Then
+            InitializeSearchContext(chkServerSearch.IsChecked)
+            DisplayFilteredRss()
         End If
 
     End Sub
@@ -158,17 +370,17 @@ Public Class dlgSearch
 
     Private Sub cboUsers_SelectionChanged() Handles cboUsers.SelectionChanged
 
-        If cboUsers.IsInitialized Then
+        If Not _suppressUIEvents AndAlso cboUsers.IsInitialized Then
 
             If cboUsers.SelectedIndex > 0 Then
-                _suppressQuery = True
+                _suppressUIEvents = True
                 cboProjects.SelectedIndex = 0
                 cboProjGroups.SelectedIndex = 0
-                _suppressQuery = False
+                _suppressUIEvents = False
             End If
 
-            RefreshProjectsFilter()
-            ' PerformQuery(QueryRxnFileString)
+            Dim userName = If(cboUsers.SelectedIndex > 0, CType(cboUsers.SelectedValue, String), String.Empty)
+            UpdateProjectsFilter(userName)
 
         End If
 
@@ -177,37 +389,26 @@ Public Class dlgSearch
 
     Private Sub cboProjects_SelectionChanged() Handles cboProjects.SelectionChanged
 
-        If cboProjects.IsInitialized Then
-
-            _suppressQuery = True
+        If Not _suppressUIEvents AndAlso cboProjects.IsInitialized Then
 
             If cboProjects.SelectedIndex > 0 Then
-                cboProjGroups.SelectedIndex = 0
-            Else
-                'no project specified: no project group associated with a specific project can be specified.
-                cboProjGroups.SelectedIndex = 0
+                Dim projectName = cboProjects.SelectedValue
+                UpdateProjGroupsFilter(projectName)
             End If
 
-            _suppressQuery = False
-
-            RefreshProjGroupsFilter()
-            '  PerformQuery(QueryRxnFileString)
+            cboProjGroups.SelectedIndex = 0
 
         End If
 
     End Sub
 
 
-    Private Sub RefreshFilters()
-
-        RefreshUsersFilter()
-        RefreshProjectsFilter()
-        RefreshProjGroupsFilter()
-
-    End Sub
-
-
-    Private Sub RefreshUsersFilter()
+    ''' <summary>
+    ''' Updates the users filter options based on the current search context. The the projects filter is also updated, 
+    ''' as it depends on the user filter selection. 
+    ''' </summary>
+    ''' 
+    Private Sub UpdateUsersFilter()
 
         _cvsUsers.Source = SearchContext.tblUsers _
             .Select(Function(p) p.UserID) _
@@ -216,16 +417,21 @@ Public Class dlgSearch
 
         _cvsUsers.View.Refresh()
 
+        UpdateProjectsFilter("")
+
     End Sub
 
 
-    Private Sub RefreshProjectsFilter()
-
-        Dim parentUserName = If(cboUsers.SelectedIndex > 0, CType(cboUsers.SelectedValue, String), String.Empty)
+    ''' <summary>
+    ''' Updates the projects filter options based on the current users filter selection. 
+    ''' The project groups filter is also updated as it depends on the project filter selection.
+    ''' </summary>
+    ''' 
+    Private Sub UpdateProjectsFilter(parentUserName As String)
 
         If String.IsNullOrEmpty(parentUserName) Then
             _cvsProjects.Source = SearchContext.tblProjects _
-                .Select(Function(p) p.Title) _
+                .Select(Function(p) TitleCase(p.Title)) _
                 .ToList() _
                 .Distinct(StringComparer.OrdinalIgnoreCase) _
                 .OrderBy(Function(t) t) _
@@ -233,7 +439,7 @@ Public Class dlgSearch
         Else
             _cvsProjects.Source = SearchContext.tblProjects _
                 .Where(Function(p) p.User.UserID = parentUserName) _
-                .Select(Function(p) p.Title) _
+                .Select(Function(p) TitleCase(p.Title)) _
                 .ToList() _
                 .Distinct(StringComparer.OrdinalIgnoreCase) _
                 .OrderBy(Function(t) t) _
@@ -242,28 +448,29 @@ Public Class dlgSearch
 
         _cvsProjects.View.Refresh()
 
+        Dim projectName = If(cboProjects.SelectedIndex > 0, CType(cboProjects.SelectedValue, String), String.Empty)
+        UpdateProjGroupsFilter(projectName)
+
     End Sub
 
 
-    Private Sub RefreshProjGroupsFilter()
-
-        Dim parentProjectName = If(cboProjects.SelectedIndex > 0, CType(cboProjects.SelectedValue, String), String.Empty)
+    ''' <summary>
+    ''' Updates the project groups filter options based on the current projects filter selection. 
+    ''' </summary>
+    ''' 
+    Private Sub UpdateProjGroupsFilter(parentProjectName As String)
 
         If String.IsNullOrEmpty(parentProjectName) Then
-            _cvsProjFolders.Source = SearchContext.tblProjFolders _
-                .Select(Function(p) p.FolderName) _
-                .ToList() _
-                .Distinct(StringComparer.OrdinalIgnoreCase) _
-                .OrderBy(Function(t) t) _
-                .ToList()
+            'a project group cannot exist without a parent project
+            _cvsProjFolders.Source = Enumerable.Empty(Of String)()
         Else
             _cvsProjFolders.Source = SearchContext.tblProjFolders _
-                .Where(Function(p) p.Project.Title = parentProjectName) _
-                .Select(Function(p) p.FolderName) _
-                .ToList() _
-                .Distinct(StringComparer.OrdinalIgnoreCase) _
-                .OrderBy(Function(t) t) _
-                .ToList()
+            .Where(Function(p) p.Project.Title.ToLower = parentProjectName.ToLower) _
+            .Select(Function(p) TitleCase(p.FolderName)) _
+            .ToList() _
+            .Distinct(StringComparer.OrdinalIgnoreCase) _
+            .OrderBy(Function(t) t) _
+            .ToList()
         End If
 
         _cvsProjFolders.View.Refresh()
@@ -307,6 +514,18 @@ Public Class dlgSearch
 
     End Sub
 
+
+    ''' <summary>
+    ''' Converts the provided string to title case (first letter of each word capitalized).
+    ''' </summary>
+    ''' 
+    Private Shared Function TitleCase(srcString As String) As String
+
+        Dim ti = CultureInfo.CurrentCulture.TextInfo
+        Return ti.ToTitleCase(srcString)
+
+    End Function
+
 End Class
 
 
@@ -319,6 +538,7 @@ Public Class RssRxnGroup
     Public Property ExpItems As IOrderedEnumerable(Of tblExperiments)
 
 End Class
+
 
 
 

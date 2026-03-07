@@ -79,7 +79,7 @@ Class MainWindow
                 .Save()
             End If
 
-            'Apply settings
+            'Apply application window settings
             If .StartupSize.Width > -1 Then
                 WindowStartupLocation = WindowStartupLocation.Manual
                 Left = .StartupPosition.X
@@ -87,6 +87,9 @@ Class MainWindow
                 Width = .StartupSize.Width
                 Height = .StartupSize.Height
             End If
+
+            'Apply non-modal search dialog setting
+            dlgSearch.IsServerQuery = .IsServerQuery
 
             'Check for pending restore
             If .RestoreFromServer = True Then
@@ -651,8 +654,8 @@ Class MainWindow
             Dispatcher.Invoke(Sub() ServerWarningDelegate(isConnected))
 
             If Not CustomControls.My.MySettings.Default.IsServerOffByUser Then
-                cbMsgBox.Display("The ELN server is unavailable!" + vbCrLf + "Changes currently are not backed up." + vbCrLf + vbCrLf +
-                   "Try to reconnect later ...", MsgBoxStyle.Information, "Server Sync")
+                cbMsgBox.Display("The ELN server is unavailable!" + vbCrLf + "Changes currently are not backed up. " +
+                   "- Try to reconnect later ...", MsgBoxStyle.Information, "Server Sync")
             End If
 
         Else
@@ -1061,6 +1064,7 @@ Class MainWindow
         With CustomControls.My.MySettings.Default
             .StartupPosition = New System.Drawing.Point(Left, Top)
             .StartupSize = New System.Drawing.Size(Width, Height)
+            .IsServerQuery = dlgSearch.IsServerQuery
             .Save()
         End With
 
@@ -1548,9 +1552,7 @@ Class MainWindow
             .LocalDBContext = DBContext
             .ServerDBContext = ServerDBContext
             With CustomControls.My.MySettings.Default
-                dlgSearch.IsServerQuery = .IsServerQuery
                 searchDlg.Show()
-                .IsServerQuery = dlgSearch.IsServerQuery
             End With
         End With
 

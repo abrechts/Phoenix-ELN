@@ -1,7 +1,7 @@
-﻿
-Imports com.epam.indigo
+﻿Imports com.epam.indigo
 Imports ElnBase.ELNEnumerations
 Imports ElnCoreModel
+Imports Microsoft.EntityFrameworkCore
 
 ' * Performance notes: 
 ' * MatchRxnFingerprint: 36 ms for 100'000 comparisons (comparison code only, no LINQ database access overhead)
@@ -11,7 +11,7 @@ Imports ElnCoreModel
 Public Enum RssErrorType
 
     None
-    TooManyHits
+    TooManyRxnHits
     QueryStructureError
     NoHitsFound
 
@@ -31,23 +31,23 @@ Public Class RxnSubstructure
 
 
     ''' <summary>
-    ''' Sets or gets the maximum number of fingerprint hits before too many hits are reported.
+    ''' Sets or gets the maximum number of fingerprint hits before too many matching reaction hits are reported.
     ''' </summary>
     ''' 
     Public Shared Property FingerPrintCutOffLimit As Integer = 500
 
 
     ''' <summary>
-    ''' Gets all *finalized* experiment entries with a reaction sketch containing the specified substructure reaction.
+    ''' Gets all experiment entries with a reaction sketch containing the specified substructure reaction.
     ''' </summary>
     ''' <param name="queryRxnStr">MDL reaction file string of the query substructure reaction to subMatch.</param>
     ''' <param name="dbContext">Database context for query.</param>
-    ''' <param Name="fpOnly">Optional: If set to true, the reaction fingerprints are not confirmed by subsequent reaction substructure  
-    ''' tests. This is an extremely fast search, but most likely will contain some false positives. E.g. chiral query centers are 
-    ''' ignored in this mode.</param>
-    ''' <returns>Query hits as IEnumerable of tblExperiments, or empty IEnumerable if not hits found.</returns>
+    ''' <returns>
+    ''' Query hits as IEnumerable of tblExperiments, or empty IEnumerable if not hits found.
+    ''' </returns>
     ''' 
-    Public Function PerformRssQuery(queryRxnStr As String, srcExperiments As IEnumerable(Of tblExperiments), isFromServer As Boolean) As RssQueryResult
+
+    Public Function PerformRssQuery(queryRxnStr As String, searchContext As ElnDbContext, isFromServer As Boolean) As RssQueryResult
 
         Dim rssResult As New RssQueryResult
 
@@ -64,44 +64,67 @@ Public Class RxnSubstructure
 
         Dim queryFp = queryRxnObj.fingerprint("sub")
 
-        Dim fpRes As IEnumerable(Of tblExperiments)
+        ' Load only ID + RxnFingerprint (lightweight)
+        Dim query As IQueryable(Of Object)
+
         If Not isFromServer Then
-            fpRes = From exp In srcExperiments Where MatchRxnFingerprint(exp.RxnFingerprint, queryFp)
+
+            query = searchContext.tblExperiments.Select(Function(exp) New With {exp.ExperimentID, exp.RxnFingerprint})
+
         Else
-            fpRes = From exp In srcExperiments Where exp.WorkflowState = WorkflowStatus.Finalized AndAlso
-              MatchRxnFingerprint(exp.RxnFingerprint, queryFp)
+
+            query = searchContext.tblExperiments _
+            .Where(Function(exp) exp.WorkflowState = WorkflowStatus.Finalized) _
+            .Select(Function(exp) New With {exp.ExperimentID, exp.RxnFingerprint})
+
         End If
 
-        If fpRes.Any Then
+        ' Filter on lightweight projections to obtain matching experiment IDs (in-memory since MatchRxnFingerprint is not translatable to SQL)
+        Dim fpMatchIds = query.AsEnumerable() _
+            .Where(Function(x) MatchRxnFingerprint(x.RxnFingerprint, queryFp)) _
+            .Select(Function(x) x.ExperimentID) _
+            .ToList()
 
-            If fpRes.Count <= FingerPrintCutOffLimit Then
+        Dim hitCount = fpMatchIds.Count
 
-                'confirm fingerprint hits by substructure match
-                Dim rssRes = From exp In fpRes Where MatchRxnSubstructure(exp.RxnIndigoObj, queryRxnObj)
+        If hitCount > 0 Then
+
+            If hitCount <= FingerPrintCutOffLimit Then
+
+                ' Now load FULL entries only for matched IDs (applying asNoTracking since readonly, as this improves performance)
+                Dim fullFingerprintEntries = searchContext.tblExperiments.
+                    Where(Function(exp) fpMatchIds.Contains(exp.ExperimentID)).
+                    AsNoTracking().
+                    ToList
+
+                ' Confirm with substructure match
+                Dim rssRes = fullFingerprintEntries.Where(Function(exp) MatchRxnSubstructure(exp.RxnIndigoObj, queryRxnObj))
+
                 With rssResult
                     .ExperimentHits = rssRes
                     .ErrorType = RssErrorType.None
                 End With
+
                 Return rssResult
 
             Else
 
-                'maximum fingerprint hit limit reached
                 With rssResult
                     .ExperimentHits = Nothing
-                    .ErrorType = RssErrorType.TooManyHits
+                    .ErrorType = RssErrorType.TooManyRxnHits
                 End With
+
                 Return rssResult
 
             End If
 
         Else
 
-            'no fingerprint hits found
             With rssResult
-                .ExperimentHits = fpRes 'empty IEnumerable
+                .ExperimentHits = New List(Of tblExperiments)()
                 .ErrorType = RssErrorType.NoHitsFound
             End With
+
             Return rssResult
 
         End If
@@ -241,10 +264,10 @@ Public Class RxnSubstructure
     ''' 
     Private Function UniqueMatchCount(srcComponent As IndigoObject, queryFragment As IndigoObject) As Integer
 
-        Dim substrMatcher As IndigoObject = IndigoBase.substructureMatcher(srcComponent)
+        Dim substructureMatcher As IndigoObject = IndigoBase.substructureMatcher(srcComponent)
         Dim uniqueCount As Integer = 0
 
-        For Each subMatch As IndigoObject In substrMatcher.iterateMatches(queryFragment)
+        For Each subMatch As IndigoObject In substructureMatcher.iterateMatches(queryFragment)
 
             Dim found As Boolean = False
 
@@ -353,6 +376,18 @@ Public Class RssQueryResult
     Public Property ErrorType As RssErrorType
 
 End Class
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
