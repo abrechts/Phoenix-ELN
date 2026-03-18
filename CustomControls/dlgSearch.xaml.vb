@@ -28,8 +28,6 @@ Public Class dlgSearch
     Private Property SearchContext As ElnDbContext
 
     Private Property QueryInfo As RSSQueryParameters
-    Private Property RxnFileString As String
-
     Private Property RssHits As IEnumerable(Of tblExperiments)
 
     Private _cvsUsers As CollectionViewSource
@@ -66,13 +64,6 @@ Public Class dlgSearch
         QueryInfo.ReactionSketchXml = skInfo.NativeReactionXML
 
         RssHits = PerformRssQuery(skInfo.MDLRxnFileString)
-        DisplayFilteredRss()
-
-    End Sub
-
-
-    Private Sub btnSearch_Click() Handles btnSearch.Click
-
         DisplayFilteredRss()
 
     End Sub
@@ -133,6 +124,11 @@ Public Class dlgSearch
 
 
     Private Sub DisplayFilteredRss()
+
+        ' exit if no query sketch present
+        If RssHits Is Nothing Then
+            Exit Sub
+        End If
 
         ' build query info object based on the current UI settings (sketch and filters)
         UpdateQueryInfo()
@@ -231,7 +227,6 @@ Public Class dlgSearch
 
         _suppressUIEvents = False
 
-        UpdateQueryInfo()
         DisplayFilteredRss()
 
     End Sub
@@ -265,6 +260,7 @@ Public Class dlgSearch
     Private Sub LoadQueryInfo(filePath As String)
 
         Dim isServerMissing As Boolean = False
+        Dim rxnFileStr As String
 
         Dim loadedQueryInfo = ReactionQuery.Load(SearchContext, filePath)
 
@@ -291,7 +287,7 @@ Public Class dlgSearch
 
                 'draw query sketch and get MDL reaction file
                 pnlQuerySketch.ReactionSketch = .ReactionSketchXml
-                RxnFileString = DrawingEditor.GetSketchInfo(.ReactionSketchXml).MDLRxnFileString
+                rxnFileStr = DrawingEditor.GetSketchInfo(.ReactionSketchXml).MDLRxnFileString
 
                 cboYieldComparer.SelectedIndex = If(.IsYieldSmallerOrEqual, 1, 0)
                 txtYield.Value = .YieldValue
@@ -324,7 +320,7 @@ Public Class dlgSearch
 
             End With
 
-            RssHits = PerformRssQuery(RxnFileString)
+            RssHits = PerformRssQuery(rxnFileStr)
             DisplayFilteredRss()
 
 
@@ -349,11 +345,11 @@ Public Class dlgSearch
         cboProjGroups.SelectedIndex = 0
         _suppressUIEvents = False
 
-        ' cascades to update the other filters as well
-        UpdateUsersFilter()
-
         IsServerQuery = isServerContext
         QueryInfo.IsServerQuery = isServerContext
+
+        ' cascades to update the other filters as well
+        UpdateUsersFilter()
 
     End Sub
 
@@ -361,8 +357,10 @@ Public Class dlgSearch
     Private Sub chkServerSearch_CheckedChanged() Handles chkServerSearch.Checked, chkServerSearch.Unchecked
 
         If chkServerSearch.IsInitialized AndAlso Not _suppressUIEvents Then
+
             InitializeSearchContext(chkServerSearch.IsChecked)
             DisplayFilteredRss()
+
         End If
 
     End Sub
@@ -382,6 +380,8 @@ Public Class dlgSearch
             Dim userName = If(cboUsers.SelectedIndex > 0, CType(cboUsers.SelectedValue, String), String.Empty)
             UpdateProjectsFilter(userName)
 
+            DisplayFilteredRss()
+
         End If
 
     End Sub
@@ -397,7 +397,68 @@ Public Class dlgSearch
             End If
 
             cboProjGroups.SelectedIndex = 0
+            DisplayFilteredRss()
 
+        End If
+
+    End Sub
+
+
+    Private Sub cboProjectGroups_SelectionChanged() Handles cboProjGroups.SelectionChanged
+
+        If Not _suppressUIEvents AndAlso cboProjGroups.IsInitialized Then
+            DisplayFilteredRss()
+        End If
+
+    End Sub
+
+
+    Private Sub cboYieldComparer_SelectionChanged() Handles cboYieldComparer.SelectionChanged
+
+        If Not _suppressUIEvents AndAlso cboYieldComparer.IsInitialized Then
+            DisplayFilteredRss()
+        End If
+
+    End Sub
+
+
+    Private Sub cboScaleComparer_SelectionChanged() Handles cboScaleComparer.SelectionChanged
+
+        If Not _suppressUIEvents AndAlso cboScaleComparer.IsInitialized Then
+            DisplayFilteredRss()
+        End If
+
+    End Sub
+
+
+    ''' <summary>
+    ''' Refreshes the displayed RSS hits when the user finishes editing the yield or scale filter values. 
+    ''' </summary>
+    ''' 
+    Private Sub Filters_LostKeyboardFocus() Handles txtYield.LostKeyboardFocus, txtScale.LostKeyboardFocus
+
+        With QueryInfo
+            If Not Equals(.YieldValue, txtYield.Value) OrElse Not Equals(.ScaleValue, txtScale.Value) Then
+                DisplayFilteredRss()
+            End If
+        End With
+
+    End Sub
+
+
+    ''' <summary>
+    ''' Finalizes the editing of the yield or scale filter values
+    ''' </summary>
+    ''' 
+    Private Sub Filters_PreviewKeyDown(sender As Object, e As KeyEventArgs) Handles txtYield.PreviewKeyDown, txtScale.PreviewKeyDown
+
+        If e.Key = Key.Enter OrElse e.Key = Key.Return Then
+            With QueryInfo
+                If Not Equals(.YieldValue, txtYield.Value) OrElse Not Equals(.ScaleValue, txtScale.Value) Then
+                    DisplayFilteredRss()
+                End If
+                Keyboard.ClearFocus()
+            End With
         End If
 
     End Sub
@@ -484,8 +545,6 @@ Public Class dlgSearch
     ''' 
     Private Sub lstHitGroups_PreviewMouseWheel(sender As Object, e As MouseWheelEventArgs) Handles lstRssHitGroups.PreviewMouseWheel
 
-        e.Handled = True
-
         Dim e2 As New MouseWheelEventArgs(e.MouseDevice, e.Timestamp, e.Delta) With {
             .RoutedEvent = ListBox.MouseWheelEvent,
             .Source = e.Source
@@ -538,6 +597,10 @@ Public Class RssRxnGroup
     Public Property ExpItems As IOrderedEnumerable(Of tblExperiments)
 
 End Class
+
+
+
+
 
 
 

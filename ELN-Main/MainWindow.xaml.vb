@@ -6,6 +6,7 @@ Imports ElnBase
 Imports ElnBase.ELNEnumerations
 Imports ElnCoreModel
 Imports Microsoft.EntityFrameworkCore
+Imports Microsoft.EntityFrameworkCore.Infrastructure.Internal
 Imports Microsoft.Win32
 
 Class MainWindow
@@ -1126,10 +1127,13 @@ Class MainWindow
     ''' 
     Private Sub ExpList_RequestOpenExperiment(sender As Object, targetExp As tblExperiments, isFromServer As Boolean)
 
-        If Not isFromServer Then
+        If targetExp Is Nothing Then
+            Exit Sub
+        End If
 
-            '-- local experiment
+        If Not isFromServer AndAlso targetExp.UserID = CType(Me.DataContext, tblUsers).UserID Then
 
+            '-- local experiment and same current user as of targetExp
             expNavTree.SelectExperiment(targetExp)
 
         Else

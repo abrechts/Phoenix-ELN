@@ -1,12 +1,12 @@
 ﻿Imports System.Windows
 Imports System.Windows.Controls
 Imports System.Windows.Input
+Imports System.Windows.Media
 Imports ElnCoreModel
 
 Public Class RssItemGroup
 
     Public Shared Event RequestOpenExperiment(sender As Object, expEntry As tblExperiments, isFromServer As Boolean)
-
 
     Public Sub New()
 
@@ -16,7 +16,6 @@ Public Class RssItemGroup
         ' Add any initialization after the InitializeComponent() call.
 
     End Sub
-
 
     Private Sub lstRssHits_PreviewMouseUp(sender As Object, e As MouseButtonEventArgs) Handles lstRssHits.PreviewMouseUp
 
@@ -32,6 +31,18 @@ Public Class RssItemGroup
 
     End Sub
 
+
+    ''' <summary>
+    ''' Allows to scroll using the mouse wheel within the itemtemplate.
+    ''' </summary>
+    '''
+    Private Sub InnerScrollViewer_PreviewMouseWheel(sender As Object, e As MouseWheelEventArgs)
+
+        Dim scroller As ScrollViewer = sender
+        scroller.ScrollToVerticalOffset(scroller.VerticalOffset - e.Delta)
+        e.Handled = True
+
+    End Sub
 
 
     Private Sub Canvas_DataContextChanged(sender As Object, e As DependencyPropertyChangedEventArgs)

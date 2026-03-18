@@ -91,11 +91,9 @@ Public Class RxnSubstructure
 
             If hitCount <= FingerPrintCutOffLimit Then
 
-                ' Now load FULL entries only for matched IDs (applying asNoTracking since readonly, as this improves performance)
+                ' Now load FULL entries only for matched IDs
                 Dim fullFingerprintEntries = searchContext.tblExperiments.
-                    Where(Function(exp) fpMatchIds.Contains(exp.ExperimentID)).
-                    AsNoTracking().
-                    ToList
+                    Where(Function(exp) fpMatchIds.Contains(exp.ExperimentID)).ToList
 
                 ' Confirm with substructure match
                 Dim rssRes = fullFingerprintEntries.Where(Function(exp) MatchRxnSubstructure(exp.RxnIndigoObj, queryRxnObj))

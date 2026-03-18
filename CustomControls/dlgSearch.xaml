@@ -14,7 +14,7 @@
 
     <Window.Resources>
 
-        <DataTemplate x:Key="expTreeItem">
+        <DataTemplate x:Key="rssGroupItem">
             <local:RssItemGroup/>
         </DataTemplate>
 
@@ -214,7 +214,7 @@
                         <Border Grid.Column="2" Grid.Row="1" CornerRadius="6" BorderBrush="#FF54A2D1" BorderThickness="1" Padding="3"  
                            VerticalAlignment="Top" Margin="0,6,0,6" Width="420" Height="150">
                             
-                            <local:SketchAreaRSS x:Name="pnlQuerySketch" ReactionSketch="{Binding}" ShrinkThreshold="700"/>
+                            <local:SketchAreaRSS x:Name="pnlQuerySketch" ReactionSketch="{Binding}" ShrinkThreshold="650"/>
                             
                         </Border>
 
@@ -273,8 +273,6 @@
 
                             <CheckBox x:Name="chkServerSearch" Content="Server Search" Foreground="white" HorizontalAlignment="Center"/>
 
-                            <Button x:Name="btnSearch" Content="Search" HorizontalAlignment="left" Padding="20,2,20,3" Margin="24,10,0,4"/>
-
                         </StackPanel>
 
                     </Grid>
@@ -297,13 +295,14 @@
                         <Separator Margin="0,2,0,2" Background="#FFA1A0A0" Height="1"/>
                     </StackPanel>
                   
-                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" MinHeight="80" Padding="4">
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"  MinHeight="80" Padding="4" 
+                        Style="{StaticResource DarkScrollViewerStyle}" >
 
                         <Grid>
 
-                            <ListBox x:Name="lstRssHitGroups" ItemsSource="{Binding}" ItemTemplate="{StaticResource expTreeItem}" BorderThickness="0"
-                                ItemContainerStyle="{StaticResource ListBoxNoHighlight}"  HorizontalAlignment="left" MinWidth="400" Padding="6"
-                                HorizontalContentAlignment="left" ScrollViewer.VerticalScrollBarVisibility="Disabled" Background="Transparent" />
+                            <ListBox x:Name="lstRssHitGroups" ItemsSource="{Binding}" ItemTemplate="{StaticResource rssGroupItem}" BorderThickness="0"
+                                ItemContainerStyle="{StaticResource ListBoxNoHighlight}"  MinWidth="400" Padding="6" HorizontalContentAlignment="Stretch"
+                                ScrollViewer.HorizontalScrollBarVisibility="Disabled" Background="Transparent"/>
 
                             <TextBlock x:Name="blkNoHitsFound" Text="---  nothing found  ---" Foreground="LightGray" HorizontalAlignment="Center"
                                 VerticalAlignment="top" Margin="0,60,0,0" FontStyle="Italic" FontSize="11"  d:Visibility="Visible"
