@@ -11,7 +11,7 @@ Public Class SolventContent
 
         Dim solventEntry = CType(Me.DataContext, tblSolvents)
 
-        If solventEntry.ProtocolItem.Experiment.WorkflowState = WorkflowStatus.Finalized Then
+        If solventEntry?.ProtocolItem.Experiment.WorkflowState = WorkflowStatus.Finalized Then
             With solventEntry
                 If .Density IsNot Nothing AndAlso .IsDisplayAsWeight Then
                     ToolTip = .Name + " - " + "Density: " + Format(.Density, "0.00")

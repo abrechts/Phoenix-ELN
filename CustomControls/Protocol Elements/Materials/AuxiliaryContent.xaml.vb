@@ -12,7 +12,7 @@ Public Class AuxiliaryContent
 
         Dim auxiliaryEntry = CType(Me.DataContext, tblAuxiliaries)
 
-        If auxiliaryEntry.ProtocolItem.Experiment.WorkflowState = WorkflowStatus.Finalized Then
+        If auxiliaryEntry?.ProtocolItem.Experiment.WorkflowState = WorkflowStatus.Finalized Then
             With auxiliaryEntry
                 If .Density IsNot Nothing Then
                     ToolTip = .Name + " - " + "Density: " + Format(.Density, "0.00")

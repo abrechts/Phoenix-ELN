@@ -20,7 +20,7 @@ Public Class ReagentContent
 
         Dim reagentEntry = CType(Me.DataContext, tblReagents)
 
-        If reagentEntry.ProtocolItem.Experiment.WorkflowState = WorkflowStatus.Finalized Then
+        If reagentEntry?.ProtocolItem.Experiment.WorkflowState = WorkflowStatus.Finalized Then
             With reagentEntry
                 Dim mwStr = "MW: " + Format(.MolecularWeight, "0.00")
                 Dim densityStr = If(.Density IsNot Nothing AndAlso .IsDisplayAsVolume,
