@@ -655,8 +655,8 @@ Class MainWindow
             Dispatcher.Invoke(Sub() ServerWarningDelegate(isConnected))
 
             If Not CustomControls.My.MySettings.Default.IsServerOffByUser Then
-                cbMsgBox.Display("The ELN server is unavailable!" + vbCrLf + "Changes currently are not backed up. " +
-                   "- Try to reconnect later ...", MsgBoxStyle.Information, "Server Sync")
+                cbMsgBox.Display("The ELN server is unavailable!" + vbCrLf + "Changes currently are not backed up. " + vbCrLf + vbCrLf +
+                   "Try to reconnect later.", MsgBoxStyle.Information, "Server Sync")
             End If
 
         Else

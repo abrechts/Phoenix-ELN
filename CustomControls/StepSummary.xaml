@@ -24,7 +24,7 @@
         </CollectionViewSource>
 
         <DataTemplate x:Key="expTreeItem">
-            <local:ExpTreeHeader Margin="0,-1"/>
+            <local:ExpTreeHeader Margin="0,-1" FontSize="11.5"/>
         </DataTemplate>
 
     </UserControl.Resources>
@@ -156,14 +156,14 @@
 
                 </Grid>
 
-                <Grid>
+                <Grid Margin="0,2,0,0">
 
                     <TextBlock Text="- no items present so far -" Foreground="#FF6C6C6C" Margin="0,7,0,0" VerticalAlignment="Top" 
                         HorizontalAlignment="Center"/>
 
                     <ListBox x:Name="lstStepExperiments" SelectionMode="Single" Background="whitesmoke" BorderThickness="0,1" BorderBrush="#FF45A1FD"
                         FocusVisualStyle="{x:Null}"              
-                        Grid.IsSharedSizeScope="true" AllowDrop="false" Margin="4,3,4,0"
+                        Grid.IsSharedSizeScope="true" AllowDrop="false" Margin="4,3,4,0" Padding="0,4,0,0"
                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                         VirtualizingStackPanel.IsVirtualizing="False" MinHeight="25"
                         ItemsSource="{Binding Source={StaticResource cvsStepExperiments}}"

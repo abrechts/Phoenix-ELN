@@ -54,6 +54,8 @@ Public Class dlgSearch
             chkServerSearch.IsChecked = IsServerQuery
         End If
 
+        blkNoHitsFound.Text = "---  unspecified reaction substructure  ---"
+
         UpdateUsersFilter()
 
     End Sub
@@ -62,9 +64,12 @@ Public Class dlgSearch
     Private Sub pnlQuerySketch_SketchEdited(sender As Object, skInfo As SketchResults) Handles pnlQuerySketch.SketchEdited
 
         QueryInfo.ReactionSketchXml = skInfo.NativeReactionXML
+        btnSaveQuery.IsEnabled = True
 
         RssHits = PerformRssQuery(skInfo.MDLRxnFileString)
         DisplayFilteredRss()
+
+        blkNoHitsFound.Text = "---  no reactions found  ---"    'invisible by default, shown when a query returns no hits
 
     End Sub
 
@@ -176,6 +181,10 @@ Public Class dlgSearch
     ''' 
     Private Sub btnSaveQuery_Click() Handles btnSaveQuery.Click
 
+        If String.IsNullOrEmpty(QueryInfo.ReactionSketchXml) Then
+            Exit Sub 'the substructure is required
+        End If
+
         Dim saveFileDlg As New Microsoft.Win32.SaveFileDialog With {
             .Title = "Save the current query",
             .Filter = "Phoenix ELN queries (*.elnquery)|*.elnquery",
@@ -203,7 +212,11 @@ Public Class dlgSearch
         }
 
         If openFileDlg.ShowDialog() Then
+
             LoadQueryInfo(openFileDlg.FileName)
+            btnSaveQuery.IsEnabled = True
+            blkNoHitsFound.Text = "---  no reactions found  ---"    'invisible by default, shown when a query returns no hits
+
         End If
 
     End Sub
@@ -556,9 +569,8 @@ Public Class dlgSearch
 
 
     Private Sub icoInfo_PreviewMouseUp() Handles icoInfo.PreviewMouseUp
-
-        Dim info As New ProcessStartInfo("https://abrechts.github.io/phoenix-eln-help.github.io/pages/ReactionSearches.html")
-        info.UseShellExecute = True
+        Dim info As New ProcessStartInfo("https://abrechts.github.io/phoenix-eln-help.github.io/pages/ReactionSearches.html") With {
+            .UseShellExecute = True}
         Process.Start(info)
 
     End Sub

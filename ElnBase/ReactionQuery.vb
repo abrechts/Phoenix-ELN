@@ -1,5 +1,6 @@
 ﻿Imports System.IO
 Imports System.Text.Json
+Imports ElnBase.ELNEnumerations
 Imports ElnCoreModel
 
 Public Class ReactionQuery
@@ -22,8 +23,6 @@ Public Class ReactionQuery
     Public Property SearchContext As ElnDbContext   'assigned rdoLocal and rdoServer setting
 
     Public Property IsServerQuery As Boolean = False
-
-    '   Public Property RssError As RssErrorType = RssErrorType.None
 
     Public Shared Property LastFilterValidationError As Boolean = False
 
@@ -84,6 +83,9 @@ Public Class ReactionQuery
             End If
 
         End With
+
+        ' -- generally finalized only experiments to display
+        rssHits = rssHits.Where(Function(x) x.WorkflowState = WorkflowStatus.Finalized)
 
         Return rssHits
 

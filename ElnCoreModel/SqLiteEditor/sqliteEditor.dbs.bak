@@ -492,8 +492,15 @@
 		<entity schema="Default" name="sync_Tombstone" color="3986C1" x="361" y="380" />
 		<entity schema="Default" name="tblProjFolders" color="3986C1" x="684" y="304" />
 		<entity schema="Default" name="tblProjects" color="3986C1" x="665" y="57" />
-		<entity schema="Default" name="tblExperiments" color="3986C1" x="969" y="57" />
 		<entity schema="Default" name="tblProtocolItems" color="3986C1" x="1292" y="304" />
+		<entity schema="Default" name="tblExperiments" color="3986C1" x="969" y="57" />
+		<browser id="4819fb99-5d1b-45f8-884d-d413b17132c7" name="tblExperiments" confirm_updates="y" >
+			<browse_table schema="Default" entity="tblExperiments" fk_out="n" x="20" y="20" width="402" height="392" >
+				<browse_table schema="Default" entity="tblProtocolItems" fk="FK_tblProtocolItems tblExperiments" fk_out="y" x="462" y="20" width="500" height="350" >
+					<browse_table schema="Default" entity="tblReagents" fk="FK_tblReagents tblProtocolItems" fk_out="y" x="1002" y="20" width="500" height="350" />
+				</browse_table>
+			</browse_table>
+		</browser>
 	</layout>
 	<layout name="Protocol Elements" id="Layout-16d" show_column_type="y" show_relation="cascade" >
 		<entity schema="Default" name="tblProducts" color="3986C1" x="855" y="342" />
