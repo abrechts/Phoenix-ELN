@@ -120,24 +120,13 @@
                     <ToolBar Style="{StaticResource ToolBarWithoutOverflowBarStyle}"  Background="Transparent" HorizontalAlignment="right"
                         BorderThickness="0" Margin="8,4,12,2">
 
-                        <Separator/>
-
                         <Button x:Name="btnResetFilters" Padding="2,2,3,3" Foreground="White" ToolTip="Reset all filters to their default values">
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center" >
                                 <ContentControl Content="{StaticResource icoDeleteFilter}" Height="16" Margin="1,0,3,-1"/>
-                                <TextBlock Text="Reset" VerticalAlignment="Center" />
+                                <TextBlock Text="Reset Filters" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
 
-                        <Separator/>
-
-                        <Button x:Name="btnRefresh" Padding="2,2,3,3" Foreground="White" ToolTip="Search the complete database again to include the latest changes to it.">
-                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center" >
-                                <ContentControl Content="{StaticResource icoDatabaseRunning_Dark}" Height="16" Margin="1,0,2,-1"/>
-                                <TextBlock Text="Refresh" VerticalAlignment="Center" />
-                            </StackPanel>
-                        </Button>
-   
                     </ToolBar>
 
                 </Grid>
@@ -162,8 +151,8 @@
 
                             <!-- users ComboBox -->
 
-                            <ComboBox x:Name="cboUsers" Style="{StaticResource DarkComboBoxStyle}" Margin="0,0,0,5" MaxHeight="300"
-                                SelectedIndex="0" MinWidth="100" VerticalContentAlignment="Center" Grid.IsSharedSizeScope="True">
+                            <ComboBox x:Name="cboUsers" Style="{StaticResource DarkComboBoxStyle}" Margin="0,0,0,5" MaxHeight="300" BorderBrush="#FF9B9B9B"
+                                SelectedIndex="0" MinWidth="100" VerticalContentAlignment="Center" Grid.IsSharedSizeScope="True" >
 
                                 <ComboBox.ItemsSource>
                                     <CompositeCollection>
@@ -189,7 +178,7 @@
 
                             <!-- projects ComboBox -->
 
-                            <ComboBox x:Name="cboProjects" Style="{StaticResource DarkComboBoxStyle}" Margin="0,0,0,5"
+                            <ComboBox x:Name="cboProjects" Style="{StaticResource DarkComboBoxStyle}" Margin="0,0,0,5" BorderBrush="#FF9B9B9B"
                                SelectedIndex="0" MaxHeight="300">
 
                                 <ComboBox.ItemsSource>
@@ -216,7 +205,7 @@
 
                             <!-- project group ComboBox -->
 
-                            <ComboBox x:Name="cboProjGroups" Style="{StaticResource DarkComboBoxStyle}" SelectedIndex="0" MaxHeight="300"
+                            <ComboBox x:Name="cboProjGroups" Style="{StaticResource DarkComboBoxStyle}" SelectedIndex="0" MaxHeight="300" BorderBrush="#FF9B9B9B"
                                IsEnabled="{Binding ElementName=cboProjects, Path=SelectedIndex, Converter={StaticResource IntToBooleanConv}}" Margin="0,0,0,6">
 
                                 <ComboBox.ItemsSource>
@@ -254,7 +243,7 @@
 
                             <!--yield filter-->
 
-                            <Border BorderBrush="#FF01ABE3" BorderThickness="1" CornerRadius="4" Padding="4" Margin="0,6,0,4" Background="Transparent" >
+                            <Border BorderBrush="#FF9B9B9B" BorderThickness="1" CornerRadius="4" Padding="4" Margin="0,6,0,4" Background="Transparent" >
 
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="left">
 
@@ -279,7 +268,7 @@
 
                             <!--scale filter-->
 
-                            <Border BorderBrush="#FF01ABE3" BorderThickness="1" CornerRadius="4" Padding="4" Margin="0,0,0,10" Background="transparent">
+                            <Border BorderBrush="#FF9B9B9B" BorderThickness="1" CornerRadius="4" Padding="4" Margin="0,0,0,10" Background="transparent">
 
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="left">
 
@@ -303,7 +292,8 @@
 
                             </Border>
 
-                            <CheckBox x:Name="chkServerSearch" Content="Server Search" Foreground="white" HorizontalAlignment="Center"/>
+                           
+                            <CheckBox x:Name="chkServerSearch" Content="Server Search" Foreground="white" HorizontalAlignment="Center" Margin="0,8,0,0"/>
 
                         </StackPanel>
 
@@ -313,7 +303,9 @@
 
             </StackPanel>
 
-            <Border Grid.Row="1" Margin="0,0,0,14" HorizontalAlignment="Center">
+            <!--Results section-->
+
+            <Border Margin="0,0,0,14" Grid.Row="1" HorizontalAlignment="Center">
 
                 <Grid>
                     <Grid.RowDefinitions>
@@ -323,13 +315,20 @@
 
                     <StackPanel Grid.Row="0">
                         <TextBlock x:Name="blkResultsTitle" Text="Results" HorizontalAlignment="Center" FontWeight="Bold" 
-                                FontSize="13" Foreground="LightBlue" FontStyle="Italic"/>
+                                    FontSize="13" Foreground="LightBlue" FontStyle="Italic"/>
                         <TextBlock Text="finalized experiments" Foreground="lightgray" HorizontalAlignment="Center" FontSize="11" FontStyle="Italic" Margin="0,-1,0,0" />
                         <Separator Margin="0,3,0,6" Background="#FFA1A0A0" Height="1"/>
                     </StackPanel>
 
+                    <ComboBox x:Name="cboSorting" Style="{StaticResource DarkComboBoxStyle}" SelectedIndex="0" HorizontalAlignment="Right" 
+                      VerticalAlignment="Top" Padding="6,1,6,4" Margin="0,6,2,0" FontSize="11.5" BorderThickness="0">
+                        <ComboBoxItem Content="sort by yield"/>
+                        <ComboBoxItem Content="sort by scale"/>
+                    </ComboBox>
+
+
                     <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" MinHeight="80" Padding="4,0,4,4" 
-                        Style="{StaticResource DarkScrollViewerStyle}" >
+                            Style="{StaticResource DarkScrollViewerStyle}" >
 
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -338,22 +337,20 @@
                             </Grid.ColumnDefinitions>
 
                             <ListBox x:Name="lstRssHitGroups" ItemsSource="{Binding}" ItemTemplate="{StaticResource rssGroupItem}" BorderThickness="0"
-                                ItemContainerStyle="{StaticResource ListBoxNoHighlight}" MinWidth="400" Padding="6" HorizontalContentAlignment="Stretch"
-                                ScrollViewer.HorizontalScrollBarVisibility="Disabled" Background="Transparent" Grid.ColumnSpan="2" />
+                                    ItemContainerStyle="{StaticResource ListBoxNoHighlight}" MinWidth="400" Padding="6" HorizontalContentAlignment="Stretch"
+                                    ScrollViewer.HorizontalScrollBarVisibility="Disabled" Background="Transparent" Grid.ColumnSpan="2" />
 
                             <TextBlock x:Name="blkNoHitsFound" Text="---  no matches found  ---" Foreground="#FFFDCE79" HorizontalAlignment="Left"
-                                VerticalAlignment="Top" Margin="147,80,0,0" FontStyle="Italic" FontSize="11"  d:Visibility="Visible" Opacity="0.95"
-                                Visibility="{Binding ElementName=lstRssHitGroups, Path=Items.Count,
-                                  Converter={StaticResource intToVisibilityConv},ConverterParameter=invert}"/>
+                                    VerticalAlignment="Top" Margin="147,80,0,0" FontStyle="Italic" FontSize="11.5"  d:Visibility="Visible" Opacity="0.95"
+                                    Visibility="{Binding ElementName=lstRssHitGroups, Path=Items.Count,
+                                      Converter={StaticResource intToVisibilityConv},ConverterParameter=invert}"/>
 
                         </Grid>
-
+                        
                     </ScrollViewer>
-
+                    
                 </Grid>
-
             </Border>
-
         </Grid>
 
     </Grid>

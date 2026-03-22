@@ -54,6 +54,8 @@ Public Class dlgSearch
             chkServerSearch.IsChecked = IsServerQuery
         End If
 
+        cboSorting.SelectedIndex = If(My.Settings.RssSortByYield, 0, 1)
+
         blkNoHitsFound.Text = "---  unspecified reaction substructure  ---"
 
         UpdateUsersFilter()
@@ -85,7 +87,7 @@ Public Class dlgSearch
         End If
 
         Dim rxnSub As New RxnSubstructure
-        Dim rssRes = rxnSub.PerformRssQuery(rxnFileString, SearchContext, IsServerQuery)
+        Dim rssRes = rxnSub.PerformRssQuery(rxnFileString, SearchContext)
 
         ' check for RSS-specific errors
 
@@ -135,22 +137,36 @@ Public Class dlgSearch
             Exit Sub
         End If
 
+        ' lstRssHitGroups.DataContext = Nothing
+
+        'set global component structure color for obtained results
+        SketchResults.ComponentStructureColor = Brushes.Black
+
         ' build query info object based on the current UI settings (sketch and filters)
         UpdateQueryInfo()
+
+        Dim isSortedByYield = (cboSorting.SelectedIndex = 0)
 
         ' filter the current RSS hits based on the applied filters in the UI (user, project, group, yield and scale filters)
         Dim newRssQuery As New ReactionQuery(SearchContext, IsServerQuery)
         Dim filteredRssExp = newRssQuery.FilterRssHits(RssHits, QueryInfo)
 
-        'the multi-property grouping criterion is implemented by concatenating the reactant and product InChIKeys 
+        ' The multi-property grouping criterion is implemented by concatenating the reactant and product InChIKeys.
+        ' Sorts internal hits per reaction by yield or scale
         Dim sameRxnGroups = filteredRssExp.GroupBy(Function(item) item.ReactantInChIKey + "/" + item.ProductInChIKey) _
-                                 .Select(Function(group) New With {
-                                     .MaxYield = group.Max(Function(item) item.Yield),
-                                     .ExpEntries = group.OrderByDescending(Function(exp) exp.Yield)
-                                 }).OrderByDescending(Function(group) group.MaxYield)
+                            .Select(Function(group) New With {
+                                .MaxYield = group.Max(Function(item) item.Yield),
+                                .MaxScale = group.Max(Function(item) item.RefReactantGrams),
+                                .ExpEntries = If(isSortedByYield,
+                                   group.OrderByDescending(Function(exp) exp.Yield),
+                                   group.OrderByDescending(Function(exp) exp.RefReactantGrams))})
 
-        'set global component structure color for obtained results
-        SketchResults.ComponentStructureColor = Brushes.Black
+        'sort the groups based on the selected sorting criterion (yield or scale)
+        If IsSortedByYield Then
+            sameRxnGroups = sameRxnGroups.OrderByDescending(Function(group) group.MaxYield)
+        Else
+            sameRxnGroups = sameRxnGroups.OrderByDescending(Function(group) group.MaxScale)
+        End If
 
         Dim rssGroups As New List(Of RssRxnGroup)
         Dim index As Integer = 1
@@ -158,12 +174,13 @@ Public Class dlgSearch
         For Each grp In sameRxnGroups
             Dim firstExp = grp.ExpEntries.First
             Dim rssRxnGroup As New RssRxnGroup
+            Dim cbDrawInfo = DrawingEditor.GetSketchInfo(firstExp.RxnSketch)
             With rssRxnGroup
-                Dim cbDrawInfo = DrawingEditor.GetSketchInfo(firstExp.RxnSketch)
                 .GroupTitle = "Reaction " + index.ToString
                 .ReactCanvas = cbDrawInfo.Reactants.First.StructureCanvas
                 .ProdCanvas = cbDrawInfo.Products.First.StructureCanvas
                 .MaxYield = grp.MaxYield
+                .MaxScale = grp.MaxScale
                 .ExpItems = grp.ExpEntries
             End With
             rssGroups.Add(rssRxnGroup)
@@ -444,6 +461,19 @@ Public Class dlgSearch
     End Sub
 
 
+    Private Sub cboSorting_SelectionChanged() Handles cboSorting.SelectionChanged
+
+        If Not _suppressUIEvents AndAlso cboSorting.IsInitialized Then
+
+            DisplayFilteredRss()
+
+            My.Settings.RssSortByYield = (cboSorting.SelectedIndex = 0)
+
+        End If
+
+    End Sub
+
+
     ''' <summary>
     ''' Refreshes the displayed RSS hits when the user finishes editing the yield or scale filter values. 
     ''' </summary>
@@ -606,6 +636,7 @@ Public Class RssRxnGroup
     Public Property ReactCanvas As Canvas
     Public Property ProdCanvas As Canvas
     Public Property MaxYield As Double?
+    Public Property MaxScale As Double?
     Public Property ExpItems As IOrderedEnumerable(Of tblExperiments)
 
 End Class

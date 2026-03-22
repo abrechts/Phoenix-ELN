@@ -84,9 +84,6 @@ Public Class ReactionQuery
 
         End With
 
-        ' -- generally finalized only experiments to display
-        rssHits = rssHits.Where(Function(x) x.WorkflowState = WorkflowStatus.Finalized)
-
         Return rssHits
 
     End Function

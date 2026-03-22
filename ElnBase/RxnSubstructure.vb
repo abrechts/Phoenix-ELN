@@ -47,7 +47,7 @@ Public Class RxnSubstructure
     ''' </returns>
     ''' 
 
-    Public Function PerformRssQuery(queryRxnStr As String, searchContext As ElnDbContext, isFromServer As Boolean) As RssQueryResult
+    Public Function PerformRssQuery(queryRxnStr As String, searchContext As ElnDbContext) As RssQueryResult
 
         Dim rssResult As New RssQueryResult
 
@@ -64,23 +64,13 @@ Public Class RxnSubstructure
 
         Dim queryFp = queryRxnObj.fingerprint("sub")
 
-        ' Load only ID + RxnFingerprint (lightweight)
-        Dim query As IQueryable(Of Object)
-
-        If Not isFromServer Then
-
-            query = searchContext.tblExperiments.Select(Function(exp) New With {exp.ExperimentID, exp.RxnFingerprint})
-
-        Else
-
-            query = searchContext.tblExperiments _
+        ' Get lightweight projections of all *finalized* experiments as ExperimentID and RxnFingerprint only.
+        Dim preQuery = searchContext.tblExperiments _
             .Where(Function(exp) exp.WorkflowState = WorkflowStatus.Finalized) _
             .Select(Function(exp) New With {exp.ExperimentID, exp.RxnFingerprint})
 
-        End If
-
         ' Filter on lightweight projections to obtain matching experiment IDs (in-memory since MatchRxnFingerprint is not translatable to SQL)
-        Dim fpMatchIds = query.AsEnumerable() _
+        Dim fpMatchIds = preQuery.AsEnumerable() _
             .Where(Function(x) MatchRxnFingerprint(x.RxnFingerprint, queryFp)) _
             .Select(Function(x) x.ExperimentID) _
             .ToList()
