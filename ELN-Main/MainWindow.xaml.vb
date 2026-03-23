@@ -90,7 +90,7 @@ Class MainWindow
             End If
 
             'Apply non-modal search dialog setting
-            dlgSearch.IsServerQuery = .IsServerQuery
+            dlgSearch.IsServerQueryActive = .IsServerQuery
 
             'Check for pending restore
             If .RestoreFromServer = True Then
@@ -354,13 +354,17 @@ Class MainWindow
 
                 End If
             Else
+
                 _isRestoring = False
+
             End If
 
         Else
 
             'e.g. server unavailable
             ServerDBContext = Nothing
+
+            dlgSearch.IsServerQueryActive = False
             Protocol_ConnectedChanged(False)
 
         End If
@@ -1065,7 +1069,6 @@ Class MainWindow
         With CustomControls.My.MySettings.Default
             .StartupPosition = New System.Drawing.Point(Left, Top)
             .StartupSize = New System.Drawing.Size(Width, Height)
-            .IsServerQuery = dlgSearch.IsServerQuery
             .Save()
         End With
 

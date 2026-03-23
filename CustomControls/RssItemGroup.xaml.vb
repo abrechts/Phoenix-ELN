@@ -20,7 +20,7 @@ Public Class RssItemGroup
     Private Sub lstRssHits_PreviewMouseUp(sender As Object, e As MouseButtonEventArgs) Handles lstRssHits.PreviewMouseUp
 
         Dim selItem = lstRssHits.SelectedItem
-        RaiseEvent RequestOpenExperiment(Me, lstRssHits.SelectedItem, dlgSearch.IsServerQuery)
+        RaiseEvent RequestOpenExperiment(Me, lstRssHits.SelectedItem, dlgSearch.IsServerQueryActive)
 
     End Sub
 
@@ -33,7 +33,7 @@ Public Class RssItemGroup
 
 
     ''' <summary>
-    ''' Allows to scroll using the mouse wheel within the itemtemplate.
+    ''' Allows to scroll using the mouse wheel within the item template.
     ''' </summary>
     '''
     Private Sub InnerScrollViewer_PreviewMouseWheel(sender As Object, e As MouseWheelEventArgs)

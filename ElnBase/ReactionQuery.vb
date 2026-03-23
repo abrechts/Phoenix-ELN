@@ -15,7 +15,7 @@ Public Class ReactionQuery
         Public Property YieldValue As Double? = Nothing
         Public Property ScaleValue As Double? = Nothing
         Public Property IsScaleSmallerOrEqual As Boolean = False
-        Public Property IsServerQuery As Boolean = False
+        '  Public Property IsServerQuery As Boolean = False
 
     End Class
 

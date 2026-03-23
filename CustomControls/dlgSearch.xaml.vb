@@ -21,7 +21,7 @@ Public Class dlgSearch
     ''' Sets or gets if the current query is server based (true) or local (false).
     ''' </summary>
     '''
-    Public Shared Property IsServerQuery As Boolean = False
+    Public Shared Property IsServerQueryActive As Boolean = False
 
     Public Property LocalDBContext As ElnDbContext
     Public Property ServerDBContext As ElnDbContext
@@ -48,13 +48,15 @@ Public Class dlgSearch
         _cvsProjFolders = Me.FindResource("ProjFoldersView")
 
         If ServerDBContext Is Nothing Then
-            IsServerQuery = False
+            IsServerQueryActive = False
             chkServerSearch.IsEnabled = False
         Else
-            chkServerSearch.IsChecked = IsServerQuery
+            IsServerQueryActive = True
+            chkServerSearch.IsChecked = IsServerQueryActive
         End If
 
         cboSorting.SelectedIndex = If(My.Settings.RssSortByYield, 0, 1)
+        chkServerSearch.IsChecked = My.Settings.IsServerQuery
 
         blkNoHitsFound.Text = "---  unspecified reaction substructure  ---"
 
@@ -148,7 +150,7 @@ Public Class dlgSearch
         Dim isSortedByYield = (cboSorting.SelectedIndex = 0)
 
         ' filter the current RSS hits based on the applied filters in the UI (user, project, group, yield and scale filters)
-        Dim newRssQuery As New ReactionQuery(SearchContext, IsServerQuery)
+        Dim newRssQuery As New ReactionQuery(SearchContext, IsServerQueryActive)
         Dim filteredRssExp = newRssQuery.FilterRssHits(RssHits, QueryInfo)
 
         ' The multi-property grouping criterion is implemented by concatenating the reactant and product InChIKeys.
@@ -162,7 +164,7 @@ Public Class dlgSearch
                                    group.OrderByDescending(Function(exp) exp.RefReactantGrams))})
 
         'sort the groups based on the selected sorting criterion (yield or scale)
-        If IsSortedByYield Then
+        If isSortedByYield Then
             sameRxnGroups = sameRxnGroups.OrderByDescending(Function(group) group.MaxYield)
         Else
             sameRxnGroups = sameRxnGroups.OrderByDescending(Function(group) group.MaxScale)
@@ -280,8 +282,6 @@ Public Class dlgSearch
             .ScaleValue = If(txtScale.Value, Nothing)
             .IsScaleSmallerOrEqual = (cboScaleComparer.SelectedIndex = 1)
 
-            .IsServerQuery = IsServerQuery  'for determining the context (server vs local) of stored queries
-
         End With
 
     End Sub
@@ -300,20 +300,20 @@ Public Class dlgSearch
 
             With QueryInfo
 
-                'determine if the loaded query is server-based but but no server connection is present.
-                If .IsServerQuery AndAlso Not chkServerSearch.IsEnabled Then
-                    cbMsgBox.Display("The loaded query is based on a server search, but no server connection is currently available." +
-                        vbCrLf + vbCrLf + "The filters for user, project and group are reset to default.",
-                        MsgBoxStyle.OkOnly + MsgBoxStyle.Exclamation, "Search context mismatch")
-                    isServerMissing = True
-                Else
-                    _suppressUIEvents = True
-                    chkServerSearch.IsChecked = .IsServerQuery
-                    _suppressUIEvents = False
-                End If
+                '    'determine if the loaded query is server-based but but no server connection is present.
+                '    If .IsServerQueryActive AndAlso Not chkServerSearch.IsEnabled Then
+                '        cbMsgBox.Display("The loaded query is based on a server search, but no server connection is currently available." +
+                '            vbCrLf + vbCrLf + "The filters for user, project and group are reset to default.",
+                '            MsgBoxStyle.OkOnly + MsgBoxStyle.Exclamation, "Search context mismatch")
+                '        isServerMissing = True
+                '    Else
+                '        _suppressUIEvents = True
+                '        chkServerSearch.IsChecked = .IsServerQueryActive
+                '        _suppressUIEvents = False
+                '    End If
 
                 'populate the user, project and group filters and resets them to "any"
-                InitializeSearchContext(.IsServerQuery AndAlso Not isServerMissing)
+                ' InitializeSearchContext(IsServerQueryActive AndAlso Not isServerMissing)
 
                 'draw query sketch and get MDL reaction file
                 pnlQuerySketch.ReactionSketch = .ReactionSketchXml
@@ -375,8 +375,7 @@ Public Class dlgSearch
         cboProjGroups.SelectedIndex = 0
         _suppressUIEvents = False
 
-        IsServerQuery = isServerContext
-        QueryInfo.IsServerQuery = isServerContext
+        IsServerQueryActive = isServerContext
 
         ' cascades to update the other filters as well
         UpdateUsersFilter()
@@ -388,10 +387,22 @@ Public Class dlgSearch
 
         If chkServerSearch.IsInitialized AndAlso Not _suppressUIEvents Then
 
-            InitializeSearchContext(chkServerSearch.IsChecked)
+            IsServerQueryActive = chkServerSearch.IsChecked
+            InitializeSearchContext(IsServerQueryActive)
+
+            'update setting after *manual* change only, i.e. not when server currently unavailable
+            If chkServerSearch.IsMouseOver Then
+                My.Settings.IsServerQuery = chkServerSearch.IsChecked
+            End If
+
+            If Not String.IsNullOrEmpty(QueryInfo.ReactionSketchXml) Then
+                Dim rxnFileStr = DrawingEditor.GetSketchInfo(QueryInfo.ReactionSketchXml).MDLRxnFileString
+                RssHits = PerformRssQuery(rxnFileStr)
+            End If
+
             DisplayFilteredRss()
 
-        End If
+            End If
 
     End Sub
 
@@ -466,7 +477,6 @@ Public Class dlgSearch
         If Not _suppressUIEvents AndAlso cboSorting.IsInitialized Then
 
             DisplayFilteredRss()
-
             My.Settings.RssSortByYield = (cboSorting.SelectedIndex = 0)
 
         End If

@@ -292,7 +292,6 @@
 
                             </Border>
 
-                           
                             <CheckBox x:Name="chkServerSearch" Content="Server Search" Foreground="white" HorizontalAlignment="Center" Margin="0,8,0,0"/>
 
                         </StackPanel>
