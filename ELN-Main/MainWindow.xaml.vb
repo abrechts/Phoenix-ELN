@@ -89,9 +89,6 @@ Class MainWindow
                 Height = .StartupSize.Height
             End If
 
-            'Apply non-modal search dialog setting
-            dlgSearch.IsServerQueryActive = .IsServerQuery
-
             'Check for pending restore
             If .RestoreFromServer = True Then
 
@@ -363,8 +360,6 @@ Class MainWindow
 
             'e.g. server unavailable
             ServerDBContext = Nothing
-
-            dlgSearch.IsServerQueryActive = False
             Protocol_ConnectedChanged(False)
 
         End If

@@ -21,8 +21,6 @@ Public Class dlgSearch
     ''' Sets or gets if the current query is server based (true) or local (false).
     ''' </summary>
     '''
-    Public Shared Property IsServerQueryActive As Boolean = False
-
     Public Property LocalDBContext As ElnDbContext
     Public Property ServerDBContext As ElnDbContext
     Private Property SearchContext As ElnDbContext
@@ -48,11 +46,7 @@ Public Class dlgSearch
         _cvsProjFolders = Me.FindResource("ProjFoldersView")
 
         If ServerDBContext Is Nothing Then
-            IsServerQueryActive = False
             chkServerSearch.IsEnabled = False
-        Else
-            IsServerQueryActive = True
-            chkServerSearch.IsChecked = IsServerQueryActive
         End If
 
         cboSorting.SelectedIndex = If(My.Settings.RssSortByYield, 0, 1)
@@ -150,7 +144,7 @@ Public Class dlgSearch
         Dim isSortedByYield = (cboSorting.SelectedIndex = 0)
 
         ' filter the current RSS hits based on the applied filters in the UI (user, project, group, yield and scale filters)
-        Dim newRssQuery As New ReactionQuery(SearchContext, IsServerQueryActive)
+        Dim newRssQuery As New ReactionQuery(SearchContext, chkServerSearch.IsChecked)
         Dim filteredRssExp = newRssQuery.FilterRssHits(RssHits, QueryInfo)
 
         ' The multi-property grouping criterion is implemented by concatenating the reactant and product InChIKeys.
@@ -375,8 +369,6 @@ Public Class dlgSearch
         cboProjGroups.SelectedIndex = 0
         _suppressUIEvents = False
 
-        IsServerQueryActive = isServerContext
-
         ' cascades to update the other filters as well
         UpdateUsersFilter()
 
@@ -387,8 +379,7 @@ Public Class dlgSearch
 
         If chkServerSearch.IsInitialized AndAlso Not _suppressUIEvents Then
 
-            IsServerQueryActive = chkServerSearch.IsChecked
-            InitializeSearchContext(IsServerQueryActive)
+            InitializeSearchContext(chkServerSearch.IsChecked)
 
             'update setting after *manual* change only, i.e. not when server currently unavailable
             If chkServerSearch.IsMouseOver Then
