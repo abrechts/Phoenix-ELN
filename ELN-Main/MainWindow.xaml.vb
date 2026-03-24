@@ -97,8 +97,8 @@ Class MainWindow
                 Try
                     File.Move(tempPath, SQLiteDbPath, True)    'overwrite current working db
                 Catch ex As Exception
-                    cbMsgBox.Display("Can't replace current experiments database for " + vbCrLf +
-                        "restore, since locked by another application!", MsgBoxStyle.Information, "Restore Error")
+                    cbMsgBox.Display("Can't replace current experiments database for restore, since it is currently " +
+                        "locked by another application!", MsgBoxStyle.Information, "Phoenix ELN Restore Error")
                 End Try
                 isRestoreFromServer = True
                 .RestoreFromServer = False
@@ -135,9 +135,9 @@ Class MainWindow
         End If
 
         If isRestoreFromServer Then
-            'Restored legacy DB's may be lacking tblProjFolders (from v.3.0.0 on) initializations. 
+            '  Restored legacy DB's may be lacking tblProjFolders (from v.3.0.0 on) initializations. 
             ProjectFolders.SetMissingProjFolderRefs(DBContext)
-            'Reset all sync flags
+            '  Reset all sync flags
             DBContext.ResetSyncFlags()
         End If
 

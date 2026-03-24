@@ -49,7 +49,11 @@ Public Class cbMsgBox
         Dim msgBox = New cbMsgBox(MessageStr, Title, messageType, buttonType, defaultButton)
 
         If Application.Current?.MainWindow IsNot Nothing Then
-            msgBox.Owner = Application.Current.MainWindow
+            If Application.Current.MainWindow.ActualHeight > 0 Then
+                msgBox.Owner = Application.Current.MainWindow
+            Else
+                msgBox.WindowStartupLocation = WindowStartupLocation.CenterScreen
+            End If
         End If
 
         msgBox.ShowDialog()
