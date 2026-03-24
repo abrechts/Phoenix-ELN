@@ -481,27 +481,6 @@ Public Class ServerSync
 
 
     ''' <summary>
-    ''' Resets all SyncStates across all tables to 0 and clears the sync_Tombstone table.
-    ''' </summary>
-    ''' <remarks>Typically utilized after bulk upload or for debug.</remarks>
-    ''' 
-    Public Sub ResetSyncFlags()
-
-        '- Reset all entry syncStates
-        For Each tblInfo In ElnDbContext.TableInfo
-            Dim res = LocalContext.Database.SqlQueryRaw(Of Integer)("UPDATE " + tblInfo.TableName + " SET SyncState = 0 ").AsEnumerable(0)
-        Next
-
-        '- Clear sync_Tombstone entries
-        LocalContext.sync_Tombstone.RemoveRange(LocalContext.sync_Tombstone)
-
-        '- Save without sync change tracking
-        LocalContext.SaveChangesNoSyncTracking()
-
-    End Sub
-
-
-    ''' <summary>
     ''' Assigns new, identical sync transaction parameters to local and server databases.
     ''' </summary>
     ''' <param name="localDbGuid">The GUID of the affected local database.</param>

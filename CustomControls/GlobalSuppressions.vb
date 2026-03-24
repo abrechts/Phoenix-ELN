@@ -6,3 +6,4 @@
 Imports System.Diagnostics.CodeAnalysis
 
 <Assembly: SuppressMessage("Style", "IDE1006:Naming Styles", Justification:="<Pending>")>
+<Assembly: SuppressMessage("Performance", "CA1862:Use the 'StringComparison' method overloads to perform case-insensitive string comparisons", Justification:="<Pending>", Scope:="member", Target:="~M:CustomControls.dlgSearch.UpdateProjGroupsFilter(System.String)")>

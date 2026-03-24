@@ -1,8 +1,6 @@
-﻿Imports System.ComponentModel
+﻿
 Imports System.Windows
-Imports ElnCoreModel
 Imports System.Windows.Controls
-Imports ElnBase.ELNEnumerations
 
 
 Public Class SketchAreaRSS
@@ -17,14 +15,21 @@ Public Class SketchAreaRSS
     End Sub
 
 
-    Public Shared Shadows ReadOnly ReactionSketchProperty As DependencyProperty =
-        DependencyProperty.Register("ReactionSketch", GetType(String), GetType(SketchAreaRSS),
-        New PropertyMetadata(AddressOf OnReactionSketchChanged))
+    ''' <summary>
+    ''' Sets or gets the threshold for shrinking the reaction sketch in case the sketch height is smaller than the threshold.
+    ''' </summary>
+    ''' <returns></returns>
+    Public Property ShrinkThreshold As Double = 650
+
 
     ''' <summary>
     ''' Sets or gets the currently displayed reaction sketch XML.
     ''' </summary>
     ''' 
+    Public Shared Shadows ReadOnly ReactionSketchProperty As DependencyProperty =
+        DependencyProperty.Register("ReactionSketch", GetType(String), GetType(SketchAreaRSS),
+        New PropertyMetadata(AddressOf OnReactionSketchChanged))
+
     Public Property ReactionSketch() As String
         Get
             Return GetValue(ReactionSketchProperty)
@@ -138,18 +143,16 @@ Public Class SketchAreaRSS
             Dim skCanvas = SketchInfo.SketchCanvas
             sketchViewbox.Child = SketchInfo.SketchCanvas
 
-            Dim shrinkThreshold = 400 '700
+            If skCanvas.Height < ShrinkThreshold Then         'limit upscaling
 
-            If skCanvas.Height < shrinkThreshold Then         'limit upscaling
-
-                Dim canvasTopDiff = (shrinkThreshold - skCanvas.Height) / 2
-                Dim viewBoxDiff = canvasTopDiff * (sketchGrid.ActualHeight / shrinkThreshold)
+                Dim canvasTopDiff = (ShrinkThreshold - skCanvas.Height) / 2
+                Dim viewBoxDiff = canvasTopDiff * (sketchGrid.ActualHeight / ShrinkThreshold)
                 sketchViewbox.Margin = New Thickness(viewBoxDiff)
 
             Else
 
                 'reduce the native margin around the sketch in CBDraw canvas
-                sketchViewbox.Margin = New Thickness(0, -15, 0, 4)
+                sketchViewbox.Margin = New Thickness(0, 0, 0, 0)
 
             End If
 

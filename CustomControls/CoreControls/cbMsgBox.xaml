@@ -61,7 +61,7 @@
             <!-- Header with Icon and Title -->
             <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
 
-                <Border x:Name="IconBorder" Width="40" Height="40" Margin="0,0,16,0" CornerRadius="8" d:Background="#FF0078D4">
+                <Border x:Name="IconBorder" Width="40" Height="40" Margin="0,0,16,0" CornerRadius="8" d:Background="#FF856CCF">
                     <TextBlock x:Name="IconText" d:Text="ℹ" FontSize="22" Foreground="white" d:Margin="0,-2,0,0" 
                       HorizontalAlignment="Center" VerticalAlignment="center" />
                 </Border>

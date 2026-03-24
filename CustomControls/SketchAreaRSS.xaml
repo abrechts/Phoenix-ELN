@@ -4,15 +4,19 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:CustomControls"
-             mc:Ignorable="d" d:Width="400">
+             mc:Ignorable="d" d:Width="500" d:Height="200" >
 
-    <Grid x:Name="sketchGrid" Background="white" Cursor="Hand" d:Height="100" Margin="0" >
+    <Grid x:Name="sketchGrid" Background="white" Cursor="Hand" Margin="0">
 
         <Viewbox x:Name="sketchViewbox" StretchDirection="DownOnly"/>
 
-        <TextBlock x:Name="blkClickInfo" Foreground="Gray" FontStyle="Oblique" Text="Click to edit substructure query ..." 
-            TextAlignment="Center" FontFamily="Verdana" FontSize="10" Cursor="Hand" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-        
+        <TextBlock x:Name="blkClickInfo" Foreground="#FF5F5FE2" FontStyle="Oblique" Text="edit substructure query ..."
+            TextAlignment="Center" FontFamily="Verdana" FontSize="10" Cursor="Hand" VerticalAlignment="Center" HorizontalAlignment="Center">
+            <TextBlock.TextDecorations>
+                <TextDecoration Location="Underline" PenOffset="2"/>
+            </TextBlock.TextDecorations>
+        </TextBlock>
+
     </Grid>
 
 </UserControl>

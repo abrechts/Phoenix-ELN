@@ -31,7 +31,7 @@ Public Class MySqlBulkUpload
             'then upload large tblEmbeddedFiles (30% faster than with above script method)
             Dim success = UploadEmbedded(localContext, serverContext)
             If success Then
-                localContext.ServerSynchronization.ResetSyncFlags()
+                localContext.ResetSyncFlags()
             End If
 
             Return success

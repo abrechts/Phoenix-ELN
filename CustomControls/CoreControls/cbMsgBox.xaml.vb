@@ -94,7 +94,7 @@ Public Class cbMsgBox
             Case Else ' Information
                 IconText.Text = "ℹ"
                 IconText.Margin = New Thickness(1, -3, 0, 0)
-                IconBorder.Background = New SolidColorBrush(Color.FromRgb(0, 120, 212))
+                IconBorder.Background = New SolidColorBrush(Color.FromRgb(133, 108, 207))
 
         End Select
 

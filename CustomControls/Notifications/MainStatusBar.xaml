@@ -24,13 +24,13 @@
                 <StackPanel x:Name="pnlServerOk" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,4,0" Visibility="Collapsed" 
                    d:Visibility="visible" ToolTip="Connected to ELN server.">
                     
-                    <ContentControl Content="{StaticResource icoDatabaseRunning_Dark}" Height="20" VerticalContentAlignment="Center" 
+                    <ContentControl Content="{StaticResource icoDatabaseRunning_Dark}" Height="18" VerticalContentAlignment="Center" 
                       Opacity="0.9" Margin="2,0,1,0"/>
                     
                 </StackPanel>
 
                 <StackPanel x:Name="pnlServerError" Orientation="Horizontal" VerticalAlignment="Center" d:Visibility="visible" Visibility="Collapsed">
-                    <ContentControl x:Name="icoServerError" Content="{StaticResource icoDatabaseWarning_Dark}" Height="18"
+                    <ContentControl x:Name="icoServerError" Content="{StaticResource icoDatabaseWarning_Dark}" Height="16"
                        VerticalContentAlignment="Center" Margin="2,0,3,0"/>
                     <TextBlock x:Name="lnkReconnects" Text="Reconnect" Foreground="#FFB2D8F0" TextDecorations="Underline" Cursor="Hand" Margin="0,0,4,0"
                        FontFamily="Arial" VerticalAlignment="Center"/>
