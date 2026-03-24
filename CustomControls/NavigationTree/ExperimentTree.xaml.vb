@@ -3,7 +3,6 @@ Imports System.Windows.Controls
 Imports System.Windows.Threading
 Imports ElnCoreModel
 Imports GongSolutions.Wpf.DragDrop
-Imports Microsoft.EntityFrameworkCore
 
 
 Public Class ExperimentTree
