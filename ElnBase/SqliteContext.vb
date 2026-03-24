@@ -51,6 +51,11 @@ Public Class ElnDbContext
     Public Property ServerSynchronization As ServerSync
 
 
+    ''' <summary>
+    ''' Resets all synchronization flags and clears the sync_Tombstone table. Typically used after initial bulk upload to the server,
+    ''' or after restoring from the server, where the initial flags were copied during the initial bulk upload.
+    ''' </summary>
+    ''' 
     Public Sub ResetSyncFlags()
 
         '- Reset all entry syncStates
