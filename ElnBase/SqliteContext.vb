@@ -51,6 +51,22 @@ Public Class ElnDbContext
     Public Property ServerSynchronization As ServerSync
 
 
+    Public Sub ResetSyncFlags()
+
+        '- Reset all entry syncStates
+        For Each tblInfo In ElnDbContext.TableInfo
+            Dim res = Database.SqlQueryRaw(Of Integer)("UPDATE " + tblInfo.TableName + " SET SyncState = 0 ").AsEnumerable(0)
+        Next
+
+        '- Clear sync_Tombstone entries
+        sync_Tombstone.RemoveRange(sync_Tombstone)
+
+        '- Save without sync change tracking
+        SaveChangesNoSyncTracking()
+
+    End Sub
+
+
     ''' <summary>
     ''' Saves the changes to the database and writes change tracking information for 
     ''' modified, added and deleted entities.

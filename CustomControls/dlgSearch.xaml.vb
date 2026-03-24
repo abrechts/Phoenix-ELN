@@ -47,10 +47,12 @@ Public Class dlgSearch
 
         If ServerDBContext Is Nothing Then
             chkServerSearch.IsEnabled = False
+            chkServerSearch.IsChecked = False
+        Else
+            chkServerSearch.IsChecked = My.Settings.IsServerQuery
         End If
 
         cboSorting.SelectedIndex = If(My.Settings.RssSortByYield, 0, 1)
-        chkServerSearch.IsChecked = My.Settings.IsServerQuery
 
         blkNoHitsFound.Text = "---  unspecified reaction substructure  ---"
 
@@ -133,7 +135,7 @@ Public Class dlgSearch
             Exit Sub
         End If
 
-        ' lstRssHitGroups.DataContext = Nothing
+        RssItemGroup.IsServerResult = chkServerSearch.IsChecked
 
         'set global component structure color for obtained results
         SketchResults.ComponentStructureColor = Brushes.Black

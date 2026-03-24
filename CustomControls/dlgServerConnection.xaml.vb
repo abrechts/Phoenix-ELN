@@ -117,9 +117,8 @@ Public Class dlgServerConnection
         If res = MsgBoxResult.Ok Then
 
             My.Settings.IsServerOffByUser = True
-            dlgSearch.IsServerQueryActive = False
-
             DialogResult = True
+
             RaiseEvent ServerContextCreated(Nothing)
 
         End If

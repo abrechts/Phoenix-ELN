@@ -134,9 +134,11 @@ Class MainWindow
             End If
         End If
 
-        'Restored legacy DB's may be lacking tblProjFolders (from v.3.0.0 on) initializations. 
         If isRestoreFromServer Then
+            'Restored legacy DB's may be lacking tblProjFolders (from v.3.0.0 on) initializations. 
             ProjectFolders.SetMissingProjFolderRefs(DBContext)
+            'Reset all sync flags
+            DBContext.ResetSyncFlags()
         End If
 
         ApplicationVersion = GetType(MainWindow).Assembly.GetName().Version
@@ -167,9 +169,9 @@ Class MainWindow
         AddHandler ServerSync.SyncProgress, AddressOf ServerSync_SyncProgress
         AddHandler dlgServerConnection.ServerContextCreated, AddressOf ServerSync_ServerContextCreated
         AddHandler ExpTabHeader.PinStateChanged, AddressOf expTabHeader_PinStateChanged
-        AddHandler StepSummary.RequestOpenExperiment, AddressOf ExpList_RequestOpenExperiment
-        AddHandler RssItemGroup.RequestOpenExperiment, AddressOf ExpList_RequestOpenExperiment
-        AddHandler StepExpSelector.RequestOpenExperiment, AddressOf ExpList_RequestOpenExperiment
+        AddHandler StepSummary.RequestOpenExperiment, AddressOf RssExpList_RequestOpenExperiment
+        AddHandler RssItemGroup.RequestOpenExperiment, AddressOf RssExpList_RequestOpenExperiment
+        AddHandler StepExpSelector.RequestOpenExperiment, AddressOf RssExpList_RequestOpenExperiment
         AddHandler ExperimentContent.ExperimentContextChanged, AddressOf ExperimentContent_ContextChanged
         AddHandler ExperimentContent.RequestSequencesDialog, AddressOf ExperimentContent_RequestSequencesDialog
 
@@ -199,6 +201,7 @@ Class MainWindow
         With CustomControls.My.MySettings.Default
 
             If DBContext.tblDatabaseInfo.First.tblUsers.First.UserID <> "demo" Then
+
                 If .IsServerSpecified Then
                     If Not .IsServerOffByUser Then
 
@@ -214,6 +217,7 @@ Class MainWindow
                         'manually disconnected by localUser
                         mainStatusInfo.DisplayServerError = True
                     End If
+
                 End If
                 btnAddUser.IsEnabled = True
             Else
@@ -350,6 +354,7 @@ Class MainWindow
                     End If
 
                 End If
+
             Else
 
                 _isRestoring = False
@@ -613,6 +618,7 @@ Class MainWindow
             End If
 
             Dim restoreDlg As New dlgRestoreServer(ServerDBContext)
+
             With restoreDlg
                 .Owner = Me
                 .ShowDialog()
@@ -1123,15 +1129,15 @@ Class MainWindow
     ''' Handles experiment selection within RSS results and step summary control.
     ''' </summary>
     ''' 
-    Private Sub ExpList_RequestOpenExperiment(sender As Object, targetExp As tblExperiments, isFromServer As Boolean)
+    Private Sub RssExpList_RequestOpenExperiment(sender As Object, targetExp As tblExperiments, isFromServer As Boolean)
 
         If targetExp Is Nothing Then
             Exit Sub
         End If
 
-        If Not isFromServer AndAlso targetExp.UserID = CType(Me.DataContext, tblUsers).UserID Then
+        If Not isFromServer Then
 
-            '-- local experiment and same current user as of targetExp
+            ''-- local experiment and same current user as of targetExp
             expNavTree.SelectExperiment(targetExp)
 
         Else

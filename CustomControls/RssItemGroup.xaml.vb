@@ -8,6 +8,9 @@ Public Class RssItemGroup
 
     Public Shared Event RequestOpenExperiment(sender As Object, expEntry As tblExperiments, isFromServer As Boolean)
 
+    Public Shared Property IsServerResult As Boolean = False
+
+
     Public Sub New()
 
         ' This call is required by the designer.
@@ -17,10 +20,11 @@ Public Class RssItemGroup
 
     End Sub
 
+
     Private Sub lstRssHits_PreviewMouseUp(sender As Object, e As MouseButtonEventArgs) Handles lstRssHits.PreviewMouseUp
 
         Dim selItem = lstRssHits.SelectedItem
-        RaiseEvent RequestOpenExperiment(Me, lstRssHits.SelectedItem, dlgSearch.IsServerQueryActive)
+        RaiseEvent RequestOpenExperiment(Me, lstRssHits.SelectedItem, IsServerResult)
 
     End Sub
 
