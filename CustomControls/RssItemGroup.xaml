@@ -11,7 +11,7 @@
     <UserControl.Resources>
 
         <DataTemplate x:Key="hitGroupItem">
-            <local:ExpTreeHeader Margin="0,-1" FontSize="11"/>
+            <local:ExpTreeHeader SuppressContextMenu="true" Margin="0,-1" FontSize="11"/>
         </DataTemplate>
 
     </UserControl.Resources>

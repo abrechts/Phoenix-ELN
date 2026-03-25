@@ -11,6 +11,7 @@ Partial Public Class ExpTreeHeader
 
     Public Shared Event RequestUpdateWorkflowState(sender As Object, targetExp As tblExperiments, requestedState As WorkflowStatus)
 
+
     Public Sub New()
 
         ' This call is required by the Windows Form Designer.
@@ -33,7 +34,23 @@ Partial Public Class ExpTreeHeader
     End Property
 
 
-    Private Sub Me_PreviewMouseRightButtonDown(sender As Object, e As RoutedEventArgs) Handles Me.PreviewMouseRightButtonUp
+    ''' <summary>
+    ''' Gets or sets if the context menu should be suppressed. Typically utilized for use of the experiments 
+    ''' header other than in the experiments tree, e.g. in search result lists.
+    ''' </summary>
+    ''' 
+    Public Property SuppressContextMenu As Boolean = False
+
+
+    Private Sub Me_ContextMenuOpening(sender As Object, e As RoutedEventArgs) Handles Me.ContextMenuOpening
+
+        If SuppressContextMenu Then
+            e.Handled = True
+        End If
+
+    End Sub
+
+    Private Sub Me_PreviewMouseRightButtonUp(sender As Object, e As RoutedEventArgs) Handles Me.PreviewMouseRightButtonUp
 
         Dim tvItem = WPFToolbox.FindVisualParent(Of TreeViewItem)(Me)
         If tvItem IsNot Nothing Then

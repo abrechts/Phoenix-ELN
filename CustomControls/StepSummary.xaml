@@ -24,7 +24,7 @@
         </CollectionViewSource>
 
         <DataTemplate x:Key="expTreeItem">
-            <local:ExpTreeHeader Margin="0,-1" FontSize="11.5"/>
+            <local:ExpTreeHeader SuppressContextMenu="true" Margin="0,-1" FontSize="11.5"/>
         </DataTemplate>
 
     </UserControl.Resources>
