@@ -3,6 +3,11 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     Title="Restore" TextOptions.TextFormattingMode="Display"  Height="267" Width="424" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" 
     SnapsToDevicePixels="True" UseLayoutRounding="True" ShowInTaskbar="False" FontFamily="Verdana" FontSize="11" >
+
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+    </Window.Resources>
+
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="10*" />
@@ -73,9 +78,11 @@
 
                         <StackPanel Orientation="Horizontal" Margin="12,6,0,0">
                             <TextBlock x:Name="blkPwInfo" Text="Password:" VerticalAlignment="Center" Width="66" />
-                            <Grid>
-                                <TextBox x:Name="txtAdminID" Width="148" TabIndex="1" Padding="2" Visibility="Collapsed"/>
-                                <PasswordBox x:Name="pwBox" Width="148" TabIndex="1" Padding="2" />
+                            <PasswordBox x:Name="pwBox" Width="148" TabIndex="1" Padding="2" />
+                            <Grid Width="16" Margin="-1,0,0,0">
+                                <ContentControl Content="{StaticResource icoRedDot}" HorizontalAlignment="Center" VerticalAlignment="Center" ToolTip="Caps Lock is On"
+                                    Visibility="{Binding IsCapsLockOn,RelativeSource={RelativeSource AncestorType=Window},Converter={StaticResource BoolToVis}}"
+                                    ToolTipService.InitialShowDelay="250"/>
                             </Grid>
                         </StackPanel>
 

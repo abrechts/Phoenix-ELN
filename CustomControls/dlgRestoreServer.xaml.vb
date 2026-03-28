@@ -1,9 +1,13 @@
-﻿Imports System.Windows
+﻿Imports System.ComponentModel
+Imports System.Windows
 Imports System.Windows.Input
+Imports System.Windows.Threading
 Imports ElnBase
 Imports ElnCoreModel
 
 Partial Public Class dlgRestoreServer
+
+    Implements INotifyPropertyChanged
 
     Private _serverContext As ElnDbContext
 
@@ -12,6 +16,49 @@ Partial Public Class dlgRestoreServer
         ErrorPresent
         BackupPresent
     End Enum
+
+
+    ' Caps lock indicator for PasswordBox
+    '--------------------------------------
+
+    Private _isCapsLockOn As Boolean
+
+    Public Event PropertyChanged As PropertyChangedEventHandler Implements INotifyPropertyChanged.PropertyChanged
+
+    Public Property IsCapsLockOn As Boolean
+        Get
+            Return _isCapsLockOn
+        End Get
+        Set(value As Boolean)
+            If value = _isCapsLockOn Then Return
+            _isCapsLockOn = value
+            RaiseEvent PropertyChanged(Me, New PropertyChangedEventArgs(NameOf(IsCapsLockOn)))
+        End Set
+    End Property
+
+    Private Sub UpdateCapsLockState()
+        IsCapsLockOn = Keyboard.IsKeyToggled(Key.CapsLock)
+    End Sub
+
+    Private Sub PwdBox_GotKeyboardFocus(sender As Object, e As KeyboardFocusChangedEventArgs) Handles pwBox.GotKeyboardFocus
+        UpdateCapsLockState()
+    End Sub
+
+    Private Sub PwdBox_LostKeyboardFocus(sender As Object, e As KeyboardFocusChangedEventArgs) Handles pwBox.LostKeyboardFocus
+        IsCapsLockOn = False
+    End Sub
+
+    Private Sub PwdBox_PreviewKeyDown(sender As Object, e As KeyEventArgs) Handles pwBox.PreviewKeyDown
+        If e.Key = Key.CapsLock Then
+            ' CapsLock toggles after the key event; update on dispatcher
+            Dispatcher.BeginInvoke(
+                CType(Sub() UpdateCapsLockState(), Action),
+                DispatcherPriority.Background)
+        End If
+    End Sub
+
+    '-------------------------------------
+
 
 
     Public Property TargetDbInfoEntry As tblDatabaseInfo
