@@ -35,6 +35,32 @@ Public Class dlgSearch
     Private _suppressUIEvents As Boolean = False
 
 
+    ''' <summary>
+    ''' Defines the maximum number of reaction groups per result page.
+    ''' </summary>
+    Private Const ResultPageItems As Integer = 20
+
+    ''' <summary>
+    ''' Sets or gets the result index of the first reaction group displayed on the current result page.
+    ''' </summary>
+    Private Property ResultPageStartIndex As Integer = 0
+
+    ''' <summary>
+    ''' Sets or gets the current result page number (starting from 1).
+    ''' </summary>
+    Private Property ResultPageNr As Integer = 1
+
+    ''' <summary>
+    ''' Sets or gets the total number of hits (i.e. reaction groups).
+    ''' </summary>
+    Private Property TotalHitCount As Integer = 0
+
+    ''' <summary>
+    ''' Sets or gets the time taken to perform the RSS query in milliseconds, excluding filtering and rendering of the results.
+    ''' </summary>
+    Private Property rssQueryTime As Integer = 0    'in ms
+
+
     Private Sub Me_Loaded() Handles Me.Loaded
 
         SearchContext = LocalDBContext
@@ -54,7 +80,7 @@ Public Class dlgSearch
 
         cboSorting.SelectedIndex = If(My.Settings.RssSortByYield, 0, 1)
 
-        blkNoHitsFound.Text = "---  unspecified reaction substructure  ---"
+        blkNoHitsFound.Text = "---  no matches  ---"
 
         UpdateUsersFilter()
 
@@ -84,8 +110,13 @@ Public Class dlgSearch
             Return Nothing
         End If
 
+        Dim sw = Stopwatch.StartNew
+
         Dim rxnSub As New RxnSubstructure
         Dim rssRes = rxnSub.PerformRssQuery(rxnFileString, SearchContext)
+
+        sw.Stop()
+        rssQueryTime = sw.ElapsedMilliseconds
 
         ' check for RSS-specific errors
 
@@ -128,11 +159,21 @@ Public Class dlgSearch
     End Function
 
 
-    Private Sub DisplayFilteredRss()
+    ''' <summary>
+    ''' Converts the current RSS hits (if any) into display groups based on the currently applied filters and displays them in the UI.
+    ''' </summary>
+    ''' 
+    Private Sub DisplayFilteredRss(Optional isPageChange As Boolean = False)
 
         ' exit if no query sketch present
         If RssHits Is Nothing Then
             Exit Sub
+        End If
+
+        'go back to first results page if not just changing results page
+        If Not isPageChange Then
+            ResultPageStartIndex = 0
+            ResultPageNr = 1
         End If
 
         RssItemGroup.IsServerResult = chkServerSearch.IsChecked
@@ -166,6 +207,11 @@ Public Class dlgSearch
             sameRxnGroups = sameRxnGroups.OrderByDescending(Function(group) group.MaxScale)
         End If
 
+        TotalHitCount = sameRxnGroups.Count()
+
+        'separate results into display groups
+        sameRxnGroups = sameRxnGroups.Skip(ResultPageStartIndex).Take(ResultPageItems)
+
         Dim rssGroups As New List(Of RssRxnGroup)
         Dim index As Integer = 1
 
@@ -174,7 +220,7 @@ Public Class dlgSearch
             Dim rssRxnGroup As New RssRxnGroup
             Dim cbDrawInfo = DrawingEditor.GetSketchInfo(firstExp.RxnSketch)
             With rssRxnGroup
-                .GroupTitle = "Reaction " + index.ToString
+                .GroupTitle = "Reaction " + (ResultPageStartIndex + index).ToString
                 .ReactCanvas = cbDrawInfo.Reactants.First.StructureCanvas
                 .ProdCanvas = cbDrawInfo.Products.First.StructureCanvas
                 .MaxYield = grp.MaxYield
@@ -186,6 +232,76 @@ Public Class dlgSearch
         Next
 
         lstRssHitGroups.DataContext = rssGroups
+
+        scrlResults.ScrollToHome()
+
+        UpdateQueryStats()
+
+    End Sub
+
+
+    ''' <summary>
+    ''' Updates the query statistics information .
+    ''' </summary>
+    ''' 
+    Private Sub UpdateQueryStats()
+
+        Dim finalSectionNr As Integer = (TotalHitCount + ResultPageItems - 1) \ ResultPageItems
+
+        pnlHitNavigation.IsEnabled = (TotalHitCount > ResultPageItems)
+
+        If pnlHitNavigation.IsEnabled Then
+
+            btnNext.IsEnabled = (ResultPageNr < finalSectionNr)
+            btnToEnd.IsEnabled = (ResultPageNr < finalSectionNr)
+
+            btnBack.IsEnabled = (ResultPageNr > 1)
+            btnBackToStart.IsEnabled = (ResultPageNr > 1)
+
+        End If
+
+        Dim groupEndIndex = If(ResultPageNr = finalSectionNr, TotalHitCount, ResultPageStartIndex + ResultPageItems)
+        blkHitInfo.Text = If(TotalHitCount > 0, $"{ResultPageStartIndex + 1} - {groupEndIndex} (of {TotalHitCount})", "")
+
+        blkHitCount.Text = $"{TotalHitCount} reactions"
+        blkQueryTime.Text = $"{rssQueryTime} ms"
+
+    End Sub
+
+
+    ''' <summary>
+    ''' Result group button navigation
+    ''' </summary>
+    ''' 
+    Private Sub btnNext_Click() Handles btnNext.Click
+
+        ResultPageNr += 1
+        ResultPageStartIndex = (ResultPageNr - 1) * ResultPageItems
+        DisplayFilteredRss(isPageChange:=True)
+
+    End Sub
+
+    Private Sub btnToEnd_Click() Handles btnToEnd.Click
+
+        Dim finalSectionNr As Integer = (TotalHitCount + ResultPageItems - 1) \ ResultPageItems
+
+        ResultPageNr = finalSectionNr
+        ResultPageStartIndex = (ResultPageNr - 1) * ResultPageItems
+        DisplayFilteredRss(isPageChange:=True)
+
+    End Sub
+
+    Private Sub btnBack_Click() Handles btnBack.Click
+
+        ResultPageNr -= 1
+        ResultPageStartIndex = (ResultPageNr - 1) * ResultPageItems
+        DisplayFilteredRss(isPageChange:=True)
+
+    End Sub
+
+    Private Sub btnBackToStart_Click() Handles btnBackToStart.Click
+
+        DisplayFilteredRss(isPageChange:=False) 'specifying false resets to first page
 
     End Sub
 
@@ -395,7 +511,7 @@ Public Class dlgSearch
 
             DisplayFilteredRss()
 
-            End If
+        End If
 
     End Sub
 
@@ -413,7 +529,6 @@ Public Class dlgSearch
 
             Dim userName = If(cboUsers.SelectedIndex > 0, CType(cboUsers.SelectedValue, String), String.Empty)
             UpdateProjectsFilter(userName)
-
             DisplayFilteredRss()
 
         End If
@@ -493,7 +608,7 @@ Public Class dlgSearch
 
 
     ''' <summary>
-    ''' Finalizes the editing of the yield or scale filter values
+    ''' Finalizes editing of the yield or scale filter values
     ''' </summary>
     ''' 
     Private Sub Filters_PreviewKeyDown(sender As Object, e As KeyEventArgs) Handles txtYield.PreviewKeyDown, txtScale.PreviewKeyDown

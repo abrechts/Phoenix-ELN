@@ -10,7 +10,7 @@
  
         mc:Ignorable="d"
         Title="Substructure Search" TextOptions.TextFormattingMode="Display" WindowStartupLocation="CenterOwner" ShowInTaskbar="False" 
-        Height="800" MinHeight="300" Width="770" MaxWidth="850" MinWidth="770" Background="#FF3D3C3C">
+        Height="840" MinHeight="840" Width="770" MaxWidth="850" MinWidth="770" Background="#FF3D3C3C" >
 
     <Window.Resources>
 
@@ -32,7 +32,7 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="ListBoxItem">
                         <Border Background="{TemplateBinding Background}">
-                            <ContentPresenter HorizontalAlignment="left" VerticalAlignment="Center" />
+                            <ContentPresenter HorizontalAlignment="Stretch" VerticalAlignment="Center" />
                         </Border>
                     </ControlTemplate>
                 </Setter.Value>
@@ -47,310 +47,356 @@
             </Style.Triggers>
         </Style>
 
+        <Style x:Key="NavButtonStyle" TargetType="Button">
+            <Setter Property="Foreground" Value="white"/>
+            <Setter Property="Background" Value="gray"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Foreground" Value="black"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Opacity" Value="0.6"/>
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Opacity" Value="0.3"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
     </Window.Resources>
 
-    <Grid Margin="0,6,0,0">
+    <Grid >
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="32"/>
+        </Grid.RowDefinitions>
 
-        <Grid Grid.ColumnSpan="2">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0">
 
-            <StackPanel Grid.Row="0">
+            <Grid>
 
-                <Grid>
+                <StackPanel  Orientation="Horizontal" Margin="24,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center">
 
-                    <StackPanel  Orientation="Horizontal" Margin="24,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <TextBlock Text="Find Reactions" FontWeight="Bold" HorizontalAlignment="Center" FontStyle="Italic" 
+                        FontSize="13.5" Foreground="LightBlue"/>
 
-                        <TextBlock Text="Find Reactions" FontWeight="Bold" HorizontalAlignment="Center" FontStyle="Italic" 
-                           FontSize="13.5" Foreground="LightBlue"/>
+                    <ContentControl x:Name="icoInfo" Content="{StaticResource icoInfo}" Cursor="Hand" Height="14" Margin="6,1,0,0"
+                        Opacity="0.9"/>
 
-                        <ContentControl x:Name="icoInfo" Content="{StaticResource icoInfo}" Cursor="Hand" Height="14" Margin="6,1,0,0"
-                           Opacity="0.9"/>
+                </StackPanel>
+
+                <ToolBar Style="{StaticResource ToolBarWithoutOverflowBarStyle}" Background="Transparent" HorizontalAlignment="left"
+                    BorderThickness="0" Margin="8,4,12,2" >
+
+                    <!--disabled button styles-->
+                    <ToolBar.Resources>
+
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="White"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsEnabled" Value="false">
+                                    <Setter Property="Opacity" Value="0.5"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+
+                        <Style TargetType="ContentControl">
+                            <Setter Property="Foreground" Value="White"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsEnabled" Value="false">
+                                    <Setter Property="Opacity" Value="0.6"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+
+                    </ToolBar.Resources>
+
+                    <Button x:Name="btnSaveQuery" Padding="2,2,3,3" Foreground="White" IsEnabled="false">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center" >
+                            <ContentControl Content="{StaticResource icoSave_Dark}" Height="14" Margin="2,0,4,-1"/>
+                            <TextBlock Text="Save Query" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Separator/>
+
+                    <Button x:Name="btnLoadQuery" Padding="2,2,3,3" Foreground="White">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center" >
+                            <ContentControl Content="{StaticResource icoOpenFolder_Dark}" Height="16" Margin="2,0,4,-1"/>
+                            <TextBlock Text="Open Query" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+
+                    <Separator/>
+
+                </ToolBar>
+
+                <ToolBar Style="{StaticResource ToolBarWithoutOverflowBarStyle}"  Background="Transparent" HorizontalAlignment="right"
+                    BorderThickness="0" Margin="8,4,12,2">
+
+                    <Button x:Name="btnResetFilters" Padding="2,2,3,3" Foreground="White" ToolTip="Reset all filters to their default values">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center" >
+                            <ContentControl Content="{StaticResource icoDeleteFilter}" Height="16" Margin="1,0,3,-1"/>
+                            <TextBlock Text="Reset Filters" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+
+                </ToolBar>
+
+            </Grid>
+
+            <Border Grid.Row="1" Background="transparent" BorderBrush="#FFADADAD" BorderThickness="1" Margin="12,2,12,12" CornerRadius="6" >
+
+                <Grid >
+
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="120*"/>
+                        <ColumnDefinition Width="5*"/>
+                        <ColumnDefinition Width="420"/>
+                        <ColumnDefinition Width="120*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Orientation="Vertical" Grid.Row="1" Grid.Column="0" Margin="6,8,4,0" VerticalAlignment="Center" >
+
+                        <!-- users ComboBox -->
+
+                        <ComboBox x:Name="cboUsers" Style="{StaticResource DarkComboBoxStyle}" Margin="0,0,0,5" MaxHeight="300" BorderBrush="#FF9B9B9B"
+                            SelectedIndex="0" MinWidth="100" VerticalContentAlignment="Center" Grid.IsSharedSizeScope="True" >
+
+                            <ComboBox.ItemsSource>
+                                <CompositeCollection>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <ContentControl Content="{StaticResource icoUser2_dark}" Width="16"/>
+                                        <TextBlock Text="All Users" Margin="5.5,0,0,0" VerticalAlignment="Center" Foreground="white"/>
+                                    </StackPanel>
+                                    <Separator Background="LightGray" Height="0.8" Margin="0,-3"/>
+                                    <CollectionContainer x:Name="usersContainer" Collection="{Binding Source={StaticResource UsersView}}"/>
+                                </CompositeCollection>
+                            </ComboBox.ItemsSource>
+
+                            <ComboBox.Resources>
+                                <DataTemplate DataType="{x:Type sys:String}">
+                                    <StackPanel Orientation="Horizontal" Margin="0,-2,0,0" >
+                                        <ContentControl Content="{StaticResource icoUser2_dark}" Width="16"/>
+                                        <TextBlock Text="{Binding}" Margin="4,0,0,0" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ComboBox.Resources>
+
+                        </ComboBox>
+
+                        <!-- projects ComboBox -->
+
+                        <ComboBox x:Name="cboProjects" Style="{StaticResource DarkComboBoxStyle}" Margin="0,0,0,5" BorderBrush="#FF9B9B9B"
+                            SelectedIndex="0" MaxHeight="300">
+
+                            <ComboBox.ItemsSource>
+                                <CompositeCollection>
+                                    <StackPanel Orientation="Horizontal">
+                                        <ContentControl Content="{StaticResource icoFolderClosed_Dark}" Width="16"/>
+                                        <TextBlock Text="All Projects" Margin="5,0,0,0" VerticalAlignment="Center" Foreground="white"/>
+                                    </StackPanel>
+                                    <Separator Background="LightGray" Height="0.8" Margin="0,-3"/>
+                                    <CollectionContainer x:Name="projectsContainer" Collection="{Binding Source={StaticResource ProjectsView}}"/>
+                                </CompositeCollection>
+                            </ComboBox.ItemsSource>
+
+                            <ComboBox.Resources>
+                                <DataTemplate DataType="{x:Type sys:String}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <ContentControl Content="{StaticResource icoFolderClosed_Dark}" Width="16"/>
+                                        <TextBlock Text="{Binding}" Margin="4,0,0,0" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ComboBox.Resources>
+
+                        </ComboBox>
+
+                        <!-- project group ComboBox -->
+
+                        <ComboBox x:Name="cboProjGroups" Style="{StaticResource DarkComboBoxStyle}" SelectedIndex="0" MaxHeight="300" BorderBrush="#FF9B9B9B"
+                            IsEnabled="{Binding ElementName=cboProjects, Path=SelectedIndex, Converter={StaticResource IntToBooleanConv}}" Margin="0,0,0,6">
+
+                            <ComboBox.ItemsSource>
+                                <CompositeCollection>
+                                    <StackPanel Orientation="Horizontal">
+                                        <ContentControl Content="{StaticResource icoLightBlueDot}" Width="16" HorizontalAlignment="Left" Margin="0,1,0,0"/>
+                                        <TextBlock Text="All Groups" Margin="5,0,0,0" VerticalAlignment="Center" Foreground="white"/>
+                                    </StackPanel>
+                                    <Separator Background="LightGray" Height="0.8" Margin="0,-3"/>
+                                    <CollectionContainer  x:Name="projectGroupsContainer" Collection="{Binding Source={StaticResource ProjFoldersView}}"/>
+                                </CompositeCollection>
+                            </ComboBox.ItemsSource>
+
+                            <ComboBox.Resources>
+                                <DataTemplate DataType="{x:Type sys:String}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <ContentControl Content="{StaticResource icoLightBlueDot}" Width="16"/>
+                                        <TextBlock Text="{Binding}" Margin="4,0,0,0" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ComboBox.Resources>
+
+                        </ComboBox>
 
                     </StackPanel>
 
-                    <ToolBar Style="{StaticResource ToolBarWithoutOverflowBarStyle}"  Background="Transparent" HorizontalAlignment="left"
-                       BorderThickness="0" Margin="8,4,12,2" >
+                    <Border Grid.Column="2" Grid.Row="1" CornerRadius="6" BorderBrush="#FF54A2D1" BorderThickness="1" Padding="3"  
+                        VerticalAlignment="Top" Margin="0,6,0,6" Width="420" Height="150">
 
-                        <!--disabled button styles-->
-                        <ToolBar.Resources>
+                        <local:SketchAreaRSS x:Name="pnlQuerySketch" ReactionSketch="{Binding}" ShrinkThreshold="650"/>
 
-                            <Style TargetType="TextBlock">
-                                <Setter Property="Foreground" Value="White"/>
-                                <Style.Triggers>
-                                    <Trigger Property="IsEnabled" Value="false">
-                                        <Setter Property="Opacity" Value="0.5"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
+                    </Border>
 
-                            <Style TargetType="ContentControl">
-                                <Setter Property="Foreground" Value="White"/>
-                                <Style.Triggers>
-                                    <Trigger Property="IsEnabled" Value="false">
-                                        <Setter Property="Opacity" Value="0.6"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
+                    <StackPanel Grid.Column="3" Grid.Row="1" Margin="6,0,6,0" VerticalAlignment="Center" HorizontalAlignment="center">
 
-                        </ToolBar.Resources>
+                        <!--yield filter-->
 
-                        <Button x:Name="btnSaveQuery" Padding="2,2,3,3" Foreground="White" IsEnabled="false">
-                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center" >
-                                <ContentControl Content="{StaticResource icoSave_Dark}" Height="14" Margin="2,0,4,-1"/>
-                                <TextBlock Text="Save Query" VerticalAlignment="Center"/>
+                        <Border BorderBrush="#FF9B9B9B" BorderThickness="1" CornerRadius="4" Padding="4" Margin="0,6,0,4" Background="Transparent" >
+
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="left">
+
+                                <TextBlock Text="Yield" FontWeight="DemiBold" Foreground="lightblue" Margin="2,0,0,0" VerticalAlignment="Center"/>
+
+                                <ComboBox x:Name="cboYieldComparer" VerticalAlignment="Center" SelectedIndex="0" FontWeight="demibold" Padding="1,2,1,3"     
+                                    Foreground="LightBlue" BorderBrush="Transparent" Background="Transparent" Style="{StaticResource DarkComboBoxStyle}" 
+                                    ToolTip="{Binding SelectedItem.ToolTip, RelativeSource={RelativeSource Self}}">
+                                    <ComboBoxItem Content=" ≥ " ToolTip="larger or equal"/>
+                                    <ComboBoxItem Content=" ≤ " ToolTip="smaller or equal"/>
+                                </ComboBox>
+
+                                <StackPanel x:Name="pnlYield" Orientation="Horizontal" Margin="1,0,0,0">
+                                    <local:NumericTextBox x:Name="txtYield" IntegersOnly="true" PositiveNumbersOnly="True" d:Text="56" MinWidth="30"
+                                        Margin="0,0,2,0" HorizontalContentAlignment="center" CaretBrush="White" Foreground="white" Background="Transparent" 
+                                        BorderThickness="1" BorderBrush="lightgray" VerticalContentAlignment="Center" Padding="2,0,0,0" />
+                                    <TextBlock Text="%" Margin="1,0,0,0" VerticalAlignment="Center" Foreground="white"/>
+                                </StackPanel>
+
                             </StackPanel>
-                        </Button>
+                        </Border>
 
-                        <Separator/>
+                        <!--scale filter-->
 
-                        <Button x:Name="btnLoadQuery" Padding="2,2,3,3" Foreground="White">
-                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center" >
-                                <ContentControl Content="{StaticResource icoOpenFolder_Dark}" Height="16" Margin="2,0,4,-1"/>
-                                <TextBlock Text="Open Query" VerticalAlignment="Center" />
+                        <Border BorderBrush="#FF9B9B9B" BorderThickness="1" CornerRadius="4" Padding="4" Margin="0,0,0,10" Background="transparent">
+
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="left">
+
+                                <TextBlock Text="Scale" FontWeight="DemiBold" Foreground="lightBlue" Margin="3,1,1,0" VerticalAlignment="Center" />
+
+                                <ComboBox x:Name="cboScaleComparer" VerticalAlignment="Center" SelectedIndex="0" FontWeight="demibold" Padding="0,2,1,3"     
+                                    Foreground="LightBlue" BorderBrush="Transparent" Background="Transparent" Style="{StaticResource DarkComboBoxStyle}" 
+                                    ToolTip="{Binding SelectedItem.ToolTip, RelativeSource={RelativeSource Self}}">
+                                    <ComboBoxItem Content=" ≥ " ToolTip="larger or equal"/>
+                                    <ComboBoxItem Content=" ≤ " ToolTip="smaller or equal"/>
+                                </ComboBox>
+
+                                <local:NumericTextBox x:Name="txtScale" SignificantDigits="3" MaxLength="5" PositiveNumbersOnly="True"
+                                    d:Text="200" MinWidth="40" CaretBrush="White" Foreground="white" Background="Transparent"  
+                                    HorizontalContentAlignment="Center" BorderThickness="1" Margin="1,0,2,0" Padding="0,0,0,1"
+                                    BorderBrush="lightgray" VerticalContentAlignment="Center"/>
+
+                                <TextBlock Text="g" Margin="2,0,3,0" VerticalAlignment="Center" Foreground="white"/>
+
                             </StackPanel>
-                        </Button>
-
-                        <Separator/>
-
-                    </ToolBar>
-
-                    <ToolBar Style="{StaticResource ToolBarWithoutOverflowBarStyle}"  Background="Transparent" HorizontalAlignment="right"
-                        BorderThickness="0" Margin="8,4,12,2">
-
-                        <Button x:Name="btnResetFilters" Padding="2,2,3,3" Foreground="White" ToolTip="Reset all filters to their default values">
-                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center" >
-                                <ContentControl Content="{StaticResource icoDeleteFilter}" Height="16" Margin="1,0,3,-1"/>
-                                <TextBlock Text="Reset Filters" VerticalAlignment="Center" />
-                            </StackPanel>
-                        </Button>
-
-                    </ToolBar>
-
-                </Grid>
-
-                <Border Grid.Row="1" Background="transparent" BorderBrush="#FFADADAD" BorderThickness="1" Margin="12,2,12,12" CornerRadius="6" >
-
-                    <Grid >
-
-                        <Grid.RowDefinitions>
-                            <RowDefinition />
-                            <RowDefinition/>
-                        </Grid.RowDefinitions>
-
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="120*"/>
-                            <ColumnDefinition Width="5*"/>
-                            <ColumnDefinition Width="420"/>
-                            <ColumnDefinition Width="120*"/>
-                        </Grid.ColumnDefinitions>
-
-                        <StackPanel Orientation="Vertical" Grid.Row="1" Grid.Column="0" Margin="6,8,4,0" VerticalAlignment="Center" >
-
-                            <!-- users ComboBox -->
-
-                            <ComboBox x:Name="cboUsers" Style="{StaticResource DarkComboBoxStyle}" Margin="0,0,0,5" MaxHeight="300" BorderBrush="#FF9B9B9B"
-                                SelectedIndex="0" MinWidth="100" VerticalContentAlignment="Center" Grid.IsSharedSizeScope="True" >
-
-                                <ComboBox.ItemsSource>
-                                    <CompositeCollection>
-                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                            <ContentControl Content="{StaticResource icoUser2_dark}" Width="16"/>
-                                            <TextBlock Text="All Users" Margin="5.5,0,0,0" VerticalAlignment="Center" Foreground="white"/>
-                                        </StackPanel>
-                                        <Separator Background="LightGray" Height="0.8" Margin="0,-3"/>
-                                        <CollectionContainer x:Name="usersContainer" Collection="{Binding Source={StaticResource UsersView}}"/>
-                                    </CompositeCollection>
-                                </ComboBox.ItemsSource>
-
-                                <ComboBox.Resources>
-                                    <DataTemplate DataType="{x:Type sys:String}">
-                                        <StackPanel Orientation="Horizontal" Margin="0,-2,0,0" >
-                                            <ContentControl Content="{StaticResource icoUser2_dark}" Width="16"/>
-                                            <TextBlock Text="{Binding}" Margin="4,0,0,0" VerticalAlignment="Center"/>
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </ComboBox.Resources>
-
-                            </ComboBox>
-
-                            <!-- projects ComboBox -->
-
-                            <ComboBox x:Name="cboProjects" Style="{StaticResource DarkComboBoxStyle}" Margin="0,0,0,5" BorderBrush="#FF9B9B9B"
-                               SelectedIndex="0" MaxHeight="300">
-
-                                <ComboBox.ItemsSource>
-                                    <CompositeCollection>
-                                        <StackPanel Orientation="Horizontal">
-                                            <ContentControl Content="{StaticResource icoFolderClosed_Dark}" Width="16"/>
-                                            <TextBlock Text="All Projects" Margin="5,0,0,0" VerticalAlignment="Center" Foreground="white"/>
-                                        </StackPanel>
-                                        <Separator Background="LightGray" Height="0.8" Margin="0,-3"/>
-                                        <CollectionContainer x:Name="projectsContainer" Collection="{Binding Source={StaticResource ProjectsView}}"/>
-                                    </CompositeCollection>
-                                </ComboBox.ItemsSource>
-
-                                <ComboBox.Resources>
-                                    <DataTemplate DataType="{x:Type sys:String}">
-                                        <StackPanel Orientation="Horizontal">
-                                            <ContentControl Content="{StaticResource icoFolderClosed_Dark}" Width="16"/>
-                                            <TextBlock Text="{Binding}" Margin="4,0,0,0" VerticalAlignment="Center"/>
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </ComboBox.Resources>
-
-                            </ComboBox>
-
-                            <!-- project group ComboBox -->
-
-                            <ComboBox x:Name="cboProjGroups" Style="{StaticResource DarkComboBoxStyle}" SelectedIndex="0" MaxHeight="300" BorderBrush="#FF9B9B9B"
-                               IsEnabled="{Binding ElementName=cboProjects, Path=SelectedIndex, Converter={StaticResource IntToBooleanConv}}" Margin="0,0,0,6">
-
-                                <ComboBox.ItemsSource>
-                                    <CompositeCollection>
-                                        <StackPanel Orientation="Horizontal">
-                                            <ContentControl Content="{StaticResource icoLightBlueDot}" Width="16" HorizontalAlignment="Left" Margin="0,1,0,0"/>
-                                            <TextBlock Text="All Groups" Margin="5,0,0,0" VerticalAlignment="Center" Foreground="white"/>
-                                        </StackPanel>
-                                        <Separator Background="LightGray" Height="0.8" Margin="0,-3"/>
-                                        <CollectionContainer  x:Name="projectGroupsContainer" Collection="{Binding Source={StaticResource ProjFoldersView}}"/>
-                                    </CompositeCollection>
-                                </ComboBox.ItemsSource>
-
-                                <ComboBox.Resources>
-                                    <DataTemplate DataType="{x:Type sys:String}">
-                                        <StackPanel Orientation="Horizontal">
-                                            <ContentControl Content="{StaticResource icoLightBlueDot}" Width="16"/>
-                                            <TextBlock Text="{Binding}" Margin="4,0,0,0" VerticalAlignment="Center"/>
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </ComboBox.Resources>
-
-                            </ComboBox>
-
-                        </StackPanel>
-
-                        <Border Grid.Column="2" Grid.Row="1" CornerRadius="6" BorderBrush="#FF54A2D1" BorderThickness="1" Padding="3"  
-                           VerticalAlignment="Top" Margin="0,6,0,6" Width="420" Height="150">
-
-                            <local:SketchAreaRSS x:Name="pnlQuerySketch" ReactionSketch="{Binding}" ShrinkThreshold="650"/>
 
                         </Border>
 
-                        <StackPanel Grid.Column="3" Grid.Row="1" Margin="6,0,6,0" VerticalAlignment="Center" HorizontalAlignment="center">
+                        <CheckBox x:Name="chkServerSearch" Content="Server Search" Foreground="white" HorizontalAlignment="Center" Margin="0,8,0,0"/>
 
-                            <!--yield filter-->
-
-                            <Border BorderBrush="#FF9B9B9B" BorderThickness="1" CornerRadius="4" Padding="4" Margin="0,6,0,4" Background="Transparent" >
-
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="left">
-
-                                    <TextBlock Text="Yield" FontWeight="DemiBold" Foreground="lightblue" Margin="2,0,0,0" VerticalAlignment="Center"/>
-
-                                    <ComboBox x:Name="cboYieldComparer" VerticalAlignment="Center" SelectedIndex="0" FontWeight="demibold" Padding="1,2,1,3"     
-                                       Foreground="LightBlue" BorderBrush="Transparent" Background="Transparent" Style="{StaticResource DarkComboBoxStyle}" 
-                                       ToolTip="{Binding SelectedItem.ToolTip, RelativeSource={RelativeSource Self}}">
-                                        <ComboBoxItem Content=" ≥ " ToolTip="larger or equal"/>
-                                        <ComboBoxItem Content=" ≤ " ToolTip="smaller or equal"/>
-                                    </ComboBox>
-
-                                    <StackPanel x:Name="pnlYield" Orientation="Horizontal" Margin="1,0,0,0">
-                                        <local:NumericTextBox x:Name="txtYield" IntegersOnly="true" PositiveNumbersOnly="True" d:Text="56" MinWidth="30"
-                                            Margin="0,0,2,0" HorizontalContentAlignment="center" CaretBrush="White" Foreground="white" Background="Transparent" 
-                                            BorderThickness="1" BorderBrush="lightgray" VerticalContentAlignment="Center" Padding="2,0,0,0" />
-                                        <TextBlock Text="%" Margin="1,0,0,0" VerticalAlignment="Center" Foreground="white"/>
-                                    </StackPanel>
-
-                                </StackPanel>
-                            </Border>
-
-                            <!--scale filter-->
-
-                            <Border BorderBrush="#FF9B9B9B" BorderThickness="1" CornerRadius="4" Padding="4" Margin="0,0,0,10" Background="transparent">
-
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="left">
-
-                                    <TextBlock Text="Scale" FontWeight="DemiBold" Foreground="lightBlue" Margin="3,1,1,0" VerticalAlignment="Center" />
-
-                                    <ComboBox x:Name="cboScaleComparer" VerticalAlignment="Center" SelectedIndex="0" FontWeight="demibold" Padding="0,2,1,3"     
-                                       Foreground="LightBlue" BorderBrush="Transparent" Background="Transparent" Style="{StaticResource DarkComboBoxStyle}" 
-                                       ToolTip="{Binding SelectedItem.ToolTip, RelativeSource={RelativeSource Self}}">
-                                        <ComboBoxItem Content=" ≥ " ToolTip="larger or equal"/>
-                                        <ComboBoxItem Content=" ≤ " ToolTip="smaller or equal"/>
-                                    </ComboBox>
-
-                                    <local:NumericTextBox x:Name="txtScale" SignificantDigits="3" MaxLength="5" PositiveNumbersOnly="True"
-                                        d:Text="200" MinWidth="40" CaretBrush="White" Foreground="white" Background="Transparent"  
-                                        HorizontalContentAlignment="Center" BorderThickness="1" Margin="1,0,2,0" Padding="0,0,0,1"
-                                        BorderBrush="lightgray" VerticalContentAlignment="Center"/>
-
-                                    <TextBlock Text="g" Margin="2,0,3,0" VerticalAlignment="Center" Foreground="white"/>
-
-                                </StackPanel>
-
-                            </Border>
-
-                            <CheckBox x:Name="chkServerSearch" Content="Server Search" Foreground="white" HorizontalAlignment="Center" Margin="0,8,0,0"/>
-
-                        </StackPanel>
-
-                    </Grid>
-
-                </Border>
-
-            </StackPanel>
-
-            <!--Results section-->
-
-            <Border Margin="0,0,0,14" Grid.Row="1" HorizontalAlignment="Center">
-
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-
-                    <StackPanel Grid.Row="0">
-                        <TextBlock x:Name="blkResultsTitle" Text="Results" HorizontalAlignment="Center" FontWeight="Bold" 
-                                    FontSize="13" Foreground="LightBlue" FontStyle="Italic"/>
-                        <TextBlock Text="finalized experiments" Foreground="lightgray" HorizontalAlignment="Center" FontSize="11" FontStyle="Italic" Margin="0,-1,0,0" />
-                        <Separator Margin="0,3,0,6" Background="#FFA1A0A0" Height="1"/>
                     </StackPanel>
 
-                    <ComboBox x:Name="cboSorting" Style="{StaticResource DarkComboBoxStyle}" SelectedIndex="0" HorizontalAlignment="Right" 
-                      VerticalAlignment="Top" Padding="6,1,6,4" Margin="0,6,2,0" FontSize="11.5" BorderThickness="0">
-                        <ComboBoxItem Content="sort by yield"/>
-                        <ComboBoxItem Content="sort by scale"/>
-                    </ComboBox>
-
-
-                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" MinHeight="80" Padding="4,0,4,4" 
-                            Style="{StaticResource DarkScrollViewerStyle}" >
-
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="63*"/>
-                                <ColumnDefinition Width="17*"/>
-                            </Grid.ColumnDefinitions>
-
-                            <ListBox x:Name="lstRssHitGroups" ItemsSource="{Binding}" ItemTemplate="{StaticResource rssGroupItem}" BorderThickness="0"
-                                    ItemContainerStyle="{StaticResource ListBoxNoHighlight}" MinWidth="400" Padding="6" HorizontalContentAlignment="Stretch"
-                                    ScrollViewer.HorizontalScrollBarVisibility="Disabled" Background="Transparent" Grid.ColumnSpan="2" />
-
-                            <TextBlock x:Name="blkNoHitsFound" Text="---  no matches found  ---" Foreground="#FFFDCE79" HorizontalAlignment="Left"
-                                    VerticalAlignment="Top" Margin="147,80,0,0" FontStyle="Italic" FontSize="11.5"  d:Visibility="Visible" Opacity="0.95"
-                                    Visibility="{Binding ElementName=lstRssHitGroups, Path=Items.Count,
-                                      Converter={StaticResource intToVisibilityConv},ConverterParameter=invert}"/>
-
-                        </Grid>
-                        
-                    </ScrollViewer>
-                    
                 </Grid>
+
             </Border>
-        </Grid>
+
+        </StackPanel>
+
+        <!--Results section-->
+
+        <Border Margin="0,0,0,6" Grid.Row="1" HorizontalAlignment="Center">
+
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Row="0">
+                    <TextBlock x:Name="blkResultsTitle" Text="Results" HorizontalAlignment="Center" FontWeight="Bold" 
+                                FontSize="13" Foreground="LightBlue" FontStyle="Italic"/>
+                    <TextBlock Text="finalized experiments" Foreground="lightgray" HorizontalAlignment="Center" FontSize="11" FontStyle="Italic" Margin="0,-1,0,0" />
+                    <Separator Margin="0,3,0,6" Background="#FFA1A0A0" Height="1"/>
+                </StackPanel>
+
+                <ComboBox x:Name="cboSorting" Grid.Row="0" Style="{StaticResource DarkComboBoxStyle}" SelectedIndex="0" HorizontalAlignment="Right" 
+                    VerticalAlignment="Top" Padding="6,1,6,4" Margin="0,6,2,0" FontSize="11.5" BorderThickness="0">
+                    <ComboBoxItem Content="sort by yield"/>
+                    <ComboBoxItem Content="sort by scale"/>
+                </ComboBox>
+
+                <ScrollViewer x:Name="scrlResults" Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" 
+                    MinHeight="80" Padding="4,0,4,4"  Style="{StaticResource DarkScrollViewerStyle}" >
+
+                    <Grid>
+                        <ListBox x:Name="lstRssHitGroups" ItemsSource="{Binding}" ItemTemplate="{StaticResource rssGroupItem}" BorderThickness="0" 
+                                MinWidth="400" Padding="6" ItemContainerStyle="{StaticResource ListBoxNoHighlight}" HorizontalContentAlignment="Stretch"
+                                ScrollViewer.HorizontalScrollBarVisibility="Disabled" Background="transparent" Grid.ColumnSpan="2"
+                                 VirtualizingPanel.IsVirtualizing="true" VirtualizingPanel.VirtualizationMode="Recycling">
+                        </ListBox>
+
+                        <TextBlock x:Name="blkNoHitsFound" Text="---  no matches found  ---" Foreground="#FFFDCE79" HorizontalAlignment="Center"
+                                VerticalAlignment="Top" Margin="0,160,0,0" FontStyle="Italic" FontSize="11.5"  d:Visibility="Visible" Opacity="0.95"
+                                Visibility="{Binding ElementName=lstRssHitGroups, Path=Items.Count,
+                                    Converter={StaticResource intToVisibilityConv},ConverterParameter=invert}"/>
+                    </Grid>
+
+                </ScrollViewer>
+            </Grid>
+        </Border>
+
+        <!--Navigation bar -->
+        
+        <StackPanel Grid.Row="2" TextElement.FontSize="11.5 " Background="#FF5E5E5E">
+            <Separator Foreground="white" Height="1" Margin="0,0,0,4"/>
+            <Grid VerticalAlignment="Center" Margin="8,1,12,0" >
+
+                <TextBlock x:Name="blkHitCount" d:Text="100 hits" Foreground="#FFE1E1E1" HorizontalAlignment="Left" ToolTip="Total number of hits for this query" VerticalAlignment="Center"/>
+
+                <StackPanel x:Name="pnlHitNavigation" Orientation="Horizontal" HorizontalAlignment="Center" IsEnabled="false">
+
+                    <Button x:Name="btnBackToStart" Style="{StaticResource NavButtonStyle}" Padding="5,1,5,2" Margin="0,0,4,0">
+                        <StackPanel Orientation="Horizontal" Margin="0,1,0,0">
+                            <TextBlock Text="‖" Margin="0,-1,1,0"/>
+                            <TextBlock Text="◀"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button x:Name="btnBack" Content="◀" Style="{StaticResource NavButtonStyle}" Padding="6,1,7,2" Margin="0,0,8,0"/>
+
+                    <TextBlock x:Name="blkHitInfo" d:Text="1-10 " MinWidth="26" Foreground="whitesmoke" VerticalAlignment="Center"/>
+
+                    <Button x:Name="btnNext" Content="▶" Style="{StaticResource NavButtonStyle}" Padding="6,1,7,2" Margin="6,0,0,0"/>
+                    <Button x:Name="btnToEnd" Style="{StaticResource NavButtonStyle}" Padding="5,1,5,2" Margin="4,0,0,0">
+                        <StackPanel Orientation="Horizontal" Margin="0,1,0,0">
+                            <TextBlock Text="▶"/>
+                            <TextBlock Text="‖" Margin="1,-1,0,0"/>
+                        </StackPanel>
+                    </Button>
+
+                </StackPanel>
+
+                <TextBlock x:Name="blkQueryTime" d:Text="20 ms" Foreground="#FFE1E1E1" HorizontalAlignment="Right" ToolTip="RSS query time" VerticalAlignment="Center"/>
+
+            </Grid>
+        </StackPanel>
 
     </Grid>
+
 </Window>
