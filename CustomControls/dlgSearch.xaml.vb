@@ -90,6 +90,17 @@ Public Class dlgSearch
     Private Sub pnlQuerySketch_SketchEdited(sender As Object, skInfo As SketchResults) Handles pnlQuerySketch.SketchEdited
 
         QueryInfo.ReactionSketchXml = skInfo.NativeReactionXML
+
+        btnSaveQuery.IsEnabled = False
+
+        ' check for identical query reactant and product structures
+        If skInfo.Reactants.First.InChIKey = skInfo.Products.First.InChIKey Then
+            cbMsgBox.Display("Sorry, can't search for identical reactant and product!",
+                    MsgBoxStyle.OkOnly + MsgBoxStyle.Exclamation, "Query structure error")
+            lstRssHitGroups.DataContext = Nothing
+            Exit Sub
+        End If
+
         btnSaveQuery.IsEnabled = True
 
         RssHits = PerformRssQuery(skInfo.MDLRxnFileString)
@@ -411,21 +422,6 @@ Public Class dlgSearch
             QueryInfo = loadedQueryInfo
 
             With QueryInfo
-
-                '    'determine if the loaded query is server-based but but no server connection is present.
-                '    If .IsServerQueryActive AndAlso Not chkServerSearch.IsEnabled Then
-                '        cbMsgBox.Display("The loaded query is based on a server search, but no server connection is currently available." +
-                '            vbCrLf + vbCrLf + "The filters for user, project and group are reset to default.",
-                '            MsgBoxStyle.OkOnly + MsgBoxStyle.Exclamation, "Search context mismatch")
-                '        isServerMissing = True
-                '    Else
-                '        _suppressUIEvents = True
-                '        chkServerSearch.IsChecked = .IsServerQueryActive
-                '        _suppressUIEvents = False
-                '    End If
-
-                'populate the user, project and group filters and resets them to "any"
-                ' InitializeSearchContext(IsServerQueryActive AndAlso Not isServerMissing)
 
                 'draw query sketch and get MDL reaction file
                 pnlQuerySketch.ReactionSketch = .ReactionSketchXml

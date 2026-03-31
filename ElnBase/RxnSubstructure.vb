@@ -1,7 +1,6 @@
 ﻿Imports com.epam.indigo
 Imports ElnBase.ELNEnumerations
 Imports ElnCoreModel
-Imports Microsoft.EntityFrameworkCore
 
 ' * Performance notes: 
 ' * MatchRxnFingerprint: 36 ms for 100'000 comparisons (comparison code only, no LINQ database access overhead)
@@ -62,6 +61,9 @@ Public Class RxnSubstructure
             Return rssResult
         End If
 
+        Dim reactQueryFrag As IndigoObject = queryRxnObj.iterateReactants(0)
+        Dim prodQueryFrag As IndigoObject = queryRxnObj.iterateProducts(0)
+
         Dim queryFp = queryRxnObj.fingerprint("sub")
 
         ' Get lightweight projections of all *finalized* experiments as ExperimentID and RxnFingerprint only.
@@ -86,7 +88,7 @@ Public Class RxnSubstructure
                     Where(Function(exp) fpMatchIds.Contains(exp.ExperimentID)).ToList
 
                 ' Confirm with substructure match
-                Dim rssRes = fullFingerprintEntries.Where(Function(exp) MatchRxnSubstructure(exp.RxnIndigoObj, queryRxnObj))
+                Dim rssRes = fullFingerprintEntries.Where(Function(exp) MatchRxnSubstructure(exp.RxnIndigoObj, reactQueryFrag, prodQueryFrag))
 
                 With rssResult
                     .ExperimentHits = rssRes
@@ -191,11 +193,11 @@ Public Class RxnSubstructure
     ''' Gets if the specified serialized reaction object and the specified reaction substructure newSmarts in a RSS substructure hit.
     ''' </summary>
     ''' 
-    Private Function MatchRxnSubstructure(srcIndigoRxnArr As Byte(), queryIndigoRxnObj As IndigoObject) As Boolean
+    Private Function MatchRxnSubstructure(srcIndigoRxnArr As Byte(), reactQueryFrag As IndigoObject, prodQueryFrag As IndigoObject) As Boolean
 
         Dim srcIndigoObj = IndigoBase.loadReaction(srcIndigoRxnArr)
 
-        Return MatchRxnSubstructure(srcIndigoObj, queryIndigoRxnObj)
+        Return MatchRxnSubstructure(srcIndigoObj, reactQueryFrag, prodQueryFrag)
 
     End Function
 
@@ -204,41 +206,38 @@ Public Class RxnSubstructure
     ''' Gets if the specified reaction object and the specified reaction substructure result in a RSS hit.
     ''' </summary>
     ''' 
-    Private Function MatchRxnSubstructure(sourceIndigoRxnObj As IndigoObject, queryIndigoRxnObj As IndigoObject) As Boolean
+    ' Private Function MatchRxnSubstructure(sourceIndigoRxnObj As IndigoObject, queryIndigoRxnObj As IndigoObject) As Boolean
+    Private Function MatchRxnSubstructure(sourceIndigoRxnObj As IndigoObject, reactQueryFrag As IndigoObject, prodQueryFrag As IndigoObject) As Boolean
 
         '240 ms for 1000 hits
 
-        If sourceIndigoRxnObj Is Nothing OrElse queryIndigoRxnObj Is Nothing Then
+        If sourceIndigoRxnObj Is Nothing OrElse reactQueryFrag Is Nothing OrElse prodQueryFrag Is Nothing Then
             Return Nothing
         End If
-
-        'get query reactant and product fragments
-        Dim reactFrag As IndigoObject = queryIndigoRxnObj.iterateReactants(0)
-        Dim prodFrag As IndigoObject = queryIndigoRxnObj.iterateProducts(0)
 
         'get source reactant and products
         Dim srcRefReact = sourceIndigoRxnObj.iterateReactants(0)
         Dim srcRefProd = sourceIndigoRxnObj.iterateProducts(0)
 
         'get unique match counts
-        Dim rrCount = UniqueMatchCount(srcRefReact, reactFrag) 'reactFrags in reactant
-        Dim prCount = UniqueMatchCount(srcRefReact, prodFrag)  'prodFrags in reactant
-        Dim rpCount = UniqueMatchCount(srcRefProd, reactFrag) 'reactFrags in product
-        Dim ppCount = UniqueMatchCount(srcRefProd, prodFrag)  'prodFrags in product
+        Dim rrCount = UniqueMatchCount(srcRefReact, reactQueryFrag) 'reactFrags in reactant
+        Dim prCount = UniqueMatchCount(srcRefReact, prodQueryFrag)  'prodFrags in reactant
+        Dim rpCount = UniqueMatchCount(srcRefProd, reactQueryFrag) 'reactFrags in product
+        Dim ppCount = UniqueMatchCount(srcRefProd, prodQueryFrag)  'prodFrags in product
 
         'get query molecules as non-query molecules for subsequent inter-match
-        Dim stdReactFrag = IndigoBase.loadMolecule(reactFrag.smiles)
-        Dim stdProdFrag = IndigoBase.loadMolecule(prodFrag.smiles)
+        Dim stdReactFrag = IndigoBase.loadMolecule(reactQueryFrag.smiles)
+        Dim stdProdFrag = IndigoBase.loadMolecule(prodQueryFrag.smiles)
 
         'correct for query reactant fragment being part of product fragment
-        Dim reactInProdCount = UniqueMatchCount(stdProdFrag, reactFrag)
+        Dim reactInProdCount = UniqueMatchCount(stdProdFrag, reactQueryFrag)
         rpCount -= reactInProdCount
 
         'correct for query product fragment being part of reactant fragment
-        Dim prodInReactCount = UniqueMatchCount(stdReactFrag, prodFrag)
+        Dim prodInReactCount = UniqueMatchCount(stdReactFrag, prodQueryFrag)
         prCount -= prodInReactCount
 
-        '--> match, if reactFrag count decreases and prodFrag count increases in srcRefReact -> srcRefProd
+        '--> match, if reactQueryFrag count decreases and prodQueryFrag count increases in srcRefReact -> srcRefProd
         Return (rrCount > rpCount) AndAlso (prCount < ppCount)
 
     End Function
