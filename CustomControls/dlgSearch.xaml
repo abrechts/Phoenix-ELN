@@ -7,9 +7,8 @@
         xmlns:elnCoreModel="clr-namespace:ElnCoreModel;assembly=ElnCoreModel" 
         xmlns:scm ="clr-namespace:System.ComponentModel;assembly=WindowsBase"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
- 
         mc:Ignorable="d"
-        Title="Substructure Search" TextOptions.TextFormattingMode="Display" WindowStartupLocation="CenterOwner" ShowInTaskbar="False" 
+        Title="Reaction Substructure Search" TextOptions.TextFormattingMode="Display" WindowStartupLocation="CenterOwner" ShowInTaskbar="False" 
         Height="840" MinHeight="840" Width="770" MaxWidth="850" MinWidth="770" Background="#FF3D3C3C" >
 
     <Window.Resources>
@@ -70,7 +69,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="32"/>
+            <RowDefinition Height="26"/>
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0">
@@ -320,7 +319,7 @@
 
         <!--Results section-->
 
-        <Border Margin="0,0,0,6" Grid.Row="1" HorizontalAlignment="Center">
+        <Border x:Name="resBorder" Margin="0,30,0,6" Grid.Row="1" HorizontalAlignment="Center">
 
             <Grid>
                 <Grid.RowDefinitions>
@@ -328,31 +327,31 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <StackPanel Grid.Row="0">
-                    <TextBlock x:Name="blkResultsTitle" Text="Results" HorizontalAlignment="Center" FontWeight="Bold" 
-                                FontSize="13" Foreground="LightBlue" FontStyle="Italic"/>
-                    <TextBlock Text="finalized experiments" Foreground="lightgray" HorizontalAlignment="Center" FontSize="11" FontStyle="Italic" Margin="0,-1,0,0" />
-                    <Separator Margin="0,3,0,6" Background="#FFA1A0A0" Height="1"/>
-                </StackPanel>
+                <TextBlock Grid.Row="0" Text="finalized exp." Foreground="lightgray" HorizontalAlignment="left" VerticalAlignment="Center" 
+                   FontSize="11" FontStyle="Italic" Margin="2,-6,0,0"  />
+
+                <TextBlock Grid.Row="0" x:Name="blkResultsTitle" Text="Results" HorizontalAlignment="Center" FontWeight="Bold" 
+                    FontSize="13" Foreground="LightBlue" FontStyle="Italic"/>
 
                 <ComboBox x:Name="cboSorting" Grid.Row="0" Style="{StaticResource DarkComboBoxStyle}" SelectedIndex="0" HorizontalAlignment="Right" 
-                    VerticalAlignment="Top" Padding="6,1,6,4" Margin="0,6,2,0" FontSize="11.5" BorderThickness="0">
+                    VerticalAlignment="Top" Padding="6,1,6,4" Margin="0,-1,2,0" FontSize="11.5" BorderThickness="0">
                     <ComboBoxItem Content="sort by yield"/>
                     <ComboBoxItem Content="sort by scale"/>
                 </ComboBox>
 
+                <Separator Grid.Row="0" Margin="0,20,0,6" Background="#FFA1A0A0" Height="1" VerticalAlignment="Bottom"/>
+
                 <ScrollViewer x:Name="scrlResults" Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" 
-                    MinHeight="80" Padding="4,0,4,4"  Style="{StaticResource DarkScrollViewerStyle}" >
+                    MinHeight="80" Padding="4,2,4,4"  Style="{StaticResource DarkScrollViewerStyle}" >
 
                     <Grid>
                         <ListBox x:Name="lstRssHitGroups" ItemsSource="{Binding}" ItemTemplate="{StaticResource rssGroupItem}" BorderThickness="0" 
-                                MinWidth="400" Padding="6" ItemContainerStyle="{StaticResource ListBoxNoHighlight}" HorizontalContentAlignment="Stretch"
+                                MinWidth="400" ItemContainerStyle="{StaticResource ListBoxNoHighlight}" HorizontalContentAlignment="Stretch"
                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled" Background="transparent" Grid.ColumnSpan="2"
-                                 VirtualizingPanel.IsVirtualizing="true" VirtualizingPanel.VirtualizationMode="Recycling">
-                        </ListBox>
+                                VirtualizingPanel.IsVirtualizing="true" VirtualizingPanel.VirtualizationMode="Recycling"/>
 
                         <TextBlock x:Name="blkNoHitsFound" Text="---  no matches found  ---" Foreground="#FFFDCE79" HorizontalAlignment="Center"
-                                VerticalAlignment="Top" Margin="0,160,0,0" FontStyle="Italic" FontSize="11.5"  d:Visibility="Visible" Opacity="0.95"
+                                VerticalAlignment="Top" Margin="0,30,0,0" FontStyle="Italic" FontSize="11.5"  d:Visibility="Visible" Opacity="0.95"
                                 Visibility="{Binding ElementName=lstRssHitGroups, Path=Items.Count,
                                     Converter={StaticResource intToVisibilityConv},ConverterParameter=invert}"/>
                     </Grid>
@@ -364,7 +363,9 @@
         <!--Navigation bar -->
         
         <StackPanel Grid.Row="2" TextElement.FontSize="11.5 " Background="#FF5E5E5E">
-            <Separator Foreground="white" Height="1" Margin="0,0,0,4"/>
+            
+            <Separator Foreground="white" Height="1" Margin="0,0,0,1"/>
+            
             <Grid VerticalAlignment="Center" Margin="8,1,12,0" >
 
                 <TextBlock x:Name="blkHitCount" d:Text="100 hits" Foreground="#FFE1E1E1" HorizontalAlignment="Left" ToolTip="Total number of hits for this query" VerticalAlignment="Center"/>
@@ -378,7 +379,7 @@
                         </StackPanel>
                     </Button>
 
-                    <Button x:Name="btnBack" Content="◀" Style="{StaticResource NavButtonStyle}" Padding="6,1,7,2" Margin="0,0,8,0"/>
+                    <Button x:Name="btnBack" Content="◀" Style="{StaticResource NavButtonStyle}" Padding="6,1,7,2" Margin="0,0,6,0"/>
 
                     <TextBlock x:Name="blkHitInfo" d:Text="1-10 " MinWidth="26" Foreground="whitesmoke" VerticalAlignment="Center"/>
 

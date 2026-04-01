@@ -1,4 +1,5 @@
 ﻿Imports System.Globalization
+Imports System.Windows
 Imports System.Windows.Controls
 Imports System.Windows.Data
 Imports System.Windows.Input
@@ -245,6 +246,8 @@ Public Class dlgSearch
         lstRssHitGroups.DataContext = rssGroups
 
         scrlResults.ScrollToHome()
+
+        resBorder.Margin = If(lstRssHitGroups.Items.Count > 0, New Thickness(0, 0, 0, 6), New Thickness(0, 30, 0, 6))
 
         UpdateQueryStats()
 
