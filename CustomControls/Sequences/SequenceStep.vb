@@ -69,7 +69,11 @@ Public Class SequenceStep
     ''' 
     Public Function GetNextSteps() As List(Of SequenceStep)
 
-        Dim nextStepInChIList = (From exp In DatabaseContext.tblExperiments Where exp.ReactantInChIKey = ProductInChIKey
+        'Connects to the next step(s) based on the current reactant InChIKey, but only if the current reactant 
+        'and product InChIKeys are not identical
+
+        Dim nextStepInChIList = (From exp In DatabaseContext.tblExperiments
+                                 Where exp.ReactantInChIKey = ProductInChIKey AndAlso exp.ReactantInChIKey <> exp.ProductInChIKey
                                  Select exp.ProductInChIKey).Distinct
 
         Dim res As New List(Of SequenceStep)
@@ -92,7 +96,11 @@ Public Class SequenceStep
     ''' 
     Public Function GetPreviousSteps() As List(Of SequenceStep)
 
-        Dim prevStepInChIList = (From exp In DatabaseContext.tblExperiments Where exp.ProductInChIKey = ReactantInChIKey
+        'Connects to the previous step(s) based on the current reactant InChIKey, but only if the current reactant 
+        'and product InChIKeys are not identical
+
+        Dim prevStepInChIList = (From exp In DatabaseContext.tblExperiments
+                                 Where exp.ProductInChIKey = ReactantInChIKey AndAlso exp.ReactantInChIKey <> exp.ProductInChIKey
                                  Select exp.ReactantInChIKey).Distinct
 
         Dim res As New List(Of SequenceStep)
