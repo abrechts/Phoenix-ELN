@@ -284,6 +284,10 @@ Public Class ExperimentTree
             'select experiment child node, which is subsequently scrolled into view by TreeViewItem_Selected
             expEntry.IsCurrent = 1
 
+            'The experiment node may currently be in another scrolling area of the navigation tree,
+            'so scroll to it if necessary
+            ScrollExperimentIntoView(expEntry)
+
             'workaround: deselects first protocol item, which is auto-selected if originally no selection is present for unknown reasons
             Dim firstItem = (From item In expEntry.tblProtocolItems Order By item.SequenceNr Ascending).FirstOrDefault
             If firstItem IsNot Nothing Then
@@ -300,6 +304,33 @@ Public Class ExperimentTree
         End If
 
     End Sub
+
+
+    ''' <summary>
+    ''' It the TreeViewItem of the specified expEntry is not visible in the current navigation view, it is 
+    ''' selected and scrolled to the top of the viewport.
+    ''' </summary>
+    ''' <returns>The TreeViewItem representing the specified expEntry.</returns>
+    ''' 
+    Public Function ScrollExperimentIntoView(expEntry As tblExperiments) As TreeViewItem
+
+        Dim selTvi As TreeViewItem = TreeViewItemFromData(navTree, expEntry)
+
+        If selTvi IsNot Nothing Then
+
+            Dim scroller = WPFToolbox.FindVisualChild(Of ScrollViewer)(navTree)
+            If scroller IsNot Nothing AndAlso Not IsTreeViewItemVisible(scroller, selTvi) Then
+                scroller.ScrollToBottom()
+            End If
+
+            selTvi.IsSelected = True
+
+        End If
+
+        Return selTvi
+
+    End Function
+
 
 
     Private Sub TreeViewItem_Selected(sender As Object, e As RoutedEventArgs)
@@ -330,6 +361,62 @@ Public Class ExperimentTree
     Private Sub TreeViewItem_Unselected(sender As Object, e As RoutedEventArgs)
 
     End Sub
+
+
+
+    Private Function TreeViewItemFromData(tree As TreeView, data As Object) As TreeViewItem
+
+        ' Root-level lookup
+        tree.UpdateLayout()
+        Dim tvi = TryCast(tree.ItemContainerGenerator.ContainerFromItem(data), TreeViewItem)
+        If tvi IsNot Nothing Then Return tvi
+
+        ' Search recursively
+        For Each rootItem In tree.Items
+            Dim rootContainer = TryCast(tree.ItemContainerGenerator.ContainerFromItem(rootItem), TreeViewItem)
+            If rootContainer IsNot Nothing Then
+                Dim result = GetTreeViewItemRecursive(rootContainer, data)
+                If result IsNot Nothing Then Return result
+            End If
+        Next
+
+        Return Nothing
+
+    End Function
+
+    Private Function GetTreeViewItemRecursive(parent As TreeViewItem, data As Object) As TreeViewItem
+
+        ' Ensure children are generated
+        parent.IsExpanded = True
+        parent.UpdateLayout()
+
+        ' Direct match?
+        Dim tvi = TryCast(parent.ItemContainerGenerator.ContainerFromItem(data), TreeViewItem)
+        If tvi IsNot Nothing Then Return tvi
+
+        ' Search children
+        For Each child In parent.Items
+            Dim childContainer = TryCast(parent.ItemContainerGenerator.ContainerFromItem(child), TreeViewItem)
+            If childContainer IsNot Nothing Then
+                Dim result = GetTreeViewItemRecursive(childContainer, data)
+                If result IsNot Nothing Then Return result
+            End If
+        Next
+
+        Return Nothing
+
+    End Function
+
+
+    Private Shared Function IsTreeViewItemVisible(sv As ScrollViewer, tvi As TreeViewItem) As Boolean
+
+        Dim itemBounds As Rect = tvi.TransformToAncestor(sv).TransformBounds(New Rect(New Point(0, 0), tvi.RenderSize))
+        Dim viewport As New Rect(New Point(0, 0), New Size(sv.ViewportWidth, sv.ViewportHeight))
+
+        Return viewport.IntersectsWith(itemBounds)
+
+    End Function
+
 
 End Class
 

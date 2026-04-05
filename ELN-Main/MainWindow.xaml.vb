@@ -228,14 +228,17 @@ Class MainWindow
 
         End With
 
-        'select experiment tab of current experiment (may be a pinned one)
+        'scroll current experiment node into view and select its corresponding content tab (may be a pinned one)
         Dim currExp = (From exp In currUser.tblExperiments Where exp.IsCurrent).FirstOrDefault
-
         If currExp IsNot Nothing Then
+
+            expNavTree.ScrollExperimentIntoView(currExp)
+
             Dim thisTab As TabItem = tabExperiments.ItemContainerGenerator.ContainerFromItem(currExp)
             If thisTab IsNot Nothing Then
                 thisTab.IsSelected = True
             End If
+
         End If
 
         'start the periodic cleanup process for embedded document editing resources (currently set to every hour)

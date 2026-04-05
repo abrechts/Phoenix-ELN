@@ -23,9 +23,9 @@
 
     <Border CornerRadius="6" BorderBrush="#aaaaaa" BorderThickness="1" Padding="4" Background="white">
 
+        <!--This TreeView should NOT be virtualized to allow the selection of experiment nodes currently not in view!-->  
         <TreeView x:Name="navTree" ItemsSource="{Binding tblProjects, Converter={StaticResource projectsCollectionViewConv}}" 
-            TreeViewItem.Selected="TreeViewItem_Selected" TreeViewItem.Unselected="TreeViewItem_Unselected" Padding="2,2,2,8" BorderThickness="0"
-            VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling"  
+            TreeViewItem.Selected="TreeViewItem_Selected" TreeViewItem.Unselected="TreeViewItem_Unselected" Padding="2,2,2,8" BorderThickness="0"        
             dd:DragDrop.IsDragSource="True"
             dd:DragDrop.IsDropTarget="True"
             dd:DragDrop.UseDefaultDragAdorner="false"
