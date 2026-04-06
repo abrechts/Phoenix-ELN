@@ -184,13 +184,13 @@ Public Class ExperimentTree
         ' archival progress dialog
         With saveDlg
             If .ShowDialog(Application.Current.MainWindow) Then
-                Dim dstpath = .FileName
+                Dim destPath = .FileName
                 Dim expList = (From exp In groupEntry.tblExperiments Order By exp.ExperimentID Ascending).ToList
                 Dim zipDlg As New dlgZipProgress With {
                     .Owner = Application.Current.MainWindow,
                     .Title = "Archiving Group Experiments ...",
                     .ExperimentEntries = expList,
-                    .ZipFilePath = dstpath
+                    .ZipFilePath = destPath
                 }
                 zipDlg.ShowDialog()     'dialog contains archival logic
             End If
@@ -426,7 +426,7 @@ Public Class NavTreeDropHandler
 
     '-------------------------------------------------------------------------
     ' Drag & Drop logic (Gong: https://github.com/punker76/gong-wpf-dragdrop) 
-    ' (implemented with NuGet gong-wpf-dragdrop package)
+    ' (implemented with NuGet gong-wpf-drag/drop package)
     '--------------------------------------------------------------------------
 
     Implements IDropTarget

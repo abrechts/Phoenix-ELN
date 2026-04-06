@@ -145,8 +145,8 @@ Public Class dlgSequences
 
         pnlSeqStructures.Children.Clear()
 
-        ' Set global reaction component foreground color (for reactant and product canvases in displayed sequence)
-        SketchResults.ComponentStructureColor = Brushes.Yellow
+        'global reaction component foreground color (for reactant and product canvases in displayed sequence)
+        SketchResults.ComponentStructureColor = New SolidColorBrush(ColorConverter.ConvertFromString("#FFF9F96B"))  'light yellow
 
         For Each stp In sequence.SequenceSteps
 
