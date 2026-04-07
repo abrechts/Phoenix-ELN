@@ -327,8 +327,8 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <TextBlock Grid.Row="0" Text="finalized exp." Foreground="lightgray" HorizontalAlignment="left" VerticalAlignment="Center" 
-                   FontSize="11" FontStyle="Italic" Margin="2,-6,0,0"  />
+                <TextBlock Grid.Row="0" Foreground="lightgray" HorizontalAlignment="left" VerticalAlignment="Center" 
+                   FontSize="11" FontStyle="Italic" Margin="2,-6,0,0"  ><Run FontWeight="Bold" Text="finalized"/><Run Text=" exp."/></TextBlock>
 
                 <TextBlock Grid.Row="0" x:Name="blkResultsTitle" Text="Results" HorizontalAlignment="Center" FontWeight="Bold" 
                     FontSize="13" Foreground="LightBlue" FontStyle="Italic"/>
@@ -350,7 +350,7 @@
                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled" Background="transparent" Grid.ColumnSpan="2"
                                 VirtualizingPanel.IsVirtualizing="true" VirtualizingPanel.VirtualizationMode="Recycling"/>
 
-                        <TextBlock x:Name="blkNoHitsFound" Text="---  no matches found  ---" Foreground="#FFFDCE79" HorizontalAlignment="Center"
+                        <TextBlock x:Name="blkNoHitsFound" Text="---  specify a search  ---" Foreground="#FFFDCE79" HorizontalAlignment="Center"
                                 VerticalAlignment="Top" Margin="0,30,0,0" FontStyle="Italic" FontSize="11.5"  d:Visibility="Visible" Opacity="0.95"
                                 Visibility="{Binding ElementName=lstRssHitGroups, Path=Items.Count,
                                     Converter={StaticResource intToVisibilityConv},ConverterParameter=invert}"/>

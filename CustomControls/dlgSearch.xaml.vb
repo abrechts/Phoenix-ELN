@@ -81,8 +81,6 @@ Public Class dlgSearch
 
         cboSorting.SelectedIndex = If(My.Settings.RssSortByYield, 0, 1)
 
-        blkNoHitsFound.Text = "---  no matches  ---"
-
         UpdateUsersFilter()
 
     End Sub
