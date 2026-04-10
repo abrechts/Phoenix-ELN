@@ -28,7 +28,6 @@ Class Application
         End With
 
         e.Handled = True
-        Application.Current.Shutdown()
 
     End Sub
 

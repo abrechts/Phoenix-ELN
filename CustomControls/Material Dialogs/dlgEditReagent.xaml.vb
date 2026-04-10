@@ -277,12 +277,18 @@ Public Class dlgEditReagent
                 Case MaterialUnitType.Equivalent
 
                     Dim scaled = ELNCalculations.ScaleEquivalent(.Equivalents, isShortUnit:=True)
+                    If scaled Is Nothing Then
+                        Exit Sub
+                    End If
                     numMatAmount.Text = SignificantDigitsString(scaled.Amount, 3)
                     cboMatUnit.Text = scaled.Unit
 
                 Case MaterialUnitType.Weight
 
                     Dim scaled = ELNCalculations.ScaleWeight(.Grams)
+                    If scaled Is Nothing Then
+                        Exit Sub
+                    End If
                     numMatAmount.Text = SignificantDigitsString(scaled.Amount, 3)
                     cboMatUnit.Text = scaled.Unit
 
@@ -290,6 +296,9 @@ Public Class dlgEditReagent
 
                     'molar solution
                     Dim scaled = ELNCalculations.ScaleVolume(.Grams)
+                    If scaled Is Nothing Then
+                        Exit Sub
+                    End If
                     numMatAmount.Text = SignificantDigitsString(scaled.Amount, 3)
                     cboMatUnit.Text = scaled.Unit
 

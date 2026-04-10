@@ -219,6 +219,9 @@ Public Class dlgEditSolvent
                 Case MaterialUnitType.Volume
 
                     Dim scaled = ELNCalculations.ScaleVolume(.Milliliters)
+                    If scaled Is Nothing Then
+                        Exit Sub
+                    End If
                     numMatAmount.Text = SignificantDigitsString(scaled.Amount, 3)
                     cboMatUnit.Text = scaled.Unit
 

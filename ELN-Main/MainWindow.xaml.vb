@@ -6,7 +6,6 @@ Imports ElnBase
 Imports ElnBase.ELNEnumerations
 Imports ElnCoreModel
 Imports Microsoft.EntityFrameworkCore
-Imports Microsoft.EntityFrameworkCore.Infrastructure.Internal
 Imports Microsoft.Win32
 
 Class MainWindow
@@ -231,14 +230,17 @@ Class MainWindow
         'scroll current experiment node into view and select its corresponding content tab (may be a pinned one)
         Dim currExp = (From exp In currUser.tblExperiments Where exp.IsCurrent).FirstOrDefault
         If currExp IsNot Nothing Then
-
-            expNavTree.ScrollExperimentIntoView(currExp)
-
-            Dim thisTab As TabItem = tabExperiments.ItemContainerGenerator.ContainerFromItem(currExp)
-            If thisTab IsNot Nothing Then
-                thisTab.IsSelected = True
-            End If
-
+            Try
+                expNavTree.ScrollExperimentIntoView(currExp)
+                Dim thisTab As TabItem = tabExperiments.ItemContainerGenerator.ContainerFromItem(currExp)
+                If thisTab IsNot Nothing Then
+                    thisTab.IsSelected = True
+                End If
+            Catch ex As Exception
+                'in case of any error, e.g. due to missing content, just ignore and continue with unselected tab
+                cbMsgBox.Display("Your last used experiment seems to an error condition. Please check its content.",
+                  MsgBoxStyle.Exclamation, "Startup Issue")
+            End Try
         End If
 
         'start the periodic cleanup process for embedded document editing resources (currently set to every hour)

@@ -42,6 +42,10 @@ Public Class WeightUnitConverter
             scaled = ELNCalculations.ScaleVolume(milliliters)
         End If
 
+        If scaled Is Nothing Then
+            Return Nothing
+        End If
+
         If conv = "combined" Then
 
             'returns amount and unit string
@@ -96,6 +100,10 @@ Public Class VolumeUnitConverter
             scaled = ScaleWeight(grams)
         End If
 
+        If scaled Is Nothing Then
+            Return Nothing
+        End If
+
         If conv = "combined" Then
             'returns amount and unit string
             Return SignificantDigitsString(scaled.Amount, SignificantDigits) + " " + scaled.Unit
@@ -135,6 +143,9 @@ Public Class MMolUnitConverter
         conv = conv.ToLower
 
         Dim scaled = ScaleMMol(mMols)
+        If scaled Is Nothing Then
+            Return Nothing
+        End If
 
         If conv = "combined" Then
             'returns amount and unit string
@@ -176,7 +187,11 @@ Public Class EquivUnitConverter
         conv = conv.ToLower
 
         Dim isShortUnit = (conv = "shortunit" OrElse conv = "combinedshort")
-        Dim scaled = ELNCalculations.ScaleEquivalent(equiv, isshortunit)
+
+        Dim scaled = ELNCalculations.ScaleEquivalent(equiv, isShortUnit)
+        If scaled Is Nothing Then
+            Return Nothing
+        End If
 
         Select Case conv
             Case "amount", ""

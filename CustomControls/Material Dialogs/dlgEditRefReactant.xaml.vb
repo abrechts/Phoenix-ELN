@@ -120,12 +120,18 @@ Public Class dlgEditRefReactant
                 Case MaterialUnitType.Weight
 
                     Dim scaled = ELNCalculations.ScaleWeight(.Grams)
+                    If scaled Is Nothing Then
+                        Exit Sub
+                    End If
                     numMatAmount.Text = SignificantDigitsString(scaled.Amount, 3)
                     cboMatUnit.Text = scaled.Unit
 
                 Case MaterialUnitType.Mol
 
                     Dim scaled = ELNCalculations.ScaleMMol(.MMols)
+                    If scaled Is Nothing Then
+                        Exit Sub
+                    End If
                     numMatAmount.Text = SignificantDigitsString(scaled.Amount, 3)
                     cboMatUnit.Text = scaled.Unit
 
