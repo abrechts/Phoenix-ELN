@@ -5,7 +5,7 @@ Imports System.Windows.Input
 Imports ElnBase
 
 ''' <summary>
-''' A WPF <see cref="TextBox"/> derived control that restricts input to numeric values only.
+''' A WPF <see cref="TextBox"/> derived numBox that restricts input to numeric values only.
 ''' Supports optional constraints such as positive-only or integer-only input, and provides 
 ''' formatting options including a fixed number of decimal places or significant digits.
 ''' Handles keyboard input, paste operations, and exposes the entered value as a nullable 
@@ -15,6 +15,27 @@ Public Class NumericTextBox
 
     Inherits TextBox
 
+    Public Shared ReadOnly SignificantDigitsProperty As DependencyProperty = DependencyProperty.Register("SignificantDigits",
+        GetType(Integer),
+        GetType(NumericTextBox),
+        New PropertyMetadata(0))
+
+    Public Shared ReadOnly DecimalCountProperty As DependencyProperty = DependencyProperty.Register("DecimalCount",
+        GetType(Integer),
+        GetType(NumericTextBox),
+        New PropertyMetadata(-1))
+
+    Public Shared ReadOnly PositiveNumbersOnlyProperty As DependencyProperty = DependencyProperty.Register("PositiveNumbersOnly",
+        GetType(Boolean),
+        GetType(NumericTextBox),
+        New PropertyMetadata(False))
+
+    Public Shared ReadOnly IntegersOnlyProperty As DependencyProperty = DependencyProperty.Register("IntegersOnly",
+        GetType(Boolean),
+        GetType(NumericTextBox),
+        New PropertyMetadata(False))
+
+
     Public Sub New()
 
         DataObject.AddPastingHandler(Me, AddressOf PasteHandler)
@@ -23,37 +44,68 @@ Public Class NumericTextBox
 
 
     ''' <summary>
-    ''' Only positive numbers are allowed if set to true.
+    ''' Sets or gets the number of significant digits the resulting string must contain. If set to smaller 
+    ''' than 1, or if converting an integer value, then the unformatted string is returned. 
     ''' </summary>
+    ''' <remarks>Significant digits override DecimalCount if both are set.</remarks>
     ''' 
-    Public Property PositiveNumbersOnly As Boolean = False
+    Public Property SignificantDigits As Integer
+        Get
+            Return GetValue(SignificantDigitsProperty)
+        End Get
+        Set(value As Integer)
+            SetValue(SignificantDigitsProperty, value)
+        End Set
+    End Property
 
-    ''' <summary>
-    ''' Only integer numbers are allowed if set to true.
-    ''' </summary>
-    '''
-    Public Property IntegersOnly As Boolean = False
 
     ''' <summary>
     ''' Sets or gets the number of digits after the decimal separator the resulting string must contain. 
     ''' If set to smaller than 0, the unformatted string is returned. 
     ''' </summary>
     ''' 
-    Public Property DecimalCount As Integer = -1
+    Public Property DecimalCount As Integer
+        Get
+            Return GetValue(DecimalCountProperty)
+        End Get
+        Set(value As Integer)
+            SetValue(DecimalCountProperty, value)
+        End Set
+    End Property
+
 
     ''' <summary>
-    ''' Sets or gets the number of significant digits the resulting string must contain. If set to smaller 
-    ''' than 1, or if converting an integer value, then the unformatted string is returned. 
+    ''' Only integer numbers are allowed if set to true.
     ''' </summary>
-    ''' <remarks>Significant digits override DecimalCount if both are set.</remarks>
-    ''' 
-    Public Property SignificantDigits As Integer = 0
+    '''
+    Public Property IntegersOnly As Boolean
+        Get
+            Return GetValue(IntegersOnlyProperty)
+        End Get
+        Set(value As Boolean)
+            SetValue(IntegersOnlyProperty, value)
+        End Set
+    End Property
 
 
     ''' <summary>
-    ''' Sets or gets the entered string value as double.
+    ''' Only positive numbers are allowed if set to true.
     ''' </summary>
     ''' 
+    Public Property PositiveNumbersOnly As Boolean
+        Get
+            Return GetValue(PositiveNumbersOnlyProperty)
+        End Get
+        Set(value As Boolean)
+            SetValue(PositiveNumbersOnlyProperty, value)
+        End Set
+    End Property
+
+
+    '' <summary>
+    '' Sets or gets the entered string value as double.
+    '' </summary>
+    '' 
     Public Property Value As Double?
 
         Get

@@ -238,7 +238,7 @@ Class MainWindow
                 End If
             Catch ex As Exception
                 'in case of any error, e.g. due to missing content, just ignore and continue with unselected tab
-                cbMsgBox.Display("Your last used experiment seems to an error condition. Please check its content.",
+                cbMsgBox.Display("Your last used experiment seems to have a technical issue. Please check its content.",
                   MsgBoxStyle.Exclamation, "Startup Issue")
             End Try
         End If
