@@ -246,6 +246,11 @@ Public Class ExperimentPrint
     ''' <summary>
     ''' Enriches initial origPDF (as created from XPS doc) with embedded file attachments, and convert it to PDF/A-3b.  
     ''' </summary>
+    ''' <remarks> PDF/A-3b conformity: Following online tools can be used to check the resulting document:
+    '''    https://www.pdfforge.org/online/de/pdfa-validieren
+    '''    https://www.pdf2go.com/de/pdfa-validieren 
+    '''    Use non-confidential PDFs only for upload!
+    ''' </remarks>
     ''' <param name="origPDF">The initial PDF document to convert.</param>
     ''' <param name="convPDFPath">The destination path to save it to.</param>
     ''' 
