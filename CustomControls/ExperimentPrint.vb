@@ -121,10 +121,10 @@ Public Class ExperimentPrint
 
 
     ''' <summary>
-    ''' Converts the speified list of experiment entries into PDF documents and combines them into a zip folder.
+    ''' Converts the specified list of experiment entries into PDF documents and combines them into a zip folder.
     ''' </summary>
     ''' <param name="expEntries">A list of tblExperiments entries to be part of the zip folder.</param>
-    ''' <param name="zipFolderPath">The fiull path of the desintation zip archive.</param>
+    ''' <param name="zipFolderPath">The full path of the destination zip archive.</param>
     ''' <returns>True, if successful</returns>
     ''' 
     Public Shared Function ExperimentsToPdfZip(expEntries As List(Of tblExperiments), zipFolderPath As String) As Boolean
@@ -228,9 +228,9 @@ Public Class ExperimentPrint
             .SketchPanel.SetComponentLabels()
         End With
 
-        Dim stackPrintTempl As New PrintPageTemplate(printStack, pageSize, 0.95)
+        Dim stackPrintTemplate As New PrintPageTemplate(printStack, pageSize, 0.95)
 
-        With stackPrintTempl
+        With stackPrintTemplate
             .ShowConfidentialMarker = False
             .IsHeaderVisible = False
             .FooterTitleLeft = expEntry.User.CompanyName
@@ -238,7 +238,7 @@ Public Class ExperimentPrint
             .FooterCenterImage = Nothing ' --> add CompanyLogoImage in the future
         End With
 
-        Return stackPrintTempl
+        Return stackPrintTemplate
 
     End Function
 
