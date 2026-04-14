@@ -545,6 +545,18 @@ Namespace My
                 Me("RssSortByYield") = value
             End Set
         End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("True")>  _
+        Public Property SameStepAllUsers() As Boolean
+            Get
+                Return CType(Me("SameStepAllUsers"),Boolean)
+            End Get
+            Set
+                Me("SameStepAllUsers") = value
+            End Set
+        End Property
     End Class
 End Namespace
 

@@ -2,7 +2,9 @@
 Imports System.Windows
 Imports System.Windows.Data
 Imports System.Windows.Input
+Imports ElnBase
 Imports ElnCoreModel
+
 
 Public Class StepSummary
 
@@ -17,22 +19,107 @@ Public Class StepSummary
         cvsStepExperiments = Me.TryFindResource("cvsStepExperiments")
 
         AddHandler SketchArea.SketchSourceChanged, AddressOf SketchArea_SketchSourceChanged
+        AddHandler ServerSync.ServerContextCreated, AddressOf ServerSync_ServerContextCreated
+        AddHandler dlgServerConnection.ServerContextCreated, AddressOf ServerSync_ServerContextCreated
 
     End Sub
 
-
-    Private Property cvsStepExperiments As CollectionViewSource
+    Private Property ServerContext As ElnDbContext
 
     Private Property RefReactInChIKey As String
 
     Private Property RefProductInChIKey As String
 
+    Private Property CurrUserID As String
+
+    Private Property cvsStepExperiments As CollectionViewSource
+
 
     Private Sub Me_DataContextChanged() Handles Me.DataContextChanged
 
+        'handles *tblUsers* context changes
+
         If Me.DataContext IsNot Nothing Then
-            cvsStepExperiments.Source = CType(Me.DataContext, tblUsers).tblExperiments
+            CurrUserID = CType(Me.DataContext, tblUsers).UserID
+            UpdateStepExperiments()
             cboSortType_Changed()
+        Else
+            CurrUserID = ""
+        End If
+
+    End Sub
+
+
+    Private Sub ServerSync_ServerContextCreated(dbContext As ElnDbContext)
+
+        'handles server context changes from both the server sync control and the server connection dialog
+
+        ServerContext = dbContext
+
+        With chkIncludeServer
+            .IsEnabled = (ServerContext IsNot Nothing)
+            .IsChecked = My.Settings.SameStepAllUsers AndAlso .IsEnabled    'check only if enabled
+        End With
+
+        UpdateStepExperiments()
+
+    End Sub
+
+
+    ''' <summary>
+    ''' Updates the list of same step experiments, combining local experiments with *finalized* server experiments of other users.
+    ''' </summary>
+    ''' 
+    Private Sub UpdateStepExperiments()
+
+        If Me.DataContext Is Nothing Then
+            Exit Sub
+        End If
+
+        Dim localExperiments = CType(Me.DataContext, tblUsers).tblExperiments.Where(Function(exp) exp.ReactantInChIKey = RefReactInChIKey _
+                                                                                      AndAlso exp.ProductInChIKey = RefProductInChIKey)
+        If ServerContext IsNot Nothing AndAlso chkIncludeServer.IsChecked Then
+
+            Dim serverExperiments = ServerContext.tblExperiments.
+                Where(Function(exp) exp.ReactantInChIKey = RefReactInChIKey _
+                        AndAlso exp.ProductInChIKey = RefProductInChIKey _
+                        AndAlso exp.UserID <> CurrUserID _
+                        AndAlso exp.WorkflowState = ELNEnumerations.WorkflowStatus.Finalized)
+
+            cvsStepExperiments.Source = localExperiments.Concat(serverExperiments)
+
+        Else
+
+            cvsStepExperiments.Source = localExperiments
+
+        End If
+
+    End Sub
+
+
+    Private Sub lstRssHits_PreviewMouseUp(sender As Object, e As MouseButtonEventArgs) Handles lstStepExperiments.PreviewMouseUp
+
+
+        Dim selItem = CType(lstStepExperiments.SelectedItem, tblExperiments)
+
+        If selItem IsNot Nothing Then
+
+            Dim fromServer = (selItem.UserID <> CurrUserID)
+            RaiseEvent RequestOpenExperiment(Me, selItem, fromServer)
+
+            e.Handled = True
+
+        End If
+
+
+    End Sub
+
+
+    Private Sub chkIncludeServer_Changed() Handles chkIncludeServer.Checked, chkIncludeServer.Unchecked
+
+        If Me.IsInitialized AndAlso chkIncludeServer.IsMouseOver Then   'IsMouseOver detects user interaction
+            UpdateStepExperiments()
+            My.Settings.SameStepAllUsers = chkIncludeServer.IsChecked
         End If
 
     End Sub
@@ -44,7 +131,8 @@ Public Class StepSummary
 
             RefReactInChIKey = skInfo.Reactants.First.InChIKey
             RefProductInChIKey = skInfo.Products.First.InChIKey
-            cvsStepExperiments.View.Refresh()
+
+            UpdateStepExperiments()
 
             pnlReactLinks.IsEnabled = True
             pnlProdLinks.IsEnabled = True
@@ -122,19 +210,6 @@ Public Class StepSummary
             .DataContext = ExperimentContent.TabExperimentsPresenter.DataContext
             .ShowDialog()
         End With
-
-    End Sub
-
-
-    Private Sub cvsStepExperiments_Filter(sender As Object, e As FilterEventArgs) 'XAML event
-
-        Dim expEntry As tblExperiments = e.Item
-
-        If expEntry.ReactantInChIKey = RefReactInChIKey AndAlso expEntry.ProductInChIKey = RefProductInChIKey Then
-            e.Accepted = True
-        Else
-            e.Accepted = False
-        End If
 
     End Sub
 

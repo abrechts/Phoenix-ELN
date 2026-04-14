@@ -365,6 +365,64 @@
                 </Rectangle.Fill>
             </Rectangle>
 
+            
+            <!--CheckBox style where the foreground brush specifies the checkmark brush and disabled reduces opacity to 0.7 -->
+          
+            <Style x:Key="ColorCheckmarkCheckboxStyle" TargetType="CheckBox">
+                <Setter Property="Foreground" Value="LimeGreen"/>
+
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="CheckBox">
+                            <Grid Margin="2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Checkbox box -->
+                                <Border x:Name="Border"
+                                    Width="16" Height="16"
+                                    CornerRadius="2"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="1"
+                                    Background="White"/>
+
+                                <!-- Checkmark -->
+                                <Path x:Name="CheckMark"
+                                    Stroke="{TemplateBinding Foreground}"
+                                    StrokeThickness="2"
+                                    Data="M 3 8 L 7 12 L 13 4"
+                                    Visibility="Collapsed"
+                                    HorizontalAlignment="Center"        
+                                    VerticalAlignment="Center">
+                                    <Path.RenderTransform>
+                                        <ScaleTransform ScaleX="0.8" ScaleY="0.8"/>
+                                    </Path.RenderTransform>
+                                </Path>
+
+                                <!-- Content -->
+                                <ContentPresenter Grid.Column="1"
+                                    Margin="3,0,0,0"
+                                    VerticalAlignment="Center"
+                                    RecognizesAccessKey="True"/>
+                            </Grid>
+
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter TargetName="CheckMark" Property="Visibility" Value="Visible"/>
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="false">
+                                    <Setter Property="Opacity" Value="0.7"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+
+
         </ResourceDictionary>
 
     </Application.Resources>

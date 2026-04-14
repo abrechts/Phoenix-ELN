@@ -1,7 +1,6 @@
 ﻿Imports System.Windows
 Imports System.Windows.Controls
 Imports System.Windows.Input
-Imports System.Windows.Media
 Imports ElnCoreModel
 
 Public Class RssItemGroup
@@ -25,6 +24,7 @@ Public Class RssItemGroup
 
         Dim selItem = lstRssHits.SelectedItem
         RaiseEvent RequestOpenExperiment(Me, lstRssHits.SelectedItem, IsServerResult)
+        e.Handled = True
 
     End Sub
 

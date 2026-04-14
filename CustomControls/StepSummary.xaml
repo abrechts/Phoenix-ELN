@@ -13,8 +13,7 @@
 
     <UserControl.Resources>
 
-        <CollectionViewSource x:Key="cvsStepExperiments" IsLiveSortingRequested="True" 
-          Filter="cvsStepExperiments_Filter">
+        <CollectionViewSource x:Key="cvsStepExperiments" IsLiveSortingRequested="True">
             <CollectionViewSource.SortDescriptions>
                 <componentModel:SortDescription PropertyName="Scale" Direction="Descending"/>
             </CollectionViewSource.SortDescriptions>
@@ -37,8 +36,8 @@
             <StackPanel DockPanel.Dock="Top" Margin="0,0,0,4">
 
                 <TextBlock Text="Ref. Reactant" DockPanel.Dock="top" VerticalAlignment="Center" Foreground="{StaticResource DialogTitleForeground}"
-                Background="transparent" FontStyle="Italic"  Padding="1,0" Margin="0,0,0,2" 
-                HorizontalAlignment="Center" Opacity="0.9" FontWeight="Bold" FontSize="12.5"/>
+                  Background="transparent" FontStyle="Italic"  Padding="1,0" Margin="76,0,0,2" 
+                  HorizontalAlignment="left" Opacity="0.9" FontWeight="Bold" FontSize="12.5"/>
 
                 <Separator Margin="0,0,0,0" Background="#FF4D84D7"/>
 
@@ -80,8 +79,8 @@
             <StackPanel DockPanel.Dock="Top" >
 
                 <TextBlock Text="Ref. Product" DockPanel.Dock="top" VerticalAlignment="Center" Foreground="{StaticResource DialogTitleForeground}"
-                Background="transparent" FontStyle="Italic" FontWeight="Bold" Padding="1,0" Margin="0,0,0,2" 
-                FontSize="12.5" HorizontalAlignment="Center" Opacity="0.9"/>
+                   Background="transparent" FontStyle="Italic" FontWeight="Bold" Padding="1,0" Margin="76,0,0,2" 
+                   FontSize="12.5" HorizontalAlignment="left" Opacity="0.9"/>
 
                 <Separator Margin="0,0,0,2" Background="#FF4D84D7"/>
 
@@ -122,8 +121,8 @@
             <StackPanel DockPanel.Dock="Top">
 
                 <TextBlock Text="Exp. Info" DockPanel.Dock="top" VerticalAlignment="Center" Foreground="{StaticResource DialogTitleForeground}"
-                Background="transparent" FontStyle="Italic" FontWeight="Bold" Padding="1,0" Margin="0,6,0,2" 
-                FontSize="12.5" HorizontalAlignment="Center" Opacity="0.9"/>
+                Background="transparent" FontStyle="Italic" FontWeight="Bold" Padding="1,0" Margin="76,6,0,2" 
+                FontSize="12.5" HorizontalAlignment="left" Opacity="0.9"/>
 
                 <Separator Margin="0,0,0,2" Background="#FF4D84D7"/>
 
@@ -140,16 +139,23 @@
 
             </StackPanel>
 
-            <DockPanel Background="White" DockPanel.Dock="top" Margin="0,10,0,0">
+            <DockPanel Background="white" DockPanel.Dock="top" Margin="0,10,0,0">
 
                 <Grid DockPanel.Dock="top" >
 
-                    <TextBlock Text="Same Step" DockPanel.Dock="top" VerticalAlignment="Center" Foreground="{StaticResource DialogTitleForeground}"
-                            Background="transparent" FontStyle="Italic" FontWeight="Bold" Padding="1,0" Margin="0,0,4,0" 
-                            FontSize="12.5" HorizontalAlignment="Center"/>
+                    <Grid ToolTip="Include experiments of other users &#x0a;(server connection required)" Margin="8,2,0,0">
+                        <CheckBox x:Name="chkIncludeServer" FontSize="11.5" BorderBrush="#45A1FD" BorderThickness="1" HorizontalAlignment="Left" 
+                          IsEnabled="false" d:IsEnabled="true" Foreground="green" Style="{StaticResource ColorCheckmarkCheckboxStyle}" >
+                            <ContentControl Content="{StaticResource icoServerUser}" Height="16" Margin="-0,0,4,0" VerticalAlignment="Center"/>
+                        </CheckBox>
+                    </Grid>
+                    
+                    <TextBlock Text="Same Step" DockPanel.Dock="top" VerticalAlignment="Bottom" Foreground="{StaticResource DialogTitleForeground}"
+                        Background="transparent" FontStyle="Italic" FontWeight="Bold" Padding="1,0" Margin="76,0,0,1" 
+                        FontSize="12.5" HorizontalAlignment="left"/>
 
-                    <local:ComboPlus x:Name="cboSortType" SelectedIndex="0" Padding="6,1,6,2" Margin="0,0,4,0"
-                           CboBackground="white" VerticalAlignment="Center" FontSize="11.5" HorizontalAlignment="Right">
+                    <local:ComboPlus x:Name="cboSortType" SelectedIndex="0" Padding="6,1,6,2" Margin="0,0,4,0" ToolTip="Sort order"
+                        CboBackground="white" VerticalAlignment="Center" FontSize="11.5" HorizontalAlignment="Right">
                         <ComboBoxItem Content="by yield"/>
                         <ComboBoxItem Content="by scale"/>
                     </local:ComboPlus>
