@@ -4,6 +4,7 @@ Imports ElnCoreModel
 
 Public Class SequenceStep
 
+
     Public Sub New(reactInChIKey As String, prodInChIKey As String, dbContext As ElnDbContext)
 
         ReactantInChIKey = reactInChIKey
@@ -12,6 +13,7 @@ Public Class SequenceStep
 
     End Sub
 
+
     Public Property DatabaseContext As ElnDbContext
 
     Public Property ReactantInChIKey As String
@@ -19,6 +21,7 @@ Public Class SequenceStep
     Public Property ProductInChIKey As String
 
     Public Property IsSelected As Boolean = False
+
 
     ''' <summary>
     ''' Sets or gets if the current sequence scheme is based on this step.
@@ -39,9 +42,11 @@ Public Class SequenceStep
     ''' </summary>
     ''' 
     Public ReadOnly Property GetStepExperiments As IEnumerable(Of tblExperiments)
+
         Get
             Return From exp In DatabaseContext.tblExperiments Where exp.ReactantInChIKey = ReactantInChIKey AndAlso exp.ProductInChIKey = ProductInChIKey
         End Get
+
     End Property
 
 
