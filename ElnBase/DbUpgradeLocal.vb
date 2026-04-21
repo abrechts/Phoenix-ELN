@@ -82,6 +82,13 @@ Public Class DbUpgradeLocal
                 DbExecuteCmd(addColCmd, sqliteConn)
             End If
 
+            ' --> introduced in version 4.1.0
+            If Not DbColumnExists("tblExperiments", "IsRacemicReactant", sqliteConn) Then
+                DbAddColumn("tblExperiments", "IsRacemicReactant", "TINYINT", "0", sqliteConn)
+                DbAddColumn("tblExperiments", "IsRacemicProduct", "TINYINT", "0", sqliteConn)
+            End If
+
+
         End Using
 
         Upgrade = True

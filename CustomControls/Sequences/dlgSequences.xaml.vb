@@ -166,7 +166,7 @@ Public Class dlgSequences
                 .blkStepNr.Text = "Step " + stepPos.ToString
                 .blkSeedSymbol.Visibility = If(stp.IsSeedStep, Visibility.Visible, Visibility.Collapsed)
 
-                Dim stepExpList = stp.GetStepExperiments
+                Dim stepExpList = stp.StepExperiments
                 Dim maxYield = (From exp In stepExpList Order By exp.Yield Descending).FirstOrDefault.Yield
                 Dim yieldPrefix = If(stepExpList.Count > 1, "≤ ", "")
                 .blkExpCount.Text = If(maxYield Is Nothing, "no yield", yieldPrefix + ELNCalculations.SignificantDigitsString(maxYield, 3) + "%")

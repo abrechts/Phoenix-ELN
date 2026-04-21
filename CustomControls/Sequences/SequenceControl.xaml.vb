@@ -149,8 +149,17 @@ Public Class SequenceControl
         DownstreamSequenceNr = 1
         UpstreamSequenceNr = 0
 
-        Dim firstStep As New SequenceStep(initialExp.ReactantInChIKey, initialExp.ProductInChIKey, dbContext)
-        firstStep.IsSeedStep = True
+        Dim sameStepExperiments = dbContext.tblExperiments.Where(Function(exp) _
+            exp.ReactantInChIKey = StartInChIKey AndAlso exp.ProductInChIKey = EndInChIKey _
+            AndAlso exp.IsRacemicReactant = initialExp.IsRacemicReactant _
+            AndAlso exp.IsRacemicProduct = initialExp.IsRacemicProduct).ToList
+
+        Dim firstStep As New SequenceStep(initialExp.ReactantInChIKey, initialExp.ProductInChIKey, sameStepExperiments, dbContext) With {
+            .IsSeedStep = True,
+            .IsReactantRacemate = initialExp.IsRacemicReactant,
+            .IsProductRacemate = initialExp.IsRacemicProduct
+        }
+
         SequenceSteps.Add(firstStep)
         SeedStep = firstStep
 

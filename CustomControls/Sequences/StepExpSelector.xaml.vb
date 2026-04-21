@@ -31,7 +31,7 @@ Public Class StepExpSelector
         ExpEntryEnabledConverter.IsServerExperiments = (dlgSequences.UseServerContext AndAlso dlgSequences.ServerContext IsNot Nothing)
 
         'get all step experiments; unfinalized server experiments will be disabled later in the step exp list 
-        Dim res = From exp In seqStep.GetStepExperiments Order By exp.Yield Descending
+        Dim res = From exp In seqStep.StepExperiments Order By exp.Yield Descending
         lstStepExperiments.ItemsSource = res
 
     End Sub

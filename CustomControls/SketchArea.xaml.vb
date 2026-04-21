@@ -1,11 +1,11 @@
 ﻿
 Imports System.Windows
-Imports ElnCoreModel
 Imports System.Windows.Controls
-Imports ElnBase.ELNCalculations
-Imports ElnBase.ELNEnumerations
 Imports System.Windows.Media
 Imports ElnBase
+Imports ElnBase.ELNCalculations
+Imports ElnBase.ELNEnumerations
+Imports ElnCoreModel
 
 Public Class SketchArea
 
@@ -158,6 +158,8 @@ Public Class SketchArea
                 .MDLRxnFileString = SketchInfo.MDLRxnFileString
                 .ReactantInChIKey = SketchInfo.Reactants.First.InChIKey
                 .ProductInChIKey = SketchInfo.Products.First.InChIKey
+                .IsRacemicReactant = If(SketchInfo.Reactants.First.IsSetAsRacemate = True, 1, 0)
+                .IsRacemicProduct = If(SketchInfo.Products.First.IsSetAsRacemate = True, 1, 0)
             End With
 
             'register RSS query fields
@@ -178,6 +180,31 @@ Public Class SketchArea
         End If
 
     End Sub
+
+
+
+    ''' <summary>
+    ''' Assigns the IsRacemic definitions for reactant and product of all experiments, based on their reaction sketches. This is
+    ''' required for experiment databases earlier than version 4.1.0, which did not have these tblExperiments fields.
+    ''' </summary>
+    '''
+    Public Shared Sub RegisterIsRacemicBacklog(dbContext As ElnDbContext)
+
+        'takes about 1.2 sec for processing 500 experiments (the max of currently active users), which is acceptable for a one-time backlog update
+
+        For Each exp In dbContext.tblExperiments
+            Dim skInfo = DrawingEditor.GetSketchInfo(exp.RxnSketch, dataOnly:=True)
+            If skInfo IsNot Nothing Then
+                exp.IsRacemicReactant = If(skInfo.Reactants.First.IsSetAsRacemate, 1, 0)
+                exp.IsRacemicProduct = If(skInfo.Products.First.IsSetAsRacemate, 1, 0)
+            End If
+        Next
+
+        dbContext.SaveChanges()
+
+    End Sub
+
+
 
 
     ''' <summary>

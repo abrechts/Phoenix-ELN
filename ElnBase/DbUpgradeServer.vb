@@ -72,6 +72,13 @@ Public Class DbUpgradeServer
                 DbExecuteCmd(addColCmd, serverConn)
             End If
 
+            ' --> introduced in version 4.1.0 (racemate bracket assignments)
+
+            If Not DbColumnExists("tblExperiments", "IsRacemicReactant", serverConn) Then
+                DbAddColumn("tblExperiments", "IsRacemicReactant", "TINYINT", "0", "ProjFolderID", serverConn)
+                DbAddColumn("tblExperiments", "IsRacemicProduct", "TINYINT", "0", "ProjFolderID", serverConn)
+            End If
+
             ' --->
             'Important: If a DEFAULT VALUE for an SQLite column is specified, ALWAYS also assign it to the
             'server column to be added (could otherwise also lead to failed restore from server operation 

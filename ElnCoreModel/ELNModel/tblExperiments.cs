@@ -53,6 +53,10 @@ public partial class tblExperiments
 
     public string? ProjFolderID { get; set; }
 
+    public byte? IsRacemicReactant { get; set; }
+
+    public byte? IsRacemicProduct { get; set; }
+
     public virtual tblProjFolders? ProjFolder { get; set; }
 
     public virtual tblProjects Project { get; set; } = null!;

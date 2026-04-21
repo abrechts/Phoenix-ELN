@@ -9,7 +9,7 @@ public partial class tblSolvents
 
     public string ProtocolItemID { get; set; } = null!;
 
-    public short SpecifiedUnitType { get; set; }
+    public int SpecifiedUnitType { get; set; }
 
     public byte IsDisplayAsWeight { get; set; }
 

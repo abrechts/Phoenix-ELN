@@ -9,7 +9,7 @@ public partial class tblEmbeddedFiles
 
     public string ProtocolItemID { get; set; } = null!;
 
-    public short FileType { get; set; }
+    public int FileType { get; set; }
 
     public string FileName { get; set; } = null!;
 

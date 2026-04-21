@@ -126,6 +126,11 @@ Class MainWindow
             DBContext.SaveChanges()
         End If
 
+        'Check for backlog registration of experiment IsReactRacemicReactant and IsRacemicProduct (can be removed later)
+        If New Version(DBContext.tblDatabaseInfo.First.CurrAppVersion) < New Version("4.1.0") Then
+            SketchArea.RegisterIsRacemicBacklog(DBContext)
+        End If
+
         'Version upgrade to project folders (from v.3.0.0 on) - one-time initialize default folders
         If _IsVersionUpgrade OrElse isRestoreFromServer Then
             If Not DBContext.tblProjFolders.Any Then
