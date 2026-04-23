@@ -236,7 +236,7 @@ Public Class TransferPackage
             ' Copy extracted contents to the Phoenix ELN data folder
             CopyDirectory(tempFolderPath, dbFolderPath)
 
-            ' Remove test folder
+            ' Remove temp folder
             Directory.Delete(tempFolderPath, recursive:=True)
 
             ' Import settings and delete settings file

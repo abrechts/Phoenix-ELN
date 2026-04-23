@@ -71,12 +71,13 @@ Class MainWindow
 
             'Check for pending transfer pack data migration
             If .DataMigrationType <> MigrationType.None Then
-                Threading.Thread.Sleep(50)  'allow previous instance to close
+                Threading.Thread.Sleep(50)                  'allow previous instance to close
                 _MigrationType = .DataMigrationType         'for use in Me_ContentRendered
                 TransferPackage.PerformPendingMigration()   'overwrites current settings
                 .DataMigrationType = MigrationType.None
                 .RestoreFromServer = False
                 .Save()
+                DbUpgradeLocal.Upgrade(SQLiteDbPath)        'since the transfer package db could contain an earlier version db
             End If
 
             'Apply application window settings
