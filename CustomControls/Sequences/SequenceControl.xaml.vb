@@ -162,6 +162,7 @@ Public Class SequenceControl
 
         SequenceSteps.Add(firstStep)
         SeedStep = firstStep
+        SequenceStep.AllSchemeSteps.Add(firstStep)
 
         AddDownstreamElements(firstStep)
         AddUpstreamElements(firstStep)
@@ -187,6 +188,7 @@ Public Class SequenceControl
 
         If Not SequenceSteps.Contains(connectingStep) Then
             SequenceSteps.Add(connectingStep)
+            SequenceStep.AllSchemeSteps.Add(connectingStep)
         End If
 
         If direction = SequenceDirection.Downstream Then
@@ -329,6 +331,16 @@ Public Class SequenceControl
             'Otherwise get next connects
             Dim nextConnects = refStep.GetNextSteps
 
+            'remove steps already present in current overall scheme
+            If nextConnects.Count > 1 Then
+                For i = nextConnects.Count - 1 To 0 Step -1
+                    Dim connStep = nextConnects(i)
+                    If SchemeContainsStep(connStep) Then
+                        nextConnects.RemoveAt(i)
+                    End If
+                Next
+            End If
+
             Select Case nextConnects.Count
 
                 Case 0 'no more connecting steps, end of sequence
@@ -346,14 +358,22 @@ Public Class SequenceControl
                         Exit While
                     End If
 
-                    SequenceSteps.Add(refStep)
-                    EndInChIKey = refStep.ProductInChIKey
+                    'complete sequence with added step, if sequence end product is identical with sequence start reactant (-> circular reference loop).
+                    If Not SchemeContainsStep(refStep) Then
+                        SequenceSteps.Add(refStep)
+                        SequenceStep.AllSchemeSteps.Add(refStep)
+                        EndInChIKey = refStep.ProductInChIKey
+                    Else
+                        endReached = True
+                        Exit While
+                    End If
 
                 Case > 1 'multiple downstream connects -> branch off
 
                     HasDownstreamConnections = True
 
                     'create (recursive) downstream elements 
+
                     For Each connStep In nextConnects
                         Dim downSequence As New SequenceControl(connStep, SequenceDirection.Downstream) 'recursive: constructor builds adjacent elements based on connStep
                         downSequence.ShowUpstreamConnector()
@@ -362,6 +382,7 @@ Public Class SequenceControl
                     Next
 
                     'detect converging downstream sequences
+
                     Dim res = From seq In DownstreamSequences Group By seq.EndInChIKey Into convergentGroups = Group
 
                     For Each result In res
@@ -371,6 +392,7 @@ Public Class SequenceControl
                         If result.convergentGroups.Count = 1 Then
 
                             'no convergence -> add next connecting sequence to downstream panel
+
                             Dim seq = result.convergentGroups.First
                             downStrElement.pnlConvSequences.Children.Add(seq)
 
@@ -428,6 +450,20 @@ Public Class SequenceControl
 
 
     ''' <summary>
+    ''' Gets if the current overall sequence scheme already contains the specified step.
+    ''' </summary>
+    ''' 
+    Public Shared Function SchemeContainsStep(queryStep As SequenceStep) As Boolean
+
+        Dim res = SequenceStep.AllSchemeSteps.Where(Function(stp) _
+                               (stp.ReactantInChIKey = queryStep.ReactantInChIKey AndAlso stp.IsReactantRacemate = queryStep.IsReactantRacemate) AndAlso
+                               (stp.ProductInChIKey = queryStep.ProductInChIKey AndAlso stp.IsProductRacemate = queryStep.IsProductRacemate))
+        Return res.Any
+
+    End Function
+
+
+    ''' <summary>
     ''' Converts 1 to 'a', 2 to 'b', etc.
     ''' </summary>
     ''' 
@@ -448,8 +484,18 @@ Public Class SequenceControl
 
         While Not endReached
 
-            'Otherwise get next connects
+            'Otherwise get previous connects
             Dim prevConnects = refStep.GetPreviousSteps
+
+            'remove steps already present in current overall scheme
+            If prevConnects.Count > 1 Then
+                For i = prevConnects.Count - 1 To 0 Step -1
+                    Dim connStep = prevConnects(i)
+                    If SchemeContainsStep(connStep) Then
+                        prevConnects.RemoveAt(i)
+                    End If
+                Next
+            End If
 
             Select Case prevConnects.Count
 
@@ -461,30 +507,40 @@ Public Class SequenceControl
 
                     refStep = prevConnects.First
 
-                    'complete sequence if refStep has multiple incoming sequences and does not contain seed step
+                    'complete sequence if refStep has multiple outgoing sequences and does not contain seed step
                     Dim nextConnects = refStep.GetNextSteps
                     If nextConnects.Count > 1 AndAlso Not SequenceSteps.Contains(SeedStep) Then
                         endReached = True
                         Exit While
                     End If
 
-                    SequenceSteps.Insert(0, refStep)
-                    StartInChIKey = refStep.ReactantInChIKey
+                    'complete sequence with added step, if sequence end product is identical with sequence start reactant (-> circular reference loop).
+                    If Not SchemeContainsStep(refStep) Then
+                        SequenceSteps.Insert(0, refStep)
+                        SequenceStep.AllSchemeSteps.Add(refStep)
+                        StartInChIKey = refStep.ReactantInChIKey
+                    Else
+                        endReached = True
+                        Exit While
+                    End If
 
                 Case > 1 'multiple upstream connects -> branch off
 
                     HasUpstreamConnections = True
-                    ' VerticalConnectorLeft.Visibility = Visibility.Visible
 
-                    'create (recursive) upstream elements 
+                    'create (recursive) upstream elements
+                    '
                     For Each connStep In prevConnects
-                        Dim upSequence As New SequenceControl(connStep, SequenceDirection.Upstream) 'recursive
-                        upSequence.ShowDownstreamConnector()
-                        upSequence.HasDownstreamConnections = True
-                        UpstreamSequences.Add(upSequence)   'add to list, not UI
+                        If Not SchemeContainsStep(connStep) Then
+                            Dim upSequence As New SequenceControl(connStep, SequenceDirection.Upstream) 'recursive
+                            upSequence.ShowDownstreamConnector()
+                            upSequence.HasDownstreamConnections = True
+                            UpstreamSequences.Add(upSequence)   'add to list, not UI
+                        End If
                     Next
 
                     'detect converging upstream sequences
+
                     Dim res = From seq In UpstreamSequences Group By seq.StartInChIKey Into convergentGroups = Group
 
                     For Each result In res

@@ -122,6 +122,8 @@ Public Class dlgSequences
 
         Dim dbContext As ElnDbContext = If(UseServerContext AndAlso ServerContext IsNot Nothing, ServerContext, LocalContext)
 
+        SequenceStep.AllSchemeSteps.Clear()
+
         Dim seedSequence = New SequenceControl(refExperiment, dbContext)
         With pnlConnections.Children
             .Clear()

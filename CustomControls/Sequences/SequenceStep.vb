@@ -49,6 +49,13 @@ Public Class SequenceStep
 
 
     ''' <summary>
+    ''' Gets the list of all SequenceSteps present in the overall sequences scheme.
+    ''' </summary>
+    '''
+    Public Shared Property AllSchemeSteps As New List(Of SequenceStep)
+
+
+    ''' <summary>
     ''' Gets the next neighboring downstream connecting step(s) based on the current product InChIKey and associated racemate definition. 
     ''' If an empty list is returned, then the end of the sequence is reached. If more than one connecting step is returned, 
     ''' then the sequence is to be completed due to sequence branching.
@@ -64,15 +71,17 @@ Public Class SequenceStep
             AndAlso (exp.ReactantInChIKey <> exp.ProductInChIKey OrElse exp.IsRacemicReactant <> exp.IsRacemicProduct)) 'exclude steps with identical reactant and product 
 
         ' Group the next step experiments by their user-specified racemate definitions
-        Dim expGroupDict = nextStepExperiments.GroupBy(Function(e) e.IsRacemicReactant).ToDictionary(Function(g) g.Key, Function(g) g.ToList())
+        Dim expGroupDict = nextStepExperiments.GroupBy(Function(e) e.IsRacemicProduct).ToDictionary(Function(g) g.Key, Function(g) g.ToList())
 
         For Each kvp In expGroupDict
 
             Dim isRac = kvp.Key
             For Each prodKey In kvp.Value.Select(Function(e) e.ProductInChIKey).Distinct()
                 Dim expList = kvp.Value.Where(Function(e) e.ProductInChIKey = prodKey).ToList
-                Dim newStep As New SequenceStep(ProductInChIKey, prodKey, expList, DatabaseContext)
-                newStep.IsReactantRacemate = isRac
+                Dim newStep As New SequenceStep(ProductInChIKey, prodKey, expList, DatabaseContext) With {
+                .IsReactantRacemate = IsProductRacemate,
+                .IsProductRacemate = isRac
+                }
                 res.Add(newStep)
             Next
 
@@ -99,15 +108,17 @@ Public Class SequenceStep
             AndAlso (exp.ReactantInChIKey <> exp.ProductInChIKey OrElse exp.IsRacemicReactant <> exp.IsRacemicProduct)) 'exclude steps with identical reactant and product 
 
         ' Group the previous step experiments by their user-specified racemate definitions
-        Dim expGroupDict = prevStepExperiments.GroupBy(Function(e) e.IsRacemicProduct).ToDictionary(Function(g) g.Key, Function(g) g.ToList())
+        Dim expGroupDict = prevStepExperiments.GroupBy(Function(e) e.IsRacemicReactant).ToDictionary(Function(g) g.Key, Function(g) g.ToList())
 
         For Each kvp In expGroupDict
 
             Dim isRac = kvp.Key
             For Each reactKey In kvp.Value.Select(Function(e) e.ReactantInChIKey).Distinct()
                 Dim expList = kvp.Value.Where(Function(e) e.ReactantInChIKey = reactKey).ToList
-                Dim newStep As New SequenceStep(reactKey, ReactantInChIKey, expList, DatabaseContext)
-                newStep.IsReactantRacemate = isRac
+                Dim newStep As New SequenceStep(reactKey, ReactantInChIKey, expList, DatabaseContext) With {
+                    .IsReactantRacemate = isRac,
+                    .IsProductRacemate = IsReactantRacemate
+                }
                 res.Add(newStep)
             Next
 
