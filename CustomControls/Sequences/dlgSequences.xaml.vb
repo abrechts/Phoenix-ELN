@@ -1,4 +1,5 @@
 ﻿Imports System.Windows
+Imports System.Windows.Controls
 Imports System.Windows.Input
 Imports System.Windows.Media
 Imports ElnBase
@@ -265,6 +266,27 @@ Public Class dlgSequences
 
         If TypeOf e.Source Is SequenceControl Then
             RaiseEvent ClearSequenceSelections(Me)
+        End If
+
+    End Sub
+
+
+    ''' <summary>
+    ''' Workaround to enforce the minimum height of the bottom row of the main grid when dragging the splitter.
+    ''' </summary>
+    '''
+    Private Sub pnlSplitter_DragDelta(sender As Object, e As MouseEventArgs) Handles pnlSplitter.PreviewMouseMove
+
+        If pnlSplitter.IsDragging AndAlso pnlSplitter.ResizeDirection = GridResizeDirection.Rows Then
+
+            Dim pos = Mouse.GetPosition(mainGrid)
+            Dim splitterHeight = mainGrid.RowDefinitions(1).ActualHeight
+            Dim rowBelow = mainGrid.RowDefinitions(2)
+
+            If pos.Y >= mainGrid.ActualHeight - splitterHeight - rowBelow.MinHeight Then
+                e.Handled = True
+            End If
+
         End If
 
     End Sub

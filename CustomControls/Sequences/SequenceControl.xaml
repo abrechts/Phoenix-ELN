@@ -48,7 +48,7 @@
         <StackPanel Orientation="Horizontal">
 
             <!--vertical connector left-->
-            <Grid HorizontalAlignment="right" d:Background="whitesmoke">
+            <Grid HorizontalAlignment="right" d:Background="whitesmoke" VerticalAlignment="Center" d:Height="80">
                 <StackPanel x:Name="pnlUpstream" Margin="0,0,2,0" d:Width="100" VerticalAlignment="Center"/>
                 <Canvas x:Name="canvOverlayLeft" IsHitTestVisible="False" >
                     <Polyline x:Name="VertPolylineLeft" Stroke="#FFC283FC" StrokeThickness="2"/>
@@ -78,7 +78,7 @@
             </StackPanel>
 
             <!--vertical connector right-->
-            <Grid HorizontalAlignment="left" d:Background="WhiteSmoke">
+            <Grid HorizontalAlignment="left" d:Background="WhiteSmoke" VerticalAlignment="Center" d:Height="80">
                 <StackPanel x:Name="pnlDownstream" d:Width="100" VerticalAlignment="Center"/>
                 <!-- Canvas overlay for vertical connector lines  -->
                 <Canvas x:Name="canvOverlayRight" IsHitTestVisible="False">

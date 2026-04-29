@@ -37,11 +37,18 @@
      
         <Border BorderThickness="1,1,1,0" BorderBrush="#FFC1C1C1" Margin="16,6,16,12">
 
-            <DockPanel DockPanel.Dock="top">
+            <Grid x:Name="mainGrid">
 
-                <ScrollViewer DockPanel.Dock="Top" VerticalScrollBarVisibility="auto" Style="{StaticResource DarkScrollViewerStyle}" 
-                   VerticalAlignment="Top" Margin="0,6,0,6" HorizontalScrollBarVisibility="Auto" MaxHeight="130">
-                    <Grid x:Name="pnlConnections" d:Width="300" d:Height="130" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto" x:Name="rowSequences" MinHeight="80"/>
+                    <RowDefinition Height="6"/>
+                    <RowDefinition Height="*" MinHeight="210" />
+                </Grid.RowDefinitions>
+
+                <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Visible" Style="{StaticResource DarkScrollViewerStyle}" 
+                   VerticalAlignment="Stretch" Margin="0,6,0,6" HorizontalScrollBarVisibility="Auto">
+                    
+                    <Grid x:Name="pnlConnections" d:Width="300" d:Height="130"  HorizontalAlignment="Center" VerticalAlignment="Stretch"/>
 
                     <ScrollViewer.Resources>
                         <sys:Double x:Key="{x:Static SystemParameters.VerticalScrollBarWidthKey}">12</sys:Double>
@@ -49,8 +56,11 @@
                     </ScrollViewer.Resources>
 
                 </ScrollViewer>
+   
+                <GridSplitter x:Name="pnlSplitter" Grid.Row="1" Height="6" HorizontalAlignment="Stretch" VerticalAlignment="Center" ResizeDirection="Rows"
+                   ResizeBehavior="PreviousAndCurrent" ShowsPreview="false" Cursor="SizeNS" Background="transparent" />
 
-                <Border BorderThickness="0,1,0,1" BorderBrush="#FFC1C1C1">
+                <Border Grid.Row="2" BorderThickness="0,1,0,1" BorderBrush="#FFC1C1C1" >
 
                     <Grid>
 
@@ -59,12 +69,11 @@
                             <ColumnDefinition Width="220"/>
                         </Grid.ColumnDefinitions>
 
-                        <ScrollViewer VerticalScrollBarVisibility="visible" Style="{StaticResource DarkScrollViewerStyle}" Grid.Column="0" Margin="0,4,1,0">
+                        <ScrollViewer VerticalScrollBarVisibility="Visible" Style="{StaticResource DarkScrollViewerStyle}" Grid.Column="0" Margin="0,4,1,0">
                             <WrapPanel x:Name="pnlSeqStructures" HorizontalAlignment="Center"/>
                         </ScrollViewer>
 
-                        <Border Grid.Column="1" BorderThickness="1,0,0,0" BorderBrush="#FFC1C1C1" MinWidth="100" CornerRadius="0,0,0,0" 
-                           Margin="0,0,0,0">
+                        <Border Grid.Column="1" BorderThickness="1,0,0,0" BorderBrush="#FFC1C1C1" MinWidth="100" CornerRadius="0,0,0,0" Margin="0,0,0,0">
                             <DockPanel>
                                 
                                 <StackPanel HorizontalAlignment="Center" DockPanel.Dock="top" Orientation="Horizontal">
@@ -88,7 +97,7 @@
                         </Border>
                     </Grid>
                 </Border>
-            </DockPanel>
+            </Grid>
         </Border>
             
     </DockPanel>
