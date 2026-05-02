@@ -18,14 +18,14 @@
         </DataTemplate>
 
     </UserControl.Resources>
-    
+
     <Grid>
 
         <ListBox x:Name="lstStepExperiments"
             SelectionMode="Single" Background="transparent" BorderThickness="0" FocusVisualStyle="{x:Null}"              
             Grid.IsSharedSizeScope="true" AllowDrop="false"
             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-            VirtualizingStackPanel.IsVirtualizing="False" MinHeight="25"
+            VirtualizingStackPanel.IsVirtualizing="False" d:MinHeight="25"
             ItemTemplate="{StaticResource expTreeItem}">
 
             <ListBox.ItemContainerStyle>
@@ -33,7 +33,7 @@
                     <!--Disable unfinalized server experiments-->
                     <Setter Property="IsEnabled" Value="{Binding Converter={StaticResource expEntryEnabledConv}}" />
                     <Setter Property="ToolTipService.ShowOnDisabled" Value="True" />
-                    <Setter Property="ToolTipService.InitialShowDelay" Value="1000" />
+                    <Setter Property="ToolTipService.InitialShowDelay" Value="500" />
                     <Style.Triggers>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Opacity" Value="0.7"/>

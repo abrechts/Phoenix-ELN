@@ -134,6 +134,18 @@ Public Class dlgSequences
         seedSequence.HighlightControl()
         PopulateSequenceScheme(seedSequence)
 
+        'limit the maximum height of sequences row to the actual height of its sequences panel
+        pnlConnections.UpdateLayout()
+        rowSequences.MaxHeight = pnlConnections.ActualHeight + rowSplitter.ActualHeight + 8
+
+        If rowSequences.MaxHeight = rowSequences.MinHeight Then
+            pnlSplitter.Cursor = Nothing
+            pnlSplitter.BorderThickness = New Thickness(0)
+        Else
+            pnlSplitter.Cursor = Cursors.SizeNS
+            pnlSplitter.BorderThickness = New Thickness(0, 1, 0, 0)
+        End If
+
     End Sub
 
 
@@ -280,16 +292,29 @@ Public Class dlgSequences
         If pnlSplitter.IsDragging AndAlso pnlSplitter.ResizeDirection = GridResizeDirection.Rows Then
 
             Dim pos = Mouse.GetPosition(mainGrid)
-            Dim splitterHeight = mainGrid.RowDefinitions(1).ActualHeight
-            Dim rowBelow = mainGrid.RowDefinitions(2)
+            Dim splitterHeight = rowSplitter.ActualHeight
 
-            If pos.Y >= mainGrid.ActualHeight - splitterHeight - rowBelow.MinHeight Then
+            If pos.Y >= mainGrid.ActualHeight - splitterHeight - rowScheme.MinHeight Then
                 e.Handled = True
             End If
 
         End If
 
     End Sub
+
+
+    ''' <summary>
+    ''' Workaround to enable mouse wheel scrolling of the experiments list.
+    ''' </summary>
+    ''' 
+    Private Sub ScrollViewer_PreviewMouseWheel(sender As Object, e As MouseWheelEventArgs) Handles scrlExperiments.PreviewMouseWheel
+
+        Dim sv = DirectCast(sender, ScrollViewer)
+        sv.ScrollToVerticalOffset(sv.VerticalOffset - e.Delta)
+        e.Handled = True
+
+    End Sub
+
 
 
     Private Sub icoInfo_PreviewMouseUp() Handles icoInfo.PreviewMouseUp
