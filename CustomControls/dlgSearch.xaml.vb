@@ -64,6 +64,8 @@ Public Class dlgSearch
 
     Private Sub Me_Loaded() Handles Me.Loaded
 
+        AddHandler RssItemGroup.RequestOpenExperiment, AddressOf OnRssExpItemClicked
+
         SearchContext = LocalDBContext
 
         QueryInfo = New RSSQueryParameters
@@ -82,6 +84,14 @@ Public Class dlgSearch
         cboSorting.SelectedIndex = If(My.Settings.RssSortByYield, 0, 1)
 
         UpdateUsersFilter()
+
+    End Sub
+
+
+    Private Sub Me_Closing() Handles Me.Closing
+
+        My.Settings.dlgSearchPosition = New System.Drawing.Point(Left, Top)
+        My.Settings.dlgSearchSize = New System.Drawing.Size(ActualWidth, ActualHeight)
 
     End Sub
 
@@ -245,7 +255,7 @@ Public Class dlgSearch
 
         scrlResults.ScrollToHome()
 
-        resBorder.Margin = If(lstRssHitGroups.Items.Count > 0, New Thickness(0, 0, 0, 6), New Thickness(0, 30, 0, 6))
+        resBorder.Margin = If(lstRssHitGroups.Items.Count > 0, New Thickness(12, 0, 12, 6), New Thickness(12, 30, 12, 6))
 
         UpdateQueryStats()
 
@@ -709,6 +719,22 @@ Public Class dlgSearch
         }
 
         lstRssHitGroups.RaiseEvent(e2)
+
+    End Sub
+
+
+    Private Sub OnRssExpItemClicked(sender As Object, exp As tblExperiments, isFromServer As Boolean, args As StepExpOpenArgs)
+
+        If args.WasOpened Then
+            infoToast.Show($"{exp.ExperimentID} opened in protocol area")
+        End If
+
+    End Sub
+
+
+    Private Sub Me_Closed() Handles Me.Closed
+
+        RemoveHandler RssItemGroup.RequestOpenExperiment, AddressOf OnRssExpItemClicked
 
     End Sub
 

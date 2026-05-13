@@ -2,11 +2,12 @@
 Imports System.Windows.Controls
 Imports System.Windows.Media
 Imports System.Windows
+Imports ElnCoreModel
 
 
 Public Class SequenceStructure
 
-    Public Shared Event StepArrowSelected(sender As Object)
+    Public Shared Event StepArrowClicked(sender As Object)
 
     Public Sub New()
 
@@ -23,6 +24,20 @@ Public Class SequenceStructure
         LowerLabelForeground = Brushes.WhiteSmoke
 
     End Sub
+
+
+    ''' <summary>
+    ''' Sets or gets the sequential step number string (to be assigned when populating the scheme)
+    ''' </summary>
+    ''' 
+    Public Property StepNumberStr As String
+        Get
+            Return blkStepNr.Text
+        End Get
+        Set(value As String)
+            blkStepNr.Text = value
+        End Set
+    End Property
 
 
     ''' <summary>
@@ -105,15 +120,8 @@ Public Class SequenceStructure
             If value = True Then
                 pnlArrowRight.BorderBrush = Brushes.LightSkyBlue
             Else
-                If SourceStep IsNot Nothing Then
-                    If Not SourceStep.IsSeedStep Then
-                        pnlArrowRight.BorderBrush = Brushes.Transparent
-                        pnlArrowRight.Background = Brushes.Transparent
-                    Else
-                        pnlArrowRight.BorderBrush = Brushes.Gray
-                        pnlArrowRight.Background = CType(New BrushConverter().ConvertFrom("#FF3F3F3F"), SolidColorBrush)
-                    End If
-                End If
+                pnlArrowRight.BorderBrush = Brushes.Transparent
+                pnlArrowRight.Background = Brushes.Transparent
             End If
 
         End Set
@@ -122,10 +130,24 @@ Public Class SequenceStructure
 
 
     ''' <summary>
-    ''' Sets or gets the underlying SequenceStep
+    ''' Populates StepExperiments with all experiments containing the same reaction as the specified reference experiment
+    ''' </summary>
+    '''
+    Public Sub SetStepExperiments(refExp As tblExperiments, expList As IQueryable(Of tblExperiments))
+
+        Dim sameStepExp = expList.Where(Function(n) _
+               (n.ReactantInChIKey = refExp.ReactantInChIKey AndAlso n.IsRacemicReactant = refExp.IsRacemicReactant) AndAlso
+               (n.ProductInChIKey = refExp.ProductInChIKey AndAlso n.IsRacemicProduct = refExp.IsRacemicProduct))
+
+        StepExperiments = sameStepExp.OrderByDescending(Function(n) n.Yield)
+
+    End Sub
+
+    ''' <summary>
+    ''' Sets or gets the list of experiment items represented by this step
     ''' </summary>
     ''' 
-    Public Property SourceStep As SequenceStep
+    Public Property StepExperiments As IQueryable(Of tblExperiments)
 
 
     ''' <summary>
@@ -181,30 +203,11 @@ Public Class SequenceStructure
     End Sub
 
 
-    ''' <summary>
-    ''' Gets if the right arrow element is not connecting to the next sequence structure, but indicating 
-    ''' that the sequence is connecting to other sequences downstream.
-    ''' </summary>
-    ''' 
-    Private Function IsTrailingRightArrow() As Boolean
+    Private Sub pnlArrowRight_PreviewMouseUp() Handles pnlArrowRight.PreviewMouseUp
 
-        Dim parentPanel = WPFToolbox.FindVisualParent(Of WrapPanel)(Me)
-        If parentPanel IsNot Nothing Then
-            Return (parentPanel.Children.IndexOf(Me) = parentPanel.Children.Count - 1)
-        Else
-            Return False
-        End If
-
-    End Function
-
-
-
-    Private Sub pnlArrowRight_PreviewMouseDown() Handles pnlArrowRight.PreviewMouseDown
-
-        If Not IsTrailingRightArrow() Then
-            RaiseEvent StepArrowSelected(Me)
-        End If
+        RaiseEvent StepArrowClicked(Me)
 
     End Sub
+
 
 End Class

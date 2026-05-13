@@ -174,11 +174,10 @@ Class MainWindow
         AddHandler ServerSync.SyncProgress, AddressOf ServerSync_SyncProgress
         AddHandler dlgServerConnection.ServerContextCreated, AddressOf ServerSync_ServerContextCreated
         AddHandler ExpTabHeader.PinStateChanged, AddressOf expTabHeader_PinStateChanged
-        AddHandler StepSummary.RequestOpenExperiment, AddressOf RssExpList_RequestOpenExperiment
-        AddHandler RssItemGroup.RequestOpenExperiment, AddressOf RssExpList_RequestOpenExperiment
-        AddHandler StepExpSelector.RequestOpenExperiment, AddressOf RssExpList_RequestOpenExperiment
+        AddHandler StepSummary.RequestOpenExperiment, AddressOf ResultList_RequestOpenExperiment
+        AddHandler RssItemGroup.RequestOpenExperiment, AddressOf RssItemGroup_RequestOpenExperiment
+        AddHandler StepExpSelector.RequestOpenExperiment, AddressOf StepExpSelector_RequestOpenExperiment
         AddHandler ExperimentContent.ExperimentContextChanged, AddressOf ExperimentContent_ContextChanged
-        AddHandler ExperimentContent.RequestSequencesDialog, AddressOf ExperimentContent_RequestSequencesDialog
 
         'determine current localUser (since multiple users possible)
         Dim currUser = (From user In DBContext.tblUsers Where user.IsCurrent = 1).FirstOrDefault
@@ -520,7 +519,7 @@ Class MainWindow
 
         ' Perform the comparison in memory
         Dim conflictingUsers = localUsers.Where(Function(localUser) _
-        ServerDBContext.tblUsers.Any(Function(serverUser) serverUser.UserID.ToLower() = localUser.UserID.ToLower())).ToList()
+        ServerDBContext.tblUsers.Any(Function(serverUser) serverUser.UserID.Equals(localUser.UserID, StringComparison.CurrentCultureIgnoreCase))).ToList()
 
         Return conflictingUsers
 
@@ -583,7 +582,7 @@ Class MainWindow
                 cbMsgBox.Display("Continue to resolve another user-ID conflict:", MsgBoxStyle.Information, "Duplicate Username")
             End If
 
-            Dim dupServerUser = (From user In ServerDBContext.tblUsers Where user.UserID.ToLower = dupLocalUser.UserID.ToLower).First
+            Dim dupServerUser = (From user In ServerDBContext.tblUsers Where user.UserID.Equals(dupLocalUser.UserID, StringComparison.CurrentCultureIgnoreCase)).First
             Dim duplicateDlg As New dlgChangeUsername(ServerDBContext, dupServerUser)
             With duplicateDlg
                 .Owner = Me
@@ -1140,16 +1139,32 @@ Class MainWindow
     ''' Handles experiment selection within RSS results and step summary control.
     ''' </summary>
     ''' 
-    Private Sub RssExpList_RequestOpenExperiment(sender As Object, targetExp As tblExperiments, isFromServer As Boolean)
+    Private Sub ResultList_RequestOpenExperiment(sender As Object, targetExp As tblExperiments, isFromServer As Boolean)
+        TryOpenExperiment(targetExp, isFromServer)
+    End Sub
+
+
+    Private Sub StepExpSelector_RequestOpenExperiment(sender As Object, targetExp As tblExperiments, isFromServer As Boolean, args As StepExpOpenArgs)
+        args.WasOpened = TryOpenExperiment(targetExp, isFromServer)
+    End Sub
+
+
+    Private Sub RssItemGroup_RequestOpenExperiment(sender As Object, targetExp As tblExperiments, isFromServer As Boolean, args As StepExpOpenArgs)
+        args.WasOpened = TryOpenExperiment(targetExp, isFromServer)
+    End Sub
+
+
+    Private Function TryOpenExperiment(targetExp As tblExperiments, isFromServer As Boolean) As Boolean
 
         If targetExp Is Nothing Then
-            Exit Sub
+            Return False
         End If
 
         If Not isFromServer Then
 
             ''-- local experiment and same current user as of targetExp
             expNavTree.SelectExperiment(targetExp)
+            Return True
 
         Else
 
@@ -1160,19 +1175,29 @@ Class MainWindow
                 ' experiment already displayed in a tab
                 Dim thisTab As TabItem = tabExperiments.ItemContainerGenerator.ContainerFromItem(targetExp)
                 thisTab.IsSelected = True
+                Return True
 
             Else
+
+                'if server target exp originates from current user, then open it from local database
+                If targetExp.UserID = CType(Me.DataContext, tblUsers).UserID Then
+                    Dim localExp = DBContext.tblExperiments.Where(Function(exp) exp.ExperimentID = targetExp.ExperimentID).FirstOrDefault
+                    If localExp IsNot Nothing Then
+                        expNavTree.SelectExperiment(localExp)
+                        Return True
+                    End If
+                End If
 
                 ' warn for too many open exp tabs
                 If tabExperiments.Items.Count > 4 AndAlso Not ExpDisplayList.First.DisplayIndex = -2 Then
                     Dim res = cbMsgBox.Display("The maximum of 5 open experiments will be" + vbCrLf +
-                                     "exceeded if opening the server experiment." + vbCrLf + vbCrLf +
-                                     "Release the rightmost experiment?", MsgBoxStyle.OkCancel + MsgBoxStyle.Information, "Pin Limit")
+                                    "exceeded if opening the server experiment." + vbCrLf + vbCrLf +
+                                    "Release the rightmost experiment?", MsgBoxStyle.OkCancel + MsgBoxStyle.Information, "Pin Limit")
                     If res = MsgBoxResult.Ok Then
                         Dim lastIndex = tabExperiments.Items.Count - 1
                         CType(tabExperiments.Items(lastIndex), tblExperiments).DisplayIndex = Nothing
                     Else
-                        Exit Sub
+                        Return False
                     End If
                 End If
 
@@ -1188,12 +1213,13 @@ Class MainWindow
 
                 'select leftmost experiments tab containing this server exp
                 tabExperiments.SelectedIndex = 0
+                Return True
 
             End If
 
         End If
 
-    End Sub
+    End Function
 
 
     ''' <summary>
@@ -1524,8 +1550,9 @@ Class MainWindow
 
     Private Sub mnuHelp_Click() Handles mnuHelp.Click
 
-        Dim info As New ProcessStartInfo("https://abrechts.github.io/phoenix-eln-help.github.io/pages/1CreateExperiment.html")
-        info.UseShellExecute = True
+        Dim info As New ProcessStartInfo("https://abrechts.github.io/phoenix-eln-help.github.io/pages/1CreateExperiment.html") With {
+            .UseShellExecute = True
+        }
         Process.Start(info)
 
     End Sub
@@ -1567,43 +1594,71 @@ Class MainWindow
 
         Dim searchDlg As New dlgSearch
         With searchDlg
-            .Owner = Me
+
             .LocalDBContext = DBContext
             .ServerDBContext = ServerDBContext
-            With CustomControls.My.MySettings.Default
-                searchDlg.Show()
-            End With
+
+            Dim settings = CustomControls.My.MySettings.Default
+            If settings.dlgSearchSize.Width > -1 Then
+                .WindowStartupLocation = WindowStartupLocation.Manual
+                .Left = settings.dlgSearchPosition.X
+                .Top = settings.dlgSearchPosition.Y
+                .Width = settings.dlgSearchSize.Width
+                .Height = settings.dlgSearchSize.Height
+            Else
+                .Owner = Me
+            End If
+
+            .Show()
+
         End With
 
     End Sub
 
 
+    Private Sub btnAnalyze_Click() Handles btnAnalyze.Click
+
+        ExperimentContent_RequestSequencesDialog(Nothing, CType(SelectedExpContent.DataContext, tblExperiments))
+
+    End Sub
+
+
+
     Private Sub ExperimentContent_RequestSequencesDialog(sender As Object, refExp As tblExperiments)
 
-        If refExp IsNot Nothing Then
-
-            Dim seqDlg As New dlgSequences(refExp, DBContext, ServerDBContext, CustomControls.My.MySettings.Default.UseServerSequences)
-
-            With CustomControls.My.MySettings.Default
-
-                If .dlgSequencesSize.Width > -1 Then
-                    seqDlg.WindowStartupLocation = WindowStartupLocation.Manual
-                    seqDlg.Left = .dlgSequencesPosition.X
-                    seqDlg.Top = .dlgSequencesPosition.Y
-                    seqDlg.Width = .dlgSequencesSize.Width
-                    seqDlg.Height = .dlgSequencesSize.Height
-                Else
-                    seqDlg.Owner = Me
-                End If
-
-                seqDlg.ShowDialog()
-
-                .dlgSequencesPosition = New System.Drawing.Point(seqDlg.Left, seqDlg.Top)
-                .dlgSequencesSize = New System.Drawing.Size(seqDlg.ActualWidth, seqDlg.ActualHeight)
-
-            End With
-
+        If refExp.RxnSketch Is Nothing Then
+            cbMsgBox.Display("Missing reaction sketch: Can't create a connection graph!", MsgBoxStyle.OkOnly, "Synthetic Connections")
+            Exit Sub
         End If
+
+        Dim isServerExp As Boolean = (refExp.DisplayIndex = -2) 'unique tab indicator for server experiment 
+
+        If isServerExp AndAlso ServerDBContext Is Nothing Then
+            cbMsgBox.Display("The current experiment originates from the server, but the server currently is unavailable!", MsgBoxStyle.OkOnly)
+            Exit Sub
+        End If
+
+        Dim connectionsDlg As New dlgConnectGraph(refExp, DBContext, ServerDBContext, isServerExp OrElse CustomControls.My.MySettings.Default.UseServerSequences)
+
+        With connectionsDlg
+
+            Dim settings = CustomControls.My.MySettings.Default
+            If settings.dlgSequencesSize.Width > -1 Then
+                .WindowStartupLocation = WindowStartupLocation.Manual
+                .Left = settings.dlgSequencesPosition.X
+                .Top = settings.dlgSequencesPosition.Y
+                .Width = settings.dlgSequencesSize.Width
+                .Height = settings.dlgSequencesSize.Height
+            Else
+                .Owner = Me
+            End If
+
+            .ShowDialog()
+
+            settings.dlgSequencesPosition = New System.Drawing.Point(.Left, .Top)
+            settings.dlgSequencesSize = New System.Drawing.Size(.ActualWidth, .ActualHeight)
+
+        End With
 
     End Sub
 

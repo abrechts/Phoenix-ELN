@@ -557,6 +557,30 @@ Namespace My
                 Me("SameStepAllUsers") = value
             End Set
         End Property
+
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("-1, -1")>  _
+        Public Property dlgSearchSize() As Global.System.Drawing.Size
+            Get
+                Return CType(Me("dlgSearchSize"),Global.System.Drawing.Size)
+            End Get
+            Set
+                Me("dlgSearchSize") = value
+            End Set
+        End Property
+
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("-1, -1")>  _
+        Public Property dlgSearchPosition() As Global.System.Drawing.Point
+            Get
+                Return CType(Me("dlgSearchPosition"),Global.System.Drawing.Point)
+            End Get
+            Set
+                Me("dlgSearchPosition") = value
+            End Set
+        End Property
     End Class
 End Namespace
 

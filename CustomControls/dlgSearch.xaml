@@ -8,8 +8,8 @@
         xmlns:scm ="clr-namespace:System.ComponentModel;assembly=WindowsBase"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
-        Title="Reaction Substructure Search" TextOptions.TextFormattingMode="Display" WindowStartupLocation="CenterOwner" ShowInTaskbar="False" 
-        Height="840" MinHeight="840" Width="770" MaxWidth="850" MinWidth="770" Background="#FF3D3C3C" >
+        Title="Reaction Substructure Search" TextOptions.TextFormattingMode="Display" WindowStartupLocation="CenterOwner" ShowInTaskbar="False"
+        Height="750" MinHeight="600" Width="800" MinWidth="700" Background="#FF303036" >
 
     <Window.Resources>
 
@@ -27,10 +27,11 @@
         <local:IntegerToBooleanConverter x:Key="IntToBooleanConv"/>
 
         <Style x:Key="ListBoxNoHighlight" TargetType="ListBoxItem">
+            <Setter Property="Padding" Value="12,0"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ListBoxItem">
-                        <Border Background="{TemplateBinding Background}">
+                        <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
                             <ContentPresenter HorizontalAlignment="Stretch" VerticalAlignment="Center" />
                         </Border>
                     </ControlTemplate>
@@ -166,8 +167,8 @@
 
                         <!-- users ComboBox -->
 
-                        <ComboBox x:Name="cboUsers" Style="{StaticResource DarkComboBoxStyle}" Margin="0,0,0,5" MaxHeight="300" BorderBrush="#FF9B9B9B"
-                            SelectedIndex="0" MinWidth="100" VerticalContentAlignment="Center" Grid.IsSharedSizeScope="True" >
+                        <ComboBox x:Name="cboUsers" Style="{StaticResource DarkCombo}" Margin="0,0,0,5" MaxHeight="300" BorderBrush="#FF9B9B9B"
+                            SelectedIndex="0" MinWidth="100" VerticalContentAlignment="Center" Grid.IsSharedSizeScope="True" Background="transparent">
 
                             <ComboBox.ItemsSource>
                                 <CompositeCollection>
@@ -193,8 +194,8 @@
 
                         <!-- projects ComboBox -->
 
-                        <ComboBox x:Name="cboProjects" Style="{StaticResource DarkComboBoxStyle}" Margin="0,0,0,5" BorderBrush="#FF9B9B9B"
-                            SelectedIndex="0" MaxHeight="300">
+                        <ComboBox x:Name="cboProjects" Style="{StaticResource DarkCombo}" Margin="0,0,0,5" BorderBrush="#FF9B9B9B"
+                            SelectedIndex="0" MaxHeight="300" Background="transparent">
 
                             <ComboBox.ItemsSource>
                                 <CompositeCollection>
@@ -220,8 +221,9 @@
 
                         <!-- project group ComboBox -->
 
-                        <ComboBox x:Name="cboProjGroups" Style="{StaticResource DarkComboBoxStyle}" SelectedIndex="0" MaxHeight="300" BorderBrush="#FF9B9B9B"
-                            IsEnabled="{Binding ElementName=cboProjects, Path=SelectedIndex, Converter={StaticResource IntToBooleanConv}}" Margin="0,0,0,6">
+                        <ComboBox x:Name="cboProjGroups" Style="{StaticResource DarkCombo}" SelectedIndex="0" MaxHeight="300" BorderBrush="#FF9B9B9B"
+                            IsEnabled="{Binding ElementName=cboProjects, Path=SelectedIndex, Converter={StaticResource IntToBooleanConv}}" Margin="0,0,0,6"
+                            Background="transparent">
 
                             <ComboBox.ItemsSource>
                                 <CompositeCollection>
@@ -265,10 +267,10 @@
                                 <TextBlock Text="Yield" FontWeight="DemiBold" Foreground="lightblue" Margin="2,0,0,0" VerticalAlignment="Center"/>
 
                                 <ComboBox x:Name="cboYieldComparer" VerticalAlignment="Center" SelectedIndex="0" FontWeight="demibold" Padding="1,2,1,3"     
-                                    Foreground="LightBlue" BorderBrush="Transparent" Background="Transparent" Style="{StaticResource DarkComboBoxStyle}" 
+                                    Foreground="LightBlue" BorderBrush="Transparent" Background="Transparent" Style="{StaticResource DarkCombo}" 
                                     ToolTip="{Binding SelectedItem.ToolTip, RelativeSource={RelativeSource Self}}">
-                                    <ComboBoxItem Content=" ≥ " ToolTip="larger or equal"/>
-                                    <ComboBoxItem Content=" ≤ " ToolTip="smaller or equal"/>
+                                    <ComboBoxItem Content="≥" ToolTip="larger or equal"/>
+                                    <ComboBoxItem Content="≤" ToolTip="smaller or equal"/>
                                 </ComboBox>
 
                                 <StackPanel x:Name="pnlYield" Orientation="Horizontal" Margin="1,0,0,0">
@@ -287,18 +289,18 @@
 
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="left">
 
-                                <TextBlock Text="Scale" FontWeight="DemiBold" Foreground="lightBlue" Margin="3,1,1,0" VerticalAlignment="Center" />
+                                <TextBlock Text="Scale" FontWeight="DemiBold" Foreground="lightBlue" Margin="3,1,0,0" VerticalAlignment="Center" />
 
                                 <ComboBox x:Name="cboScaleComparer" VerticalAlignment="Center" SelectedIndex="0" FontWeight="demibold" Padding="0,2,1,3"     
-                                    Foreground="LightBlue" BorderBrush="Transparent" Background="Transparent" Style="{StaticResource DarkComboBoxStyle}" 
+                                    Foreground="LightBlue" BorderBrush="Transparent" Background="Transparent" Style="{StaticResource DarkCombo}" 
                                     ToolTip="{Binding SelectedItem.ToolTip, RelativeSource={RelativeSource Self}}">
-                                    <ComboBoxItem Content=" ≥ " ToolTip="larger or equal"/>
-                                    <ComboBoxItem Content=" ≤ " ToolTip="smaller or equal"/>
+                                    <ComboBoxItem Content="≥" ToolTip="larger or equal"/>
+                                    <ComboBoxItem Content="≤" ToolTip="smaller or equal"/>
                                 </ComboBox>
 
                                 <local:NumericTextBox x:Name="txtScale" SignificantDigits="3" MaxLength="5" PositiveNumbersOnly="True"
                                     d:Text="200" MinWidth="40" CaretBrush="White" Foreground="white" Background="Transparent"  
-                                    HorizontalContentAlignment="Center" BorderThickness="1" Margin="1,0,2,0" Padding="0,0,0,1"
+                                    HorizontalContentAlignment="Center" BorderThickness="1" Margin="0,0,2,0" Padding="0,0,0,1"
                                     BorderBrush="lightgray" VerticalContentAlignment="Center"/>
 
                                 <TextBlock Text="g" Margin="2,0,3,0" VerticalAlignment="Center" Foreground="white"/>
@@ -319,7 +321,7 @@
 
         <!--Results section-->
 
-        <Border x:Name="resBorder" Margin="0,30,0,6" Grid.Row="1" HorizontalAlignment="Center">
+        <Border x:Name="resBorder" Margin="12,30,12,6" Grid.Row="1">
 
             <Grid>
                 <Grid.RowDefinitions>
@@ -333,8 +335,8 @@
                 <TextBlock Grid.Row="0" x:Name="blkResultsTitle" Text="Results" HorizontalAlignment="Center" FontWeight="Bold" 
                     FontSize="13" Foreground="LightBlue" FontStyle="Italic"/>
 
-                <ComboBox x:Name="cboSorting" Grid.Row="0" Style="{StaticResource DarkComboBoxStyle}" SelectedIndex="0" HorizontalAlignment="Right" 
-                    VerticalAlignment="Top" Padding="6,1,6,4" Margin="0,-1,2,0" FontSize="11.5" BorderThickness="0">
+                <ComboBox x:Name="cboSorting" Grid.Row="0" Style="{StaticResource DarkCombo}" SelectedIndex="0" HorizontalAlignment="Right" 
+                    VerticalAlignment="Top" Padding="6,1,6,4" Margin="0,-1,2,0" FontSize="11.5" BorderThickness="0" Background="transparent">
                     <ComboBoxItem Content="sort by yield"/>
                     <ComboBoxItem Content="sort by scale"/>
                 </ComboBox>
@@ -360,8 +362,12 @@
             </Grid>
         </Border>
 
+        <!-- Info toast – floats centered over the whole dialog, auto-dismissed from code-behind -->
+        <local:InfoToast x:Name="infoToast" Grid.RowSpan="3" Panel.ZIndex="99"
+                         IsHitTestVisible="False" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+
         <!--Navigation bar -->
-        
+
         <StackPanel Grid.Row="2" TextElement.FontSize="11.5 " Background="#FF5E5E5E">
             
             <Separator Foreground="white" Height="1" Margin="0,0,0,1"/>

@@ -122,13 +122,22 @@
 
                     <Separator/>
 
-                    <Button x:Name="btnSearch" HorizontalAlignment="Left" VerticalAlignment="Center" ToolTip="Find experiments" d:Visibility="Visible"
-                        Visibility="Visible">
+                    <Button x:Name="btnSearch" HorizontalAlignment="Left" VerticalAlignment="Center" ToolTip="Find experiments">
                         <StackPanel Orientation="Horizontal">
                             <ContentControl Content="{StaticResource icoSearch_Dark}" Height="16" Margin="0,1,4,0"/>
                             <TextBlock Text="Search" Margin="0,0,2,0" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
+
+                    <Button x:Name="btnAnalyze" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="1,0,0,0"
+                        ToolTip="Display all synthetic steps leading to the &#x0a;current experiment and away from it."
+                        IsEnabled="{Binding ElementName=btnSearch, Path=IsEnabled}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="💡" Foreground="#FFFFF1B3" FontSize="13" Margin="-4,0,0,0"/>
+                            <TextBlock Text="Analyze" Margin="-1,1,2,0" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
 
                     <Separator Margin="2,2,0,2"/>
 
