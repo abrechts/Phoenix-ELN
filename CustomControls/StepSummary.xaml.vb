@@ -27,8 +27,10 @@ Public Class StepSummary
     Private Property ServerContext As ElnDbContext
 
     Private Property RefReactInChIKey As String
+    Private Property RefReactantIsRacemate As Boolean
 
     Private Property RefProductInChIKey As String
+    Private Property RefProductIsRacemate As Boolean
 
     Private Property CurrUserID As String
 
@@ -76,13 +78,19 @@ Public Class StepSummary
             Exit Sub
         End If
 
-        Dim localExperiments = CType(Me.DataContext, tblUsers).tblExperiments.Where(Function(exp) exp.ReactantInChIKey = RefReactInChIKey _
-                                                                                      AndAlso exp.ProductInChIKey = RefProductInChIKey)
+        Dim localExperiments = CType(Me.DataContext, tblUsers).tblExperiments.
+            Where(Function(exp) exp.ReactantInChIKey = RefReactInChIKey _
+                AndAlso exp.ProductInChIKey = RefProductInChIKey _
+                AndAlso exp.IsRacemicReactant = Convert.ToByte(RefReactantIsRacemate) _
+                AndAlso exp.IsRacemicProduct = Convert.ToByte(RefProductIsRacemate))
+
         If ServerContext IsNot Nothing AndAlso chkIncludeServer.IsChecked Then
 
             Dim serverExperiments = ServerContext.tblExperiments.
                 Where(Function(exp) exp.ReactantInChIKey = RefReactInChIKey _
                         AndAlso exp.ProductInChIKey = RefProductInChIKey _
+                        AndAlso exp.IsRacemicReactant = Convert.ToByte(RefReactantIsRacemate) _
+                        AndAlso exp.IsRacemicProduct = Convert.ToByte(RefProductIsRacemate) _
                         AndAlso exp.UserID <> CurrUserID _
                         AndAlso exp.WorkflowState = ELNEnumerations.WorkflowStatus.Finalized)
 
@@ -129,8 +137,15 @@ Public Class StepSummary
 
         If skInfo IsNot Nothing AndAlso skInfo.Reactants.Count > 0 AndAlso skInfo.Products.Count > 0 Then
 
-            RefReactInChIKey = skInfo.Reactants.First.InChIKey
-            RefProductInChIKey = skInfo.Products.First.InChIKey
+            With skInfo.Reactants.First
+                RefReactInChIKey = .InChIKey
+                RefReactantIsRacemate = .IsSetAsRacemate
+            End With
+
+            With skInfo.Products.First
+                RefProductInChIKey = .InChIKey
+                RefProductIsRacemate = .IsSetAsRacemate
+            End With
 
             UpdateStepExperiments()
 

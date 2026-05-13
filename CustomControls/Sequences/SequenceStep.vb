@@ -70,7 +70,7 @@ Public Class SequenceStep
             AndAlso exp.IsRacemicReactant = IsProductRacemate _  'compare the user-specified racemate definition
             AndAlso (exp.ReactantInChIKey <> exp.ProductInChIKey OrElse exp.IsRacemicReactant <> exp.IsRacemicProduct)) 'exclude steps with identical reactant and product 
 
-        ' Group the next step experiments by their user-specified racemate definitions
+        ' Group the next step experiments by their (user-specified) racemate definitions
         Dim expGroupDict = nextStepExperiments.GroupBy(Function(e) e.IsRacemicProduct).ToDictionary(Function(g) g.Key, Function(g) g.ToList())
 
         For Each kvp In expGroupDict

@@ -186,17 +186,15 @@ Public Class SequenceControl
         StartInChIKey = connectingStep.ReactantInChIKey
         EndInChIKey = connectingStep.ProductInChIKey
 
-        If Not SequenceSteps.Contains(connectingStep) Then
-            SequenceSteps.Add(connectingStep)
-            SequenceStep.AllSchemeSteps.Add(connectingStep)
-        End If
+        SequenceSteps.Add(connectingStep)
+        SequenceStep.AllSchemeSteps.Add(connectingStep)
 
         If direction = SequenceDirection.Downstream Then
             DownstreamSequenceNr += 1
             Me.SequenceTitle = "Sequence " + DownstreamSequenceNr.ToString
-            AddDownstreamElements(connectingStep)
-        Else
-            UpstreamSequenceNr -= 1
+                AddDownstreamElements(connectingStep)
+            Else
+                UpstreamSequenceNr -= 1
             Me.SequenceTitle = "Sequence " + UpstreamSequenceNr.ToString
             AddUpstreamElements(connectingStep)
         End If
@@ -353,7 +351,7 @@ Public Class SequenceControl
 
                     'complete sequence if refStep has multiple incoming sequences and does not contain seed step
                     Dim prevConnects = refStep.GetPreviousSteps
-                    If prevConnects.Count > 1 AndAlso Not SequenceSteps.Contains(SeedStep) Then
+                    If prevConnects.Count > 1 Then
                         endReached = True
                         Exit While
                     End If
@@ -375,10 +373,12 @@ Public Class SequenceControl
                     'create (recursive) downstream elements 
 
                     For Each connStep In nextConnects
-                        Dim downSequence As New SequenceControl(connStep, SequenceDirection.Downstream) 'recursive: constructor builds adjacent elements based on connStep
-                        downSequence.ShowUpstreamConnector()
-                        downSequence.HasUpstreamConnections = True
-                        DownstreamSequences.Add(downSequence)   'add to list, not UI
+                        If Not SchemeContainsStep(connStep) Then
+                            Dim downSequence As New SequenceControl(connStep, SequenceDirection.Downstream) 'recursive: constructor builds adjacent elements based on connStep
+                            downSequence.ShowUpstreamConnector()
+                            downSequence.HasUpstreamConnections = True
+                            DownstreamSequences.Add(downSequence)   'add to list, not UI
+                        End If
                     Next
 
                     'detect converging downstream sequences
@@ -398,7 +398,7 @@ Public Class SequenceControl
 
                         Else
 
-                            'convergent sequences -> add converging sequence group
+                            'convergent sequences -> add converging sequences
 
                             ConvergingDownstreamGroups.Add(result.convergentGroups.ToList)
 
@@ -414,17 +414,20 @@ Public Class SequenceControl
                                 'merging to a downstream sequence
 
                                 Dim connStep = finalStep.GetNextSteps.First
-                                Dim convergedSequence As New SequenceControl(connStep, SequenceDirection.Downstream) 'recursive
-                                convergedSequence.HasUpstreamConnections = True
 
-                                With downStrElement
-                                    .pnlConvergingDown.Visibility = Visibility.Visible
-                                    .pnlConvergingDown.Children.Add(convergedSequence)
-                                End With
+                                If Not SchemeContainsStep(connStep) Then
+                                    Dim convergedSequence As New SequenceControl(connStep, SequenceDirection.Downstream) 'recursive
+                                    convergedSequence.HasUpstreamConnections = True
+                                    With downStrElement
+                                        .pnlConvergingDown.Visibility = Visibility.Visible
+                                        .pnlConvergingDown.Children.Add(convergedSequence)
+                                    End With
+
+                                End If
 
                             Else
 
-                                'merging to common product without further sequence
+                                'merging to common product *without* further sequence
 
                                 With downStrElement
                                     .btnMergeRightCenter.Visibility = Visibility.Visible
@@ -509,7 +512,7 @@ Public Class SequenceControl
 
                     'complete sequence if refStep has multiple outgoing sequences and does not contain seed step
                     Dim nextConnects = refStep.GetNextSteps
-                    If nextConnects.Count > 1 AndAlso Not SequenceSteps.Contains(SeedStep) Then
+                    If nextConnects.Count > 1 Then
                         endReached = True
                         Exit While
                     End If
@@ -571,16 +574,20 @@ Public Class SequenceControl
                                 'merging to a upstream sequence
 
                                 Dim connStep = firstStep.GetPreviousSteps.First
-                                Dim convergedSequence As New SequenceControl(connStep, SequenceDirection.Upstream) 'recursive
-                                With convergedSequence
-                                    .ShowDownstreamConnector()
-                                    .HasDownstreamConnections = True
-                                End With
 
-                                With upStrElement
-                                    .pnlConvergingUp.Visibility = Visibility.Visible
-                                    .pnlConvergingUp.Children.Add(convergedSequence)
-                                End With
+                                If Not SchemeContainsStep(connStep) Then
+
+                                    Dim convergedSequence As New SequenceControl(connStep, SequenceDirection.Upstream) 'recursive
+                                    With convergedSequence
+                                        .ShowDownstreamConnector()
+                                        .HasDownstreamConnections = True
+                                    End With
+                                    With upStrElement
+                                        .pnlConvergingUp.Visibility = Visibility.Visible
+                                        .pnlConvergingUp.Children.Add(convergedSequence)
+                                    End With
+
+                                End If
 
                             Else
 
