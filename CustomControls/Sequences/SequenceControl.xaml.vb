@@ -192,9 +192,9 @@ Public Class SequenceControl
         If direction = SequenceDirection.Downstream Then
             DownstreamSequenceNr += 1
             Me.SequenceTitle = "Sequence " + DownstreamSequenceNr.ToString
-                AddDownstreamElements(connectingStep)
-            Else
-                UpstreamSequenceNr -= 1
+            AddDownstreamElements(connectingStep)
+        Else
+            UpstreamSequenceNr -= 1
             Me.SequenceTitle = "Sequence " + UpstreamSequenceNr.ToString
             AddUpstreamElements(connectingStep)
         End If
