@@ -1,7 +1,9 @@
 ﻿Imports System.ComponentModel
 Imports System.Windows
+Imports System.Windows.Controls
 Imports System.Windows.Data
 Imports System.Windows.Input
+Imports System.Windows.Media
 Imports ElnBase
 Imports ElnCoreModel
 
@@ -104,23 +106,6 @@ Public Class StepSummary
 
     End Sub
 
-
-    Private Sub lstRssHits_PreviewMouseUp(sender As Object, e As MouseButtonEventArgs) Handles lstStepExperiments.PreviewMouseUp
-
-
-        Dim selItem = CType(lstStepExperiments.SelectedItem, tblExperiments)
-
-        If selItem IsNot Nothing Then
-
-            Dim fromServer = (selItem.UserID <> CurrUserID)
-            RaiseEvent RequestOpenExperiment(Me, selItem, fromServer)
-
-            e.Handled = True
-
-        End If
-
-
-    End Sub
 
 
     Private Sub chkIncludeServer_Changed() Handles chkIncludeServer.Checked, chkIncludeServer.Unchecked
@@ -229,13 +214,18 @@ Public Class StepSummary
     End Sub
 
 
-    Private Sub ListBoxItem_Selected(sender As Object, e As MouseButtonEventArgs) Handles lstStepExperiments.PreviewMouseUp
+    Private Sub lstStepExperiments_PreviewMouseDown(sender As Object, e As MouseButtonEventArgs) Handles lstStepExperiments.PreviewMouseDown
 
-        Dim selExp = lstStepExperiments.SelectedItem
+        Dim hitResult = VisualTreeHelper.HitTest(lstStepExperiments, e.GetPosition(lstStepExperiments))
+        If hitResult Is Nothing Then Return
 
+        Dim listBoxItem = WPFToolbox.FindVisualParent(Of ListBoxItem)(hitResult.VisualHit)
+        If listBoxItem Is Nothing Then Return
+
+        Dim selExp = TryCast(listBoxItem.DataContext, tblExperiments)
         If selExp IsNot Nothing Then
-            lstStepExperiments.UnselectAll()
-            RaiseEvent RequestOpenExperiment(Me, selExp, False)
+            Dim fromServer = (selExp.UserID <> CurrUserID)
+            RaiseEvent RequestOpenExperiment(Me, selExp, fromServer)
         End If
 
     End Sub
