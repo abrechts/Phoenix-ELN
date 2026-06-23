@@ -8,14 +8,12 @@ Public Class StepExpSelector
 
     'DataContext is SequenceStep
 
-    Public Shared Event RequestOpenExperiment(sender As Object, expEntry As tblExperiments, isFromServer As Boolean)
+    Public Shared Event RequestOpenExperiment(sender As Object, expEntry As tblExperiments, isFromServer As Boolean, args As StepExpOpenArgs)
 
     Public Sub New()
 
         ' This call is required by the designer.
         InitializeComponent()
-
-        ' Add any initialization after the InitializeComponent() call.
 
     End Sub
 
@@ -28,8 +26,6 @@ Public Class StepExpSelector
 
         Dim seqStep = CType(Me.DataContext, SequenceStep)
 
-        ExpEntryEnabledConverter.IsServerExperiments = (dlgSequences.UseServerContext AndAlso dlgSequences.ServerContext IsNot Nothing)
-
         'get all step experiments; unfinalized server experiments will be disabled later in the step exp list 
         Dim res = From exp In seqStep.StepExperiments Order By exp.Yield Descending
         lstStepExperiments.ItemsSource = res
@@ -37,17 +33,36 @@ Public Class StepExpSelector
     End Sub
 
 
+    Public Property ItemsSource As List(Of tblExperiments)
+
+        Get
+            Return lstStepExperiments.ItemsSource
+        End Get
+        Set(value As List(Of tblExperiments))
+            lstStepExperiments.ItemsSource = value
+        End Set
+
+    End Property
+
+
     Private Sub ListBoxItem_Selected(sender As Object, e As MouseButtonEventArgs) Handles lstStepExperiments.PreviewMouseUp
 
         Dim selExp As tblExperiments = lstStepExperiments.SelectedItem
 
         If selExp IsNot Nothing Then
-            lstStepExperiments.UnselectAll()
-            RaiseEvent RequestOpenExperiment(Me, selExp, False)
+            Dim openArgs As New StepExpOpenArgs
+            RaiseEvent RequestOpenExperiment(Me, selExp, ExpEntryEnabledConverter.IsServerExperiments, openArgs)
         End If
 
     End Sub
 
+
+End Class
+
+
+Public Class StepExpOpenArgs
+
+    Public Property WasOpened As Boolean = False
 
 End Class
 
@@ -71,7 +86,9 @@ Public Class ExpEntryEnabledConverter
     End Function
 
     Public Function ConvertBack(value As Object, targetType As Type, parameter As Object, culture As CultureInfo) As Object Implements IValueConverter.ConvertBack
+
         Throw New NotImplementedException()
+
     End Function
 
 End Class

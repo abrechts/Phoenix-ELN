@@ -184,9 +184,9 @@ Public Class StepSummary
 
 
     Private Sub lnkPubChemReact_Click() Handles lnkPubChemReact.PreviewMouseUp
-
-        Dim info As New ProcessStartInfo("https://pubchem.ncbi.nlm.nih.gov/compound/" + blkInChIKeyReact.Text)
-        info.UseShellExecute = True
+        Dim info As New ProcessStartInfo("https://pubchem.ncbi.nlm.nih.gov/compound/" + blkInChIKeyReact.Text) With {
+            .UseShellExecute = True
+        }
         Process.Start(info)
 
     End Sub
@@ -194,8 +194,9 @@ Public Class StepSummary
 
     Private Sub lnkPubChemProd_Click() Handles lnkPubChemProd.PreviewMouseUp
 
-        Dim info As New ProcessStartInfo("https://pubchem.ncbi.nlm.nih.gov/compound/" + blkInChIKeyProd.Text)
-        info.UseShellExecute = True
+        Dim info As New ProcessStartInfo("https://pubchem.ncbi.nlm.nih.gov/compound/" + blkInChIKeyProd.Text) With {
+            .UseShellExecute = True
+        }
         Process.Start(info)
 
     End Sub

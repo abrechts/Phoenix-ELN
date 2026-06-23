@@ -116,6 +116,12 @@
     <Setting Name="dlgSequencesPosition" Type="System.Drawing.Point" Scope="User">
       <Value Profile="(Default)">-1, -1</Value>
     </Setting>
+    <Setting Name="dlgSearchSize" Type="System.Drawing.Size" Scope="User">
+      <Value Profile="(Default)">-1, -1</Value>
+    </Setting>
+    <Setting Name="dlgSearchPosition" Type="System.Drawing.Point" Scope="User">
+      <Value Profile="(Default)">-1, -1</Value>
+    </Setting>
     <Setting Name="CbDrawBioSeqPinned" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>

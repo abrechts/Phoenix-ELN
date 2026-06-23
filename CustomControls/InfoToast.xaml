@@ -1,0 +1,21 @@
+<UserControl x:Class="InfoToast"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d"
+             Visibility="Collapsed"
+             d:Opacity="1" d:Visibility="Visible" >
+
+    <Border Background="#FF303030" CornerRadius="10" BorderBrush="#FFAAB8FF" BorderThickness="1" Padding="10,6,14,6">
+        <Border.Effect>
+            <DropShadowEffect Color="gray" BlurRadius="16" ShadowDepth="6" Opacity="0.6" Direction="320"/>
+        </Border.Effect>
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+            <TextBlock Text="✔ " Foreground="#FF89FCA6" FontSize="12" VerticalAlignment="Center" Margin="0,0,2,0"/>
+            <TextBlock x:Name="blkToastMessage" Foreground="white" FontSize="12"
+                       FontFamily="Segoe UI" VerticalAlignment="Center" d:Text="demo-000132 opened"/>
+        </StackPanel>
+    </Border>
+
+</UserControl>
