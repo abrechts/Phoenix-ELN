@@ -1,0 +1,50 @@
+<Window x:Class="dlgSequenceScheme"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:CustomControls"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        mc:Ignorable="d"
+        Title="Combined Scheme"
+        d:Width="1100" d:Height="600"
+        MinWidth="600" MinHeight="350"
+        Background="#0F0F22"
+        WindowStartupLocation="CenterOwner" WindowState="Maximized" WindowStyle="none" AllowsTransparency="True" ShowInTaskbar="False"
+        Loaded="Window_Loaded"
+        KeyDown="Window_KeyDown">
+
+    <Grid Margin="8">
+
+        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" >
+        
+            <TextBlock x:Name="blkTitle" DockPanel.Dock="top" Text="STRUCTURE GRAPH" FontSize="14" FontWeight="Bold" Margin="0,12,0,0"
+                FontFamily="Segoe UI" Foreground="#FFF9D192" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+
+            <local:SequenceSchemeView x:Name="SchemeView" DockPanel.Dock="top" Margin="24,12,24,24" d:MinWidth="200" d:MinHeight="120"/>
+
+        </StackPanel>
+
+        <Border Background="LightCyan" DockPanel.Dock="bottom"  HorizontalAlignment="Center" VerticalAlignment="Bottom"
+          Margin="0,0,0,36" CornerRadius="10"  Padding="3">
+            <Button x:Name="btnClose" Content="Close (Esc)" Width="90" Background="Transparent" IsCancel="True" BorderThickness="0" FontSize="14"/>
+        </Border>
+
+        <!-- Control strip (top-right): PDF button + zoom combo -->
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,12,12,0">
+
+            <Button x:Name="btnPdfExport" Content="PDF" Style="{StaticResource DarkModeButtonStyle}" ToolTip="Export as PDF" BorderThickness="1"
+               FontSize="11" FontWeight="SemiBold" Foreground="#FFCFCDCD" VerticalAlignment="Center" Margin="4,0,4,0" Padding="5,1,5,2"/>
+
+            <ComboBox x:Name="ZoomCombo" FontSize="11" Tag="100%" VerticalContentAlignment="Center" BorderBrush="DimGray"
+               Foreground="#FFCFCDCD" Style="{StaticResource DarkCombo}" SelectionChanged="ZoomCombo_SelectionChanged" VerticalAlignment="Center" >
+                <ComboBoxItem Content="100%" IsSelected="True"/>
+                <ComboBoxItem Content="75%"/>
+                <ComboBoxItem Content="50%"/>
+                <ComboBoxItem x:Name="FitAllItem" Content="Fit All"/>
+            </ComboBox>
+
+        </StackPanel>
+
+    </Grid>
+
+</Window>

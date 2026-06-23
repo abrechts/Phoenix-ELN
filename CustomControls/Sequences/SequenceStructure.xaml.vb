@@ -101,12 +101,20 @@ Public Class SequenceStructure
     End Property
 
 
+    ''' <summary>
+    ''' Sets or gets the border brush of the step selection border
+    ''' </summary>
+    ''' 
+    Public Property SelectionBorderBrush As Brush = Brushes.LightSkyBlue
+
+
     Private _IsSelected As Boolean = False
+
 
     ''' <summary>
     ''' Sets or gets if the reaction arrow is marked as as selected
     ''' </summary>
-    ''' 
+    '''
     Public Property IsSelected As Boolean
 
         Get
@@ -118,7 +126,7 @@ Public Class SequenceStructure
             _IsSelected = value
 
             If value = True Then
-                pnlArrowRight.BorderBrush = Brushes.LightSkyBlue
+                pnlArrowRight.BorderBrush = SelectionBorderBrush
             Else
                 pnlArrowRight.BorderBrush = Brushes.Transparent
                 pnlArrowRight.Background = Brushes.Transparent

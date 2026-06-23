@@ -42,7 +42,7 @@
                     <StackPanel x:Name="arrowRight" Cursor="Hand" Margin="2,1,2,1">
 
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="center" Margin="-10,0,0,-3">
-                            <TextBlock x:Name="blkSeedSymbol" Text="➤" Foreground="lightblue" d:Visibility="Visible" Visibility="Collapsed" FontSize="9.5" Margin="0,2,3,0"/>
+                            <TextBlock x:Name="blkSeedSymbol" Text="➤" Foreground="lightblue" d:Visibility="Visible" Visibility="Collapsed" FontSize="9.5" Margin="0,1,3,0"/>
                             <TextBlock x:Name="blkStepNr" d:Text="Step 2" FontSize="11" FontFamily="Segoe UI" Foreground="lightblue" />
                         </StackPanel>
 

@@ -184,6 +184,16 @@ Partial Public Class SequenceGraph
     Public Property SeedSequence As SequenceNode
 
     ''' <summary>
+    ''' Returns the sequences built by the last BuildAndRender call.
+    ''' </summary>
+    '''
+    Public ReadOnly Property Sequences As IReadOnlyList(Of SequenceNode)
+        Get
+            Return _sequences
+        End Get
+    End Property
+
+    ''' <summary>
     ''' The height of the rendered graph content (GraphCanvas), as computed by
     ''' the last ComputeLayout pass. Useful for sizing host containers to fit
     ''' the graph without unnecessary scroll space.

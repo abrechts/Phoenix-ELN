@@ -216,6 +216,102 @@ Partial Public Class dlgConnectGraph
 
 
     ''' <summary>
+    ''' Populates the individual step structures of the sequence scheme based on the provided sequence.
+    ''' </summary>
+    '''
+    Private Sub PopulateSequenceScheme(seq As SequenceGraph.SequenceNode)
+
+        'global reaction component foreground color (for reactant and product canvases in displayed sequence)
+        SketchResults.ComponentStructureColor = New SolidColorBrush(ColorConverter.ConvertFromString("#FFF9F96B"))
+
+        blkSchemeTitle.Text = $"Sequence {seq.Id + 1}"
+
+        'color legend
+        Dim accent = GraphView.GetSequenceAccentBrush(seq)
+        bdrSchemeTitle.BorderBrush = accent
+        If TypeOf accent Is SolidColorBrush Then
+            Dim c = CType(accent, SolidColorBrush).Color
+            bdrSchemeTitle.Background = New SolidColorBrush(Color.FromArgb(60, c.R, c.G, c.B))
+        End If
+
+        bdrLegendSwatch.Background = accent
+        blkLegendType.Text = seq.SequenceType
+
+        Dim stepNr As Integer = 1
+        pnlSeqStructures.Children.Clear()
+
+        For Each seqStep In seq.Members
+
+            Dim expItem = CType(seqStep.ConnectItem.AttachedItem, tblExperiments)
+            Dim skInfo = DrawingEditor.GetSketchInfo(expItem.RxnSketch)
+            Dim reactCanv = skInfo.Reactants.First.StructureCanvas
+
+            Dim stepStruct As New SequenceStructure
+            With stepStruct
+
+                'add reactant structure for each step
+                .SetStepExperiments(expItem, QueryExperiments)
+                .StructureCanvas = reactCanv
+                .StepNumberStr = "Step " + stepNr.ToString
+
+                If seqStep.ConnectItem.IsSeed Then
+                    'always initially select seed step, if present in sequence
+                    .blkSeedSymbol.Visibility = Visibility.Visible
+                    OnStepArrowClicked(stepStruct)
+                ElseIf stepNr = 1 Then
+                    'otherwise select first step of sequence
+                    OnStepArrowClicked(stepStruct)
+                End If
+
+                Dim yieldStr = Format(.StepExperiments.Max(Function(x) x.Yield), "0")
+                Dim prefix = If(.StepExperiments.Count > 1, "≤ ", "")
+                If yieldStr <> "" Then
+                    .blkExpCount.Text = prefix + yieldStr + "%"
+                Else
+                    .blkExpCount.Text = "no yield"
+                End If
+
+                stepNr += 1
+
+                If seqStep Is seq.Members.First AndAlso seq.Incoming.Count > 0 Then
+                    .ShowLeftArrow()
+                End If
+
+                pnlSeqStructures.Children.Add(stepStruct)
+
+                'finally add product structure for last step
+                If seqStep Is seq.Members.Last Then
+                    Dim stepStructProd As New SequenceStructure
+                    With stepStructProd
+                        Dim prodCanv = skInfo.Products.First.StructureCanvas
+                        .StructureCanvas = prodCanv
+                        .IsSelected = False
+                        .HideRightArrow()
+                        pnlSeqStructures.Children.Add(stepStructProd)
+                        If seq.Outgoing.Count > 0 Then
+                            .ShowDottedRightArrow()
+                        End If
+                    End With
+                End If
+
+            End With
+
+        Next
+
+    End Sub
+
+
+    Private Sub btnShowAllSchemes_PreviewMouseUp() Handles btnShowAllSchemes.PreviewMouseUp
+
+        Dim dlg As New dlgSequenceScheme()
+        dlg.Owner = Me
+        dlg.SetData(GraphView.Sequences, QueryExperiments)
+        dlg.Show()
+
+    End Sub
+
+
+    ''' <summary>
     ''' Defers SequenceGraph.ApplyFitAllZoom until after the pending layout pass, so it sees the
     ''' ScrollViewer viewport size that results from the GraphAreaRow height set by AdjustSplitterToGraphHeight.
     ''' </summary>
@@ -269,93 +365,6 @@ Partial Public Class dlgConnectGraph
         Const BOTTOM_AREA_MIN_HEIGHT As Double = 250    'must match Row1's MinHeight in the XAML
 
         GraphAreaRow.MaxHeight = Math.Max(GraphAreaRow.MinHeight, Me.ActualHeight - BOTTOM_AREA_MIN_HEIGHT)
-
-    End Sub
-
-
-    ''' <summary>
-    ''' Populates the individual step structures of the sequence scheme based on the provided sequence.
-    ''' </summary>
-    ''' 
-    Private Sub PopulateSequenceScheme(seq As SequenceGraph.SequenceNode)
-
-        'global reaction component foreground color (for reactant and product canvases in displayed sequence)
-        SketchResults.ComponentStructureColor = New SolidColorBrush(ColorConverter.ConvertFromString("#FFF9F96B"))  'light yellow
-
-        blkSchemeTitle.Text = $"Sequence {seq.Id + 1}"
-
-        'color legend
-        Dim accent = GraphView.GetSequenceAccentBrush(seq)
-        bdrSchemeTitle.BorderBrush = accent
-        If TypeOf accent Is SolidColorBrush Then
-            Dim c = CType(accent, SolidColorBrush).Color
-            bdrSchemeTitle.Background = New SolidColorBrush(Color.FromArgb(60, c.R, c.G, c.B))
-        End If
-
-        bdrLegendSwatch.Background = accent
-        blkLegendType.Text = seq.SequenceType
-
-        Dim stepNr As Integer = 1
-        pnlSeqStructures.Children.Clear()
-
-        For Each seqStep In seq.Members
-
-            Dim expItem = CType(seqStep.ConnectItem.AttachedItem, tblExperiments)
-            Dim skInfo = DrawingEditor.GetSketchInfo(expItem.RxnSketch)
-            Dim reactCanv = skInfo.Reactants.First.StructureCanvas
-
-            Dim stepStruct As New SequenceStructure
-            With stepStruct
-
-                'add reactant structure for each step
-                .SetStepExperiments(expItem, QueryExperiments)
-                .StructureCanvas = reactCanv
-                .StepNumberStr = "Step " + stepNr.ToString
-
-                If seqStep.ConnectItem.IsSeed Then
-                    'always initially seed step, if present in sequence
-                    .blkSeedSymbol.Visibility = Visibility.Visible
-                    OnStepArrowClicked(stepStruct)
-                ElseIf stepNr = 1 Then
-                    'otherwise select first step of sequence
-                    OnStepArrowClicked(stepStruct)
-                End If
-
-                Dim yieldStr = Format(.StepExperiments.Max(Function(x) x.Yield), "0")
-                Dim prefix = If(.StepExperiments.Count > 1, "≤ ", "")
-                If yieldStr <> "" Then
-                    .blkExpCount.Text = prefix + yieldStr + "%"
-                Else
-                    .blkExpCount.Text = "no yield"
-                End If
-
-                stepNr += 1
-
-                If seqStep Is seq.Members.First AndAlso seq.Incoming.Count > 0 Then
-                    .ShowLeftArrow()
-                End If
-
-                pnlSeqStructures.Children.Add(stepStruct)
-
-                'additionally add product structure for final step
-
-                If seqStep Is seq.Members.Last Then
-                    Dim stepStructProd As New SequenceStructure
-                    With stepStructProd
-                        Dim prodCanv = skInfo.Products.First.StructureCanvas
-                        .StructureCanvas = prodCanv
-                        .IsSelected = False
-                        .HideRightArrow()
-                        pnlSeqStructures.Children.Add(stepStructProd)
-                        If seq.Outgoing.Count > 0 Then
-                            .ShowDottedRightArrow()
-                        End If
-                    End With
-                End If
-
-            End With
-
-        Next
 
     End Sub
 
@@ -459,7 +468,7 @@ Partial Public Class dlgConnectGraph
         Try
             GraphView.BuildAndRender(_srcObjects, seed)
             GraphView.SelectSequence(GraphView.SeedSequence)
-            OnSequenceCardClicked(GraphView.SeedSequence)  'render reaction schemes
+            OnSequenceCardClicked(GraphView.SeedSequence)
             AdjustSplitterToGraphHeight()
             ApplyFitAllZoomAfterLayout()
         Catch ex As Exception

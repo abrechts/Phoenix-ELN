@@ -6,20 +6,10 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
         mc:Ignorable="d" 
         Title="Connection Graph Visualizer"
-        Width="1000" Height="700"
-        MinWidth="800" MinHeight="460"
-        Background="#0F0F22"
+        Width="1000" Height="700" MinWidth="800" MinHeight="460" Background="#0F0F22"
         WindowStartupLocation="CenterScreen"
-        Loaded="Window_Loaded" ShowInTaskbar="False"
-        KeyDown="Window_KeyDown">
+        Loaded="Window_Loaded" ShowInTaskbar="False"  KeyDown="Window_KeyDown">
 
-    <Window.Resources>
-        <!-- ── Scrollbar track ── -->
-        <Style TargetType="ScrollBar">
-            <Setter Property="Background" Value="#0D0D22"/>
-        </Style>
-    </Window.Resources>
-  
     <Grid>
         
         <Grid.ColumnDefinitions>
@@ -72,7 +62,7 @@
         </Border>
 
         <!-- GRAPH AREA - spans the full window width -->
-        <Grid Grid.Row="0" Grid.ColumnSpan="2">
+        <Grid Grid.Row="0" Grid.ColumnSpan="2" Margin="0,6,0,0">
 
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -80,11 +70,11 @@
             </Grid.RowDefinitions>
 
             <StackPanel Grid.Row="0" VerticalAlignment="Center">
-                
+
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                     <TextBlock Text="SYNTHETIC CONNECTIONS" FontSize="15" FontWeight="Bold" FontFamily="Segoe UI" 
                         Foreground="#FFF9D192"  HorizontalAlignment="Center" Margin="8,6,0,0" />
-                    <TextBlock x:Name="icoInfo" Text="🛈" Cursor="Hand" Foreground="lightblue" Margin="6,4,0,0" VerticalAlignment="Center" FontSize="15"/>
+                    <TextBlock x:Name="icoInfo" Text="🛈" Cursor="Hand" Foreground="lightblue" Margin="6,6,0,0" VerticalAlignment="Center" FontSize="15"/>
                 </StackPanel>
 
                 <TextBlock x:Name="blkSubtitle" Grid.Row="0" Foreground="LightBlue" HorizontalAlignment="center" FontSize="11" Margin="0,0,0,2" Padding="4,0">     
@@ -101,7 +91,14 @@
                 <ComboBoxItem x:Name="cboItemServer" Content="Server Database"/>
             </ComboBox>
 
-            <local:SequenceGraph x:Name="GraphView" Grid.Row="1" Margin="4,6,4,4"/>
+            <local:SequenceGraph x:Name="GraphView" Grid.Row="1" Margin="4,6,4,4" Opacity="0.9"/>
+
+            <!-- Structure graph button -->
+            <Button x:Name="btnShowAllSchemes" Grid.Row="0" HorizontalAlignment="Left" VerticalAlignment="Center"
+               Margin="12,0,0,0" Padding="4,2,6,2" BorderThickness="1"  BorderBrush="#FF036582"  Cursor="Hand" Style="{StaticResource DarkModeButtonStyle}"
+               ToolTip="Displays all structures of the &#x0a;complete connection graph &#x0a;(full screen).">
+                <TextBlock Text="> Structure Graph " FontSize="12" Foreground="#FFE3E1E1" Margin="0,0,0,2"/>
+            </Button>
 
         </Grid>
 
@@ -114,22 +111,25 @@
                          IsHitTestVisible="False" HorizontalAlignment="Center" VerticalAlignment="Center"/>
 
         <!-- Reaction scheme area -->
-        <DockPanel Grid.Row="2" Grid.Column="0" Margin="4,2,4,4">
+        <DockPanel Grid.Row="2" Grid.Column="0" Margin="4,8,4,4">
 
-            <Border HorizontalAlignment="Left" VerticalAlignment="top" Margin="6,2,0,0" BorderBrush="#FF707070" 
-               BorderThickness="1" CornerRadius="5" Padding="6,2,8,2">
-                <StackPanel Orientation="Horizontal">
-                    <Border x:Name="bdrLegendSwatch" Width="10" Height="10" CornerRadius="2" Margin="0,0,6,0" VerticalAlignment="Center" d:Background="#5284E4"/>
-                    <TextBlock x:Name="blkLegendType" FontSize="11" FontFamily="Segoe UI" Foreground="LightGray" VerticalAlignment="Center" d:Text="Linear"/>
-                </StackPanel>
-            </Border>
+            <Grid DockPanel.Dock="Top" Margin="0,6,0,24">
 
-            <Grid DockPanel.Dock="Top" Margin="0,6,0,14">
-                <Border x:Name="bdrSchemeTitle" CornerRadius="6" BorderThickness="1" Opacity="0.8" Padding="8,1,8,4" MinWidth="120" 
+                <!-- Color legend -->
+                <Border HorizontalAlignment="Left" Margin="6,0,0,0" BorderBrush="Gray" BorderThickness="1,0" CornerRadius="5" Opacity="0.95">
+                    <StackPanel Orientation="Horizontal">
+                        <Border x:Name="bdrLegendSwatch" Width="10" Height="10" CornerRadius="2" Margin="6,0,4,0" VerticalAlignment="Center" d:Background="#5284E4"/>
+                        <TextBlock x:Name="blkLegendType" FontSize="11" FontFamily="Segoe UI" Foreground="LightGray" VerticalAlignment="Center" 
+                          d:Text="Linear" Margin="0,0,6,1"/>
+                    </StackPanel>
+                </Border>
+
+                <Border x:Name="bdrSchemeTitle" CornerRadius="6" BorderThickness="1" Opacity="0.8" Padding="8,1,8,4" MinWidth="120"
                    HorizontalAlignment="Center" VerticalAlignment="Center" d:Background="#5284E4" >
                     <TextBlock x:Name="blkSchemeTitle" FontSize="11" FontWeight="Bold" FontFamily="Segoe UI"
                       Foreground="White" HorizontalAlignment="Center" TextAlignment="Center" d:Text="Sequence 1"/>
                 </Border>
+                
             </Grid>
 
             <ScrollViewer VerticalScrollBarVisibility="Visible" Style="{StaticResource DarkScrollViewerStyle}">

@@ -24,8 +24,8 @@
 
         <Border Background="LightCyan" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,20" CornerRadius="10"
            Padding="3">
-            <Button Content="Close (Esc)" Width="90"  Background="Transparent" IsCancel="True" BorderThickness="0"
-              FontSize="16"/>
+            <Button x:Name="btnClose" Content="Close (Esc)" Width="90" Background="Transparent" IsCancel="True" BorderThickness="0"
+              FontSize="14"/>
         </Border>
 
     </Grid>

@@ -37,7 +37,7 @@
             <Grid>
 
                 <ToolBar x:Name="mainToolbar" Focusable="true" Style="{StaticResource ToolBarWithoutOverflowBarStyle}"
-                   FontFamily="Verdana" FontSize="12" Margin="-4,0,1,0" Padding="0,1,0,0" Background="#FF4F4F4F">
+                   FontFamily="Verdana" FontSize="12" Margin="-4,0,1,0" Padding="0,1,0,1" Background="#FF4F4F4F">
 
                     <!--disabled button styles-->
                     <ToolBar.Resources>
@@ -147,7 +147,7 @@
                             <Style TargetType="{x:Type MenuItem}" BasedOn="{StaticResource DarkModeMenuStyle}"/>
                         </Menu.Resources>
 
-                        <MenuItem Header="Tools" Margin="1,0,1,0">
+                        <MenuItem Header="Tools" Margin="1,1,1,0">
 
                             <MenuItem.Icon>
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="center">
@@ -218,7 +218,7 @@
                             <Style TargetType="{x:Type MenuItem}" BasedOn="{StaticResource DarkModeMenuStyle}"/>
                         </Menu.Resources>
 
-                        <MenuItem Header="Help" VerticalAlignment="Center" Padding="2,0,4,0" Margin="1,0,1,0">
+                        <MenuItem Header="Help" VerticalAlignment="Center" Padding="2,0,4,0" Margin="1,1,1,0">
                             
                             <MenuItem.Icon>
                                 <StackPanel Orientation="Horizontal" >
