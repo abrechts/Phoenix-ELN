@@ -21,8 +21,8 @@
 
     <Grid>
 
-        <ListBox x:Name="lstStepExperiments"
-            SelectionMode="Single" Background="transparent" BorderThickness="0" FocusVisualStyle="{x:Null}"              
+        <ListBox x:Name="lstStepExperiments" local:DarkModeHelper.IsDarkMode="True"
+            SelectionMode="Single" Background="transparent" BorderThickness="0" FocusVisualStyle="{x:Null}"
             Grid.IsSharedSizeScope="true" AllowDrop="false"
             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
             VirtualizingStackPanel.IsVirtualizing="False" d:MinHeight="25"

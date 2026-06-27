@@ -1,18 +1,63 @@
-﻿<UserControl x:Class="TreeViewEditLabel"
+<UserControl x:Class="TreeViewEditLabel"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:CustomControls"
-             mc:Ignorable="d" 
-             d:DesignHeight="18" d:DesignWidth="100" x:Name="editLabel">
+             mc:Ignorable="d"
+             d:DesignWidth="100" x:Name="editLabel">
 
     <Grid>
-        <TextBox x:Name="txtTitle" d:Text="Title" BorderThickness="0" Background="{StaticResource ActiveEditBackground}" 
-           Padding="0,0,4,0" 
-            Text="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=local:TreeViewEditLabel}, Path=EditText,Mode=TwoWay}"/>
-        <TextBlock x:Name="blkTitle" d:Text="Title" Padding="2,0,6,0" Background="white"
-            Text="{Binding ElementName=txtTitle,Path=Text}"/>
+        
+        <TextBox x:Name="txtTitle" d:Text="Title" Padding="2,-1,6,0" IsReadOnly="True"
+            Text="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=local:TreeViewEditLabel}, Path=EditText, Mode=TwoWay}"
+            Foreground="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=local:TreeViewEditLabel}, Path=TitleForeground}"
+            CaretBrush="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=local:TreeViewEditLabel}, Path=TitleForeground}">
+            
+            <TextBox.Style>
+                <Style TargetType="TextBox">
+                    <Setter Property="BorderThickness" Value="1"/>
+                    <Setter Property="BorderBrush"     Value="Transparent"/>
+                    <Setter Property="Background"      Value="Transparent"/>
+                    <Setter Property="Cursor"          Value="Arrow"/>
+                    <Setter Property="Focusable"       Value="False"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="TextBox">
+                                <Border BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                        Background="{TemplateBinding Background}">
+                                    <ScrollViewer x:Name="PART_ContentHost" Focusable="False"
+                                                  Padding="{TemplateBinding Padding}"/>
+                                </Border>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                    <Style.Triggers>
+                         <!--Edit mode--> 
+                        <Trigger Property="IsReadOnly" Value="False">
+                            <Setter Property="Background" Value="{StaticResource ActiveEditBackground}"/>
+                            <Setter Property="Cursor"     Value="IBeam"/>
+                            <Setter Property="Focusable"  Value="True"/>
+                        </Trigger>
+                         <!--Dark mode--> 
+                        <DataTrigger Binding="{Binding Path=(local:DarkModeHelper.IsDarkMode), RelativeSource={RelativeSource Self}}" Value="True">
+                            <Setter Property="Foreground"  Value="WhiteSmoke"/>
+                            <Setter Property="CaretBrush"  Value="WhiteSmoke"/>
+                        </DataTrigger>
+                         <!--Dark mode + edit mode--> 
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding Path=(local:DarkModeHelper.IsDarkMode), RelativeSource={RelativeSource Self}}" Value="True"/>
+                                <Condition Binding="{Binding IsReadOnly, RelativeSource={RelativeSource Self}}" Value="False"/>
+                            </MultiDataTrigger.Conditions>
+                            <Setter Property="Background" Value="{StaticResource DarkInputBackground}"/>
+                        </MultiDataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBox.Style>
+            
+        </TextBox>
     </Grid>
-    
+
 </UserControl>

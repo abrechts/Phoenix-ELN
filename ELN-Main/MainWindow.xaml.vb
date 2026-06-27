@@ -1,5 +1,6 @@
 ﻿Imports System.Collections.ObjectModel
 Imports System.ComponentModel
+Imports System.Text.RegularExpressions
 Imports System.Windows.Threading
 Imports CustomControls
 Imports ElnBase
@@ -37,7 +38,6 @@ Class MainWindow
         If (Process.GetProcessesByName(Process.GetCurrentProcess().ProcessName).Length > 1) Then
             Me.Hide()
             cbMsgBox.Display("Phoenix ELN is already running! ", MsgBoxStyle.Information, "Phoenix ELN")
-            Me.Close()
             Application.Current.Shutdown()
         End If
 
@@ -64,6 +64,9 @@ Class MainWindow
                 .Save()
                 _IsVersionUpgrade = True
             End If
+
+            'Set dark mode / light mode
+            Me.IsDarkMode = .IsDarkMode
 
             '------------------------
             '_IsVersionUpgrade = True
@@ -176,8 +179,10 @@ Class MainWindow
         AddHandler ExpTabHeader.PinStateChanged, AddressOf expTabHeader_PinStateChanged
         AddHandler StepSummary.RequestOpenExperiment, AddressOf ResultList_RequestOpenExperiment
         AddHandler RssItemGroup.RequestOpenExperiment, AddressOf RssItemGroup_RequestOpenExperiment
+        AddHandler RssItemGroup.RequestStepConnections, AddressOf ExperimentContent_RequestSequencesDialog
         AddHandler StepExpSelector.RequestOpenExperiment, AddressOf StepExpSelector_RequestOpenExperiment
         AddHandler ExperimentContent.ExperimentContextChanged, AddressOf ExperimentContent_ContextChanged
+
 
         'determine current localUser (since multiple users possible)
         Dim currUser = (From user In DBContext.tblUsers Where user.IsCurrent = 1).FirstOrDefault
@@ -291,6 +296,29 @@ Class MainWindow
         End Select
 
     End Sub
+
+
+    ''' <summary>
+    ''' Sets or gets if the main window is to be rendered in dark mode display
+    ''' </summary>
+    ''' 
+    Public Shared ReadOnly IsDarkModeProperty As DependencyProperty = DependencyProperty.Register(NameOf(IsDarkMode), GetType(Boolean), GetType(MainWindow),
+            New PropertyMetadata(False, AddressOf OnIsDarkModeChanged))
+
+    Public Property IsDarkMode As Boolean
+        Get
+            Return DirectCast(GetValue(IsDarkModeProperty), Boolean)
+        End Get
+        Set(value As Boolean)
+            SetValue(IsDarkModeProperty, value)
+        End Set
+    End Property
+
+    Private Shared Sub OnIsDarkModeChanged(d As DependencyObject, e As DependencyPropertyChangedEventArgs)
+        CustomControls.My.MySettings.Default.IsDarkMode = CBool(e.NewValue)
+        CustomControls.My.MySettings.Default.Save()
+    End Sub
+
 
 
     ''' <summary>
@@ -808,6 +836,13 @@ Class MainWindow
             End If
 
         End If
+
+    End Sub
+
+
+    Private Sub chkLightMode_Changed() Handles chkLightMode.PreviewMouseDown
+
+        CustomControls.My.MySettings.Default.IsDarkMode = chkLightMode.IsChecked
 
     End Sub
 
@@ -1618,20 +1653,20 @@ Class MainWindow
 
     Private Sub btnAnalyze_Click() Handles btnAnalyze.Click
 
-        ExperimentContent_RequestSequencesDialog(Nothing, CType(SelectedExpContent.DataContext, tblExperiments))
+        Dim refExp = CType(SelectedExpContent.DataContext, tblExperiments)
+        Dim isServerExp As Boolean = (refExp.DisplayIndex = -2) 'unique tab indicator for server experiment 
+
+        ExperimentContent_RequestSequencesDialog(Nothing, refExp, isServerExp)
 
     End Sub
 
 
-
-    Private Sub ExperimentContent_RequestSequencesDialog(sender As Object, refExp As tblExperiments)
+    Private Sub ExperimentContent_RequestSequencesDialog(sender As Object, refExp As tblExperiments, isServerExp As Boolean)
 
         If refExp.RxnSketch Is Nothing Then
             cbMsgBox.Display("Missing reaction sketch: Can't create a connection graph!", MsgBoxStyle.OkOnly, "Synthetic Connections")
             Exit Sub
         End If
-
-        Dim isServerExp As Boolean = (refExp.DisplayIndex = -2) 'unique tab indicator for server experiment 
 
         If isServerExp AndAlso ServerDBContext Is Nothing Then
             cbMsgBox.Display("The current experiment originates from the server, but the server currently is unavailable!", MsgBoxStyle.OkOnly)

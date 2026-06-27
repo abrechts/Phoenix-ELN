@@ -1,0 +1,214 @@
+<UserControl x:Class="ThemedComboBox"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:CustomControls"
+             mc:Ignorable="d"
+             x:Name="Root"
+             d:DesignHeight="28" d:DesignWidth="200"
+             Focusable="False">
+
+    <!-- Strip the UserControl's own default Border so only the inner ComboBox
+         template renders visual chrome (background, border, corner radius). -->
+    
+    <UserControl.Template>
+        <ControlTemplate TargetType="UserControl">
+            <ContentPresenter/>
+        </ControlTemplate>
+    </UserControl.Template>
+
+    <UserControl.Resources>
+
+        <local:DisplayMemberPathConverter x:Key="DisplayMemberPathConverter"/>
+
+        <!-- Renders an ImageSource (DrawingImage, BitmapImage …) inside a ContentPresenter.
+             UIElement resources (Path, Canvas, Viewbox …) are displayed directly. -->
+        <DataTemplate DataType="{x:Type ImageSource}">
+            <Image Source="{Binding}" Stretch="Uniform"/>
+        </DataTemplate>
+
+        <!-- Item ControlTemplate: only TemplateBinding (no cross-namescope references).
+             Retrieved by key in code-behind for the programmatically built ItemContainerStyle. -->
+        <ControlTemplate x:Key="ThemedItemTemplate" TargetType="ComboBoxItem">
+            <Border Background="{TemplateBinding Background}"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}"
+                    Padding="{TemplateBinding Padding}"
+                    CornerRadius="3"
+                    Margin="2,1">
+                <ContentPresenter VerticalAlignment="Center"/>
+            </Border>
+        </ControlTemplate>
+    </UserControl.Resources>
+
+    <!--
+        All bindings inside the ComboBox ControlTemplate use
+        {Binding Tag.X, RelativeSource={RelativeSource AncestorType=ComboBox}}
+        where Tag is set to the ThemedComboBox instance in code-behind.
+        This avoids x:Reference Root, which the XAML designer cannot resolve
+        across ControlTemplate namescope boundaries (though it works at runtime).
+        Standard ComboBox properties (Background, Foreground, BorderBrush,
+        BorderThickness) are bound to the UserControl in code-behind and
+        accessed in the template via plain AncestorType=ComboBox binding.
+        The ItemContainerStyle is built entirely in code-behind.
+    -->
+
+    <ComboBox x:Name="InnerCombo">
+
+        <ComboBox.Template>
+            <ControlTemplate TargetType="ComboBox">
+                <Grid x:Name="MainGrid">
+
+                    <!-- Full-area ToggleButton: paints background/border and drives IsDropDownOpen -->
+                    <ToggleButton Focusable="False" ClickMode="Press"
+                                  IsChecked="{Binding IsDropDownOpen, Mode=TwoWay,
+                                              RelativeSource={RelativeSource TemplatedParent}}">
+                        <ToggleButton.Template>
+                            <ControlTemplate TargetType="ToggleButton">
+                                <Border x:Name="TBd"
+                                        Background="{Binding Background, RelativeSource={RelativeSource AncestorType=ComboBox}, TargetNullValue=Transparent}"
+                                        BorderBrush="{Binding BorderBrush, RelativeSource={RelativeSource AncestorType=ComboBox}}"
+                                        BorderThickness="{Binding BorderThickness, RelativeSource={RelativeSource AncestorType=ComboBox}}"
+                                        CornerRadius="{Binding Tag.CornerRadius, RelativeSource={RelativeSource AncestorType=ComboBox}}"/>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="TBd" Property="BorderBrush"
+                                                Value="{Binding Tag.ItemMouseOverBorderBrush, RelativeSource={RelativeSource AncestorType=ComboBox}}"/>
+                                    </Trigger>
+                                    <Trigger Property="IsChecked" Value="True">
+                                        <Setter TargetName="TBd" Property="BorderBrush"
+                                                Value="{Binding Tag.ItemSelectedBorderBrush, RelativeSource={RelativeSource AncestorType=ComboBox}}"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </ToggleButton.Template>
+                    </ToggleButton>
+
+                    <!-- Content overlay: icon | selected text | chevron  (non-interactive) -->
+                    <Grid IsHitTestVisible="False"
+                          Margin="{Binding Padding, RelativeSource={RelativeSource AncestorType=ComboBox}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Mode-aware icon: Viewbox scales any XAML resource (DrawingImage,
+                             Path, Canvas …) uniformly to 16×16. Collapses when no icon is set. -->
+                        
+                        <Viewbox Grid.Column="0"
+                                 Width="16" Height="16"
+                                 Stretch="Uniform"
+                                 VerticalAlignment="Center"
+                                 Margin="2,0,0,2">
+                            <Viewbox.Style>
+                                <Style TargetType="Viewbox">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Tag.ActiveIcon, RelativeSource={RelativeSource AncestorType=ComboBox}}" Value="{x:Null}">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Viewbox.Style>
+                            <ContentPresenter Content="{Binding Tag.ActiveIcon, RelativeSource={RelativeSource AncestorType=ComboBox}}"/>
+                        </Viewbox>
+
+                        <!-- Selected item display -->
+                        <!-- Display text is resolved manually via DisplayMemberPathConverter rather
+                             than SelectionBoxItem/SelectionBoxItemTemplate, which WPF does not
+                             reliably regenerate in a heavily retemplated ComboBox. When
+                             Tag.ItemTemplate is set, the converter passes the raw item through
+                             unchanged and the template renders it as usual. -->
+                        
+                        <ContentPresenter x:Name="SelectionContent"
+                                          Grid.Column="1"
+                                          ContentTemplate="{Binding Tag.ItemTemplate, RelativeSource={RelativeSource AncestorType=ComboBox}}"
+                                          VerticalAlignment="Center"
+                                          TextBlock.Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ComboBox}}">
+                            <ContentPresenter.Content>
+                                <MultiBinding Converter="{StaticResource DisplayMemberPathConverter}">
+                                    <Binding Path="SelectedItem" RelativeSource="{RelativeSource AncestorType=ComboBox}"/>
+                                    <Binding Path="Tag.DisplayMemberPath" RelativeSource="{RelativeSource AncestorType=ComboBox}"/>
+                                </MultiBinding>
+                            </ContentPresenter.Content>
+                            <!-- Extra left margin when no icon occupies Column 0, so text doesn't hug the border -->
+                            <ContentPresenter.Style>
+                                <Style TargetType="ContentPresenter">
+                                    <Setter Property="Margin" Value="2,2,1,4"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Tag.ActiveIcon, RelativeSource={RelativeSource AncestorType=ComboBox}}" Value="{x:Null}">
+                                            <Setter Property="Margin" Value="6,2,1,4"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ContentPresenter.Style>
+                        </ContentPresenter>
+
+                        <!-- Placeholder shown when SelectedIndex = -1; text comes from PlaceholderText DP -->
+                        <TextBlock x:Name="PlaceholderText"
+                                   Grid.Column="1"
+                                   Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ComboBox}}"
+                                   Opacity="0.5"
+                                   VerticalAlignment="Center"
+                                   Visibility="Collapsed">
+                            <TextBlock.Text>
+                                <Binding Path="Tag.PlaceholderText" RelativeSource="{RelativeSource AncestorType=ComboBox}"/>
+                            </TextBlock.Text>
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Margin" Value="1,0"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Tag.ActiveIcon, RelativeSource={RelativeSource AncestorType=ComboBox}}" Value="{x:Null}">
+                                            <Setter Property="Margin" Value="5,0,1,0"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+
+                        <!-- Drop-down chevron -->
+                        <TextBlock Grid.Column="2"
+                                   Text="▾"
+                                   Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ComboBox}}"
+                                   FontSize="13"
+                                   VerticalAlignment="Center"
+                                   Margin="2,1,2,0"/>
+                    </Grid>
+
+                    <!-- Dropdown popup -->
+                    <Popup x:Name="PART_Popup"
+                           IsOpen="{TemplateBinding IsDropDownOpen}"
+                           AllowsTransparency="True"
+                           Placement="Bottom"
+                           StaysOpen="False">
+                        <Border Background="{Binding Background,   RelativeSource={RelativeSource AncestorType=ComboBox}}"
+                                BorderBrush="{Binding BorderBrush, RelativeSource={RelativeSource AncestorType=ComboBox}}"
+                                BorderThickness="1"
+                                CornerRadius="0,0,5,5"
+                                Margin="0,0,8,8"
+                                MinWidth="{Binding ActualWidth, ElementName=MainGrid}">
+                            <Border.Effect>
+                                <DropShadowEffect ShadowDepth="4" BlurRadius="9" Opacity="0.38"/>
+                            </Border.Effect>
+                            <ScrollViewer MaxHeight="240" VerticalScrollBarVisibility="Auto">
+                                <ItemsPresenter/>
+                            </ScrollViewer>
+                        </Border>
+                    </Popup>
+
+                </Grid>
+
+                <ControlTemplate.Triggers>
+                    <Trigger Property="SelectedIndex" Value="-1">
+                        <Setter TargetName="PlaceholderText"  Property="Visibility" Value="Visible"/>
+                        <Setter TargetName="SelectionContent" Property="Visibility" Value="Collapsed"/>
+                    </Trigger>
+                </ControlTemplate.Triggers>
+
+            </ControlTemplate>
+        </ComboBox.Template>
+
+    </ComboBox>
+
+</UserControl>

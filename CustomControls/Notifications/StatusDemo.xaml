@@ -6,12 +6,13 @@
              xmlns:local="clr-namespace:CustomControls"
              xmlns:base="clr-namespace:ElnCoreModel;assembly=ElnCoreModel"
             d:DataContext="{d:DesignInstance Type=base:tblUsers}"
-             mc:Ignorable="d" 
-            d:DesignWidth="250">
+             mc:Ignorable="d"
+            d:DesignWidth="250" x:Name="statusDemoRoot">
 
     <UserControl.Resources>
         <local:RemainingDemoCountConverter x:Key="demoCountConv"/>
         <local:RemainingDemoBrushConverter x:Key="warningBrushConv"/>
+        <local:DarkModeColorConverter x:Key="dmColor"/>
         <Style TargetType="TextBlock">
             <Setter Property="LineHeight" Value="14"/>
             <Setter Property="LineStackingStrategy" Value="BlockLineHeight"/>
@@ -22,8 +23,7 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ToolTip">
-                        <Border Background="#FF686868" CornerRadius="6" BorderThickness="1" BorderBrush="#FF9A9A9A" 
-                   TextBlock.FontStyle="Normal" TextBlock.Foreground="white">
+                        <Border Background="#FF686868" CornerRadius="6" BorderThickness="1" BorderBrush="#FF9A9A9A" TextBlock.Foreground="white">
                             <ContentPresenter Margin="8,6" HorizontalAlignment="Center" VerticalAlignment="Top"/>
                         </Border>
                     </ControlTemplate>
@@ -37,8 +37,20 @@
 
         <StackPanel Orientation="Horizontal">
 
-            <TextBlock Text="●" Margin="1,0,3,0" FontSize="14" Foreground="#FF5C5C5C"/>
-            <TextBlock Text="You are in the 'demo' sandbox." FontWeight="bold" FontStyle="italic" Foreground="#FF494949"
+            <StackPanel.Style>
+                <Style TargetType="StackPanel">
+                    <Setter Property="TextBlock.Foreground" Value="#FF5C5C5C"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Path=(local:DarkModeHelper.IsDarkMode), RelativeSource={RelativeSource Self}}" Value="True">
+                            <Setter Property="TextBlock.Foreground" Value="whitesmoke"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </StackPanel.Style>
+
+            <TextBlock Text="●" Margin="1,0,3,0" FontSize="14"/>
+
+            <TextBlock Text="You are in the 'demo' sandbox." FontWeight="bold" FontStyle="italic"
                 TextWrapping="wrap" FontSize="12"/>
             <ContentControl Content="{StaticResource icoInfo}" Height="14" Margin="4,0,0,0" ToolTipService.InitialShowDelay="250"
                 ToolTip="Familiarize with the application as 'demo'&#x0a;user, then create a unique user for your&#x0a;real experiments"/>
@@ -48,10 +60,20 @@
         <StackPanel Orientation="Horizontal" Margin="0,4,0,0" Background="{Binding tblExperiments.Count, Converter={StaticResource warningBrushConv}}"
           HorizontalAlignment="Left">
 
-            <TextBlock Text="●" Margin="1,0,3,0" FontSize="14" Foreground="#FF5C5C5C"/>
-            <TextBlock Text="Demo experiments left:" FontWeight="bold" FontStyle="italic" Foreground="#FF494949"     
-                TextWrapping="wrap"  FontSize="12"/>
-            <TextBlock x:Name="blkRemainingCount" d:Text="20" FontWeight="bold" FontStyle="italic" Foreground="#FF2B2BFD"
+            <StackPanel.Style>
+                <Style TargetType="StackPanel">
+                    <Setter Property="TextBlock.Foreground" Value="#FF5C5C5C"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Path=(local:DarkModeHelper.IsDarkMode), RelativeSource={RelativeSource Self}}" Value="True">
+                            <Setter Property="TextBlock.Foreground" Value="whitesmoke"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </StackPanel.Style>
+
+            <TextBlock Text="●" Margin="1,0,3,0" FontSize="14"/>
+            <TextBlock Text="Demo experiments left:" FontWeight="bold" FontStyle="italic" TextWrapping="wrap" FontSize="12"/>
+            <TextBlock x:Name="blkRemainingCount" d:Text="20" FontWeight="bold" FontStyle="italic"
                 Text="{Binding tblExperiments.Count, Converter={StaticResource demoCountConv}}" Margin="3,0,6,0" FontSize="12"/>
             <ContentControl Content="{StaticResource icoInfo}" Height="14" ToolTipService.InitialShowDelay="250"
                 ToolTip="The number of sandbox experiments is limited, since &#x0a;they will be lost after creating your own username."/>
@@ -62,33 +84,51 @@
 
         <TextBlock Margin="12,0,0,0" HorizontalAlignment="Left" FontStyle="Italic" Text="Create your own userID now:"/>
 
-        <Button x:Name="btnCreateUser" Content="Create User" BorderThickness="1" Padding="8,1,8,3"
-            BorderBrush="green" Background="#FFDCFFDC" HorizontalAlignment="Left" Margin="12,4,0,6" 
+        <Button x:Name="btnCreateUser" Content="Create User" BorderThickness="1" Padding="8,1,8,3" 
+            HorizontalAlignment="Left" Margin="12,4,0,6" Background="#FFC5FFC5"
             VerticalContentAlignment="Center" FocusVisualStyle="{x:Null}"
-            ToolTip="Leave the demo sandbox and start &#x0a;creating your own experiments."/>
+            ToolTip="Leave the demo sandbox and start &#x0a;creating your own experiments.">
+            <!--<Button.Style>
+                <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                    <Setter Property="BorderBrush" Value="Green"/>
+                    <Setter Property="Background" Value="#FFDCFFDC"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Path=(local:DarkModeHelper.IsDarkMode), RelativeSource={RelativeSource Self}}" Value="True">
+                            <Setter Property="BorderBrush" Value="#FF4CAF50"/>
+                            <Setter Property="Background" Value="#FF1A3320"/>
+                            <Setter Property="Foreground" Value="#FF90D490"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Button.Style>-->
+        </Button>
 
         <Separator Margin="12,4,12,8"/>
 
-        <TextBlock Margin="12,0,12,0" TextWrapping="wrap" HorizontalAlignment="left"  IsHyphenationEnabled="true">
-            <Run Text="Existing Users" FontStyle="Italic" FontWeight="DemiBold" FontSize="12" Foreground="#FF222222" />
-            <Run Text=": Transfer your ELN data from a previous installation -" FontStyle="Normal" />
-            <Run x:Name="lnkTransferInfo" Text="more info." Foreground="Blue" TextDecorations="Underline" Cursor="Hand"/>
+        <TextBlock Margin="12,0,12,0" TextWrapping="wrap" HorizontalAlignment="left" IsHyphenationEnabled="true"
+            Foreground="{Binding Path=(local:DarkModeHelper.IsDarkMode), RelativeSource={RelativeSource Self}, Converter={StaticResource dmColor}, ConverterParameter='#FF222222|WhiteSmoke'}">
+            <Run Text="Existing Users" FontStyle="Italic" FontWeight="DemiBold" FontSize="12"/>
+            <Run Text=": Transfer your ELN data from a previous installation -" FontStyle="Normal"/>
+            <Run x:Name="lnkTransferInfo" Text="more info." TextDecorations="Underline" Cursor="Hand"
+                 Foreground="{Binding Path=(local:DarkModeHelper.IsDarkMode), ElementName=statusDemoRoot, Converter={StaticResource dmColor}, ConverterParameter='Blue|#FF7EB4FF'}"/>
         </TextBlock>
         
 
         <StackPanel Orientation="Horizontal" Margin="12,4,22,0" HorizontalAlignment="Left">
             
-            <ContentControl Content="{StaticResource icoOpenFolder}" Height="20" Margin="0,0,5,0"/>
+            <ContentControl Content="{StaticResource icoOpenFolder_Dark}" Height="18" Margin="0,0,5,0"/>
 
-            <TextBlock x:Name="lnkImportPackage" Text="Import transfer package" HorizontalAlignment="Center" Foreground="blue" 
+            <TextBlock x:Name="lnkImportPackage" Text="Import transfer package" HorizontalAlignment="Center"
+                Foreground="{Binding Path=(local:DarkModeHelper.IsDarkMode), RelativeSource={RelativeSource Self}, Converter={StaticResource dmColor}, ConverterParameter='Blue|#FF7EB4FF'}"
                 Cursor="Hand" TextDecorations="Underline" VerticalAlignment="Center" FontSize="12.5"
                 ToolTip="Imports experiments and settings of an original &#x0a;ELN installation (preferred method)."/>
             
         </StackPanel>
 
         <StackPanel Orientation="Horizontal" Margin="12,0,22,6" HorizontalAlignment="Left">
-            <ContentControl Content="{StaticResource icoFromServer}" Height="20" Margin="0,0,5,0"/>
-            <TextBlock x:Name="lnkRestore" Text="Restore from server" HorizontalAlignment="Center" Foreground="blue" 
+            <ContentControl Content="{StaticResource icoFromServer_Dark}" Height="18" Margin="0,0,5,0"/>
+            <TextBlock x:Name="lnkRestore" Text="Restore from server" HorizontalAlignment="Center"
+                Foreground="{Binding Path=(local:DarkModeHelper.IsDarkMode), RelativeSource={RelativeSource Self}, Converter={StaticResource dmColor}, ConverterParameter='Blue|#FF7EB4FF'}"
                 Cursor="Hand" TextDecorations="Underline" VerticalAlignment="Center" FontSize="12.5"
                 ToolTip="Replaces the demo database experiments with your own experiments.&#x0a;This is the method of choice if your original data were lost."/>
         </StackPanel>

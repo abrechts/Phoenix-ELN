@@ -173,7 +173,7 @@
                             <ComboBox.ItemsSource>
                                 <CompositeCollection>
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                        <ContentControl Content="{StaticResource icoUser2_dark}" Width="16"/>
+                                        <ContentControl Content="{StaticResource icoUser2_Dark}" Width="16"/>
                                         <TextBlock Text="All Users" Margin="5.5,0,0,0" VerticalAlignment="Center" Foreground="white"/>
                                     </StackPanel>
                                     <Separator Background="LightGray" Height="0.8" Margin="0,-3"/>
@@ -184,7 +184,7 @@
                             <ComboBox.Resources>
                                 <DataTemplate DataType="{x:Type sys:String}">
                                     <StackPanel Orientation="Horizontal" Margin="0,-2,0,0" >
-                                        <ContentControl Content="{StaticResource icoUser2_dark}" Width="16"/>
+                                        <ContentControl Content="{StaticResource icoUser2_Dark}" Width="16"/>
                                         <TextBlock Text="{Binding}" Margin="4,0,0,0" VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </DataTemplate>

@@ -1,6 +1,6 @@
-﻿2026-05-06 13:41:01|                  |       90037|-R-S|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\Deployment\Phoenix ELN\Phoenix-ELN\Phoenix ELN-4.1.0-Setup.dat
+﻿2026-07-02 13:40:48|                  |       90037|-R-S|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\Deployment\Phoenix ELN\Phoenix-ELN\Phoenix ELN-4.1.0-Setup.dat
 2015-09-08 14:36:32|                  |       23558|-R-S|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\Deployment\blankcd.ico
-2026-05-06 13:41:13|                  |        2060|-R-S|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\Deployment\Phoenix ELN\Phoenix-ELN\Readme.txt
+2026-07-02 13:40:49|                  |        2060|-R-S|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\Deployment\Phoenix ELN\Phoenix-ELN\Readme.txt
 2026-05-06 13:29:44|                  |     2334720|----|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\ELN-Main\bin\Release\Publish\ElnData_Seed.db
 2024-11-11 19:26:40|     10.0.17763.55|    23637048|----|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\ELN-Main\bin\Release\Publish\Microsoft.Windows.SDK.NET.dll
 2026-04-03 04:16:36|       12.4.0.1420|    22274024|----|F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\ELN-Main\bin\Release\Publish\Spire.Pdf.dll

@@ -121,7 +121,7 @@
                         <Button Grid.Row="2" x:Name="btnFinalize" HorizontalAlignment="Right" Style="{StaticResource SimpleButton}" 
                                Margin="0,0,-2,0">
                             <StackPanel Orientation="Horizontal">
-                                <ContentControl Content="{StaticResource icoOkBullet}" Height="16" Margin="0,0,3,0" VerticalAlignment="Center"/>
+                                <ContentControl Content="{StaticResource icoOkBullet}" Height="16" Margin="0,0,3,0" VerticalAlignment="Center" Opacity="0.7"/>
                                 <TextBlock Text="Finalize" FontStyle="Normal" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
@@ -133,22 +133,10 @@
 
         <Border Grid.Row="1" Background="white" BorderBrush="#FFADADAD" BorderThickness="1,1,1,0" Margin="12,0,12,0">
             <Grid>
-                
                 <local:SketchArea x:Name="pnlSketch" ReactionSketch="{Binding RxnSketch}" Margin="12,8,12,6"/>
-
-                <ContentControl x:Name="icoFinalized" Content="{StaticResource icoOkBullet}" Height="22" Margin="0,0,6,0" 
-                    Opacity="0.8" VerticalAlignment="Top" HorizontalAlignment="Right" Visibility="{Binding WorkflowState,
+                <ContentControl x:Name="icoFinalized" Content="{StaticResource icoOkBullet}" Height="18" Margin="0,2,3,0" 
+                    Opacity="0.65" VerticalAlignment="Top" HorizontalAlignment="Right" Visibility="{Binding WorkflowState,
                     Converter={StaticResource expStateVisConv}}"/>
-
-                <!--<Button x:Name="btnSequences" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,2,3" Background="#FFEAF2FF" BorderBrush="#FF82B7FF"
-                   ToolTip="Display all synthetic steps leading &#x0a;to this step and away from it." Visibility="collapsed" d:Visibility="visible" >
-                    <StackPanel Orientation="Horizontal" Margin="1,-2">
-                        <TextBlock Text="🠪" FontSize="14" Foreground="#FF6E6E6E"/>
-                        <TextBlock Text="⟐" FontSize="14" Foreground="#FF2684FF" Margin="0,0,0,0" VerticalAlignment="Center"/>
-                        <TextBlock Text="🠪" FontSize="14" Foreground="#FF6E6E6E"/>
-                    </StackPanel>
-                </Button>-->
-
             </Grid>
         </Border>
 

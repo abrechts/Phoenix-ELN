@@ -7,6 +7,8 @@ Public Class RssItemGroup
 
     Public Shared Event RequestOpenExperiment(sender As Object, expEntry As tblExperiments, isFromServer As Boolean, args As StepExpOpenArgs)
 
+    Public Shared Event RequestStepConnections(sender As Object, expEntry As tblExperiments, isFromServer As Boolean)
+
     Public Shared Property IsServerResult As Boolean = False
 
 
@@ -31,7 +33,15 @@ Public Class RssItemGroup
 
     Private Sub lstRssHits_LostFocus() Handles lstRssHits.LostFocus
 
-        lstRssHits.UnselectAll
+        lstRssHits.UnselectAll()
+
+    End Sub
+
+
+    Private Sub lnkConnections_MouseUp() Handles lnkConnections.MouseUp
+
+        Dim firstExp = lstRssHits.Items(0)
+        RaiseEvent RequestStepConnections(Me, firstExp, IsServerResult)
 
     End Sub
 

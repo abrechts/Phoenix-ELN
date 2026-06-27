@@ -10,39 +10,81 @@
                 d:DesignWidth="260">
 
     <UserControl.Resources>
-        
+
         <local:DemoVisibilityConverter x:Key="demoVisConv"/>
         <local:UnfinalizedCountConverter x:Key="unfinalizedCountConv"/>
         <local:UnfinalizedWarningVisibilityConverter x:Key="unfinalizedWarningVisConv"/>
         <local:AppVersionConverter x:Key="appVersionConv"/>
+        <local:DarkModeColorConverter x:Key="dmColor"/>
 
         <Style TargetType="TextBlock">
             <Setter Property="LineHeight" Value="14"/>
             <Setter Property="LineStackingStrategy" Value="BlockLineHeight"/>
         </Style>
-        
+
     </UserControl.Resources>
 
-    <Border BorderBrush="gray" BorderThickness="1" CornerRadius="6" Padding="10,6,6,4" Background="white">
+    <Border BorderThickness="1" CornerRadius="6" Padding="10,6,6,4">
+        <Border.Style>
+            <Style TargetType="Border">
+                <Setter Property="Background" Value="White"/>
+                <Setter Property="BorderBrush" Value="Gray"/>
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding Path=(local:DarkModeHelper.IsDarkMode), RelativeSource={RelativeSource Self}}" Value="True">
+                        <Setter Property="Background" Value="{StaticResource DarkPanelBackground2}"/>
+                        <Setter Property="BorderBrush" Value="{StaticResource DarkPanelBorder}"/>
+                        <Setter Property="TextElement.Foreground" Value="WhiteSmoke"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </Border.Style>
         
         <StackPanel Margin="0,2,0,0">
 
             <Grid HorizontalAlignment="left">
                 
                 <TextBlock x:Name="blkWelcome" Text="{Binding FirstName,StringFormat={}Welcome {0}!}" d:Text="Welcome User!" FontWeight="Bold"
-                  FontSize="12.5" Foreground="{StaticResource DialogTitleForeground}" Margin="0,0,0,2" FontStyle="Italic"/>
+                  FontSize="12.5" Margin="0,0,0,2" FontStyle="Italic">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="LineHeight" Value="14"/>
+                            <Setter Property="LineStackingStrategy" Value="BlockLineHeight"/>
+                            <Setter Property="Foreground" Value="{StaticResource DialogTitleForeground}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Path=(local:DarkModeHelper.IsDarkMode), RelativeSource={RelativeSource Self}}" Value="True">
+                                    <Setter Property="Foreground" Value="{StaticResource DarkTitleForeground}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
 
-                <TextBlock Text="Status Info"  Margin="0,0,0,2" FontStyle="Italic" FontWeight="Bold" 
-                  Foreground="#FF0941CC" FontSize="12.5" Background="white"
-                   Visibility="{Binding UserID, Converter={StaticResource demoVisConv}}"/>
+                <TextBlock Text="Status Info" Margin="0,0,0,2" FontStyle="Italic" FontWeight="Bold"
+                  FontSize="12.5" Visibility="{Binding UserID, Converter={StaticResource demoVisConv}}">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="LineHeight" Value="14"/>
+                            <Setter Property="LineStackingStrategy" Value="BlockLineHeight"/>
+                            <Setter Property="Foreground" Value="{StaticResource DialogTitleForeground}"/>
+                            <Setter Property="Background" Value="white"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Path=(local:DarkModeHelper.IsDarkMode), RelativeSource={RelativeSource Self}}" Value="True">
+                                    <Setter Property="Foreground" Value="{StaticResource DarkTitleForeground}"/>
+                                    <Setter Property="Background" Value="{StaticResource DarkPanelBackground2}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
 
             </Grid>
 
-            <ContentControl Content="{StaticResource HorizFadingLineBlue}" Margin="0,0,0,6"/>
+            <!--<ContentControl Content="{StaticResource HorizFadingLineBlue}" Margin="0,0,0,6"/>-->
+            <Separator Margin="0,0,12,6"/>
 
             <local:StatusDemo Margin="-2,0,0,4" Visibility="{Binding UserID,Converter={StaticResource demoVisConv}}"/>
          
-            <StackPanel Margin="0,0,0,2" Background="white">
+            <StackPanel Margin="0,0,0,2" Background="Transparent">
 
                 <Grid HorizontalAlignment="Left">
 
@@ -56,11 +98,11 @@
                         </Border>
                     
                         <ContentControl x:Name="icoNoUpdateAvailable" Content="{StaticResource icoOkCheckmark}" Height="14" VerticalAlignment="center" 
-                            Margin="0,3,0,0" ToolTip="The application is up to date!" d:Visibility="Visible" Visibility="visible"
+                            Margin="2,3,0,0" ToolTip="The application is up to date!" d:Visibility="Visible" Visibility="visible"
                             ToolTipService.InitialShowDelay="250"/>
 
                         <ContentControl x:Name="icoUpdateAvailable" Content="{StaticResource icoWarningCircleRed}" Height="16" 
-                            Visibility="Collapsed" d:Visibility="visible" VerticalAlignment="bottom" Margin="0,0,0,-1"/>
+                            Visibility="Collapsed" d:Visibility="visible" VerticalAlignment="bottom" Margin="2,0,0,-1"/>
 
 
                     </StackPanel>
@@ -72,11 +114,12 @@
                 <StackPanel x:Name="pnlUpdateInfo" Orientation="Horizontal"  Margin="11,2,0,5" Visibility="Collapsed" d:Visibility="visible">
 
                     <TextBlock FontStyle="Italic" Background="#FFFFFF6E" Padding="0,0,2,0">
-                        <Run FontWeight="Bold" Text="Update" Foreground="#FF393939"/>
-                        <Run Text="available:"/>
+                        <Run  Text="Update" Foreground="#FF393939"/>
+                        <Run Text="available:" Foreground="#FF393939"/>
                     </TextBlock>
 
-                    <TextBlock x:Name="lnkVersionInfo" Foreground="blue"  Margin="2,0,0,0" 
+                    <TextBlock x:Name="lnkVersionInfo" Margin="2,0,0,0"
+                      Foreground="{Binding Path=(local:DarkModeHelper.IsDarkMode), RelativeSource={RelativeSource Self}, Converter={StaticResource dmColor}, ConverterParameter='Blue|#FF7EB4FF'}"
                       Cursor="Hand" FontFamily="verdana" HorizontalAlignment="Left" Padding="0,0,2,0" FontStyle="Italic">
                         <Run Text="Version"/>
                         <Run x:Name="blkNewVersion" d:Text="2.12.4" Text=""/>
@@ -90,7 +133,7 @@
 
                         <TextBlock Text="● Unfinalized Exp:" TextWrapping="Wrap" Margin="2,0,2,0" VerticalAlignment="Center" FontStyle="Italic"/>
 
-                        <Border Margin="0,0,2,0" CornerRadius="4" >
+                        <Border Margin="2,0,2,0" CornerRadius="4" >
                             <TextBlock d:Text="11" Text="{Binding tblExperiments, Converter={StaticResource unfinalizedCountConv}}"  
                             VerticalAlignment="Center" FontWeight="demibold" Padding="3,0,2,0" ScrollViewer.CanContentScroll="True" />
                         </Border>

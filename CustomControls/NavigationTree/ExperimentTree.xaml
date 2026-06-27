@@ -21,11 +21,24 @@
 
     </UserControl.Resources>
 
-    <Border CornerRadius="6" BorderBrush="#aaaaaa" BorderThickness="1" Padding="4" Background="white">
+    <Border CornerRadius="6" BorderThickness="1" Padding="4">
+        <Border.Style>
+            <Style TargetType="Border">
+                <Setter Property="Background" Value="White"/>
+                <Setter Property="BorderBrush" Value="#AAAAAA"/>
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding Path=(local:DarkModeHelper.IsDarkMode), RelativeSource={RelativeSource Self}}" Value="True">
+                        <Setter Property="Background" Value="{StaticResource DarkPanelBackground2}"/>
+                        <Setter Property="BorderBrush" Value="{StaticResource DarkPanelBorder}"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </Border.Style>
 
-        <!--This TreeView should NOT be virtualized to allow the selection of experiment nodes currently not in view!-->  
-        <TreeView x:Name="navTree" ItemsSource="{Binding tblProjects, Converter={StaticResource projectsCollectionViewConv}}" 
-            TreeViewItem.Selected="TreeViewItem_Selected" TreeViewItem.Unselected="TreeViewItem_Unselected" Padding="2,2,2,8" BorderThickness="0"        
+        <!--This TreeView should NOT be virtualized to allow the selection of experiment nodes currently not in view!-->
+        <TreeView x:Name="navTree" Background="Transparent"
+            ItemsSource="{Binding tblProjects, Converter={StaticResource projectsCollectionViewConv}}"
+            TreeViewItem.Selected="TreeViewItem_Selected" TreeViewItem.Unselected="TreeViewItem_Unselected" Padding="2,2,2,8" BorderThickness="0"
             dd:DragDrop.IsDragSource="True"
             dd:DragDrop.IsDropTarget="True"
             dd:DragDrop.UseDefaultDragAdorner="false"
@@ -38,14 +51,14 @@
                 <!--Project nodes-->
                 <HierarchicalDataTemplate DataType="{x:Type data:tblProjects}" 
                   ItemsSource="{Binding tblProjFolders,Converter={StaticResource projectFoldersCollectionViewConv}}">
-                    <local:ProjectTreeHeader RequestDeleteProject="projectHeader_RequestDeleteProject" RequestAddFolder="projectHeader_RequestAddFolder"/>
+                    <local:ProjectTreeHeader RequestDeleteProject="projectHeader_RequestDeleteProject" RequestAddFolder="projectHeader_RequestAddFolder" Margin="0,0,0,1"/>
                 </HierarchicalDataTemplate>
 
                 <!--Project Folder nodes -->
                 <HierarchicalDataTemplate DataType="{x:Type data:tblProjFolders}" ItemsSource="{Binding tblExperiments, 
                   Converter={StaticResource expCollectionViewConv}}">
-                    <local:ProjFolderTreeHeader RequestAddExperiment="folderHeader_RequestAddExperiment" 
-                       RequestDeleteFolder="folderHeader_RequestDeleteFolder" RequestArchiveFolder="folderHeader_RequestArchiveFolder" />
+                    <local:ProjFolderTreeHeader RequestAddExperiment="folderHeader_RequestAddExperiment"
+                       RequestDeleteFolder="folderHeader_RequestDeleteFolder" RequestArchiveFolder="folderHeader_RequestArchiveFolder" Margin="0,0,0,1"/>
                 </HierarchicalDataTemplate>
 
                 <!--Experiment nodes-->
@@ -56,14 +69,19 @@
             </TreeView.Resources>
 
             <TreeView.ItemContainerStyle>
-                
+
                 <Style TargetType="{x:Type TreeViewItem}">
                     <!--Specifies the selection/deselection background behavior of the expItem-->
                     <Setter Property="Template" Value="{StaticResource ExperimentTreeViewItem}"/>
                     <Setter Property="IsExpanded" Value="{Binding IsNodeExpanded,Converter={StaticResource intToBooleanConv},
                         Mode=TwoWay}"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Path=(local:DarkModeHelper.IsDarkMode), RelativeSource={RelativeSource Self}}" Value="True">
+                            <Setter Property="Background" Value="Transparent"/>
+                        </DataTrigger>
+                    </Style.Triggers>
                 </Style>
-                
+
             </TreeView.ItemContainerStyle>
 
         </TreeView>

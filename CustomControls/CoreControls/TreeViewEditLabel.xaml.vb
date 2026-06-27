@@ -1,4 +1,4 @@
-﻿Imports System.Windows
+Imports System.Windows
 Imports System.Windows.Controls
 Imports System.Windows.Input
 Imports System.Windows.Media
@@ -38,8 +38,21 @@ Public Class TreeViewEditLabel
     End Property
 
     Private Shared Sub OnTextChanged(d As DependencyObject, e As DependencyPropertyChangedEventArgs)
-        ' Dim editBlock = DirectCast(d, EditableTextBlock)
     End Sub
+
+
+    Public Shared ReadOnly TitleForegroundProperty As DependencyProperty = DependencyProperty.Register(
+      "TitleForeground", GetType(Brush), GetType(TreeViewEditLabel),
+      New FrameworkPropertyMetadata(SystemColors.ControlTextBrush))
+
+    Public Property TitleForeground As Brush
+        Get
+            Return DirectCast(GetValue(TitleForegroundProperty), Brush)
+        End Get
+        Set(value As Brush)
+            SetValue(TitleForegroundProperty, value)
+        End Set
+    End Property
 
 
     Private Sub Me_Loaded() Handles Me.Loaded
@@ -53,18 +66,18 @@ Public Class TreeViewEditLabel
 
 
     ''' <summary>
-    ''' This shared property gets the TreeViewEditLabel currently in edit mode. Useful for 
-    ''' for e.g. for validating the currently focused control in the application close event, 
+    ''' This shared property gets the TreeViewEditLabel currently in edit mode. Useful for
+    ''' for e.g. for validating the currently focused control in the application close event,
     ''' or for preventing mouse clicks on other controls when in edit.
     ''' </summary>
-    ''' 
+    '''
     Public Shared Property CurrentEditItem As TreeViewEditLabel = Nothing
 
 
     ''' <summary>
     ''' Sets or gets if the control currently is in edit mode.
     ''' </summary>
-    ''' 
+    '''
     Public Property IsInEdit As Boolean = False
 
 
@@ -78,24 +91,36 @@ Public Class TreeViewEditLabel
     ''' <summary>
     ''' Sets or gets if the time after a first click still is within the double-click time range.
     ''' </summary>
-    ''' 
+    '''
     Private Property IsInDoubleClickRange As Boolean = True
 
 
     ''' <summary>
-    ''' Sets or gets the timespan in milliseconds which is considered the maximum double click 
+    ''' Sets or gets the timespan in milliseconds which is considered the maximum double click
     ''' time interval. The default is 400 ms.
     ''' </summary>
-    ''' 
-    Public Property DoubleClickDelay As Double = 400   'ms   
+    '''
+    Public Property DoubleClickDelay As Double = 400   'ms
 
 
     ''' <summary>
-    ''' Sets or gets the maximum allowed characters for user input. The default value 
+    ''' Sets or gets the maximum allowed characters for user input. The default value
     ''' of zero means no restriction.
     ''' </summary>
-    ''' 
+    '''
     Public Property MaxCharacters As Integer = 0
+
+
+    Private ReadOnly Property EditBorderBrush As Brush
+
+        Get
+            If DarkModeHelper.GetIsDarkMode(Me) Then
+                Return New SolidColorBrush(ColorConverter.ConvertFromString("#FF8FC4F8"))
+            End If
+            Return New SolidColorBrush(ColorConverter.ConvertFromString("#FF4A90D9"))
+        End Get
+
+    End Property
 
 
     Private Sub ClickDelayTimer_Tick() Handles ClickDelayTimer.Tick
@@ -106,38 +131,42 @@ Public Class TreeViewEditLabel
     End Sub
 
 
-    Private Sub parentTreeViewItem_Selected(sender As Object, e As RoutedEventArgs) Handles ParentTreeViewItem.Selected
+    Private Sub parentTreeViewItem_Unselected(sender As Object, e As RoutedEventArgs) Handles ParentTreeViewItem.Unselected
 
-        If Me.IsMouseOver Then
-            blkTitle.Background = New SolidColorBrush(ColorConverter.ConvertFromString("#FFE2E2E2"))
+        HasFirstMouseClick = False
+        txtTitle.ClearValue(TextBox.BorderBrushProperty)
+
+    End Sub
+
+
+    Private Sub ParentTreeViewItem_PreviewKeyDown(sender As Object, e As KeyEventArgs) Handles ParentTreeViewItem.PreviewKeyDown
+
+        If e.Key = Key.Escape AndAlso HasFirstMouseClick AndAlso Not IsInEdit Then
+            HasFirstMouseClick = False
+            txtTitle.ClearValue(TextBox.BorderBrushProperty)
         End If
 
     End Sub
 
-    Private Sub parentTreeViewItem_Unselected(sender As Object, e As RoutedEventArgs) Handles ParentTreeViewItem.Unselected
 
-        HasFirstMouseClick = False
-        blkTitle.Background = Brushes.White
+    Private Sub txtTitle_PreviewMouseLeftButtonUp() Handles txtTitle.PreviewMouseLeftButtonUp
 
-    End Sub
-
-
-    Private Sub blkTitle_MouseLeftButtonUp() Handles blkTitle.PreviewMouseLeftButtonUp
+        If Not txtTitle.IsReadOnly Then Return  ' TextBox handles its own selection in edit mode
 
         If Not HasFirstMouseClick Then
 
             IsInDoubleClickRange = True
             ClickDelayTimer.Start()
             HasFirstMouseClick = True
-            blkTitle.Background = New SolidColorBrush(ColorConverter.ConvertFromString("#FFE2E2E2"))
+            txtTitle.BorderBrush = EditBorderBrush
 
         Else
 
             If Not IsInDoubleClickRange Then
                 BeginEdit()
             Else
-                blkTitle.Background = Brushes.White
                 HasFirstMouseClick = False
+                txtTitle.ClearValue(TextBox.BorderBrushProperty)
             End If
 
         End If
@@ -146,9 +175,9 @@ Public Class TreeViewEditLabel
 
 
     ''' <summary>
-    ''' Commit text data when Return or Enter key is pressed, perform Undo is ESC key is pressed.
+    ''' Commit text data when Return or Enter key is pressed, perform Undo if ESC key is pressed.
     ''' </summary>
-    ''' 
+    '''
     Private Sub txtTitle_PreviewKeyDown(sender As Object, e As KeyEventArgs) Handles txtTitle.PreviewKeyDown
 
         If e.Key = Key.Enter OrElse e.Key = Key.Return Then
@@ -166,7 +195,7 @@ Public Class TreeViewEditLabel
     ''' <summary>
     ''' Restores the original value
     ''' </summary>
-    ''' 
+    '''
     Public Sub Undo()
 
         txtTitle.Undo()
@@ -180,10 +209,10 @@ Public Class TreeViewEditLabel
     ''' <summary>
     ''' Sets the control into edit mode.
     ''' </summary>
-    ''' 
+    '''
     Public Sub BeginEdit()
 
-        blkTitle.Visibility = Visibility.Collapsed
+        txtTitle.IsReadOnly = False
 
         WPFToolbox.WaitForPriority(Threading.DispatcherPriority.ContextIdle)
 
@@ -203,10 +232,10 @@ Public Class TreeViewEditLabel
     ''' <summary>
     ''' Ends the edit mode.
     ''' </summary>
-    ''' 
+    '''
     Public Function EndEdit() As Boolean
 
-        'update source from code to cover situations where txtTitle does not lose focus
+        ' Update source from code to cover situations where txtTitle does not lose focus
         Dim expr = txtTitle.GetBindingExpression(TextBox.TextProperty)
         expr.UpdateSource()
 
@@ -215,11 +244,11 @@ Public Class TreeViewEditLabel
 
         If isValid Then
 
-            'A parent validation logic is expected to handle the validation event according to its rules.
-            'If the event is not handled, the validation is assumed valid.
+            ' A parent validation logic is expected to handle the validation event according to its rules.
+            ' If the event is not handled, the validation is assumed valid.
 
-            blkTitle.Visibility = Visibility.Visible
-            blkTitle.Background = Brushes.White
+            txtTitle.IsReadOnly = True
+            txtTitle.ClearValue(TextBox.BorderBrushProperty)
             HasFirstMouseClick = False
             IsInEdit = False
 

@@ -91,37 +91,6 @@ Public Class ExperimentsCollectionViewConverter
 End Class
 
 
-Public Class StatusIconConverter
-
-    Implements IValueConverter
-
-    Public Function Convert(value As Object, targetType As System.Type, parameter As Object, culture As System.Globalization.CultureInfo) As Object _
-    Implements IValueConverter.Convert
-
-        Dim imgSrc As Viewbox
-
-        Select Case CType(value, WorkflowStatus)
-            Case WorkflowStatus.Finalized
-                imgSrc = Application.Current.FindResource("icoOkBulletBlue")'
-            Case WorkflowStatus.InProgress
-                imgSrc = Application.Current.FindResource("icoRedDot")'
-            Case WorkflowStatus.Unlocked
-                imgSrc = Application.Current.FindResource("icoReopened") '
-            Case Else
-                imgSrc = Application.Current.FindResource("icoReopened") '
-        End Select
-
-        Return imgSrc
-
-    End Function
-
-    Public Function ConvertBack(value As Object, targetType As System.Type, parameter As Object, culture As System.Globalization.CultureInfo) As Object _
-    Implements IValueConverter.ConvertBack
-        Return Nothing
-    End Function
-
-End Class
-
 
 Public Class TabStatusIconConverter
 

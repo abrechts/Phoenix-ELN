@@ -17,7 +17,7 @@ Partial Public Class SequenceGraph
     Private Const BOX_W As Double = 130      ' card width
     Private Const BOX_H As Double = 44       ' card height
     Private Const COL_GAP As Double = 70     ' horizontal gap between columns
-    Private Const ROW_GAP As Double = 35     ' vertical gap between cards in same column
+    Private Const ROW_GAP As Double = 30 '35     ' vertical gap between cards in same column
     Private Const PAD As Double = 9          ' canvas padding on every side
 
 
@@ -931,7 +931,7 @@ Partial Public Class SequenceGraph
 
     Private Sub DrawJunctionBundle(b As JunctionBundle)
 
-        Dim stroke = GetBrush(130, 80, 120, 195)
+        Dim stroke = GetBrush(130, 136, 176, 250)
 
         ' Source → junction (no arrowhead)
 
@@ -1023,7 +1023,7 @@ Partial Public Class SequenceGraph
 
         GraphCanvas.Children.Add(New Path With {
             .Data = geometry,
-            .Stroke = GetBrush(130, 80, 120, 195),
+            .Stroke = GetBrush(130, 136, 176, 250),
             .StrokeThickness = 1.8
         })
 
@@ -1053,7 +1053,7 @@ Partial Public Class SequenceGraph
 
         GraphCanvas.Children.Add(New Path With {
             .Data = geom,
-            .Fill = GetBrush(175, 100, 150, 230)
+            .Fill = GetBrush(175, 156, 206, 255)
         })
 
     End Sub
@@ -1068,29 +1068,36 @@ Partial Public Class SequenceGraph
         Dim gradTop, gradBot, rim, hdrClr As Color
 
         If seq.ContainsSeed Then
-            gradTop = GetColor(&H5C, &H4C, &H0)
-            gradBot = GetColor(&H2C, &H24, &H0)
+            gradTop = GetColor(&HA4, &H84, &H10)
+            gradBot = GetColor(&H60, &H4A, &H8)
             rim = GetColor(&HF4, &HD0, &H18)
             hdrClr = GetColor(88, &HF4, &HD0, &H18)
             seq.SequenceType = "Start"
 
         ElseIf seq.IsParallel Then
-            gradTop = GetColor(&HC, &H47, &H55)
-            gradBot = GetColor(&H6, &H26, &H30)
+            gradTop = GetColor(&H11, &H63, &H77)
+            gradBot = GetColor(&H8, &H35, &H43)
             rim = GetColor(&H18, &HA8, &HC8)
             hdrClr = GetColor(88, &H18, &HA8, &HC8)
-            seq.SequenceType = "Parallel"
+            seq.SequenceType = "Alternative"
+
+        ElseIf (seq.Incoming.Count > 1 AndAlso seq.Outgoing.Count > 1) Then
+            gradTop = GetColor(&H5A, &H28, &H9B)
+            gradBot = GetColor(&H3A, &H1C, &H5A)
+            rim = GetColor(&HA0, &H50, &HE0)
+            hdrClr = GetColor(88, &HA0, &H50, &HE0)
+            seq.SequenceType = "Hub"
 
         ElseIf seq.IsTerminal Then
-            gradTop = GetColor(&H6E, &H38, &HE)
-            gradBot = GetColor(&H42, &H20, &H6)
+            gradTop = GetColor(&H9A, &H4E, &H14)
+            gradBot = GetColor(&H5C, &H2D, &H8)
             rim = GetColor(&HDA, &H8E, &H2C)
             hdrClr = GetColor(88, &HDA, &H8E, &H2C)
             seq.SequenceType = "Terminal"
 
         Else
-            gradTop = GetColor(&H20, &H42, &H8C)
-            gradBot = GetColor(&H10, &H16, &H56)
+            gradTop = GetColor(&H2D, &H5C, &HC4)
+            gradBot = GetColor(&H16, &H1F, &H78)
             rim = GetColor(&H52, &H84, &HE4)
             hdrClr = GetColor(88, &H52, &H84, &HE4)
             seq.SequenceType = "Linear"
@@ -1139,7 +1146,7 @@ Partial Public Class SequenceGraph
         headerBorder.Child = New TextBlock With {
             .Text = $"{seedStr}Sequence {seq.Id + 1}",
             .Foreground = New SolidColorBrush(Colors.White),
-            .FontSize = 12,
+            .FontSize = 13,
             .FontWeight = FontWeights.Bold,
             .VerticalAlignment = VerticalAlignment.Center,
             .HorizontalAlignment = HorizontalAlignment.Center
@@ -1155,18 +1162,20 @@ Partial Public Class SequenceGraph
             .VerticalAlignment = VerticalAlignment.Center,
             .Margin = New Thickness(0, -1, 0, 0)
         }
+
         countPanel.Children.Add(New TextBlock With {
             .Text = seq.Members.Count.ToString(),
             .FontFamily = New FontFamily("Consolas"),
             .FontSize = 13,
             .FontWeight = FontWeights.Bold,
+            .Margin = New Thickness(0, 0, 0, -2),
             .Foreground = New SolidColorBrush(Colors.White),
             .VerticalAlignment = VerticalAlignment.Center
         })
         countPanel.Children.Add(New TextBlock With {
             .Text = If(seq.Members.Count = 1, " Step", " Steps"),
-            .FontSize = 10,
-            .Margin = New Thickness(4, 0, 0, 0),
+            .FontSize = 11,
+            .Margin = New Thickness(2, 0, 0, -1.5),
             .Foreground = GetBrush(180, 255, 255, 255),
             .VerticalAlignment = VerticalAlignment.Center
         })

@@ -6,9 +6,9 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
         mc:Ignorable="d" 
         Title="Connection Graph Visualizer"
-        Width="1000" Height="700" MinWidth="800" MinHeight="460" Background="#0F0F22"
+        Width="1000" Height="700" MinWidth="800" MinHeight="460" Background="#FF1F1F1F"
         WindowStartupLocation="CenterScreen"
-        Loaded="Window_Loaded" ShowInTaskbar="False"  KeyDown="Window_KeyDown">
+        Loaded="Window_Loaded" ShowInTaskbar="False"  KeyDown="Window_KeyDown" Opacity="0.95">
 
     <Grid>
         
@@ -28,7 +28,7 @@
 
         <!-- SIDEBAR -->
 
-        <Border Grid.Row="2" Grid.Column="1" Background="#09091A" BorderBrush="#1E1E42" BorderThickness="0,0,1,0">
+        <Border Grid.Row="2" Grid.Column="1" Background="transparent" BorderBrush="#1E1E42" BorderThickness="0,0,1,0">
             
             <DockPanel LastChildFill="True">
 
@@ -116,15 +116,18 @@
             <Grid DockPanel.Dock="Top" Margin="0,6,0,24">
 
                 <!-- Color legend -->
-                <Border HorizontalAlignment="Left" Margin="6,0,0,0" BorderBrush="Gray" BorderThickness="1,0" CornerRadius="5" Opacity="0.95">
+                <Border x:Name="pnlLegend" HorizontalAlignment="Left" Margin="6,0,0,0" BorderThickness="0" Background="#FF393939" 
+                  ToolTipService.InitialShowDelay="500">
                     <StackPanel Orientation="Horizontal">
-                        <Border x:Name="bdrLegendSwatch" Width="10" Height="10" CornerRadius="2" Margin="6,0,4,0" VerticalAlignment="Center" d:Background="#5284E4"/>
-                        <TextBlock x:Name="blkLegendType" FontSize="11" FontFamily="Segoe UI" Foreground="LightGray" VerticalAlignment="Center" 
+                        <Border x:Name="bdrLegendSwatch" Width="10" Height="10" CornerRadius="2" Margin="6,0,4,0" VerticalAlignment="Center" 
+                           d:Background="#5284E4"/>
+                        <TextBlock x:Name="blkLegendType" FontSize="11" FontFamily="Segoe UI" Foreground="LightGray" VerticalAlignment="Center"
                           d:Text="Linear" Margin="0,0,6,1"/>
                     </StackPanel>
                 </Border>
 
-                <Border x:Name="bdrSchemeTitle" CornerRadius="6" BorderThickness="1" Opacity="0.8" Padding="8,1,8,4" MinWidth="120"
+                <!-- Sequence title -->
+                <Border x:Name="bdrSchemeTitle" CornerRadius="6" BorderThickness="1" Opacity="1" Padding="8,1,8,4" MinWidth="120"
                    HorizontalAlignment="Center" VerticalAlignment="Center" d:Background="#5284E4" >
                     <TextBlock x:Name="blkSchemeTitle" FontSize="11" FontWeight="Bold" FontFamily="Segoe UI"
                       Foreground="White" HorizontalAlignment="Center" TextAlignment="Center" d:Text="Sequence 1"/>

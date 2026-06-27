@@ -1,4 +1,4 @@
-﻿<Window x:Class="MainWindow"
+﻿<Window x:Class="MainWindow" x:Name="mainWin"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -6,10 +6,10 @@
         xmlns:custom="clr-namespace:CustomControls;assembly=CustomControls"
         xmlns:data="clr-namespace:ElnCoreModel;assembly=ElnCoreModel" 
         xmlns:componentModel="clr-namespace:System.ComponentModel;assembly=WindowsBase"
+        xmlns:local="clr-namespace:ChemBytes"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=data:tblUsers}"
-        Title="Phoenix ELN" Width="1310" MinWidth="1310" Height="950" MinHeight="850" TextOptions.TextFormattingMode="Display" 
-        WindowStartupLocation="CenterScreen">
+        Title="Phoenix ELN" Width="1310" >
 
     <Window.Resources>
 
@@ -17,6 +17,7 @@
 
             <custom:DemoVisibilityConverter x:Key="demoVisConv"/>
             <custom:DemoToBooleanConverter x:Key="demoToBoolConv"/>
+            <custom:BooleanInvertConverter x:Key="boolInvertConv"/>
 
             <!-- cboUsers sequenceNr sorting -->
             <CollectionViewSource x:Key="cvsSortedUsers" Source="{Binding Database.tblUsers}">
@@ -30,20 +31,44 @@
     </Window.Resources>
 
 
-    <DockPanel Background="#FF979797">
+    <DockPanel>
+        <DockPanel.Style>
+            <Style TargetType="DockPanel">
+                <Setter Property="Background" Value="#FF979797"/>
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsDarkMode, ElementName=mainWin}" Value="True">
+                        <Setter Property="Background" Value="#FF2A2A2A"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </DockPanel.Style>
 
         <Border DockPanel.Dock="top" BorderBrush="gray" Margin="0,0,0,-1" >
 
             <Grid>
 
-                <ToolBar x:Name="mainToolbar" Focusable="true" Style="{StaticResource ToolBarWithoutOverflowBarStyle}"
-                   FontFamily="Verdana" FontSize="12" Margin="-4,0,1,0" Padding="0,1,0,1" Background="#FF4F4F4F">
+                <ToolBar x:Name="mainToolbar" Focusable="true"
+                   FontFamily="Segoe UI" FontSize="13" Margin="-4,0,1,0" Padding="0,1,0,1"
+                   BorderThickness="0,0,0,1" >
+
+                    <ToolBar.Style >
+                        <Style TargetType="ToolBar" BasedOn="{StaticResource ToolBarWithoutOverflowBarStyle}">
+                            <Setter Property="Background" Value="{StaticResource DarkPanelBackground}"/>
+                            <Setter Property="BorderBrush" Value="#FF4F4F4F"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsDarkMode, ElementName=mainWin}" Value="True">
+                                    <Setter Property="Background" Value="{StaticResource MainMenuBgDark}"/>
+                                    <Setter Property="BorderBrush" Value="{StaticResource DarkPanelBorder}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ToolBar.Style>
 
                     <!--disabled button styles-->
                     <ToolBar.Resources>
 
                         <Style TargetType="TextBlock">
-                            <Setter Property="Foreground" Value="White"/>
+                            <Setter Property="Foreground" Value="WhiteSmoke"/>
                             <Style.Triggers>
                                 <Trigger Property="IsEnabled" Value="false">
                                     <Setter Property="Opacity" Value="0.5"/>
@@ -52,7 +77,7 @@
                         </Style>
 
                         <Style TargetType="ContentControl">
-                            <Setter Property="Foreground" Value="White"/>
+                            <Setter Property="Foreground" Value="WhiteSmoke"/>
                             <Style.Triggers>
                                 <Trigger Property="IsEnabled" Value="false">
                                     <Setter Property="Opacity" Value="0.6"/>
@@ -122,26 +147,27 @@
 
                     <Separator/>
 
-                    <Button x:Name="btnSearch" HorizontalAlignment="Left" VerticalAlignment="Center" ToolTip="Find experiments">
+                    <Button x:Name="btnSearch" HorizontalAlignment="Left" VerticalAlignment="Center" ToolTip="Find experiments" Margin="2,0,0,0">
                         <StackPanel Orientation="Horizontal">
                             <ContentControl Content="{StaticResource icoSearch_Dark}" Height="16" Margin="0,1,4,0"/>
                             <TextBlock Text="Search" Margin="0,0,2,0" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
 
-                    <Button x:Name="btnAnalyze" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="1,0,0,0"
+                    <Button x:Name="btnAnalyze" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0,2,0"
                         ToolTip="Display all synthetic steps leading to the &#x0a;current experiment and away from it."
                         IsEnabled="{Binding ElementName=btnSearch, Path=IsEnabled}">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="💡" Foreground="#FFFFF1B3" FontSize="13" Margin="-4,0,0,0"/>
-                            <TextBlock Text="Analyze" Margin="-1,1,2,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="💡" Foreground="#FFFFF1B3" FontSize="13" Margin="0,0,0,0"/>
+                            <TextBlock Text="Analyze" Margin="0,1,3,0" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
 
 
                     <Separator Margin="2,2,0,2"/>
 
-                    <Menu x:Name="mnuTools" TextBlock.FontFamily="Verdana" Background="transparent" VerticalAlignment="Center" Margin="3,0,0,0">
+                    <Menu x:Name="mnuTools" TextBlock.FontFamily="Segoe UI" TextBlock.FontSize="13" Background="transparent" 
+                        VerticalAlignment="Center" Margin="3,0,0,0">
                         
                         <Menu.Resources>
                             <Style TargetType="{x:Type MenuItem}" BasedOn="{StaticResource DarkModeMenuStyle}"/>
@@ -177,7 +203,7 @@
 
                     <Separator/>
 
-                    <Menu x:Name="mnuSpelling" TextBlock.FontFamily="Verdana" Background="Transparent" Padding="1,0,0,1" FontSize="11.5">
+                    <Menu x:Name="mnuSpelling" TextBlock.FontFamily="Segoe UI" TextBlock.FontSize="13" Background="Transparent" Padding="1,0,0,1" >
 
                         <Menu.Resources>
                             <Style TargetType="{x:Type MenuItem}" BasedOn="{StaticResource DarkModeMenuStyle}"/>
@@ -213,7 +239,7 @@
 
                     <Separator/>
 
-                    <Menu TextBlock.FontFamily="Verdana" Background="Transparent" Padding="1,0,0,0" VerticalAlignment="Center">
+                    <Menu TextBlock.FontFamily="Segoe UI" TextBlock.FontSize="13" Background="Transparent" Padding="1,0,0,0" VerticalAlignment="Center">
                         <Menu.Resources>
                             <Style TargetType="{x:Type MenuItem}" BasedOn="{StaticResource DarkModeMenuStyle}"/>
                         </Menu.Resources>
@@ -238,6 +264,12 @@
 
                     <Separator/>
 
+                    <ToggleButton x:Name="chkLightMode"
+                        IsChecked="{Binding IsDarkMode, RelativeSource={RelativeSource AncestorType={x:Type local:MainWindow}}, Mode=TwoWay, Converter={StaticResource boolInvertConv}}"
+                        ToolTip="Toggle dark / light mode">
+                        <TextBlock Text="🌞" FontSize="13" Margin="2,0"/>
+                    </ToggleButton>
+
                 </ToolBar>
 
                 <custom:MainStatusBar x:Name="mainStatusInfo" HorizontalAlignment="Right" Margin="0,0,6,0" VerticalAlignment="Center"/>
@@ -246,41 +278,153 @@
         </Border>
 
         <Grid DockPanel.Dock="left" Width="316">
-            
+            <Grid.Style>
+                <Style TargetType="Grid">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsDarkMode, ElementName=mainWin}" Value="True">
+                            <Setter Property="custom:DarkModeHelper.IsDarkMode" Value="True"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Style>
+
             <!-- Navigation Tree -->
-            <Border CornerRadius="8" Background="WhiteSmoke" Margin="8,8,4,8" BorderBrush="gray" BorderThickness="1">
+            <Border CornerRadius="8" Margin="8,8,4,8" BorderThickness="1">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="Background" Value="whitesmoke"/>
+                        <Setter Property="BorderBrush" Value="Gray"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsDarkMode, ElementName=mainWin}" Value="True">
+                                <Setter Property="Background" Value="{StaticResource DarkPanelBackground}"/>
+                                <Setter Property="BorderBrush" Value="{StaticResource DarkPanelBorder}"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
                 <DockPanel>
 
                     <DockPanel DockPanel.Dock="top" Margin="6,6,6,0" HorizontalAlignment="Left">
 
-                        <custom:ComboPlus x:Name="cboUsers" ItemsSource="{Binding Source={StaticResource cvsSortedUsers}}" MinWidth="94"
-                           Padding="4,0,2,1" CboBackground="white" CboBorderBrush="#FF979797" VerticalAlignment="Center">
-                            <ComboBox.ItemTemplate>
-                                <DataTemplate>
-                                    <StackPanel Orientation="Horizontal" Margin="1,3">
-                                        <ContentControl Content="{StaticResource icoUser2}" Height="16" Margin="0,0,2,0"/>
-                                        <TextBlock Text="{Binding Path=UserID}" FontFamily="Calibri" FontSize="13"/>
-                                    </StackPanel>
-                                </DataTemplate>
-                            </ComboBox.ItemTemplate>
-                        </custom:ComboPlus>
+                        <custom:ThemedComboBox x:Name="cboUsers" CornerRadius="6" BorderThickness="1" Margin="1,0,2,0" VerticalAlignment="Center" 
+                                MinWidth="94" FontSize="11.5" FontFamily="Verdana" 
+                                ItemsSource="{Binding Source={StaticResource cvsSortedUsers}}" DisplayMemberPath="UserID" 
+                                IsDarkMode="{Binding IsDarkMode, RelativeSource={RelativeSource AncestorType={x:Type local:MainWindow}}}" 
+                                IconDark="{StaticResource icoUser2_Dark}"
+                                IconLight="{StaticResource icoUser2}" 
+                                ItemMouseOverBackgroundDark="#FF1E4B6D" 
+                                BorderBrushDark="#FF6D6D6D" 
+                                BackgroundDark="#FF333333"/>
 
                         <Button x:Name="btnAddProject" VerticalAlignment="Center" ToolTip="Add a new project" Margin="6,0,4,0" 
-                           Background="white" BorderThickness="0" Padding="2,1,2,2" >
+                          Padding="3,1,5,4" >
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                                    <Setter Property="Background" Value="White"/>
+                                    <Setter Property="BorderThickness" Value="0"/>
+                                    <Setter Property="TextBlock.Foreground" Value="black"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsDarkMode, ElementName=mainWin}" Value="True">
+                                            <Setter Property="Background" Value="{StaticResource DarkInputBackground}"/>
+                                            <Setter Property="TextBlock.Foreground" Value="WhiteSmoke"/>
+                                        </DataTrigger>
+                                        <MultiDataTrigger>
+                                            <MultiDataTrigger.Conditions>
+                                                <Condition Binding="{Binding IsDarkMode, ElementName=mainWin}" Value="True"/>
+                                                <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource Self}}" Value="True"/>
+                                            </MultiDataTrigger.Conditions>
+                                            <Setter Property="TextBlock.Foreground" Value="Black"/>
+                                        </MultiDataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
                             <StackPanel Orientation="Horizontal">
-                                <ContentControl Content="{StaticResource icoNewFolder}" Height="16" Margin="2,0,4,0" />
-                                <TextBlock Text="Project" Margin="0,0,2,-2" VerticalAlignment="Center" FontFamily="Verdana" />
+                                <ContentControl Height="16" Margin="3,1,4,0">
+                                    <ContentControl.Style>
+                                        <Style TargetType="ContentControl">
+                                            <Setter Property="Content" Value="{StaticResource icoNewFolder}"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsDarkMode, ElementName=mainWin}" Value="True">
+                                                    <Setter Property="Content" Value="{StaticResource icoNewFolder_Dark}"/>
+                                                </DataTrigger>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding IsDarkMode, ElementName=mainWin}" Value="True"/>
+                                                        <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=Button}}" Value="True"/>
+                                                    </MultiDataTrigger.Conditions>
+                                                    <Setter Property="Content" Value="{StaticResource icoNewFolder}"/>
+                                                </MultiDataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </ContentControl.Style>
+                                </ContentControl>
+                                <TextBlock Text="Project" Margin="0,0,2,-2" VerticalAlignment="Center" FontFamily="Verdana" FontSize="11.5"/>
                             </StackPanel>
                         </Button>
 
-                        <Button x:Name="btnAddFolder" VerticalAlignment="Center" Margin="2,0,0,0"  Background="white" BorderThickness="0" Padding="2,1,2,2"
-                            ToolTip="Add an experiment group to the current project.&#x0a;----------------------------------------------------&#x0a;Experiment groups let you organize your project experiments into user-defined &#x0a;categories such as ‘Preliminary Experiments’, ‘Optimized Synthesis’, 'Step 1', etc.  &#x0a;&#x0a;Initially, all project experiments are in the default group 'All experiments'.&#x0a;">
+                        <Button x:Name="btnAddFolder" VerticalAlignment="Center" Margin="2,0,0,0" Padding="3,1,3,3"
+                            ToolTip="Add an experiment group to the current project.&#x0a;----------------------------------------------------&#x0a;Experiment groups let you organize your project experiments into user-defined &#x0a;categories such as ‘Preliminary Experiments’, ‘Optimized Synthesis’, ‘Step 1’, etc.  &#x0a;&#x0a;Initially, all project experiments are in the default group ‘All experiments’.&#x0a;">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                                    <Setter Property="Background" Value="White"/>
+                                    <Setter Property="BorderThickness" Value="0"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsDarkMode, ElementName=mainWin}" Value="True">
+                                            <Setter Property="Background" Value="{StaticResource DarkInputBackground}"/>
+                                            <Setter Property="Foreground" Value="WhiteSmoke"/>
+                                        </DataTrigger>
+                                        <MultiDataTrigger>
+                                            <MultiDataTrigger.Conditions>
+                                                <Condition Binding="{Binding IsDarkMode, ElementName=mainWin}" Value="True"/>
+                                                <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource Self}}" Value="True"/>
+                                            </MultiDataTrigger.Conditions>
+                                            <Setter Property="Foreground" Value="Black"/>
+                                        </MultiDataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
                             <StackPanel Orientation="Horizontal">
                                 <Grid>
-                                    <ContentControl Content="{StaticResource icoGrayDot}" Height="16" HorizontalAlignment="Left" Margin="6,1,-0,0"/>
-                                    <ContentControl Content="{StaticResource icoNew}" Height="12" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top"/>
+                                    <ContentControl Height="16" HorizontalAlignment="Left" Margin="6,2,0,0">
+                                        <ContentControl.Style>
+                                            <Style TargetType="ContentControl">
+                                                <Setter Property="Content" Value="{StaticResource icoGrayDot}"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsDarkMode, ElementName=mainWin}" Value="True">
+                                                        <Setter Property="Content" Value="{StaticResource icoGrayDot_Dark}"/>
+                                                    </DataTrigger>
+                                                    <MultiDataTrigger>
+                                                        <MultiDataTrigger.Conditions>
+                                                            <Condition Binding="{Binding IsDarkMode, ElementName=mainWin}" Value="True"/>
+                                                            <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=Button}}" Value="True"/>
+                                                        </MultiDataTrigger.Conditions>
+                                                        <Setter Property="Content" Value="{StaticResource icoGrayDot}"/>
+                                                    </MultiDataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </ContentControl.Style>
+                                    </ContentControl>
+                                    <ContentControl Height="12" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top">
+                                        <ContentControl.Style>
+                                            <Style TargetType="ContentControl">
+                                                <Setter Property="Content" Value="{StaticResource icoNew}"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsDarkMode, ElementName=mainWin}" Value="True">
+                                                        <Setter Property="Content" Value="{StaticResource icoNew_Dark}"/>
+                                                    </DataTrigger>
+                                                    <MultiDataTrigger>
+                                                        <MultiDataTrigger.Conditions>
+                                                            <Condition Binding="{Binding IsDarkMode, ElementName=mainWin}" Value="True"/>
+                                                            <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=Button}}" Value="True"/>
+                                                        </MultiDataTrigger.Conditions>
+                                                        <Setter Property="Content" Value="{StaticResource icoNew}"/>
+                                                    </MultiDataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </ContentControl.Style>
+                                    </ContentControl>
                                 </Grid>
-                                <TextBlock Text="Group" Margin="0,0,4,-2" VerticalAlignment="Center" FontFamily="Verdana" />
+                                <TextBlock Text="Group" Margin="0,0,4,0" VerticalAlignment="Center" FontFamily="Verdana" FontSize="11.5"/>
                             </StackPanel>
                         </Button>
 
@@ -293,9 +437,31 @@
         </Grid>
 
         <Grid x:Name="pnlInfo" DockPanel.Dock="right" Width="290">
-           
+            <Grid.Style>
+                <Style TargetType="Grid">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsDarkMode, ElementName=mainWin}" Value="True">
+                            <Setter Property="custom:DarkModeHelper.IsDarkMode" Value="True"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Style>
+
             <!--Status Panel-->
-            <Border CornerRadius="8" Background="White" Margin="4,8,8,8" BorderBrush="gray" BorderThickness="1">
+            <Border CornerRadius="8" Margin="4,8,8,8" BorderThickness="1">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="Background" Value="White"/>
+                        <Setter Property="BorderBrush" Value="Gray"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsDarkMode, ElementName=mainWin}" Value="True">
+                                <Setter Property="Background" Value="{StaticResource DarkPanelBackground}"/>
+                                <Setter Property="BorderBrush" Value="{StaticResource DarkPanelBorder}"/>
+                                <Setter Property="TextElement.Foreground" Value="WhiteSmoke"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
                 <DockPanel Margin="8,8,8,8">
                     <custom:StatusInfoPanel x:Name="pnlStatus" DockPanel.Dock="top"/>
                     <custom:StepSummary DockPanel.Dock="bottom" Margin="0,12,0,0"/>

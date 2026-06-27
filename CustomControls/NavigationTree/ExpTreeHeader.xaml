@@ -7,17 +7,17 @@
         xmlns:local="clr-namespace:CustomControls"
         mc:Ignorable="d" 
         d:DataContext="{d:DesignInstance Type=data:tblExperiments}"
-        SnapsToDevicePixels="True">
+        SnapsToDevicePixels="True" x:Name="expTreeHeaderRoot">
 
     <UserControl.Resources>
-        
-        <local:StatusIconConverter x:Key="statusIconConv"/>
+
         <local:UserTagConverter x:Key="userTagConv"/>
         <local:YieldStrConverter x:Key="yieldStrConv"/>
         <local:WeightFromGramsConverter x:Key="weightFromGramsConv"/>
         <local:IntegerToVisibilityConverter x:Key="intToVisConv"/>
         <local:ExpStateToVisibilityConverter x:Key="expStateVisConv"/>
         <local:PinnedToVisibilityConverter x:Key="pinnedToVisConv"/>
+        <local:DarkModeColorConverter x:Key="dmColor"/>
 
         <Style TargetType="MenuItem">
             <Setter Property="Template" Value="{StaticResource ContextMenuItem}"/>
@@ -46,41 +46,137 @@
     </UserControl.ContextMenu>
 
     <Grid>
-        <StackPanel Orientation="Horizontal" Margin="0,0,2,0">
 
-            <ContentControl x:Name="icoTabOpen"  Width="14" Visibility="{Binding DisplayIndex, Converter={StaticResource pinnedToVisConv}}" 
-             Margin="0,0,-3,0" VerticalAlignment="Center" Content="{StaticResource icoArrowRight}" Opacity="0.75"/>
+        <StackPanel Orientation="Horizontal" Margin="0,0,4,0">
 
-            <Border CornerRadius="6" >
+            <TextBlock x:Name="icoTabOpen" Text="📌" FontSize="9" FontWeight="normal" VerticalAlignment="Center" Margin="0,0,0,0"
+               Visibility="{Binding DisplayIndex, Converter={StaticResource pinnedToVisConv}}">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Foreground" Value="#FF424242"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Path=(local:DarkModeHelper.IsDarkMode), RelativeSource={RelativeSource Self}}" Value="True">
+                                <Setter Property="Foreground" Value="LightBlue"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+
+            <Border CornerRadius="6" Padding="2,0,2,0"  >
                 
                 <Border.Style>
                     <Style TargetType="Border">
-                        <Setter Property="Background" Value="white"/>
+                        <Setter Property="Background" Value="White"/>
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsCurrent}" Value="1" >
-                                <Setter Property="Background" Value="#FFC4FAFF" />
+                            <DataTrigger Binding="{Binding IsCurrent}" Value="1">
+                                <Setter Property="Background" Value="#FFC4FAFF"/>
                             </DataTrigger>
+                            <DataTrigger Binding="{Binding Path=(local:DarkModeHelper.IsDarkMode), RelativeSource={RelativeSource Self}}" Value="True">
+                                <Setter Property="Background" Value="Transparent"/>
+                            </DataTrigger>
+                            <MultiDataTrigger>
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding IsCurrent}" Value="1"/>
+                                    <Condition Binding="{Binding Path=(local:DarkModeHelper.IsDarkMode), RelativeSource={RelativeSource Self}}" Value="True"/>
+                                </MultiDataTrigger.Conditions>
+                                <MultiDataTrigger.Setters>
+                                    <Setter Property="Background" Value="#FF2272BC"/>
+                                </MultiDataTrigger.Setters>
+                            </MultiDataTrigger>
                         </Style.Triggers>
                     </Style>
                 </Border.Style>
 
                 <StackPanel Orientation="Horizontal">
-                    
-                    <ContentControl Width="14" d:Content="{StaticResource icoRedDot}" Margin="0,0,1,0" Opacity="0.75"
-                        Content="{Binding WorkflowState, Converter={StaticResource statusIconConv}}"  />
-                    
+               
+                    <Grid Width="14" Margin="-1,1,0,0" VerticalAlignment="Center">
+                        
+                        <Ellipse HorizontalAlignment="Center" VerticalAlignment="Center">
+                            
+                            <Ellipse.Style>
+                                <Style TargetType="Ellipse">
+                                    <Setter Property="Fill" Value="#FFE0584C"/>
+                                    <Setter Property="Width" Value="8"/>
+                                    <Setter Property="Height" Value="8"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding WorkflowState}" Value="1">
+                                            <Setter Property="Fill" Value="#FF396ED7"/>
+                                            <Setter Property="Width" Value="10"/>
+                                            <Setter Property="Height" Value="10"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding WorkflowState}" Value="2">
+                                            <!--<Setter Property="Fill" Value="#FF888888"/>-->
+                                            <Setter Property="Width" Value="10"/>
+                                            <Setter Property="Height" Value="10"/>
+                                        </DataTrigger>
+                                        <MultiDataTrigger>
+                                            <MultiDataTrigger.Conditions>
+                                                <Condition Binding="{Binding WorkflowState}" Value="0"/>
+                                                <Condition Binding="{Binding Path=(local:DarkModeHelper.IsDarkMode), RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True"/>
+                                            </MultiDataTrigger.Conditions>
+                                            <Setter Property="Fill" Value="#FFEE6E6E"/>
+                                        </MultiDataTrigger>
+                                        <MultiDataTrigger>
+                                            <MultiDataTrigger.Conditions>
+                                                <Condition Binding="{Binding WorkflowState}" Value="1"/>
+                                                <Condition Binding="{Binding Path=(local:DarkModeHelper.IsDarkMode), RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True"/>
+                                            </MultiDataTrigger.Conditions>
+                                            <Setter Property="Fill" Value="#FF66A0DB"/>
+                                        </MultiDataTrigger>
+                                        <MultiDataTrigger>
+                                            <MultiDataTrigger.Conditions>
+                                                <Condition Binding="{Binding WorkflowState}" Value="2"/>
+                                                <Condition Binding="{Binding Path=(local:DarkModeHelper.IsDarkMode), RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True"/>
+                                            </MultiDataTrigger.Conditions>
+                                            <Setter Property="Fill" Value="#FFEE6E6E"/>
+                                        </MultiDataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Ellipse.Style>
+                        </Ellipse>
+                        
+                        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" FontSize="8" FontWeight="bold" Margin="0,1,1,0">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Text" Value=""/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding WorkflowState}" Value="1">
+                                            <Setter Property="Text" Value="✓"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding WorkflowState}" Value="2">
+                                            <Setter Property="Text" Value="✶"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                        
+                    </Grid>
+
                     <TextBlock MinWidth="50" Margin="0,0,2,1" VerticalAlignment="Center">
-                        <Run Name="runExpID" d:Text="demo-00123" Text="{Binding ExperimentID}" Foreground="#FF2020CE"/>   
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Path=(local:DarkModeHelper.IsDarkMode), RelativeSource={RelativeSource Self}}" Value="True">
+                                        <Setter Property="Foreground" Value="WhiteSmoke"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                        <Run Name="runExpID" d:Text="demo-00123" Text="{Binding ExperimentID}"
+                             Foreground="{Binding Path=(local:DarkModeHelper.IsDarkMode), ElementName=expTreeHeaderRoot, Converter={StaticResource dmColor}, ConverterParameter='#FF2020CE|WhiteSmoke'}"/>
                         <Run Text="-"/>
-                        <Run Name="runYield" d:Text="92.5%" Text="{Binding Yield, Converter={StaticResource yieldStrConv}}" />
-                        <Run Name="runScale" d:Text="(23.5 g)" Text="{Binding RefReactantGrams,Converter={StaticResource weightFromGramsConv}}"/>
+                        <Run Name="runYield" d:Text="92.5%" Text="{Binding Yield, Converter={StaticResource yieldStrConv}}"/>
+                        <Run Name="runScale" d:Text="(23.5 g)" Text="{Binding RefReactantGrams, Converter={StaticResource weightFromGramsConv}}"/>
                     </TextBlock>
-                    
+
                 </StackPanel>
 
             </Border>
 
         </StackPanel>
+        
     </Grid>
     
 </UserControl>

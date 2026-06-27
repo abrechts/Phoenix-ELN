@@ -226,7 +226,7 @@ Partial Public Class dlgConnectGraph
 
         blkSchemeTitle.Text = $"Sequence {seq.Id + 1}"
 
-        'color legend
+        'sequence title area
         Dim accent = GraphView.GetSequenceAccentBrush(seq)
         bdrSchemeTitle.BorderBrush = accent
         If TypeOf accent Is SolidColorBrush Then
@@ -234,8 +234,32 @@ Partial Public Class dlgConnectGraph
             bdrSchemeTitle.Background = New SolidColorBrush(Color.FromArgb(60, c.R, c.G, c.B))
         End If
 
+        'color legend
         bdrLegendSwatch.Background = accent
         blkLegendType.Text = seq.SequenceType
+        Select Case seq.SequenceType
+            Case "Start"
+                pnlLegend.ToolTip = "This sequence contains the reference " + vbCrLf +
+                                    "step (➤), the origin of all upstream " + vbCrLf +
+                                    "and and downstream connections."
+            Case "Alternative"
+                pnlLegend.ToolTip = "One of several alternative synthetic pathways " + vbCrLf +
+                                    "starting with a common reactant and ending " + vbCrLf +
+                                    "with a common product."
+            Case "Hub"
+                pnlLegend.ToolTip = "This sequence serves as a hub between multiple " + vbCrLf +
+                                    "incoming and outgoing sequences."
+            Case "Terminal"
+                pnlLegend.ToolTip = "This sequence represents an upstream or " + vbCrLf +
+                                    "downstream end point."
+
+            Case "Linear"
+                pnlLegend.ToolTip = "This is a default synthetic step sequence."
+
+            Case Else
+                pnlLegend.ToolTip = Nothing
+
+        End Select
 
         Dim stepNr As Integer = 1
         pnlSeqStructures.Children.Clear()
