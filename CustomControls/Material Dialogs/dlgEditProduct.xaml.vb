@@ -78,6 +78,28 @@ Public Class dlgEditProduct
     Public Property SketchInfo As SketchResults
 
 
+    ''' <summary>
+    ''' Gets the theoretical amount in grams of the currently selected product or side-product
+    ''' </summary>
+    ''' 
+    Private Sub SetTheoreticAmount()
+
+        With ProductEntry
+
+            Dim yieldFactor = If(.ProductIndex = 0, .ProtocolItem.Experiment.RefYieldFactor, 1)  'only reference product is affected
+            Dim totalRefReactMmols = .ProtocolItem.Experiment.RefReactantMMols * yieldFactor
+            Dim prodGrams = totalRefReactMmols * SketchInfo.Products(.ProductIndex).Molweight / 1000
+
+            Dim sigDigConv As New SignificantDigitsConverter
+            Dim res = ELNCalculations.ScaleWeight(prodGrams)
+            blkTheory.Text = sigDigConv.Convert(res.Amount, Nothing, 3, Nothing) + " " + res.Unit
+
+
+        End With
+
+    End Sub
+
+
     Private Sub rdoProdA_Checked() Handles rdoProdA.Checked
 
         If SketchInfo IsNot Nothing Then
@@ -86,6 +108,7 @@ Public Class dlgEditProduct
             pnlResinLoad.Visibility = If(SketchInfo.Products(0).IsAttachedToResin, Visibility.Visible, Visibility.Collapsed)
             blkMW.Text = SketchInfo.Products(0).Molweight.ToString("0.00")
             txtMatName.Text = If(ProductEntry.Name, "Product")
+            SetTheoreticAmount()
 
         End If
 
@@ -97,6 +120,7 @@ Public Class dlgEditProduct
         pnlResinLoad.Visibility = If(SketchInfo.Products(1).IsAttachedToResin, Visibility.Visible, Visibility.Collapsed)
         blkMW.Text = SketchInfo.Products(1).Molweight.ToString("0.00")
         txtMatName.Text = If(ProductEntry.Name, "Side Prod 1")
+        SetTheoreticAmount()
 
     End Sub
 
@@ -106,6 +130,7 @@ Public Class dlgEditProduct
         pnlResinLoad.Visibility = If(SketchInfo.Products(2).IsAttachedToResin, Visibility.Visible, Visibility.Collapsed)
         blkMW.Text = SketchInfo.Products(2).Molweight.ToString("0.00")
         txtMatName.Text = If(ProductEntry.Name, "Side Prod 2")
+        SetTheoreticAmount()
 
     End Sub
 

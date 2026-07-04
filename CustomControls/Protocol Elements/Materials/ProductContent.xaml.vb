@@ -1,12 +1,7 @@
-﻿
-
-Imports System.ComponentModel
-Imports System.Globalization
-Imports System.Windows
+﻿Imports System.Globalization
 Imports System.Windows.Controls
 Imports System.Windows.Data
 Imports System.Windows.Media
-Imports ElnCoreModel
 
 Public Class ProductContent
 

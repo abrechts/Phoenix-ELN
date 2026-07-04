@@ -71,7 +71,14 @@
                         <ComboBoxItem Content="mg"/>
                     </custom:ComboPlus>
 
-                    <StackPanel Orientation="Horizontal"  VerticalAlignment="center" HorizontalAlignment="Right" >
+                    <StackPanel Orientation="Horizontal" ToolTip="Theoretical Yield">
+                        <TextBlock Text="➤" VerticalAlignment="Center" Margin="16,0,1,0" FontSize="11.5"/>
+                        <TextBox x:Name="blkTheory" d:Text="1.35 kg" IsReadOnly="True" Background="transparent" Foreground="whitesmoke" VerticalAlignment="Center" 
+                                 BorderThickness="0" />
+                        <TextBlock Text="(=100%)" VerticalAlignment="Center"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal"  VerticalAlignment="center" HorizontalAlignment="Right" Margin="0,0,2,0" >
 
                         <TextBlock Text="MW: " FontWeight="DemiBold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         <TextBlock x:Name="blkMW" d:Text="242.15" HorizontalAlignment="Center" VerticalAlignment="Center" />
