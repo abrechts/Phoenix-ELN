@@ -1,5 +1,4 @@
-﻿
-Imports System.Windows
+﻿Imports System.Windows
 Imports System.Windows.Controls
 Imports System.Windows.Media
 Imports ElnBase
@@ -145,9 +144,15 @@ Public Class SketchArea
                 reactantModified = True
             End If
 
+            'remove all side products that were deleted during sketch editing from protocol 
+            If Not RemoveDeletedSideProducts(currExp, skInfo) Then
+                'sketch update cancelled since structure of remaining side product was modified
+                Exit Sub
+            End If
+
             'update product properties
             For i = 0 To skInfo.Products.Count - 1
-                UpdateProductProperties(currExp, skInfo, i)   'skips if prodIndex does not exist
+                UpdateProductProperties(currExp, skInfo, i)
             Next
 
             SketchInfo = skInfo
@@ -168,10 +173,10 @@ Public Class SketchArea
             If Not rss.RegisterReactionRSS(currExp) Then
 
                 cbMsgBox.Display("Your reaction sketch seems to have a structure" + vbCrLf +
-                       "error (stereochemistry?) and therefore will not" + vbCrLf +
-                       "not be searchable! - Please try to correct if " + vbCrLf +
-                       "before continuing ... ",
-                       MsgBoxStyle.OkOnly + MsgBoxStyle.Exclamation, "Sketch Validation")
+                    "error (stereochemistry?) and therefore will not" + vbCrLf +
+                    "not be searchable! - Please try to correct if " + vbCrLf +
+                    "before continuing ... ",
+                    MsgBoxStyle.OkOnly + MsgBoxStyle.Exclamation, "Sketch Validation")
             End If
 
             blkClickInfo.Visibility = Visibility.Collapsed
@@ -181,6 +186,88 @@ Public Class SketchArea
 
     End Sub
 
+
+    ''' <summary>
+    ''' Removes side products which were deleted from the sketch from the protocol
+    ''' </summary>
+    ''' <param name="currExp">Current experiment entry</param>
+    ''' <param name="currSkInfo">SketchInfo after editing</param>
+    ''' 
+    Private Function RemoveDeletedSideProducts(currExp As tblExperiments, currSkInfo As SketchResults) As Boolean
+
+        Dim doomedProtocolItems As New List(Of tblProtocolItems)
+
+        If SketchInfo IsNot Nothing AndAlso currSkInfo.Products.Count < SketchInfo.Products.Count Then
+
+            If currSkInfo.Products.Count = 1 Then
+
+                ' - Scenario 1: No more side products present -> Remove all side product occurrences from protocol.
+
+                Dim doomed = From item In currExp.tblProtocolItems
+                             Where item.ElementType = ProtocolElementType.Product AndAlso
+                            item.tblProducts IsNot Nothing AndAlso
+                            item.tblProducts.ProductIndex > 0
+                doomedProtocolItems.AddRange(doomed.ToList)
+
+            ElseIf currSkInfo.Products.Count = 2 Then
+
+                ' - Scenario 2: One side product left, one deleted
+
+                'side product lists (exclude ref.product)
+                Dim origInChIList = SketchInfo.Products.Select(Function(x) x.InChIKey).Skip(1)
+                Dim newInChIList = currSkInfo.Products.Select(Function(x) x.InChIKey).Skip(1)
+
+                'list difference: removed or modified side product InChIKey(s)
+                Dim removedInChIList = origInChIList.Except(newInChIList).ToList()
+                If removedInChIList.Count = 1 Then
+
+                    'removed rxn. component identified, other side product is unmodified
+
+                    Dim doomedItems = From item In currExp.tblProtocolItems Where item.ElementType = ProtocolElementType.Product AndAlso
+                                        item.tblProducts IsNot Nothing AndAlso
+                                        item.tblProducts.InChIKey = removedInChIList.First
+
+                    'remove all protocol occurrences of removed side product
+                    doomedProtocolItems.AddRange(doomedItems)
+
+                    're-assign properties for remaining prodIndex=2 side product, since otherwise incorrect
+                    Dim sideProd2Items = From item In currExp.tblProtocolItems Where item.ElementType = ProtocolElementType.Product AndAlso
+                                            item.tblProducts IsNot Nothing AndAlso
+                                            item.tblProducts.ProductIndex = 2
+
+                    For Each prod In sideProd2Items
+                        prod.tblProducts.ProductIndex = 1
+                        If prod.tblProducts.Name = "Side Prod 2" Then
+                            prod.tblProducts.Name = "Side Prod 1"
+                        End If
+                    Next
+
+                Else
+
+                    'remaining side prod structure was modified - impossible to detect which one was deleted
+                    cbMsgBox.Display("Sketch update cancelled, since the structure one side product was modified while removing the other one." +
+                                     vbCrLf + vbCrLf + "Perform this operation two steps: First commit the side product structure changes to the protocol, " + vbCrLf +
+                                     "and then remove the other side product from the sketch in a second operation.", MsgBoxStyle.Information, "Side Product Removal")
+                    Return False
+
+                End If
+
+            End If
+
+            'remove identified side product entries from protocol
+            For Each obsoleteProd In doomedProtocolItems
+                currExp.tblProtocolItems.Remove(obsoleteProd)
+            Next
+
+            Return True
+
+        Else
+
+            Return True
+
+        End If
+
+    End Function
 
 
     ''' <summary>

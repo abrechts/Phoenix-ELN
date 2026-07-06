@@ -514,5 +514,4 @@
 		<entity schema="Default" name="tblSolvents" color="3986C1" x="855" y="57" />
 		<entity schema="Default" name="tblComments" color="3986C1" x="342" y="437" />
 	</layout>
-	<layout name="Sqlite" id="Layout-1015" show_relation="cascade" />
 </project>

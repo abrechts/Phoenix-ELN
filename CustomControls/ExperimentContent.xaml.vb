@@ -214,6 +214,7 @@ Public Class ExperimentContent
                     .UpdateRefReactResinInfo(expEntry, isRefReactAttached)  'changes to refReact resin attachments (on/off)
                     .UpdateProductsResinInfo(expEntry) 'changes to products resin attachments (on/off)
                     .RecalculateExperiment(Not isReactantModified)
+                    .RefreshItems() 'reflects any protocol items removed due to a deleted sketch product
                 End With
             End If
 
