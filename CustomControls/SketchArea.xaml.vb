@@ -144,7 +144,7 @@ Public Class SketchArea
                 reactantModified = True
             End If
 
-            'remove all side products that were deleted during sketch editing from protocol 
+            'remove all side products from protocol that were deleted during sketch editing
             If Not RemoveDeletedSideProducts(currExp, skInfo) Then
                 'sketch update cancelled since structure of remaining side product was modified
                 Exit Sub
@@ -192,80 +192,88 @@ Public Class SketchArea
     ''' </summary>
     ''' <param name="currExp">Current experiment entry</param>
     ''' <param name="currSkInfo">SketchInfo after editing</param>
+    ''' <returns>False, if operation was cancelled, otherwise true.</returns>
     ''' 
     Private Function RemoveDeletedSideProducts(currExp As tblExperiments, currSkInfo As SketchResults) As Boolean
 
         Dim doomedProtocolItems As New List(Of tblProtocolItems)
 
-        If SketchInfo IsNot Nothing AndAlso currSkInfo.Products.Count < SketchInfo.Products.Count Then
+        ' - verify that side product references actually are present in protocol
+        Dim protocolSideProducts = From item In currExp.tblProtocolItems
+                                   Where item.ElementType = ProtocolElementType.Product AndAlso
+                                    item.tblProducts IsNot Nothing AndAlso
+                                    item.tblProducts.ProductIndex > 0
 
-            If currSkInfo.Products.Count = 1 Then
+        ' - no protocol references present, no action required
+        If Not protocolSideProducts.Any Then
+            Return True
+        End If
 
-                ' - Scenario 1: No more side products present -> Remove all side product occurrences from protocol.
+        ' - no side product was deleted, no action required
+        If Not (SketchInfo IsNot Nothing AndAlso currSkInfo.Products.Count < SketchInfo.Products.Count) Then
+            Return True
+        End If
 
-                Dim doomed = From item In currExp.tblProtocolItems
-                             Where item.ElementType = ProtocolElementType.Product AndAlso
-                            item.tblProducts IsNot Nothing AndAlso
-                            item.tblProducts.ProductIndex > 0
-                doomedProtocolItems.AddRange(doomed.ToList)
+        ' - perform protocol delete operations if possible
 
-            ElseIf currSkInfo.Products.Count = 2 Then
+        If currSkInfo.Products.Count = 1 Then
 
-                ' - Scenario 2: One side product left, one deleted
+            ' No more side products present -> Remove all side product occurrences from protocol.
+            doomedProtocolItems.AddRange(protocolSideProducts.ToList)
 
-                'side product lists (exclude ref.product)
-                Dim origInChIList = SketchInfo.Products.Select(Function(x) x.InChIKey).Skip(1)
-                Dim newInChIList = currSkInfo.Products.Select(Function(x) x.InChIKey).Skip(1)
+        ElseIf currSkInfo.Products.Count = 2 Then
 
-                'list difference: removed or modified side product InChIKey(s)
-                Dim removedInChIList = origInChIList.Except(newInChIList).ToList()
-                If removedInChIList.Count = 1 Then
+            ' One side product left, one deleted
 
-                    'removed rxn. component identified, other side product is unmodified
+            'side product lists (excluding ref.product)
+            Dim origInChIList = SketchInfo.Products.Select(Function(x) x.InChIKey).Skip(1)
+            Dim newInChIList = currSkInfo.Products.Select(Function(x) x.InChIKey).Skip(1)
 
-                    Dim doomedItems = From item In currExp.tblProtocolItems Where item.ElementType = ProtocolElementType.Product AndAlso
+            'list difference: removed or modified side product InChIKey(s)
+            Dim removedInChIList = origInChIList.Except(newInChIList).ToList()
+
+            If removedInChIList.Count = 1 Then
+
+                'removed rxn. component is identified, other side product is unmodified
+                Dim doomedItems = From item In currExp.tblProtocolItems Where item.ElementType = ProtocolElementType.Product AndAlso
+                                    item.tblProducts IsNot Nothing AndAlso
+                                    item.tblProducts.InChIKey = removedInChIList.First
+
+                'remove all protocol occurrences of removed side product
+                doomedProtocolItems.AddRange(doomedItems)
+
+                're-assign properties for remaining prodIndex=2 side product, since otherwise incorrect
+                Dim sideProd2Items = From item In currExp.tblProtocolItems Where item.ElementType = ProtocolElementType.Product AndAlso
                                         item.tblProducts IsNot Nothing AndAlso
-                                        item.tblProducts.InChIKey = removedInChIList.First
+                                        item.tblProducts.ProductIndex = 2
 
-                    'remove all protocol occurrences of removed side product
-                    doomedProtocolItems.AddRange(doomedItems)
+                For Each prod In sideProd2Items
+                    prod.tblProducts.ProductIndex = 1
+                    If prod.tblProducts.Name = "Side Prod 2" Then
+                        prod.tblProducts.Name = "Side Prod 1"
+                    End If
+                Next
 
-                    're-assign properties for remaining prodIndex=2 side product, since otherwise incorrect
-                    Dim sideProd2Items = From item In currExp.tblProtocolItems Where item.ElementType = ProtocolElementType.Product AndAlso
-                                            item.tblProducts IsNot Nothing AndAlso
-                                            item.tblProducts.ProductIndex = 2
+            Else
 
-                    For Each prod In sideProd2Items
-                        prod.tblProducts.ProductIndex = 1
-                        If prod.tblProducts.Name = "Side Prod 2" Then
-                            prod.tblProducts.Name = "Side Prod 1"
-                        End If
-                    Next
+                'remaining side prod structure was concurrently modified - impossible to detect which one was deleted
 
-                Else
-
-                    'remaining side prod structure was modified - impossible to detect which one was deleted
-                    cbMsgBox.Display("Sketch update cancelled, since the structure one side product was modified while removing the other one." +
-                                     vbCrLf + vbCrLf + "Perform this operation two steps: First commit the side product structure changes to the protocol, " + vbCrLf +
-                                     "and then remove the other side product from the sketch in a second operation.", MsgBoxStyle.Information, "Side Product Removal")
-                    Return False
-
-                End If
+                cbMsgBox.Display("Sketch update cancelled, since the structure of one side product was modified concurrently with removing the other one." + vbCrLf + vbCrLf +
+                                 "Do this in two steps: First update the protocol with the changes to the side product's structure only." + vbCrLf +
+                                 "Then, in a second step, delete the desired side product from the reaction sketch.",
+                                 MsgBoxStyle.Information, "Side Product Sync Issue")
+                Return False
 
             End If
 
-            'remove identified side product entries from protocol
-            For Each obsoleteProd In doomedProtocolItems
-                currExp.tblProtocolItems.Remove(obsoleteProd)
-            Next
-
-            Return True
-
-        Else
-
-            Return True
-
         End If
+
+        'remove identified side product entries from protocol
+        For Each obsoleteProd In doomedProtocolItems
+            currExp.tblProtocolItems.Remove(obsoleteProd)
+        Next
+
+        Return True
 
     End Function
 
