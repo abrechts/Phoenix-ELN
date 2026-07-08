@@ -12,6 +12,11 @@ Public Class ExperimentTree
     Public Event RequestAddExperiment(sender As Object, projFolderEntry As tblProjFolders)
 
 
+    ' Prevents TreeViewItem_Selected from raising a redundant, reentrant ExperimentSelected event
+    ' when SelectExperiment already raises it explicitly (see ScrollExperimentIntoView).
+    Private _suppressTreeSelectedEvent As Boolean = False
+
+
     Public Sub New()
 
         ' This call is required by the designer.
@@ -323,7 +328,12 @@ Public Class ExperimentTree
                 scroller.ScrollToBottom()
             End If
 
-            selTvi.IsSelected = True
+            _suppressTreeSelectedEvent = True
+            Try
+                selTvi.IsSelected = True
+            Finally
+                _suppressTreeSelectedEvent = False
+            End Try
 
         End If
 
@@ -334,6 +344,8 @@ Public Class ExperimentTree
 
 
     Private Sub TreeViewItem_Selected(sender As Object, e As RoutedEventArgs)
+
+        If _suppressTreeSelectedEvent Then Exit Sub
 
         Dim entityObj As Object = e.OriginalSource.header
 

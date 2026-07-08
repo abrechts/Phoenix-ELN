@@ -9,7 +9,7 @@
         xmlns:local="clr-namespace:ChemBytes"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=data:tblUsers}"
-        Title="Phoenix ELN" Width="1310" >
+        Title="Phoenix ELN" Width="1310" MinHeight="700">
 
     <Window.Resources>
 

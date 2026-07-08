@@ -1209,7 +1209,13 @@ Class MainWindow
 
                 ' experiment already displayed in a tab
                 Dim thisTab As TabItem = tabExperiments.ItemContainerGenerator.ContainerFromItem(targetExp)
-                thisTab.IsSelected = True
+                If thisTab Is Nothing Then
+                    tabExperiments.UpdateLayout()
+                    thisTab = tabExperiments.ItemContainerGenerator.ContainerFromItem(targetExp)
+                End If
+                If thisTab IsNot Nothing Then
+                    thisTab.IsSelected = True
+                End If
                 Return True
 
             Else
@@ -1293,7 +1299,13 @@ Class MainWindow
                 '- experiment already displayed in a tab
 
                 Dim thisTab As TabItem = tabExperiments.ItemContainerGenerator.ContainerFromItem(selExp)
-                thisTab.IsSelected = True
+                If thisTab Is Nothing Then
+                    tabExperiments.UpdateLayout()
+                    thisTab = tabExperiments.ItemContainerGenerator.ContainerFromItem(selExp)
+                End If
+                If thisTab IsNot Nothing Then
+                    thisTab.IsSelected = True
+                End If
 
             Else
 

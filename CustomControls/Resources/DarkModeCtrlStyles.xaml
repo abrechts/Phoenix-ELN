@@ -1,6 +1,7 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
-    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib"
+    xmlns:local="clr-namespace:CustomControls">
 
     
     <!--Dark mode Menu and MenuItem Styles-->
@@ -340,7 +341,7 @@
     <!-- Dark Mode ScrollViewer Style -->
     <!--==============================-->
 
-    
+
     <!-- ScrollBar Colors -->
     
     <SolidColorBrush x:Key="ScrollBarBackground" Color="Transparent"/>
@@ -408,49 +409,61 @@
 
     <!-- *** Dark ScrollViewer Style *** -->
 
+    <ControlTemplate x:Key="DarkScrollViewerTemplate" TargetType="{x:Type ScrollViewer}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Content Presenter -->
+            <ScrollContentPresenter Grid.Column="0" Grid.Row="0"/>
+
+            <!-- Vertical ScrollBar -->
+            <ScrollBar x:Name="PART_VerticalScrollBar"
+                    Style="{StaticResource DarkScrollBarStyle}"
+                    Grid.Column="1" Grid.Row="0"
+                    Orientation="Vertical"
+                    Maximum="{TemplateBinding ScrollableHeight}"
+                    ViewportSize="{TemplateBinding ViewportHeight}"
+                    Value="{TemplateBinding VerticalOffset}"
+                    Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}"/>
+
+            <!-- Horizontal ScrollBar -->
+            <ScrollBar x:Name="PART_HorizontalScrollBar"
+                    Style="{StaticResource DarkScrollBarStyle}"
+                    Grid.Column="0" Grid.Row="1"
+                    Orientation="Horizontal"
+                    Maximum="{TemplateBinding ScrollableWidth}"
+                    ViewportSize="{TemplateBinding ViewportWidth}"
+                    Value="{TemplateBinding HorizontalOffset}"
+                    Visibility="{TemplateBinding ComputedHorizontalScrollBarVisibility}"/>
+        </Grid>
+    </ControlTemplate>
+
     <Style x:Key="DarkScrollViewerStyle" TargetType="{x:Type ScrollViewer}">
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="{x:Type ScrollViewer}">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition />
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition />
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-
-                        <!-- Content Presenter -->
-                        <ScrollContentPresenter Grid.Column="0" Grid.Row="0"/>
-
-                        <!-- Vertical ScrollBar -->
-                        <ScrollBar x:Name="PART_VerticalScrollBar"
-                                Style="{StaticResource DarkScrollBarStyle}"
-                                Grid.Column="1" Grid.Row="0"
-                                Orientation="Vertical"
-                                Maximum="{TemplateBinding ScrollableHeight}"
-                                ViewportSize="{TemplateBinding ViewportHeight}"
-                                Value="{TemplateBinding VerticalOffset}"
-                                Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}"/>
-
-                        <!-- Horizontal ScrollBar -->
-                        <ScrollBar x:Name="PART_HorizontalScrollBar"
-                                Style="{StaticResource DarkScrollBarStyle}"
-                                Grid.Column="0" Grid.Row="1"
-                                Orientation="Horizontal"
-                                Maximum="{TemplateBinding ScrollableWidth}"
-                                ViewportSize="{TemplateBinding ViewportWidth}"
-                                Value="{TemplateBinding HorizontalOffset}"
-                                Visibility="{TemplateBinding ComputedHorizontalScrollBarVisibility}"/>
-                    </Grid>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
+        <Setter Property="Template" Value="{StaticResource DarkScrollViewerTemplate}"/>
     </Style>
-    
-    
+
+
+    <!--Applies the dark scrollbar template app-wide to any ScrollViewer (including ones inside a
+        control's default template, e.g. TreeView/ListBox) whenever DarkModeHelper.IsDarkMode is inherited as True.
+        Controls that are always dark regardless of mode keep using DarkScrollViewerStyle/-Template explicitly instead.-->
+
+    <Style TargetType="{x:Type ScrollViewer}">
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding Path=(local:DarkModeHelper.IsDarkMode), RelativeSource={RelativeSource Self}}" Value="True">
+                <Setter Property="Template" Value="{StaticResource DarkScrollViewerTemplate}"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+
+
     <!-- Dark Mode Button Style -->
     <!--==============================-->
 
