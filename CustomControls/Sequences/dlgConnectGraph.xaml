@@ -111,9 +111,9 @@
                          IsHitTestVisible="False" HorizontalAlignment="Center" VerticalAlignment="Center"/>
 
         <!-- Reaction scheme area -->
-        <DockPanel Grid.Row="2" Grid.Column="0" Margin="4,8,4,4">
+        <DockPanel Grid.Row="2" Grid.Column="0" Margin="4,8,4,2">
 
-            <Grid DockPanel.Dock="Top" Margin="0,6,0,24">
+            <Grid DockPanel.Dock="Top" Margin="0,6,0,18">
 
                 <!-- Color legend -->
                 <Border x:Name="pnlLegend" HorizontalAlignment="Left" Margin="6,0,0,0" BorderThickness="0" Background="#FF393939" 

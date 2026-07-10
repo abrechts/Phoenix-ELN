@@ -243,9 +243,9 @@ Partial Public Class dlgConnectGraph
                                     "step (➤), the origin of all upstream " + vbCrLf +
                                     "and and downstream connections."
             Case "Alternative"
-                pnlLegend.ToolTip = "One of several alternative synthetic pathways " + vbCrLf +
-                                    "starting with a common reactant and ending " + vbCrLf +
-                                    "with a common product."
+                pnlLegend.ToolTip = "An alternative synthetic pathway for " + vbCrLf +
+                                    "producing the same intermediate from " + vbCrLf +
+                                    "the same starting material."
             Case "Hub"
                 pnlLegend.ToolTip = "This sequence serves as a hub between multiple " + vbCrLf +
                                     "incoming and outgoing sequences."
