@@ -17,8 +17,9 @@ Partial Public Class SequenceGraph
     Private Const BOX_W As Double = 130      ' card width
     Private Const BOX_H As Double = 44       ' card height
     Private Const COL_GAP As Double = 70     ' horizontal gap between columns
-    Private Const ROW_GAP As Double = 30 '35     ' vertical gap between cards in same column
+    Private Const ROW_GAP As Double = 30     ' vertical gap between cards in same column
     Private Const PAD As Double = 9          ' canvas padding on every side
+    Private Const EDGE_GAP As Double = 5     ' horizontal gap between a card edge and where its connecting line starts/ends
 
 
     ' Domain model
@@ -936,7 +937,7 @@ Partial Public Class SequenceGraph
         ' Source → junction (no arrowhead)
 
         For Each src In b.Sources
-            Dim x1 = src.X + src.W
+            Dim x1 = src.X + src.W + EDGE_GAP
             Dim y1 = src.Y + src.H / 2.0
             Dim dx = (b.Jx - x1) * 0.5
             Dim fig As New PathFigure With {.StartPoint = New Point(x1, y1)}
@@ -960,7 +961,7 @@ Partial Public Class SequenceGraph
         Dim arrowDepth = 9.0 * Math.Cos(Math.PI / 6.0)   ' sz * cos 30° ≈ 7.79
 
         For Each tgt In b.Targets
-            Dim x2 = tgt.X
+            Dim x2 = tgt.X - EDGE_GAP
             Dim y2 = tgt.Y + tgt.H / 2.0
             Dim lineX = x2 - arrowDepth          ' bezier ends here, arrow tip at x2
             Dim dx = (lineX - b.Jx) * 0.5
@@ -1004,9 +1005,9 @@ Partial Public Class SequenceGraph
 
     Private Sub DrawEdge(fromSq As SequenceNode, toSq As SequenceNode)
 
-        Dim x1 = fromSq.X + fromSq.W
+        Dim x1 = fromSq.X + fromSq.W + EDGE_GAP
         Dim y1 = fromSq.Y + fromSq.H / 2.0
-        Dim x2 = toSq.X
+        Dim x2 = toSq.X - EDGE_GAP
         Dim y2 = toSq.Y + toSq.H / 2.0
         If x2 <= x1 + 1.0 Then Return   ' skip back-edges (layout artefact)
 

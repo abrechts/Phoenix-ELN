@@ -328,9 +328,11 @@ Partial Public Class dlgConnectGraph
     Private Sub btnShowAllSchemes_PreviewMouseUp() Handles btnShowAllSchemes.PreviewMouseUp
 
         Dim dlg As New dlgSequenceScheme()
-        dlg.Owner = Me
-        dlg.SetData(GraphView.Sequences, QueryExperiments)
-        dlg.Show()
+        With dlg
+            .Owner = Me
+            .SetData(GraphView.Sequences, QueryExperiments)
+            .Show()
+        End With
 
     End Sub
 

@@ -161,12 +161,43 @@ Public Class SequenceStructure
     ''' <summary>
     ''' Hides the right solid arrow
     ''' </summary>
-    ''' 
+    '''
     Public Sub HideRightArrow()
 
         pnlArrowRight.Visibility = Visibility.Collapsed
 
     End Sub
+
+
+    ''' <summary>
+    ''' Hides the reactant/product structure box, leaving only the arrow area.
+    ''' Used to render a step's arrow (number, yield, seed marker) as a
+    ''' free-floating connector when its structure is already shown elsewhere.
+    ''' </summary>
+    '''
+    Public Sub HideReactantStructure()
+
+        pnlReactantStructure.Visibility = Visibility.Collapsed
+
+    End Sub
+
+
+    ''' <summary>
+    ''' Returns the vertical position of the step arrow's own line/arrowhead
+    ''' (blkUpperLabel), in this control's local coordinate space. The step
+    ''' number label above and yield label below the line make the arrow row
+    ''' land off-center within the control's overall bounds, so callers that
+    ''' need to visually align an external connector with this control's own
+    ''' arrow (rather than with its bounding-box center) should use this
+    ''' instead of DesiredSize.Height / 2.
+    ''' </summary>
+    '''
+    Public Function GetArrowAnchorY() As Double
+
+        Dim pt = blkUpperLabel.TranslatePoint(New Point(0, blkUpperLabel.ActualHeight / 2.0), Me)
+        Return pt.Y
+
+    End Function
 
 
     ''' <summary>
