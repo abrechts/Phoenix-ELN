@@ -134,9 +134,27 @@
         <Border Grid.Row="1" Background="white" BorderBrush="#FFADADAD" BorderThickness="1,1,1,0" Margin="12,0,12,0">
             <Grid>
                 <local:SketchArea x:Name="pnlSketch" ReactionSketch="{Binding RxnSketch}" Margin="12,8,12,6"/>
-                <ContentControl x:Name="icoFinalized" Content="{StaticResource icoOkBullet}" Height="18" Margin="0,2,3,0" 
+                <ContentControl x:Name="icoFinalized" Content="{StaticResource icoOkBullet}" Height="18" Margin="0,2,2,0"
                     Opacity="0.65" VerticalAlignment="Top" HorizontalAlignment="Right" Visibility="{Binding WorkflowState,
                     Converter={StaticResource expStateVisConv}}"/>
+
+                <!-- Quick-access toolbar for synthetic route graphs -->
+                <StackPanel x:Name="pnlConnectToolbar" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                   Margin="0,0,3,3" Background="transparent">
+
+                    <Button x:Name="btnConnectionGraph" BorderThickness="1" BorderBrush="#FF299ABC" Focusable="False"
+                        Padding="3" Margin="2,2,3,0" Cursor="Hand" Background="transparent"
+                        ToolTip="Sequence Graph: Interactive map of all synthetic &#x0a;steps leading to and starting from this reaction,&#x0a;divided into unique step sequences.">
+                        <ContentControl Content="{StaticResource icoGraph}" Height="13" Width="13" Opacity="0.9"/>
+                    </Button>
+
+                    <Button x:Name="btnStructureGraph" BorderThickness="1" BorderBrush="#FF299ABC" Focusable="False"
+                        Padding="3" Margin="0,2,0,0" Cursor="Hand" Background="transparent"
+                        ToolTip="Structure Graph: A map of all step structures &#x0a;leading to and starting from this reaction.">
+                        <ContentControl Content="{StaticResource icoExpandView}" Height="13" Width="13" Opacity="0.9"/>
+                    </Button>
+
+                </StackPanel>
             </Grid>
         </Border>
 

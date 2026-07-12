@@ -13,7 +13,7 @@
 
     <!--Dark mode panel colors (edit these to retheme all dark mode panels at once)-->
     <SolidColorBrush x:Key="DarkPanelBackground" Color="#FF474747"/>
-    <SolidColorBrush x:Key="DarkPanelBackground2" Color="#FF313131"/>
+    <SolidColorBrush x:Key="DarkPanelBackground2" Color="#FF343434"/>
     <SolidColorBrush x:Key="DarkPanelBorder"     Color="#FF7F7F7F"/>
     <SolidColorBrush x:Key="DarkInputBackground" Color="#FF333333"/>
     <SolidColorBrush x:Key="DarkTitleForeground" Color="#FFABCEFF"/>

@@ -115,22 +115,11 @@
 
             <Grid DockPanel.Dock="Top" Margin="0,6,0,18">
 
-                <!-- Color legend -->
-                <Border x:Name="pnlLegend" HorizontalAlignment="Left" Margin="6,0,0,0" BorderThickness="0" Background="#FF393939" 
-                  ToolTipService.InitialShowDelay="500">
-                    <StackPanel Orientation="Horizontal">
-                        <Border x:Name="bdrLegendSwatch" Width="10" Height="10" CornerRadius="2" Margin="6,0,4,0" VerticalAlignment="Center" 
-                           d:Background="#5284E4"/>
-                        <TextBlock x:Name="blkLegendType" FontSize="11" FontFamily="Segoe UI" Foreground="LightGray" VerticalAlignment="Center"
-                          d:Text="Linear" Margin="0,0,6,1"/>
-                    </StackPanel>
-                </Border>
-
                 <!-- Sequence title -->
-                <Border x:Name="bdrSchemeTitle" CornerRadius="6" BorderThickness="1" Opacity="1" Padding="8,1,8,4" MinWidth="120"
-                   HorizontalAlignment="Center" VerticalAlignment="Center" d:Background="#5284E4" >
+                <Border x:Name="bdrSchemeTitle" CornerRadius="6" BorderThickness="1" Opacity="1" Padding="12,3,12,6" MinWidth="120"
+                   HorizontalAlignment="Center" VerticalAlignment="Center" d:Background="#5284E4" ToolTipService.InitialShowDelay="250" >
                     <TextBlock x:Name="blkSchemeTitle" FontSize="11" FontWeight="Bold" FontFamily="Segoe UI"
-                      Foreground="White" HorizontalAlignment="Center" TextAlignment="Center" d:Text="Sequence 1"/>
+                        Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" d:Text="Sequence 1"/>
                 </Border>
                 
             </Grid>

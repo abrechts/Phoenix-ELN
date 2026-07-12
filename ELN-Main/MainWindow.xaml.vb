@@ -180,6 +180,8 @@ Class MainWindow
         AddHandler StepSummary.RequestOpenExperiment, AddressOf ResultList_RequestOpenExperiment
         AddHandler RssItemGroup.RequestOpenExperiment, AddressOf RssItemGroup_RequestOpenExperiment
         AddHandler RssItemGroup.RequestStepConnections, AddressOf ExperimentContent_RequestSequencesDialog
+        AddHandler ExperimentContent.RequestConnectionGraph, AddressOf ExperimentContent_RequestSequencesDialog
+        AddHandler ExperimentContent.RequestStructureGraph, AddressOf ExperimentContent_RequestStructureGraph
         AddHandler StepExpSelector.RequestOpenExperiment, AddressOf StepExpSelector_RequestOpenExperiment
         AddHandler ExperimentContent.ExperimentContextChanged, AddressOf ExperimentContent_ContextChanged
 
@@ -1663,15 +1665,6 @@ Class MainWindow
     End Sub
 
 
-    Private Sub btnAnalyze_Click() Handles btnAnalyze.Click
-
-        Dim refExp = CType(SelectedExpContent.DataContext, tblExperiments)
-        Dim isServerExp As Boolean = (refExp.DisplayIndex = -2) 'unique tab indicator for server experiment 
-
-        ExperimentContent_RequestSequencesDialog(Nothing, refExp, isServerExp)
-
-    End Sub
-
 
     Private Sub ExperimentContent_RequestSequencesDialog(sender As Object, refExp As tblExperiments, isServerExp As Boolean)
 
@@ -1705,6 +1698,39 @@ Class MainWindow
             settings.dlgSequencesPosition = New System.Drawing.Point(.Left, .Top)
             settings.dlgSequencesSize = New System.Drawing.Size(.ActualWidth, .ActualHeight)
 
+        End With
+
+    End Sub
+
+
+    ''' <summary>
+    ''' Displays the Structure Graph (dlgSequenceScheme) directly for the given experiment, without
+    ''' going through the Connection Graph dialog first.
+    ''' </summary>
+    '''
+    Private Sub ExperimentContent_RequestStructureGraph(sender As Object, refExp As tblExperiments, isServerExp As Boolean)
+
+        If refExp.RxnSketch Is Nothing Then
+            cbMsgBox.Display("Missing reaction sketch: Can't create a structure graph!", MsgBoxStyle.OkOnly, "Synthetic Connections")
+            Exit Sub
+        End If
+
+        Dim useServer = isServerExp OrElse CustomControls.My.MySettings.Default.UseServerSequences
+
+        If useServer AndAlso ServerDBContext Is Nothing Then
+            cbMsgBox.Display("The current experiment originates from the server, but the server currently is unavailable!", MsgBoxStyle.OkOnly)
+            Exit Sub
+        End If
+
+        Dim queryExperiments = If(useServer, ServerDBContext.tblExperiments, DBContext.tblExperiments)
+
+        Dim sequences = dlgConnectGraph.BuildSequences(refExp, queryExperiments)
+
+        Dim schemeDlg As New dlgSequenceScheme()
+        With schemeDlg
+            .Owner = Me
+            .SetData(sequences, queryExperiments)
+            .Show()
         End With
 
     End Sub

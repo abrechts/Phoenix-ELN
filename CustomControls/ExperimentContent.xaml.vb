@@ -30,6 +30,20 @@ Public Class ExperimentContent
     '''
     Public Shared Event ExperimentContextChanged(sender As Object, newExpEntry As tblExperiments)
 
+    ''' <summary>
+    ''' Raised when the user requests the Connection Graph (dlgConnectGraph) for the current experiment,
+    ''' via the quick-access toolbar overlaid on the reaction sketch.
+    ''' </summary>
+    '''
+    Public Shared Event RequestConnectionGraph(sender As Object, expEntry As tblExperiments, isFromServer As Boolean)
+
+    ''' <summary>
+    ''' Raised when the user requests the Structure Graph (dlgSequenceScheme) directly for the current
+    ''' experiment, via the quick-access toolbar overlaid on the reaction sketch.
+    ''' </summary>
+    '''
+    Public Shared Event RequestStructureGraph(sender As Object, expEntry As tblExperiments, isFromServer As Boolean)
+
 
     Public Sub New()
 
@@ -229,6 +243,44 @@ Public Class ExperimentContent
 
         Dim expEntry = CType(Me.DataContext, tblExperiments)
         ExpProtocol.ChangeWorkflowState(expEntry, WorkflowStatus.Finalized)
+
+    End Sub
+
+
+    ''' <summary>
+    ''' Requests the Connection Graph dialog for the current experiment.
+    ''' </summary>
+    '''
+    Private Sub btnConnectionGraph_Click() Handles btnConnectionGraph.Click
+
+        RaiseGraphRequest(isStructureGraph:=False)
+
+    End Sub
+
+
+    ''' <summary>
+    ''' Requests the Structure Graph dialog directly for the current experiment (bypassing the Connection Graph dialog).
+    ''' </summary>
+    '''
+    Private Sub btnStructureGraph_Click() Handles btnStructureGraph.Click
+
+        RaiseGraphRequest(isStructureGraph:=True)
+
+    End Sub
+
+
+    Private Sub RaiseGraphRequest(isStructureGraph As Boolean)
+
+        Dim currExp = CType(Me.DataContext, tblExperiments)
+        If currExp Is Nothing Then Exit Sub
+
+        Dim isFromServer = (currExp.DisplayIndex = -2) 'unique tab indicator for server experiment
+
+        If isStructureGraph Then
+            RaiseEvent RequestStructureGraph(Me, currExp, isFromServer)
+        Else
+            RaiseEvent RequestConnectionGraph(Me, currExp, isFromServer)
+        End If
 
     End Sub
 
@@ -434,6 +486,8 @@ Public Class ExperimentContent
         If pnlProtocol.IsPrinting Then
             tabFinalized.SelectedIndex = 0
         End If
+
+        pnlConnectToolbar.Visibility = Visibility.Collapsed
 
         Margin = New Thickness(0, -10, 0, 0)
 

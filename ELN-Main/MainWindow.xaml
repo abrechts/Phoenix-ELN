@@ -154,16 +154,6 @@
                         </StackPanel>
                     </Button>
 
-                    <Button x:Name="btnAnalyze" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0,2,0"
-                        ToolTip="Display all synthetic steps leading to the &#x0a;current experiment and away from it."
-                        IsEnabled="{Binding ElementName=btnSearch, Path=IsEnabled}">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="💡" Foreground="#FFFFF1B3" FontSize="13" Margin="0,0,0,0"/>
-                            <TextBlock Text="Analyze" Margin="0,1,3,0" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </Button>
-
-
                     <Separator Margin="2,2,0,2"/>
 
                     <Menu x:Name="mnuTools" TextBlock.FontFamily="Segoe UI" TextBlock.FontSize="13" Background="transparent" 

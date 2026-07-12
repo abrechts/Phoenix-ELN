@@ -86,9 +86,23 @@ Partial Public Class dlgConnectGraph
     '''
     Private Sub SetGraphItems(seedExp As tblExperiments, allExperiments As IQueryable(Of tblExperiments))
 
-        'NOTE: connKey-based deduplication doesn't distinguish between same step experiments of different users!
-
         QueryExperiments = allExperiments
+        _srcObjects = BuildGraphObjects(seedExp, allExperiments)
+
+    End Sub
+
+
+    ''' <summary>
+    ''' Parses through the connection graph (BFS traversal) and returns a single GraphObject per
+    ''' connection node (seed first). Shared so the connection data can be built without a
+    ''' dlgConnectGraph instance, e.g. to jump directly to the Structure Graph (see BuildSequences).
+    ''' </summary>
+    ''' <param name="seedExp">The experiment at the origin of the connection graph.</param>
+    ''' <param name="allExperiments">The collection of all experiments to consider.</param>
+    '''
+    Public Shared Function BuildGraphObjects(seedExp As tblExperiments, allExperiments As IQueryable(Of tblExperiments)) As List(Of SequenceGraph.GraphObject)
+
+        'NOTE: connKey-based deduplication doesn't distinguish between same step experiments of different users!
 
         'lightweight projection for BFS: avoids pulling large fields (sketches, MDL files, fingerprints, ...) for the full table
         Dim allExpKeys = allExperiments.Select(Function(e) New ConnNode With {
@@ -136,9 +150,29 @@ Partial Public Class dlgConnectGraph
             connItems.Add(GetGraphObject(fullExperiments(orderedIds(i)), isSeed:=(i = 0)))
         Next
 
-        _srcObjects = connItems
+        Return connItems
 
-    End Sub
+    End Function
+
+
+    ''' <summary>
+    ''' Builds the compressed sequence graph for the given seed experiment (same BFS → sequence-compression
+    ''' pipeline as the Connection Graph dialog), without displaying dlgConnectGraph. Used to jump directly
+    ''' to the Structure Graph (dlgSequenceScheme).
+    ''' </summary>
+    ''' <param name="seedExp">The experiment at the origin of the connection graph.</param>
+    ''' <param name="allExperiments">The collection of all experiments to consider.</param>
+    '''
+    Public Shared Function BuildSequences(seedExp As tblExperiments, allExperiments As IQueryable(Of tblExperiments)) As IReadOnlyList(Of SequenceGraph.SequenceNode)
+
+        Dim graphObjects = BuildGraphObjects(seedExp, allExperiments)
+
+        Dim graphBuilder As New SequenceGraph()
+        graphBuilder.BuildAndRender(graphObjects, graphObjects.First(Function(o) o.IsSeed))
+
+        Return graphBuilder.Sequences
+
+    End Function
 
 
     Private Sub cboSourceSelection_SelectionChanged() Handles cboSourceSelection.SelectionChanged
@@ -224,7 +258,7 @@ Partial Public Class dlgConnectGraph
         'global reaction component foreground color (for reactant and product canvases in displayed sequence)
         SketchResults.ComponentStructureColor = New SolidColorBrush(ColorConverter.ConvertFromString("#FFF9F96B"))
 
-        blkSchemeTitle.Text = $"Sequence {seq.Id + 1}"
+        blkSchemeTitle.Text = $"Sequence {seq.Id + 1} • {seq.SequenceType}"
 
         'sequence title area
         Dim accent = GraphView.GetSequenceAccentBrush(seq)
@@ -234,32 +268,32 @@ Partial Public Class dlgConnectGraph
             bdrSchemeTitle.Background = New SolidColorBrush(Color.FromArgb(60, c.R, c.G, c.B))
         End If
 
-        'color legend
-        bdrLegendSwatch.Background = accent
-        blkLegendType.Text = seq.SequenceType
-        Select Case seq.SequenceType
-            Case "Start"
-                pnlLegend.ToolTip = "This sequence contains the reference " + vbCrLf +
+        'sequence type tooltip
+        With bdrSchemeTitle
+            Select Case seq.SequenceType
+                Case "Start"
+                    .ToolTip = "This sequence contains the reference " + vbCrLf +
                                     "step (➤), the origin of all upstream " + vbCrLf +
                                     "and and downstream connections."
-            Case "Alternative"
-                pnlLegend.ToolTip = "An alternative synthetic pathway for " + vbCrLf +
+                Case "Alternative"
+                    .ToolTip = "An alternative synthetic pathway for " + vbCrLf +
                                     "producing the same intermediate from " + vbCrLf +
                                     "the same starting material."
-            Case "Hub"
-                pnlLegend.ToolTip = "This sequence serves as a hub between multiple " + vbCrLf +
+                Case "Hub"
+                    .ToolTip = "This sequence serves as a hub between multiple " + vbCrLf +
                                     "incoming and outgoing sequences."
-            Case "Terminal"
-                pnlLegend.ToolTip = "This sequence represents an upstream or " + vbCrLf +
+                Case "Terminal"
+                    .ToolTip = "This sequence represents an upstream or " + vbCrLf +
                                     "downstream end point."
 
-            Case "Linear"
-                pnlLegend.ToolTip = "This is a default synthetic step sequence."
+                Case "Linear"
+                    .ToolTip = "This is a default synthetic step sequence."
 
-            Case Else
-                pnlLegend.ToolTip = Nothing
+                Case Else
+                    .ToolTip = Nothing
 
-        End Select
+            End Select
+        End With
 
         Dim stepNr As Integer = 1
         pnlSeqStructures.Children.Clear()
@@ -432,7 +466,7 @@ Partial Public Class dlgConnectGraph
     End Function
 
 
-    Private Function GetGraphObject(exp As tblExperiments, Optional isSeed As Boolean = False) As SequenceGraph.GraphObject
+    Private Shared Function GetGraphObject(exp As tblExperiments, Optional isSeed As Boolean = False) As SequenceGraph.GraphObject
 
         Dim obj As New SequenceGraph.GraphObject With {
             .A = NodeKey(exp.ReactantInChIKey, exp.IsRacemicReactant),
