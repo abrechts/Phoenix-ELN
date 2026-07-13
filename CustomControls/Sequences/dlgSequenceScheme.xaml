@@ -28,9 +28,15 @@
           Margin="0,0,0,36" CornerRadius="10"  Padding="3">
             <Button x:Name="btnClose" Content="Close (Esc)" Width="90" Background="Transparent" IsCancel="True" BorderThickness="0" FontSize="14"/>
         </Border>
-
-        <!-- Control strip (top-right): PDF button + zoom combo -->
+        
         <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,12,12,0">
+
+            <ComboBox x:Name="cboSourceSelection" Style="{StaticResource DarkCombo}" Background="transparent" Margin="4,0,4,0"
+               Foreground="#FFB8B9FE" FontSize="11" BorderThickness="1" BorderBrush="DimGray" VerticalAlignment="Center"
+               ToolTip="Switch between local and server database">
+                <ComboBoxItem x:Name="cboItemLocal" Content="Local"/>
+                <ComboBoxItem x:Name="cboItemServer" Content="Server"/>
+            </ComboBox>
 
             <Button x:Name="btnPdfExport" Content="PDF" Style="{StaticResource DarkModeButtonStyle}" ToolTip="Export as PDF" BorderThickness="1"
                FontSize="11" FontWeight="SemiBold" Foreground="#FFCFCDCD" VerticalAlignment="Center" Margin="4,0,4,0" Padding="5,1,5,2"/>

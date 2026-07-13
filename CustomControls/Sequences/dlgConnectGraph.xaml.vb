@@ -216,8 +216,6 @@ Partial Public Class dlgConnectGraph
         'update selected step experiments
         Dim stepExp = struct.StepExperiments
         stepExpItems.ItemsSource = stepExp.ToList
-
-        runSchemePath.Text = blkSchemeTitle.Text
         runStepNumber.Text = struct.StepNumberStr
 
     End Sub
@@ -259,6 +257,7 @@ Partial Public Class dlgConnectGraph
         SketchResults.ComponentStructureColor = New SolidColorBrush(ColorConverter.ConvertFromString("#FFF9F96B"))
 
         blkSchemeTitle.Text = $"Sequence {seq.Id + 1} • {seq.SequenceType}"
+        runSchemePath.Text = $"Sequence {seq.Id + 1}"
 
         'sequence title area
         Dim accent = GraphView.GetSequenceAccentBrush(seq)
@@ -273,18 +272,18 @@ Partial Public Class dlgConnectGraph
             Select Case seq.SequenceType
                 Case "Start"
                     .ToolTip = "This sequence contains the reference " + vbCrLf +
-                                    "step (➤), the origin of all upstream " + vbCrLf +
-                                    "and and downstream connections."
+                               "step (➤), the origin of all upstream " + vbCrLf +
+                               "and and downstream connections."
                 Case "Alternative"
-                    .ToolTip = "An alternative synthetic pathway for " + vbCrLf +
-                                    "producing the same intermediate from " + vbCrLf +
-                                    "the same starting material."
+                    .ToolTip = "A parallel synthetic pathway for " + vbCrLf +
+                               "preparing a common intermediate " + vbCrLf +
+                               "from a common starting material."
                 Case "Hub"
                     .ToolTip = "This sequence serves as a hub between multiple " + vbCrLf +
-                                    "incoming and outgoing sequences."
+                               "incoming and outgoing sequences."
                 Case "Terminal"
                     .ToolTip = "This sequence represents an upstream or " + vbCrLf +
-                                    "downstream end point."
+                               "downstream end point."
 
                 Case "Linear"
                     .ToolTip = "This is a default synthetic step sequence."
@@ -364,7 +363,7 @@ Partial Public Class dlgConnectGraph
         Dim dlg As New dlgSequenceScheme()
         With dlg
             .Owner = Me
-            .SetData(GraphView.Sequences, QueryExperiments)
+            .SetData(GraphView.Sequences, QueryExperiments, SeedExperiment, LocalExperiments, ServerExperiments)
             .Show()
         End With
 

@@ -7,9 +7,9 @@
         xmlns:data="clr-namespace:ElnCoreModel;assembly=ElnCoreModel" 
         xmlns:componentModel="clr-namespace:System.ComponentModel;assembly=WindowsBase"
         xmlns:local="clr-namespace:ChemBytes"
-        mc:Ignorable="d"
+        mc:Ignorable="d" 
         d:DataContext="{d:DesignInstance Type=data:tblUsers}"
-        Title="Phoenix ELN" Width="1310" MinHeight="700">
+        Title="Phoenix ELN" Width="1330" Height="850" MinHeight="800" MinWidth="1330">
 
     <Window.Resources>
 
@@ -254,11 +254,16 @@
 
                     <Separator/>
 
-                    <ToggleButton x:Name="chkLightMode"
+                    <ToggleButton x:Name="chkLightMode" Margin="0,1,0,0"
                         IsChecked="{Binding IsDarkMode, RelativeSource={RelativeSource AncestorType={x:Type local:MainWindow}}, Mode=TwoWay, Converter={StaticResource boolInvertConv}}"
-                        ToolTip="Toggle dark / light mode">
-                        <TextBlock Text="🌞" FontSize="13" Margin="2,0"/>
+                        ToolTip="Toggle dark / light mode" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="🔅" FontSize="13" Foreground="LightBlue" Margin="0,0,2,0"/>
+                            <TextBlock Text="Mode" Margin="0,0,2,0"/>
+                        </StackPanel>
                     </ToggleButton>
+                    
+                    <Separator/>
 
                 </ToolBar>
 

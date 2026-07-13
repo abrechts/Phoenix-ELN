@@ -11,7 +11,7 @@ public partial class tblProjects
 
     public string? Title { get; set; }
 
-    public int? SequenceNr { get; set; }
+    public short? SequenceNr { get; set; }
 
     public byte IsNodeExpanded { get; set; }
 

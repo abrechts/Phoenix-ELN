@@ -226,7 +226,7 @@
 
                     <ListBox x:Name="lstStepExperiments" SelectionMode="Single" BorderThickness="0,1" BorderBrush="#FF45A1FD"
                         FocusVisualStyle="{x:Null}"
-                        Grid.IsSharedSizeScope="true" AllowDrop="false" Margin="4,3,4,0" Padding="0,4,0,0"
+                        Grid.IsSharedSizeScope="true" AllowDrop="false" Margin="4,2,4,0" Padding="0,4,0,0"
                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                         VirtualizingStackPanel.IsVirtualizing="False" MinHeight="25"
                         IsSynchronizedWithCurrentItem="False"

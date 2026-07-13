@@ -29,7 +29,7 @@ Public Class RestoreFromServer
                 'copy local db to temp file and clear all local data
                 With TmpLocalContext
                     Dim localDbEntry = .tblDatabaseInfo.First
-                    .tblDatabaseInfo.Remove(localDbEntry)
+                    .tblDatabaseInfo.Remove(localDbEntry)  ' --> only removes tblDatabaseInfo, but does not cascade delete
                     .SaveChanges()
                 End With
 
@@ -136,12 +136,37 @@ Public Class RestoreFromServer
 
     Private Shared Sub AddEntity(serverEntity As Object)
 
+        'With TmpLocalContext
+
+        '    Try
+
+        '        Dim cpType = serverEntity.GetType().BaseType
+        '        Dim localEntity = Activator.CreateInstance(cpType) 'creates an empty new object
+        '        .Entry(localEntity).CurrentValues.SetValues(serverEntity)
+        '        .Add(localEntity)
+
+        '    Catch ex As Exception
+        '        'do nothing
+        '    End Try
+
+        'End With
+
         With TmpLocalContext
 
             Try
 
                 Dim cpType = serverEntity.GetType().BaseType
-                Dim localEntity = Activator.CreateInstance(cpType) 'creates an empty new object
+                Dim guid = serverEntity.GetType().GetProperty("GUID")?.GetValue(serverEntity)
+
+                ' Check if entity already exists in context
+                If guid IsNot Nothing Then
+                    Dim existingEntity = .Find(cpType, guid)
+                    If existingEntity IsNot Nothing Then
+                        Return ' Entity already added, skip
+                    End If
+                End If
+
+                Dim localEntity = Activator.CreateInstance(cpType)
                 .Entry(localEntity).CurrentValues.SetValues(serverEntity)
                 .Add(localEntity)
 

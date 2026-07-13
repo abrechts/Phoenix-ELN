@@ -144,7 +144,7 @@
 
                     <Button x:Name="btnConnectionGraph" BorderThickness="1" BorderBrush="#FF299ABC" Focusable="False"
                         Padding="3" Margin="2,2,3,0" Cursor="Hand" Background="transparent"
-                        ToolTip="Sequence Graph: Interactive map of all synthetic &#x0a;steps leading to and starting from this reaction,&#x0a;divided into unique step sequences.">
+                        ToolTip="Interactive, sequence-based map of all synthetic &#x0a;steps leading to and starting from this reaction.">
                         <ContentControl Content="{StaticResource icoGraph}" Height="13" Width="13" Opacity="0.9"/>
                     </Button>
 

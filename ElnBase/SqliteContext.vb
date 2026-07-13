@@ -13,7 +13,11 @@ Public Class SQLiteContext
     Public Sub New(sqliteFilePath As String)
 
         Dim optionsBuilder As New DbContextOptionsBuilder(Of ElnDataContext)
-        Dim opts = optionsBuilder.UseSqlite("Data Source = " + sqliteFilePath)
+
+        'Foreign Keys=True is required with the winsqlite3 provider: unlike e_sqlite3, the Windows
+        'system SQLite is not compiled with SQLITE_DEFAULT_FOREIGN_KEYS, so ON DELETE CASCADE
+        'would otherwise not be enforced.
+        Dim opts = optionsBuilder.UseSqlite("Data Source = " + sqliteFilePath + ";Foreign Keys=True")
 
         'Important! Lazy loading required to obtain populated hierarchical navigation model data.
         'Install Microsoft.EntityFrameworkCore.Proxies NuGet package to use the option below:

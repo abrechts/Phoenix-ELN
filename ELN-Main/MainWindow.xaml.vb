@@ -90,6 +90,8 @@ Class MainWindow
                 Top = .StartupPosition.Y
                 Width = .StartupSize.Width
                 Height = .StartupSize.Height
+            Else
+                WindowStartupLocation = WindowStartupLocation.CenterScreen
             End If
 
             'Check for pending restore
@@ -1658,7 +1660,7 @@ Class MainWindow
                 .Owner = Me
             End If
 
-            .Show()
+            .ShowDialog()
 
         End With
 
@@ -1729,7 +1731,8 @@ Class MainWindow
         Dim schemeDlg As New dlgSequenceScheme()
         With schemeDlg
             .Owner = Me
-            .SetData(sequences, queryExperiments)
+            .SetData(sequences, queryExperiments, refExp, DBContext.tblExperiments,
+                     If(ServerDBContext IsNot Nothing, ServerDBContext.tblExperiments, Nothing))
             .Show()
         End With
 

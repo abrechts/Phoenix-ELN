@@ -9,6 +9,9 @@ Partial Public Class dlgSequenceScheme
 
     Private _sequences As IReadOnlyList(Of SequenceGraph.SequenceNode)
     Private _queryExperiments As IQueryable(Of tblExperiments)
+    Private _seedExperiment As tblExperiments
+    Private _localExperiments As IQueryable(Of tblExperiments)
+    Private _serverExperiments As IQueryable(Of tblExperiments)
     Private _suppressZoomComboEvent As Boolean = False
 
     Public Sub New()
@@ -20,12 +23,28 @@ Partial Public Class dlgSequenceScheme
     ''' Stores the data to render. Must be called before Show() so it is
     ''' available when Window_Loaded triggers the actual layout pass.
     ''' </summary>
+    ''' <param name="sequences">The already-built sequence graph to display.</param>
+    ''' <param name="queryExperiments">The experiment source (local or server) the sequences were built from.</param>
+    ''' <param name="seedExperiment">The BFS origin experiment, needed to rebuild the graph if the source is switched.</param>
+    ''' <param name="localExperiments">The local database's experiments, or Nothing if unavailable.</param>
+    ''' <param name="serverExperiments">The server database's experiments, or Nothing if unavailable.</param>
     '''
     Public Sub SetData(sequences As IReadOnlyList(Of SequenceGraph.SequenceNode),
-                       queryExperiments As IQueryable(Of tblExperiments))
+                       queryExperiments As IQueryable(Of tblExperiments),
+                       Optional seedExperiment As tblExperiments = Nothing,
+                       Optional localExperiments As IQueryable(Of tblExperiments) = Nothing,
+                       Optional serverExperiments As IQueryable(Of tblExperiments) = Nothing)
 
         _sequences = sequences
         _queryExperiments = queryExperiments
+        _seedExperiment = seedExperiment
+        _localExperiments = localExperiments
+        _serverExperiments = serverExperiments
+
+        With cboSourceSelection
+            cboItemServer.IsEnabled = (serverExperiments IsNot Nothing)
+            .SelectedItem = If(cboItemServer.IsEnabled AndAlso queryExperiments Is serverExperiments, cboItemServer, cboItemLocal)
+        End With
 
     End Sub
 
@@ -40,12 +59,45 @@ Partial Public Class dlgSequenceScheme
         ' DesiredSize values for the sequence panels (needed for column layout).
         If _sequences IsNot Nothing Then
             SchemeView.BuildAndRender(_sequences, _queryExperiments)
-            Dim seqCount = _sequences.Count
-            Dim stepCount = _sequences.Sum(Function(s) s.Members.Count)
-            blkTitle.Text = $"STRUCTURE GRAPH  —  " &
-                            $"{seqCount} Sequence{If(seqCount <> 1, "s", "")}, " &
-                            $"{stepCount} Step{If(stepCount <> 1, "s", "")}"
+            UpdateTitle()
         End If
+
+    End Sub
+
+
+    ''' <summary>
+    ''' Switches the experiment source (local/server) and rebuilds the displayed scheme from it.
+    ''' Mirrors the cboSourceSelection handling in dlgConnectGraph.
+    ''' </summary>
+    '''
+    Private Sub cboSourceSelection_SelectionChanged() Handles cboSourceSelection.SelectionChanged
+
+        If cboSourceSelection.SelectedItem Is Nothing OrElse Not cboSourceSelection.IsMouseOver Then Return
+
+        'mouseover ensures direct user interaction, not from code
+        Dim useServer As Boolean = (cboSourceSelection.SelectedItem Is cboItemServer)
+        _queryExperiments = If(useServer AndAlso _serverExperiments IsNot Nothing, _serverExperiments, _localExperiments)
+
+        My.Settings.UseServerSequences = (_queryExperiments Is _serverExperiments)
+
+        _sequences = dlgConnectGraph.BuildSequences(_seedExperiment, _queryExperiments)
+        SchemeView.BuildAndRender(_sequences, _queryExperiments)
+        UpdateTitle()
+
+    End Sub
+
+
+    ''' <summary>
+    ''' Updates the header with the current sequence/step counts.
+    ''' </summary>
+    '''
+    Private Sub UpdateTitle()
+
+        Dim seqCount = _sequences.Count
+        Dim stepCount = _sequences.Sum(Function(s) s.Members.Count)
+        blkTitle.Text = $"STRUCTURE GRAPH  —  " &
+                        $"{seqCount} Sequence{If(seqCount <> 1, "s", "")}, " &
+                        $"{stepCount} Step{If(stepCount <> 1, "s", "")}"
 
     End Sub
 
