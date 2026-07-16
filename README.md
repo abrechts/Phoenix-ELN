@@ -43,16 +43,20 @@
 
 ## Synthetic Connections
 
-*Phoenix ELN* is able to analyze your experiments for synthetic sequences leading to the current experiment (upstream) and away from it (downstream). Each step of a sequence reveals its associated experiments, ordered by yield or scale.
+*Phoenix ELN* is able to analyze your experiments for synthetic sequences leading to the current experiment (upstream) and away from it (downstream). Each step of a sequence reveals its associated experiments, ordered by yield.
 
-<img src="GitHub_Assets/Release_Assets/Connections_Full.png" alt="drawing" width=700/>
+<img src="GitHub_Assets/Release_Assets/SequenceConnects.png" alt="drawing" width=700/>
+
+And here's a second available, structure-based graph: 
+
+<img src="GitHub_Assets/Release_Assets/SequenceSchemes.png" alt="drawing" width=800/>
 
 
 ## Reaction Substructure Searches
 
 *Phoenix ELN* is able to perform reaction substructure searches (RSS) using an integrated substructure search engine, which does not depend on any server or online functionality to work. You can either query your own local experiments, or the finalized experiments of all users within your organization, if connected to the (optional) in-house ELN experiments server (see below). 
 
-<img src="GitHub_Assets/Release_Assets/RSS_Results.jpg" alt="drawing" width=550/>
+<img src="GitHub_Assets/RSS_Search.png" alt="drawing" width=550/>
 
 
 ## ELN Server Integration (optional)
