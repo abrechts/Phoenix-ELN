@@ -2,7 +2,14 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Phoenix ELN System Error" Height="400" Width="600" WindowStartupLocation="CenterScreen" ResizeMode="NoResize" ShowInTaskbar="False">
-    
+
+    <Window.Resources>
+
+        <!--This panel is always rendered light regardless of the app-wide theme toggle -->
+        <ResourceDictionary Source="/CustomControls;component/Resources/SkinLight.xaml"/>
+
+    </Window.Resources>
+
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>

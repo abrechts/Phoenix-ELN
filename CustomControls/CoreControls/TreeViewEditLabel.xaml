@@ -34,24 +34,19 @@
                         </Setter.Value>
                     </Setter>
                     <Style.Triggers>
-                         <!--Edit mode--> 
+                         <!--Edit mode-->
                         <Trigger Property="IsReadOnly" Value="False">
                             <Setter Property="Background" Value="{StaticResource ActiveEditBackground}"/>
                             <Setter Property="Cursor"     Value="IBeam"/>
                             <Setter Property="Focusable"  Value="True"/>
                         </Trigger>
-                         <!--Dark mode--> 
-                        <DataTrigger Binding="{Binding Path=(local:DarkModeHelper.IsDarkMode), RelativeSource={RelativeSource Self}}" Value="True">
-                            <Setter Property="Foreground"  Value="WhiteSmoke"/>
-                            <Setter Property="CaretBrush"  Value="WhiteSmoke"/>
-                        </DataTrigger>
-                         <!--Dark mode + edit mode--> 
+                        <!--Dark mode + edit mode--> 
                         <MultiDataTrigger>
                             <MultiDataTrigger.Conditions>
                                 <Condition Binding="{Binding Path=(local:DarkModeHelper.IsDarkMode), RelativeSource={RelativeSource Self}}" Value="True"/>
                                 <Condition Binding="{Binding IsReadOnly, RelativeSource={RelativeSource Self}}" Value="False"/>
                             </MultiDataTrigger.Conditions>
-                            <Setter Property="Background" Value="{StaticResource DarkInputBackground}"/>
+                            <Setter Property="Background" Value="{DynamicResource InputBackground}"/>
                         </MultiDataTrigger>
                     </Style.Triggers>
                 </Style>

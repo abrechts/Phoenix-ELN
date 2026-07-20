@@ -6,6 +6,13 @@
              mc:Ignorable="d" 
              d:DesignHeight="434" d:DesignWidth="761" >
 
+    <UserControl.Resources>
+
+        <!--This panel is always rendered light regardless of the app-wide theme toggle -->
+        <ResourceDictionary Source="/CustomControls;component/Resources/SkinLight.xaml"/>
+
+    </UserControl.Resources>
+
     <Grid Name="MainGrid" Margin="50,0">
         <Grid.RowDefinitions>
             <RowDefinition Name="HeaderRow" Height="22" />

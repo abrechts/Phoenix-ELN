@@ -9,11 +9,18 @@
              d:Height="150" d:Width="500">
 
     <UserControl.Resources>
+        <ResourceDictionary>
 
-        <DataTemplate x:Key="hitGroupItem">
-            <local:ExpTreeHeader SuppressContextMenu="true" Margin="0,-1" FontSize="11"/>
-        </DataTemplate>
+            <!--This panel is always rendered light regardless of the app-wide theme toggle -->
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/CustomControls;component/Resources/SkinLight.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
 
+            <DataTemplate x:Key="hitGroupItem">
+                <local:ExpTreeHeader SuppressContextMenu="true" Margin="0,-1" FontSize="11"/>
+            </DataTemplate>
+
+        </ResourceDictionary>
     </UserControl.Resources>
 
     <Border BorderThickness="1" BorderBrush="#FFADADAD" CornerRadius="6" Margin="0,0,0,4" Background="white">

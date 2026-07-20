@@ -15,7 +15,6 @@
         <local:UnfinalizedCountConverter x:Key="unfinalizedCountConv"/>
         <local:UnfinalizedWarningVisibilityConverter x:Key="unfinalizedWarningVisConv"/>
         <local:AppVersionConverter x:Key="appVersionConv"/>
-        <local:DarkModeColorConverter x:Key="dmColor"/>
 
         <Style TargetType="TextBlock">
             <Setter Property="LineHeight" Value="14"/>
@@ -24,21 +23,10 @@
 
     </UserControl.Resources>
 
-    <Border BorderThickness="1" CornerRadius="6" Padding="10,6,6,4">
-        <Border.Style>
-            <Style TargetType="Border">
-                <Setter Property="Background" Value="White"/>
-                <Setter Property="BorderBrush" Value="Gray"/>
-                <Style.Triggers>
-                    <DataTrigger Binding="{Binding Path=(local:DarkModeHelper.IsDarkMode), RelativeSource={RelativeSource Self}}" Value="True">
-                        <Setter Property="Background" Value="{StaticResource DarkPanelBackground2}"/>
-                        <Setter Property="BorderBrush" Value="{StaticResource DarkPanelBorder}"/>
-                        <Setter Property="TextElement.Foreground" Value="WhiteSmoke"/>
-                    </DataTrigger>
-                </Style.Triggers>
-            </Style>
-        </Border.Style>
-        
+    <Border BorderThickness="1" CornerRadius="6" Padding="10,6,6,4"
+        Background="{DynamicResource InnerPanelBackground}" BorderBrush="{DynamicResource PanelBorder}"
+        TextElement.Foreground="{DynamicResource BodyForeground}">
+
         <StackPanel Margin="0,2,0,0">
 
             <Grid HorizontalAlignment="left">
@@ -49,12 +37,7 @@
                         <Style TargetType="TextBlock">
                             <Setter Property="LineHeight" Value="14"/>
                             <Setter Property="LineStackingStrategy" Value="BlockLineHeight"/>
-                            <Setter Property="Foreground" Value="{StaticResource DialogTitleForeground}"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding Path=(local:DarkModeHelper.IsDarkMode), RelativeSource={RelativeSource Self}}" Value="True">
-                                    <Setter Property="Foreground" Value="{StaticResource DarkTitleForeground}"/>
-                                </DataTrigger>
-                            </Style.Triggers>
+                            <Setter Property="Foreground" Value="{DynamicResource TitleForeground}"/>
                         </Style>
                     </TextBlock.Style>
                 </TextBlock>
@@ -65,14 +48,8 @@
                         <Style TargetType="TextBlock">
                             <Setter Property="LineHeight" Value="14"/>
                             <Setter Property="LineStackingStrategy" Value="BlockLineHeight"/>
-                            <Setter Property="Foreground" Value="{StaticResource DialogTitleForeground}"/>
-                            <Setter Property="Background" Value="white"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding Path=(local:DarkModeHelper.IsDarkMode), RelativeSource={RelativeSource Self}}" Value="True">
-                                    <Setter Property="Foreground" Value="{StaticResource DarkTitleForeground}"/>
-                                    <Setter Property="Background" Value="{StaticResource DarkPanelBackground2}"/>
-                                </DataTrigger>
-                            </Style.Triggers>
+                            <Setter Property="Foreground" Value="{DynamicResource TitleForeground}"/>
+                            <Setter Property="Background" Value="{DynamicResource InnerPanelBackground}"/>
                         </Style>
                     </TextBlock.Style>
                 </TextBlock>
@@ -101,7 +78,7 @@
                             Margin="2,3,0,0" ToolTip="The application is up to date!" d:Visibility="Visible" Visibility="visible"
                             ToolTipService.InitialShowDelay="250"/>
 
-                        <ContentControl x:Name="icoUpdateAvailable" Content="{StaticResource icoWarningCircleRed}" Height="16" 
+                        <ContentControl x:Name="icoUpdateAvailable" Content="{DynamicResource WarningCircleIcon}" Height="16" 
                             Visibility="Collapsed" d:Visibility="visible" VerticalAlignment="bottom" Margin="2,0,0,-1"/>
 
 
@@ -118,8 +95,8 @@
                         <Run Text="available:" Foreground="#FF393939"/>
                     </TextBlock>
 
-                    <TextBlock x:Name="lnkVersionInfo" Margin="2,0,0,0"
-                      Foreground="{Binding Path=(local:DarkModeHelper.IsDarkMode), RelativeSource={RelativeSource Self}, Converter={StaticResource dmColor}, ConverterParameter='Blue|#FF7EB4FF'}"
+                    <TextBlock x:Name="lnkVersionInfo" Margin="3,0,0,0"
+                      Foreground="{DynamicResource LinkForeground}"
                       Cursor="Hand" FontFamily="verdana" HorizontalAlignment="Left" Padding="0,0,2,0" FontStyle="Italic">
                         <Run Text="Version"/>
                         <Run x:Name="blkNewVersion" d:Text="2.12.4" Text=""/>
@@ -141,12 +118,10 @@
                         <ContentControl Content="{StaticResource icoOkCheckmark}" Height="14" VerticalAlignment="center"
                             Visibility="{Binding tblExperiments,Converter={StaticResource unfinalizedWarningVisConv},ConverterParameter=invert}"/>
 
-
-                        <ContentControl Content="{StaticResource icoWarningCircleRed}" Height="16" VerticalAlignment="center" 
+                        <ContentControl Content="{DynamicResource WarningCircleIcon}" Height="16" VerticalAlignment="center" 
                             ToolTipService.InitialShowDelay="250"                                            
                             Visibility="{Binding tblExperiments,Converter={StaticResource unfinalizedWarningVisConv}}"
-                            ToolTip="Finalize your experiments after completion&#x0a;for status feedback and protection against&#x0a;unintended changes (can be reverted)." />
-
+                            ToolTip="Finalize your experiments after completion&#x0a;for status feedback and protection against&#x0a;unintended changes (can be reverted)." Margin="2,0,0,0" />
 
                     </StackPanel>
 

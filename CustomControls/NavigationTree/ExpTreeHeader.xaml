@@ -17,7 +17,6 @@
         <local:IntegerToVisibilityConverter x:Key="intToVisConv"/>
         <local:ExpStateToVisibilityConverter x:Key="expStateVisConv"/>
         <local:PinnedToVisibilityConverter x:Key="pinnedToVisConv"/>
-        <local:DarkModeColorConverter x:Key="dmColor"/>
 
         <Style TargetType="MenuItem">
             <Setter Property="Template" Value="{StaticResource ContextMenuItem}"/>
@@ -53,12 +52,7 @@
                Visibility="{Binding DisplayIndex, Converter={StaticResource pinnedToVisConv}}">
                 <TextBlock.Style>
                     <Style TargetType="TextBlock">
-                        <Setter Property="Foreground" Value="#FF424242"/>
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding Path=(local:DarkModeHelper.IsDarkMode), RelativeSource={RelativeSource Self}}" Value="True">
-                                <Setter Property="Foreground" Value="LightBlue"/>
-                            </DataTrigger>
-                        </Style.Triggers>
+                        <Setter Property="Foreground" Value="{DynamicResource PinGlyphForeground}"/>
                     </Style>
                 </TextBlock.Style>
             </TextBlock>
@@ -67,23 +61,11 @@
                 
                 <Border.Style>
                     <Style TargetType="Border">
-                        <Setter Property="Background" Value="White"/>
+                        <Setter Property="Background" Value="{DynamicResource TreeItemBackground}"/>
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding IsCurrent}" Value="1">
-                                <Setter Property="Background" Value="#FFC4FAFF"/>
+                                <Setter Property="Background" Value="{DynamicResource CurrentExperimentHighlight}"/>
                             </DataTrigger>
-                            <DataTrigger Binding="{Binding Path=(local:DarkModeHelper.IsDarkMode), RelativeSource={RelativeSource Self}}" Value="True">
-                                <Setter Property="Background" Value="Transparent"/>
-                            </DataTrigger>
-                            <MultiDataTrigger>
-                                <MultiDataTrigger.Conditions>
-                                    <Condition Binding="{Binding IsCurrent}" Value="1"/>
-                                    <Condition Binding="{Binding Path=(local:DarkModeHelper.IsDarkMode), RelativeSource={RelativeSource Self}}" Value="True"/>
-                                </MultiDataTrigger.Conditions>
-                                <MultiDataTrigger.Setters>
-                                    <Setter Property="Background" Value="#FF2272BC"/>
-                                </MultiDataTrigger.Setters>
-                            </MultiDataTrigger>
                         </Style.Triggers>
                     </Style>
                 </Border.Style>
@@ -96,41 +78,19 @@
                             
                             <Ellipse.Style>
                                 <Style TargetType="Ellipse">
-                                    <Setter Property="Fill" Value="#FFE0584C"/>
+                                    <Setter Property="Fill" Value="{DynamicResource WorkflowInProgressFill}"/>
                                     <Setter Property="Width" Value="8"/>
                                     <Setter Property="Height" Value="8"/>
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding WorkflowState}" Value="1">
-                                            <Setter Property="Fill" Value="#FF396ED7"/>
+                                            <Setter Property="Fill" Value="{DynamicResource WorkflowFinalizedFill}"/>
                                             <Setter Property="Width" Value="10"/>
                                             <Setter Property="Height" Value="10"/>
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding WorkflowState}" Value="2">
-                                            <!--<Setter Property="Fill" Value="#FF888888"/>-->
                                             <Setter Property="Width" Value="10"/>
                                             <Setter Property="Height" Value="10"/>
                                         </DataTrigger>
-                                        <MultiDataTrigger>
-                                            <MultiDataTrigger.Conditions>
-                                                <Condition Binding="{Binding WorkflowState}" Value="0"/>
-                                                <Condition Binding="{Binding Path=(local:DarkModeHelper.IsDarkMode), RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True"/>
-                                            </MultiDataTrigger.Conditions>
-                                            <Setter Property="Fill" Value="#FFEE6E6E"/>
-                                        </MultiDataTrigger>
-                                        <MultiDataTrigger>
-                                            <MultiDataTrigger.Conditions>
-                                                <Condition Binding="{Binding WorkflowState}" Value="1"/>
-                                                <Condition Binding="{Binding Path=(local:DarkModeHelper.IsDarkMode), RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True"/>
-                                            </MultiDataTrigger.Conditions>
-                                            <Setter Property="Fill" Value="#FF66A0DB"/>
-                                        </MultiDataTrigger>
-                                        <MultiDataTrigger>
-                                            <MultiDataTrigger.Conditions>
-                                                <Condition Binding="{Binding WorkflowState}" Value="2"/>
-                                                <Condition Binding="{Binding Path=(local:DarkModeHelper.IsDarkMode), RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True"/>
-                                            </MultiDataTrigger.Conditions>
-                                            <Setter Property="Fill" Value="#FFEE6E6E"/>
-                                        </MultiDataTrigger>
                                     </Style.Triggers>
                                 </Style>
                             </Ellipse.Style>
@@ -154,18 +114,10 @@
                         
                     </Grid>
 
-                    <TextBlock MinWidth="50" Margin="0,0,2,1" VerticalAlignment="Center">
-                        <TextBlock.Style>
-                            <Style TargetType="TextBlock">
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding Path=(local:DarkModeHelper.IsDarkMode), RelativeSource={RelativeSource Self}}" Value="True">
-                                        <Setter Property="Foreground" Value="WhiteSmoke"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </TextBlock.Style>
+                    <TextBlock MinWidth="50" Margin="0,0,2,1" VerticalAlignment="Center"
+                        Foreground="{DynamicResource BodyForeground}">
                         <Run Name="runExpID" d:Text="demo-00123" Text="{Binding ExperimentID}"
-                             Foreground="{Binding Path=(local:DarkModeHelper.IsDarkMode), ElementName=expTreeHeaderRoot, Converter={StaticResource dmColor}, ConverterParameter='#FF2020CE|WhiteSmoke'}"/>
+                             Foreground="{DynamicResource ExperimentIdForeground}"/>
                         <Run Text="-"/>
                         <Run Name="runYield" d:Text="92.5%" Text="{Binding Yield, Converter={StaticResource yieldStrConv}}"/>
                         <Run Name="runScale" d:Text="(23.5 g)" Text="{Binding RefReactantGrams, Converter={StaticResource weightFromGramsConv}}"/>

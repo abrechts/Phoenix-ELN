@@ -12,7 +12,6 @@
     <UserControl.Resources>
         <local:RemainingDemoCountConverter x:Key="demoCountConv"/>
         <local:RemainingDemoBrushConverter x:Key="warningBrushConv"/>
-        <local:DarkModeColorConverter x:Key="dmColor"/>
         <Style TargetType="TextBlock">
             <Setter Property="LineHeight" Value="14"/>
             <Setter Property="LineStackingStrategy" Value="BlockLineHeight"/>
@@ -39,12 +38,7 @@
 
             <StackPanel.Style>
                 <Style TargetType="StackPanel">
-                    <Setter Property="TextBlock.Foreground" Value="#FF5C5C5C"/>
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding Path=(local:DarkModeHelper.IsDarkMode), RelativeSource={RelativeSource Self}}" Value="True">
-                            <Setter Property="TextBlock.Foreground" Value="whitesmoke"/>
-                        </DataTrigger>
-                    </Style.Triggers>
+                    <Setter Property="TextBlock.Foreground" Value="{DynamicResource MutedForeground}"/>
                 </Style>
             </StackPanel.Style>
 
@@ -62,12 +56,7 @@
 
             <StackPanel.Style>
                 <Style TargetType="StackPanel">
-                    <Setter Property="TextBlock.Foreground" Value="#FF5C5C5C"/>
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding Path=(local:DarkModeHelper.IsDarkMode), RelativeSource={RelativeSource Self}}" Value="True">
-                            <Setter Property="TextBlock.Foreground" Value="whitesmoke"/>
-                        </DataTrigger>
-                    </Style.Triggers>
+                    <Setter Property="TextBlock.Foreground" Value="{DynamicResource MutedForeground}"/>
                 </Style>
             </StackPanel.Style>
 
@@ -88,47 +77,34 @@
             HorizontalAlignment="Left" Margin="12,4,0,6" Background="#FFC5FFC5"
             VerticalContentAlignment="Center" FocusVisualStyle="{x:Null}"
             ToolTip="Leave the demo sandbox and start &#x0a;creating your own experiments.">
-            <!--<Button.Style>
-                <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
-                    <Setter Property="BorderBrush" Value="Green"/>
-                    <Setter Property="Background" Value="#FFDCFFDC"/>
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding Path=(local:DarkModeHelper.IsDarkMode), RelativeSource={RelativeSource Self}}" Value="True">
-                            <Setter Property="BorderBrush" Value="#FF4CAF50"/>
-                            <Setter Property="Background" Value="#FF1A3320"/>
-                            <Setter Property="Foreground" Value="#FF90D490"/>
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </Button.Style>-->
         </Button>
 
         <Separator Margin="12,4,12,8"/>
 
         <TextBlock Margin="12,0,12,0" TextWrapping="wrap" HorizontalAlignment="left" IsHyphenationEnabled="true"
-            Foreground="{Binding Path=(local:DarkModeHelper.IsDarkMode), RelativeSource={RelativeSource Self}, Converter={StaticResource dmColor}, ConverterParameter='#FF222222|WhiteSmoke'}">
+            Foreground="{DynamicResource BodyForeground}">
             <Run Text="Existing Users" FontStyle="Italic" FontWeight="DemiBold" FontSize="12"/>
             <Run Text=": Transfer your ELN data from a previous installation -" FontStyle="Normal"/>
             <Run x:Name="lnkTransferInfo" Text="more info." TextDecorations="Underline" Cursor="Hand"
-                 Foreground="{Binding Path=(local:DarkModeHelper.IsDarkMode), ElementName=statusDemoRoot, Converter={StaticResource dmColor}, ConverterParameter='Blue|#FF7EB4FF'}"/>
+                 Foreground="{DynamicResource LinkForeground}"/>
         </TextBlock>
         
 
         <StackPanel Orientation="Horizontal" Margin="12,4,22,0" HorizontalAlignment="Left">
             
-            <ContentControl Content="{StaticResource icoOpenFolder_Dark}" Height="18" Margin="0,0,5,0"/>
+            <ContentControl Content="{DynamicResource OpenFolderIcon}" Height="18" Margin="0,0,5,0"/>
 
             <TextBlock x:Name="lnkImportPackage" Text="Import transfer package" HorizontalAlignment="Center"
-                Foreground="{Binding Path=(local:DarkModeHelper.IsDarkMode), RelativeSource={RelativeSource Self}, Converter={StaticResource dmColor}, ConverterParameter='Blue|#FF7EB4FF'}"
+                Foreground="{DynamicResource LinkForeground}"
                 Cursor="Hand" TextDecorations="Underline" VerticalAlignment="Center" FontSize="12.5"
                 ToolTip="Imports experiments and settings of an original &#x0a;ELN installation (preferred method)."/>
             
         </StackPanel>
 
         <StackPanel Orientation="Horizontal" Margin="12,0,22,6" HorizontalAlignment="Left">
-            <ContentControl Content="{StaticResource icoFromServer_Dark}" Height="18" Margin="0,0,5,0"/>
+            <ContentControl Content="{DynamicResource FromServerIcon}" Height="18" Margin="0,0,5,0"/>
             <TextBlock x:Name="lnkRestore" Text="Restore from server" HorizontalAlignment="Center"
-                Foreground="{Binding Path=(local:DarkModeHelper.IsDarkMode), RelativeSource={RelativeSource Self}, Converter={StaticResource dmColor}, ConverterParameter='Blue|#FF7EB4FF'}"
+                Foreground="{DynamicResource LinkForeground}"
                 Cursor="Hand" TextDecorations="Underline" VerticalAlignment="Center" FontSize="12.5"
                 ToolTip="Replaces the demo database experiments with your own experiments.&#x0a;This is the method of choice if your original data were lost."/>
         </StackPanel>

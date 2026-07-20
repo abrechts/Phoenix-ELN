@@ -13,6 +13,8 @@
                 <ResourceDictionary Source="/CustomControls;component/Resources/SpecialIcons.xaml"/>
                 <ResourceDictionary Source="/CustomControls;component/Resources/StandardIcons.xaml"/>
                 <ResourceDictionary Source="/CustomControls;component/Resources/DarkModeCtrlStyles.xaml"/>
+                <!--Active skin (light/dark); swapped at runtime by DarkModeHelper.ApplySkin-->
+                <ResourceDictionary Source="/CustomControls;component/Resources/SkinDark.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
             <SolidColorBrush x:Key="ProtocolItemBorder" Color="#FFD9D9D9"/>
@@ -184,15 +186,12 @@
                         <ControlTemplate TargetType="ToggleButton">
                             <Grid Width="15" Height="13" Margin="0,2,0,0" Background="Transparent">
                                 <Path x:Name="ExpandPath" HorizontalAlignment="Left" VerticalAlignment="Center"
-                                   Margin="1,1,1,1" Fill="#444" Data="M 4 0 L 8 4 L 4 8 Z"/>
+                                   Margin="1,1,1,1" Fill="{DynamicResource TreeExpanderGlyph}" Data="M 4 0 L 8 4 L 4 8 Z"/>
                             </Grid>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsChecked" Value="True">
                                     <Setter Property="Data" TargetName="ExpandPath" Value="M 0 4 L 8 4 L 4 8 Z"/>
                                 </Trigger>
-                                <DataTrigger Binding="{Binding Path=(cc:DarkModeHelper.IsDarkMode), RelativeSource={RelativeSource TemplatedParent}}" Value="True">
-                                    <Setter TargetName="ExpandPath" Property="Fill" Value="#AAAAAA"/>
-                                </DataTrigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
                     </Setter.Value>

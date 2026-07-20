@@ -319,6 +319,7 @@ Class MainWindow
     End Property
 
     Private Shared Sub OnIsDarkModeChanged(d As DependencyObject, e As DependencyPropertyChangedEventArgs)
+        CustomControls.DarkModeHelper.ApplySkin(CBool(e.NewValue))
         CustomControls.My.MySettings.Default.IsDarkMode = CBool(e.NewValue)
         CustomControls.My.MySettings.Default.Save()
     End Sub

@@ -5,7 +5,16 @@
     SnapsToDevicePixels="True" UseLayoutRounding="True" ShowInTaskbar="False" FontFamily="Verdana" FontSize="11" >
 
     <Window.Resources>
-        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+        <ResourceDictionary>
+
+            <!--This panel is always rendered light regardless of the app-wide theme toggle -->
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/CustomControls;component/Resources/SkinLight.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
+            <BooleanToVisibilityConverter x:Key="BoolToVis" />
+
+        </ResourceDictionary>
     </Window.Resources>
 
     <Grid>

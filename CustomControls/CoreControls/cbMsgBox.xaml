@@ -17,7 +17,13 @@
         FontSize="11">
 
     <Window.Resources>
-        
+        <ResourceDictionary>
+
+            <!--This panel is always rendered dark regardless of the app-wide theme toggle -->
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/CustomControls;component/Resources/SkinDark.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
         <Style TargetType="Button">
             <Style.Resources>
                 <Style TargetType="Border">
@@ -50,7 +56,8 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
-        
+
+        </ResourceDictionary>
     </Window.Resources>
 
 

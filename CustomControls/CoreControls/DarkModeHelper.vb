@@ -1,17 +1,15 @@
-Imports System.Globalization
 Imports System.Windows
-Imports System.Windows.Data
-Imports System.Windows.Media
 
 ''' <summary>
-''' Provides an inherited attached property that propagates dark-mode state down the element tree,
-''' and a converter for switching brush values between light and dark.
+''' Provides an inherited attached property that propagates dark-mode state down the element tree.
 ''' </summary>
+''' 
 Public Class DarkModeHelper
 
     ''' <summary>
     ''' Attached, inherited DP. Set it on a container element; all descendants read the same value.
     ''' </summary>
+    ''' 
     Public Shared ReadOnly IsDarkModeProperty As DependencyProperty =
         DependencyProperty.RegisterAttached(
             "IsDarkMode",
@@ -20,35 +18,44 @@ Public Class DarkModeHelper
             New FrameworkPropertyMetadata(False, FrameworkPropertyMetadataOptions.Inherits))
 
     Public Shared Function GetIsDarkMode(obj As DependencyObject) As Boolean
+
         Return DirectCast(obj.GetValue(IsDarkModeProperty), Boolean)
+
     End Function
 
     Public Shared Sub SetIsDarkMode(obj As DependencyObject, value As Boolean)
+
         obj.SetValue(IsDarkModeProperty, value)
+
     End Sub
 
-End Class
+    ''' <summary>
+    ''' Replaces the application level skin resource dictionary (SkinLight.xaml/SkinDark.xaml),
+    ''' updating all brushes referenced via DynamicResource. Both skins define an identical
+    ''' set of role-named brush keys.
+    ''' </summary>
+    ''' 
+    Public Shared Sub ApplySkin(isDark As Boolean)
 
+        Dim skinUri As New Uri("/CustomControls;component/Resources/" +
+            If(isDark, "SkinDark.xaml", "SkinLight.xaml"), UriKind.Relative)
 
-''' <summary>
-''' Converts a Boolean IsDarkMode value to a Brush.
-''' ConverterParameter must be two color strings separated by '|': "LightColor|DarkColor"
-''' e.g. ConverterParameter='#FF333333|#FFD4D4D4'
-''' </summary>
-Public Class DarkModeColorConverter
-    Implements IValueConverter
+        Dim mergedDict = Application.Current.Resources.MergedDictionaries
 
-    Public Function Convert(value As Object, targetType As Type, parameter As Object,
-                            culture As CultureInfo) As Object Implements IValueConverter.Convert
-        Dim isDark = CBool(value)
-        Dim parts = CStr(parameter).Split("|"c)
-        Dim colorStr = If(isDark, parts(1), parts(0))
-        Return New BrushConverter().ConvertFromString(colorStr)
-    End Function
+        For i = 0 To mergedDict.Count - 1
 
-    Public Function ConvertBack(value As Object, targetType As Type, parameter As Object,
-                                culture As CultureInfo) As Object Implements IValueConverter.ConvertBack
-        Throw New NotImplementedException()
-    End Function
+            Dim src = mergedDict(i).Source
+
+            If src IsNot Nothing AndAlso (src.OriginalString.EndsWith("SkinLight.xaml") OrElse
+              src.OriginalString.EndsWith("SkinDark.xaml")) Then
+                mergedDict(i) = New ResourceDictionary With {.Source = skinUri}
+                Return
+            End If
+
+        Next
+
+        mergedDict.Add(New ResourceDictionary With {.Source = skinUri})
+
+    End Sub
 
 End Class

@@ -31,17 +31,7 @@
     </Window.Resources>
 
 
-    <DockPanel>
-        <DockPanel.Style>
-            <Style TargetType="DockPanel">
-                <Setter Property="Background" Value="#FF979797"/>
-                <Style.Triggers>
-                    <DataTrigger Binding="{Binding IsDarkMode, ElementName=mainWin}" Value="True">
-                        <Setter Property="Background" Value="#FF2A2A2A"/>
-                    </DataTrigger>
-                </Style.Triggers>
-            </Style>
-        </DockPanel.Style>
+    <DockPanel Background="{DynamicResource WindowBackground}">
 
         <Border DockPanel.Dock="top" BorderBrush="gray" Margin="0,0,0,-1" >
 
@@ -53,14 +43,8 @@
 
                     <ToolBar.Style >
                         <Style TargetType="ToolBar" BasedOn="{StaticResource ToolBarWithoutOverflowBarStyle}">
-                            <Setter Property="Background" Value="{StaticResource DarkPanelBackground}"/>
-                            <Setter Property="BorderBrush" Value="#FF4F4F4F"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsDarkMode, ElementName=mainWin}" Value="True">
-                                    <Setter Property="Background" Value="{StaticResource MainMenuBgDark}"/>
-                                    <Setter Property="BorderBrush" Value="{StaticResource DarkPanelBorder}"/>
-                                </DataTrigger>
-                            </Style.Triggers>
+                            <Setter Property="Background" Value="{DynamicResource MainMenuBackground}"/>
+                            <Setter Property="BorderBrush" Value="{DynamicResource MainMenuBorder}"/>
                         </Style>
                     </ToolBar.Style>
 
@@ -284,19 +268,8 @@
             </Grid.Style>
 
             <!-- Navigation Tree -->
-            <Border CornerRadius="8" Margin="8,8,4,8" BorderThickness="1">
-                <Border.Style>
-                    <Style TargetType="Border">
-                        <Setter Property="Background" Value="whitesmoke"/>
-                        <Setter Property="BorderBrush" Value="Gray"/>
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsDarkMode, ElementName=mainWin}" Value="True">
-                                <Setter Property="Background" Value="{StaticResource DarkPanelBackground}"/>
-                                <Setter Property="BorderBrush" Value="{StaticResource DarkPanelBorder}"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </Border.Style>
+            <Border CornerRadius="8" Margin="8,8,4,8" BorderThickness="1"
+                Background="{DynamicResource NavPanelBackground}" BorderBrush="{DynamicResource PanelBorder}">
                 <DockPanel>
 
                     <DockPanel DockPanel.Dock="top" Margin="6,6,6,0" HorizontalAlignment="Left">
@@ -315,14 +288,10 @@
                           Padding="3,1,5,4" >
                             <Button.Style>
                                 <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
-                                    <Setter Property="Background" Value="White"/>
+                                    <Setter Property="Background" Value="{DynamicResource InputBackground}"/>
                                     <Setter Property="BorderThickness" Value="0"/>
-                                    <Setter Property="TextBlock.Foreground" Value="black"/>
+                                    <Setter Property="TextBlock.Foreground" Value="{DynamicResource BodyForeground}"/>
                                     <Style.Triggers>
-                                        <DataTrigger Binding="{Binding IsDarkMode, ElementName=mainWin}" Value="True">
-                                            <Setter Property="Background" Value="{StaticResource DarkInputBackground}"/>
-                                            <Setter Property="TextBlock.Foreground" Value="WhiteSmoke"/>
-                                        </DataTrigger>
                                         <MultiDataTrigger>
                                             <MultiDataTrigger.Conditions>
                                                 <Condition Binding="{Binding IsDarkMode, ElementName=mainWin}" Value="True"/>
@@ -337,11 +306,8 @@
                                 <ContentControl Height="16" Margin="3,1,4,0">
                                     <ContentControl.Style>
                                         <Style TargetType="ContentControl">
-                                            <Setter Property="Content" Value="{StaticResource icoNewFolder}"/>
+                                            <Setter Property="Content" Value="{DynamicResource NewFolderIcon}"/>
                                             <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsDarkMode, ElementName=mainWin}" Value="True">
-                                                    <Setter Property="Content" Value="{StaticResource icoNewFolder_Dark}"/>
-                                                </DataTrigger>
                                                 <MultiDataTrigger>
                                                     <MultiDataTrigger.Conditions>
                                                         <Condition Binding="{Binding IsDarkMode, ElementName=mainWin}" Value="True"/>
@@ -361,13 +327,10 @@
                             ToolTip="Add an experiment group to the current project.&#x0a;----------------------------------------------------&#x0a;Experiment groups let you organize your project experiments into user-defined &#x0a;categories such as ‘Preliminary Experiments’, ‘Optimized Synthesis’, ‘Step 1’, etc.  &#x0a;&#x0a;Initially, all project experiments are in the default group ‘All experiments’.&#x0a;">
                             <Button.Style>
                                 <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
-                                    <Setter Property="Background" Value="White"/>
+                                    <Setter Property="Background" Value="{DynamicResource InputBackground}"/>
                                     <Setter Property="BorderThickness" Value="0"/>
+                                    <Setter Property="Foreground" Value="{DynamicResource BodyForeground}"/>
                                     <Style.Triggers>
-                                        <DataTrigger Binding="{Binding IsDarkMode, ElementName=mainWin}" Value="True">
-                                            <Setter Property="Background" Value="{StaticResource DarkInputBackground}"/>
-                                            <Setter Property="Foreground" Value="WhiteSmoke"/>
-                                        </DataTrigger>
                                         <MultiDataTrigger>
                                             <MultiDataTrigger.Conditions>
                                                 <Condition Binding="{Binding IsDarkMode, ElementName=mainWin}" Value="True"/>
@@ -383,11 +346,8 @@
                                     <ContentControl Height="16" HorizontalAlignment="Left" Margin="6,2,0,0">
                                         <ContentControl.Style>
                                             <Style TargetType="ContentControl">
-                                                <Setter Property="Content" Value="{StaticResource icoGrayDot}"/>
+                                                <Setter Property="Content" Value="{DynamicResource GrayDotIcon}"/>
                                                 <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsDarkMode, ElementName=mainWin}" Value="True">
-                                                        <Setter Property="Content" Value="{StaticResource icoGrayDot_Dark}"/>
-                                                    </DataTrigger>
                                                     <MultiDataTrigger>
                                                         <MultiDataTrigger.Conditions>
                                                             <Condition Binding="{Binding IsDarkMode, ElementName=mainWin}" Value="True"/>
@@ -402,11 +362,8 @@
                                     <ContentControl Height="12" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top">
                                         <ContentControl.Style>
                                             <Style TargetType="ContentControl">
-                                                <Setter Property="Content" Value="{StaticResource icoNew}"/>
+                                                <Setter Property="Content" Value="{DynamicResource NewIcon}"/>
                                                 <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsDarkMode, ElementName=mainWin}" Value="True">
-                                                        <Setter Property="Content" Value="{StaticResource icoNew_Dark}"/>
-                                                    </DataTrigger>
                                                     <MultiDataTrigger>
                                                         <MultiDataTrigger.Conditions>
                                                             <Condition Binding="{Binding IsDarkMode, ElementName=mainWin}" Value="True"/>
@@ -443,20 +400,9 @@
             </Grid.Style>
 
             <!--Status Panel-->
-            <Border CornerRadius="8" Margin="4,8,8,8" BorderThickness="1">
-                <Border.Style>
-                    <Style TargetType="Border">
-                        <Setter Property="Background" Value="White"/>
-                        <Setter Property="BorderBrush" Value="Gray"/>
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsDarkMode, ElementName=mainWin}" Value="True">
-                                <Setter Property="Background" Value="{StaticResource DarkPanelBackground}"/>
-                                <Setter Property="BorderBrush" Value="{StaticResource DarkPanelBorder}"/>
-                                <Setter Property="TextElement.Foreground" Value="WhiteSmoke"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </Border.Style>
+            <Border CornerRadius="8" Margin="4,8,8,8" BorderThickness="1"
+                Background="{DynamicResource InfoPanelBackground}" BorderBrush="{DynamicResource PanelBorder}"
+                TextElement.Foreground="{DynamicResource BodyForeground}">
                 <DockPanel Margin="8,8,8,8">
                     <custom:StatusInfoPanel x:Name="pnlStatus" DockPanel.Dock="top"/>
                     <custom:StepSummary DockPanel.Dock="bottom" Margin="0,12,0,0"/>

@@ -10,7 +10,6 @@
         Background="Transparent" Padding="0,1,0,0" FontFamily="Segoe UI" FontSize="12.5">
 
     <UserControl.Resources>
-        <local:DarkModeColorConverter x:Key="dmColor"/>
         <local:IntegerToVisibilityConverter x:Key="intToVisibilityConv"/>
         <Style TargetType="MenuItem">
             <Setter Property="Template" Value="{StaticResource ContextMenuItem}"/>
@@ -34,20 +33,10 @@
 
     <Grid Margin="0,1,0,0">
         <StackPanel Orientation="Horizontal">
-            <ContentControl Height="16" HorizontalAlignment="Left" Margin="0,1,0,0">
-                <ContentControl.Style>
-                    <Style TargetType="ContentControl">
-                        <Setter Property="Content" Value="{StaticResource icoFolderClosed}"/>
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding Path=(local:DarkModeHelper.IsDarkMode), RelativeSource={RelativeSource Self}}" Value="True">
-                                <Setter Property="Content" Value="{StaticResource icoFolderNoFill_Dark}"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </ContentControl.Style>
-            </ContentControl>
+            <ContentControl Height="16" HorizontalAlignment="Left" Margin="0,1,0,0"
+                Content="{DynamicResource FolderClosedIcon}"/>
             <local:TreeViewEditLabel x:Name="lblTitle" EditText="{Binding Title, Mode=TwoWay}" MaxCharacters="40"
-                TitleForeground="{Binding Path=(local:DarkModeHelper.IsDarkMode), RelativeSource={RelativeSource Self}, Converter={StaticResource dmColor}, ConverterParameter='#FF444444|WhiteSmoke'}"
+                TitleForeground="{DynamicResource ProjectTitleForeground}"
                 FontWeight="demibold" Margin="1,0,0,0" FontStyle="Italic"/>
         </StackPanel>
     </Grid>

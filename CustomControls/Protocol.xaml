@@ -13,6 +13,12 @@
              d:DesignHeight="250" d:DesignWidth="800">
 
     <UserControl.Resources>
+        <ResourceDictionary>
+
+            <!--This panel is always rendered light regardless of the app-wide theme toggle -->
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/CustomControls;component/Resources/SkinLight.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
 
         <local:ProtocolDropHandler x:Key="protDropHandler"/>
         <local:IntegerToVisibilityConverter x:Key="intToVisConv"/>
@@ -79,6 +85,7 @@
             </Setter>
         </Style>
 
+        </ResourceDictionary>
     </UserControl.Resources>
 
     <Grid>

@@ -10,7 +10,6 @@
         Background="Transparent" Padding="0,1,0,0" FontFamily="Segoe UI" FontSize="12.5">
 
     <UserControl.Resources>
-        <local:DarkModeColorConverter x:Key="dmColor"/>
         <local:IntegerToVisibilityConverter x:Key="intToVisibilityConv"/>
         <Style TargetType="MenuItem">
             <Setter Property="Template" Value="{StaticResource ContextMenuItem}"/>
@@ -37,22 +36,12 @@
         <StackPanel>
 
             <StackPanel Orientation="Horizontal" Margin="-1,0,0,0">
-                <ContentControl Height="16" HorizontalAlignment="Left" Margin="0,0,-1,-1">
-                    <ContentControl.Style>
-                        <Style TargetType="ContentControl">
-                            <Setter Property="Content" Value="{StaticResource icoGrayDot}"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding Path=(local:DarkModeHelper.IsDarkMode), RelativeSource={RelativeSource Self}}" Value="True">
-                                    <Setter Property="Content" Value="{StaticResource icoGrayDot_Dark}"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </ContentControl.Style>
+                <ContentControl Height="16" HorizontalAlignment="Left" Margin="0,0,-1,-1"
+                    Content="{DynamicResource GrayDotIcon}">
                 </ContentControl>
                 <local:TreeViewEditLabel x:Name="lblTitle" EditText="{Binding FolderName, Mode=TwoWay}" MaxCharacters="40"
                    FontWeight="demibold" Margin="0,0,0,0" FontStyle="Italic" VerticalAlignment="Center"
-                   TitleForeground="{Binding Path=(local:DarkModeHelper.IsDarkMode), RelativeSource={RelativeSource Self}, 
-                     Converter={StaticResource dmColor}, ConverterParameter='#FF0B42C3|LightBlue'}"
+                   TitleForeground="{DynamicResource FolderTitleForeground}"
 />
             </StackPanel>
 
@@ -61,15 +50,12 @@
 
                 <StackPanel x:Name="btnAddExp" Orientation="Horizontal" Margin="18,0,0,2" Cursor="Hand">
 
-                    <!--<ContentControl Content="{StaticResource icoAdd}" Margin="-3,2,0,0" ✻ Height="13"/>-->
-
                     <TextBlock Text=">" FontSize="11" FontWeight="bold" VerticalAlignment="Center"  Margin="-3,0,0,0"
-                        Foreground="{Binding Path=(local:DarkModeHelper.IsDarkMode), RelativeSource={RelativeSource Self}, Converter={StaticResource dmColor}, ConverterParameter='Blue|Yellow'}"/>
-
+                        Foreground="{DynamicResource FolderArrowHighlight}"/>
 
                     <TextBlock Text="add experiment" TextDecorations="Underline" FontStyle="Italic" Padding="2,0,3,2"
-                        Foreground="{Binding Path=(local:DarkModeHelper.IsDarkMode), RelativeSource={RelativeSource Self}, Converter={StaticResource dmColor}, ConverterParameter='Blue|#FF7EB4FF'}"
-                        Background="{Binding Path=(local:DarkModeHelper.IsDarkMode), RelativeSource={RelativeSource Self}, Converter={StaticResource dmColor}, ConverterParameter='#FFECF8FF|Transparent'}"/>
+                        Foreground="{DynamicResource LinkForeground}"
+                        Background="{DynamicResource AddExperimentLinkBackground}"/>
 
                 </StackPanel>
 

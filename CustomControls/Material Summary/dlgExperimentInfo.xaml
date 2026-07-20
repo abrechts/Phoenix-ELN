@@ -9,7 +9,16 @@
         ResizeMode="NoResize" Title="Material Totals" MinWidth="300" MaxWidth="450" MaxHeight="450" WindowStyle="ThreeDBorderWindow" >
 
     <Window.Resources>
-        <local:BooleanToVisibilityConverter x:Key="boolToVisConv"/>
+        <ResourceDictionary>
+
+            <!--This panel is always rendered light regardless of the app-wide theme toggle -->
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/CustomControls;component/Resources/SkinLight.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
+            <local:BooleanToVisibilityConverter x:Key="boolToVisConv"/>
+
+        </ResourceDictionary>
     </Window.Resources>
     
     <StackPanel Margin="10,4,0,12">

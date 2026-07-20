@@ -21,19 +21,8 @@
 
     </UserControl.Resources>
 
-    <Border CornerRadius="6" BorderThickness="1" Padding="4">
-        <Border.Style>
-            <Style TargetType="Border">
-                <Setter Property="Background" Value="White"/>
-                <Setter Property="BorderBrush" Value="#AAAAAA"/>
-                <Style.Triggers>
-                    <DataTrigger Binding="{Binding Path=(local:DarkModeHelper.IsDarkMode), RelativeSource={RelativeSource Self}}" Value="True">
-                        <Setter Property="Background" Value="{StaticResource DarkPanelBackground2}"/>
-                        <Setter Property="BorderBrush" Value="{StaticResource DarkPanelBorder}"/>
-                    </DataTrigger>
-                </Style.Triggers>
-            </Style>
-        </Border.Style>
+    <Border CornerRadius="6" BorderThickness="1" Padding="4"
+        Background="{DynamicResource InnerPanelBackground}" BorderBrush="{DynamicResource TreePanelBorder}">
 
         <!--This TreeView should NOT be virtualized to allow the selection of experiment nodes currently not in view!-->
         <TreeView x:Name="navTree" Background="Transparent"
@@ -75,11 +64,6 @@
                     <Setter Property="Template" Value="{StaticResource ExperimentTreeViewItem}"/>
                     <Setter Property="IsExpanded" Value="{Binding IsNodeExpanded,Converter={StaticResource intToBooleanConv},
                         Mode=TwoWay}"/>
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding Path=(local:DarkModeHelper.IsDarkMode), RelativeSource={RelativeSource Self}}" Value="True">
-                            <Setter Property="Background" Value="Transparent"/>
-                        </DataTrigger>
-                    </Style.Triggers>
                 </Style>
 
             </TreeView.ItemContainerStyle>

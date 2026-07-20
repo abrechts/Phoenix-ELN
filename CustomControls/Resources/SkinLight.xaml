@@ -1,0 +1,58 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!--Light skin: role-named brushes consumed via DynamicResource throughout the application.
+        SkinDark.xaml must define the identical set of keys. The active skin is swapped at
+        runtime by DarkModeHelper.ApplySkin.-->
+
+    <!--Main window chrome-->
+    <SolidColorBrush x:Key="WindowBackground" Color="#FF979797"/>
+    <SolidColorBrush x:Key="MainMenuBackground" Color="#FF474747"/>
+    <SolidColorBrush x:Key="MainMenuBorder" Color="#FF4F4F4F"/>
+
+    <!--Panels-->
+    <SolidColorBrush x:Key="NavPanelBackground" Color="WhiteSmoke"/>
+    <SolidColorBrush x:Key="InfoPanelBackground" Color="White"/>
+    <SolidColorBrush x:Key="InnerPanelBackground" Color="White"/>
+    <SolidColorBrush x:Key="PanelBorder" Color="Gray"/>
+    <SolidColorBrush x:Key="TreePanelBorder" Color="#FFAAAAAA"/>
+
+    <!--Inputs and text-->
+    <SolidColorBrush x:Key="InputBackground" Color="White"/>
+    <SolidColorBrush x:Key="BodyForeground" Color="Black"/>
+    <SolidColorBrush x:Key="TitleForeground" Color="#FF0049B9"/>
+    <SolidColorBrush x:Key="MutedForeground" Color="#FF5C5C5C"/>
+    <SolidColorBrush x:Key="ListBackground" Color="WhiteSmoke"/>
+    <SolidColorBrush x:Key="LinkForeground" Color="Blue"/>
+    <SolidColorBrush x:Key="FolderArrowHighlight" Color="Blue"/>
+    <SolidColorBrush x:Key="ProjectTitleForeground" Color="#FF444444"/>
+    <SolidColorBrush x:Key="FolderTitleForeground" Color="#FF0B42C3"/>
+    <SolidColorBrush x:Key="ExperimentIdForeground" Color="#FF2020CE"/>
+    <SolidColorBrush x:Key="AddExperimentLinkBackground" Color="#FFECF8FF"/>
+
+    <!--Navigation tree-->
+    <SolidColorBrush x:Key="TreeItemBackground" Color="White"/>
+    <SolidColorBrush x:Key="TreeExpanderGlyph" Color="#FF444444"/>
+    <SolidColorBrush x:Key="PinGlyphForeground" Color="#FF424242"/>
+    <SolidColorBrush x:Key="CurrentExperimentHighlight" Color="#FFC4FAFF"/>
+    <SolidColorBrush x:Key="WorkflowInProgressFill" Color="#FFE0584C"/>
+    <SolidColorBrush x:Key="WorkflowFinalizedFill" Color="#FF396ED7"/>
+
+    <!--Scrollbar (unified flat scrollbar used app-wide via SkinScrollViewerTemplate; distinct from the
+        always-dark ScrollBarThumbBackground* keys in DarkModeCtrlStyles.xaml used by fixed-dark canvases)-->
+    <SolidColorBrush x:Key="ScrollThumbBackground" Color="#FFC1C1C1"/>
+    <SolidColorBrush x:Key="ScrollThumbBackgroundHover" Color="#FFA0A0A0"/>
+    <SolidColorBrush x:Key="ScrollThumbBackgroundDragging" Color="#FF808080"/>
+
+    <!--Icons: role-named forwarders to the light/dark Viewbox resources in SpecialIcons.xaml.
+        x:Shared="false" must be kept, since a Viewbox instance can only appear once in the visual tree.-->
+    <ContentControl x:Key="ServerUserIcon" x:Shared="false" Content="{StaticResource icoServerUser}"/>
+    <ContentControl x:Key="GrayDotIcon" x:Shared="false" Content="{StaticResource icoGrayDot}"/>
+    <ContentControl x:Key="OpenFolderIcon" x:Shared="false" Content="{StaticResource icoOpenFolder}"/>
+    <ContentControl x:Key="FromServerIcon" x:Shared="false" Content="{StaticResource icoFromServer}"/>
+    <ContentControl x:Key="NewFolderIcon" x:Shared="false" Content="{StaticResource icoNewFolder}"/>
+    <ContentControl x:Key="NewIcon" x:Shared="false" Content="{StaticResource icoNew}"/>
+    <ContentControl x:Key="FolderClosedIcon" x:Shared="false" Content="{StaticResource icoFolderClosed}"/>
+    <ContentControl x:Key="WarningCircleIcon" x:Shared="false" Content="{StaticResource icoWarningCircleRed}"/>
+
+</ResourceDictionary>
