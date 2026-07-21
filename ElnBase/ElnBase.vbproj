@@ -15,7 +15,7 @@
 
   <ItemGroup>
     <PackageReference Include="Indigo.Net" Version="1.45.0" />
-    <PackageReference Include="Microting.EntityFrameworkCore.MySql" Version="10.0.9" />
+    <PackageReference Include="Microting.EntityFrameworkCore.MySql" Version="10.0.10" />
   </ItemGroup>
 
   <ItemGroup>
