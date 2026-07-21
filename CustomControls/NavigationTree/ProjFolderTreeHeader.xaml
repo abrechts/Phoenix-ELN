@@ -41,7 +41,7 @@
                 </ContentControl>
                 <local:TreeViewEditLabel x:Name="lblTitle" EditText="{Binding FolderName, Mode=TwoWay}" MaxCharacters="40"
                    FontWeight="demibold" Margin="0,0,0,0" FontStyle="Italic" VerticalAlignment="Center"
-                   TitleForeground="{DynamicResource FolderTitleForeground}"
+                   TitleForeground="{DynamicResource TitleForeground}"
 />
             </StackPanel>
 

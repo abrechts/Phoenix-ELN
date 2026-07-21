@@ -26,7 +26,6 @@
     <SolidColorBrush x:Key="LinkForeground" Color="Blue"/>
     <SolidColorBrush x:Key="FolderArrowHighlight" Color="Blue"/>
     <SolidColorBrush x:Key="ProjectTitleForeground" Color="#FF444444"/>
-    <SolidColorBrush x:Key="FolderTitleForeground" Color="#FF0B42C3"/>
     <SolidColorBrush x:Key="ExperimentIdForeground" Color="#FF2020CE"/>
     <SolidColorBrush x:Key="AddExperimentLinkBackground" Color="#FFECF8FF"/>
 

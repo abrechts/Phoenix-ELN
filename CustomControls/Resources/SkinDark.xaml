@@ -20,13 +20,12 @@
     <!--Inputs and text-->
     <SolidColorBrush x:Key="InputBackground" Color="#FF333333"/>
     <SolidColorBrush x:Key="BodyForeground" Color="WhiteSmoke"/>
-    <SolidColorBrush x:Key="TitleForeground" Color="#FFABCEFF"/>
+    <SolidColorBrush x:Key="TitleForeground" Color="#FFD4E5FD"/>
     <SolidColorBrush x:Key="MutedForeground" Color="WhiteSmoke"/>
     <SolidColorBrush x:Key="ListBackground" Color="#FF2A2A2A"/>
     <SolidColorBrush x:Key="LinkForeground" Color="#FFABCEFF"/>
     <SolidColorBrush x:Key="FolderArrowHighlight" Color="Yellow"/>
     <SolidColorBrush x:Key="ProjectTitleForeground" Color="WhiteSmoke"/>
-    <SolidColorBrush x:Key="FolderTitleForeground" Color="LightBlue"/>
     <SolidColorBrush x:Key="ExperimentIdForeground" Color="WhiteSmoke"/>
     <SolidColorBrush x:Key="AddExperimentLinkBackground" Color="Transparent"/>
 
