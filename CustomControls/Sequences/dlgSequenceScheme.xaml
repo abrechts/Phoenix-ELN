@@ -15,21 +15,22 @@
 
     <Grid Margin="8">
 
-        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" >
-        
-            <TextBlock x:Name="blkTitle" DockPanel.Dock="top" Text="STRUCTURE GRAPH" FontSize="14" FontWeight="Bold" Margin="0,12,0,0"
-                FontFamily="Segoe UI" Foreground="#FFF9D192" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
-            <local:SequenceSchemeView x:Name="SchemeView" DockPanel.Dock="top" Margin="24,12,24,24" d:MinWidth="200" d:MinHeight="120"/>
+        <TextBlock x:Name="blkTitle" Grid.Row="0" Text="STRUCTURE GRAPH" FontSize="14" FontWeight="Bold" Margin="0,12,0,0"
+            FontFamily="Segoe UI" Foreground="#FFF9D192" HorizontalAlignment="Center" VerticalAlignment="Top"/>
 
-        </StackPanel>
+        <local:SequenceSchemeView x:Name="SchemeView" Grid.Row="1" Margin="24,12,24,24" d:MinWidth="200" d:MinHeight="120"/>
 
-        <Border Background="LightCyan" DockPanel.Dock="bottom"  HorizontalAlignment="Center" VerticalAlignment="Bottom"
+        <Border Background="LightCyan" Grid.Row="0" Grid.RowSpan="2" HorizontalAlignment="Center" VerticalAlignment="Bottom"
           Margin="0,0,0,36" CornerRadius="10"  Padding="3">
             <Button x:Name="btnClose" Content="Close (Esc)" Width="90" Background="Transparent" IsCancel="True" BorderThickness="0" FontSize="14"/>
         </Border>
-        
-        <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,12,12,0">
+
+        <StackPanel Orientation="Horizontal" Grid.Row="0" Grid.RowSpan="2" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,12,12,0">
 
             <ComboBox x:Name="cboSourceSelection" Style="{StaticResource DarkCombo}" Background="transparent" Margin="4,0,4,0"
                Foreground="#FFB8B9FE" FontSize="11" BorderThickness="1" BorderBrush="DimGray" VerticalAlignment="Center"
