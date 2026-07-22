@@ -546,7 +546,12 @@ Public Class SequenceSchemeView
         ' Draw connectors using _seqPanels for coordinate lookup (same positions/sizes)
         ' and printCanvas as the render target.
         AddContentBorder(printCanvas, _seqPanels, Brushes.Gray)
-        DrawConnectors(_sequences, printCanvas, _seqPanels, printConnectorSteps)
+        DrawConnectors(_sequences, printCanvas, _seqPanels, printConnectorSteps,
+                       strokeOverride:=New SolidColorBrush(printBlue.Color),
+                       arrowFillOverride:=New SolidColorBrush(printBlue.Color),
+                       dotFillOverride:=New SolidColorBrush(printBlue.Color),
+                       thicknessOverride:=1.0,
+                       arrowSizeOverride:=6.5)
 
         ' One off-tree layout pass so PrintVisual can render the panels correctly
         printCanvas.Measure(New Size(Double.PositiveInfinity, Double.PositiveInfinity))
@@ -878,9 +883,18 @@ Public Class SequenceSchemeView
     Private Sub DrawConnectors(sequences As IReadOnlyList(Of SequenceGraph.SequenceNode),
                                 targetCanvas As Canvas,
                                 panels As Dictionary(Of SequenceGraph.SequenceNode, StackPanel),
-                                connectorSteps As Dictionary(Of SequenceGraph.SequenceNode, SequenceStructure))
+                                connectorSteps As Dictionary(Of SequenceGraph.SequenceNode, SequenceStructure),
+                                Optional strokeOverride As Brush = Nothing,
+                                Optional arrowFillOverride As Brush = Nothing,
+                                Optional dotFillOverride As Brush = Nothing,
+                                Optional thicknessOverride As Double = 2.0,
+                                Optional arrowSizeOverride As Double = 9.0)
 
-        Dim stroke As New SolidColorBrush(Color.FromArgb(130, 80, 120, 195))
+        Dim stroke As Brush = If(strokeOverride, New SolidColorBrush(Color.FromArgb(170, 120, 150, 205)))
+        Dim arrowFill As Brush = If(arrowFillOverride, New SolidColorBrush(Color.FromArgb(200, 135, 160, 215)))
+        Dim dotFill As Brush = If(dotFillOverride, New SolidColorBrush(Color.FromRgb(105, 140, 200)))
+        Dim thickness = thicknessOverride
+        Dim arrowSize = arrowSizeOverride
 
         Dim bundles = FindJunctionBundles(panels)
 
@@ -894,7 +908,7 @@ Public Class SequenceSchemeView
         Next
 
         For Each b In bundles
-            DrawJunctionBundle(b, stroke, targetCanvas, panels)
+            DrawJunctionBundle(b, stroke, arrowFill, dotFill, thickness, arrowSize, targetCanvas, panels)
         Next
 
         Dim mergeGroups = FindMergeGroups(panels, connectorSteps)
@@ -904,7 +918,7 @@ Public Class SequenceSchemeView
                     bundled.Add($"{src.Id}_{tgt.Id}")
                 Next
             Next
-            DrawMergeGroup(g, stroke, targetCanvas, panels, connectorSteps)
+            DrawMergeGroup(g, stroke, arrowFill, dotFill, thickness, arrowSize, targetCanvas, panels, connectorSteps)
         Next
 
         For Each seq In sequences
@@ -940,7 +954,7 @@ Public Class SequenceSchemeView
                 stubFig.Segments.Add(New LineSegment(New Point(curveStartX, y1), True))
                 Dim stubGeo As New PathGeometry()
                 stubGeo.Figures.Add(stubFig)
-                targetCanvas.Children.Add(New Path With {.Data = stubGeo, .Stroke = stroke, .StrokeThickness = 2.0})
+                targetCanvas.Children.Add(New Path With {.Data = stubGeo, .Stroke = stroke, .StrokeThickness = thickness})
             End If
 
             For Each target In edges
@@ -962,10 +976,10 @@ Public Class SequenceSchemeView
                     Canvas.SetLeft(connStep, cx)
                     Canvas.SetTop(connStep, cy)
                     DrawBezierArrow(curveStartX, y1, cx, y2, stroke, targetCanvas, showArrowhead:=False, straightApproach:=CONNECTOR_STRAIGHT_APPROACH,
-                                    straightDeparture:=If(departure = 0.0, CONNECTOR_STRAIGHT_DEPARTURE, 0.0))
+                                    straightDeparture:=If(departure = 0.0, CONNECTOR_STRAIGHT_DEPARTURE, 0.0), arrowFill:=arrowFill, thickness:=thickness, arrowSize:=arrowSize)
                 Else
                     DrawBezierArrow(curveStartX, y1, x2, y2, stroke, targetCanvas,
-                                    straightDeparture:=If(departure = 0.0, CONNECTOR_STRAIGHT_DEPARTURE, 0.0))
+                                    straightDeparture:=If(departure = 0.0, CONNECTOR_STRAIGHT_DEPARTURE, 0.0), arrowFill:=arrowFill, thickness:=thickness, arrowSize:=arrowSize)
                 End If
             Next
         Next
@@ -1027,7 +1041,8 @@ Public Class SequenceSchemeView
     End Function
 
 
-    Private Sub DrawJunctionBundle(b As JunctionBundle, stroke As Brush,
+    Private Sub DrawJunctionBundle(b As JunctionBundle, stroke As Brush, arrowFill As Brush, dotFill As Brush,
+                                    thickness As Double, arrowSize As Double,
                                     targetCanvas As Canvas,
                                     panels As Dictionary(Of SequenceGraph.SequenceNode, StackPanel))
 
@@ -1040,10 +1055,10 @@ Public Class SequenceSchemeView
             fig.Segments.Add(New BezierSegment(New Point(x1 + dx, y1), New Point(b.Jx - dx, b.Jy), New Point(b.Jx, b.Jy), True))
             Dim geo As New PathGeometry()
             geo.Figures.Add(fig)
-            targetCanvas.Children.Add(New Path With {.Data = geo, .Stroke = stroke, .StrokeThickness = 2.0})
+            targetCanvas.Children.Add(New Path With {.Data = geo, .Stroke = stroke, .StrokeThickness = thickness})
         Next
 
-        Dim arrowDepth = 9.0 * Math.Cos(Math.PI / 6.0)
+        Dim arrowDepth = arrowSize * Math.Cos(Math.PI / 6.0)
         For Each tgt In b.Targets
             Dim p = panels(tgt)
             Dim x2 = Canvas.GetLeft(p)
@@ -1054,15 +1069,15 @@ Public Class SequenceSchemeView
             fig.Segments.Add(New BezierSegment(New Point(b.Jx + dx, b.Jy), New Point(lineX - dx, y2), New Point(lineX, y2), True))
             Dim geo As New PathGeometry()
             geo.Figures.Add(fig)
-            targetCanvas.Children.Add(New Path With {.Data = geo, .Stroke = stroke, .StrokeThickness = 2.0})
-            DrawArrowHead(x2, y2, targetCanvas)
+            targetCanvas.Children.Add(New Path With {.Data = geo, .Stroke = stroke, .StrokeThickness = thickness})
+            DrawArrowHead(x2, y2, arrowSize, arrowFill, targetCanvas)
         Next
 
         Const DOT_DIAM As Double = 12.0
         Dim jDot As New Ellipse With {
             .Width = DOT_DIAM,
             .Height = DOT_DIAM,
-            .Fill = New SolidColorBrush(Color.FromRgb(80, 120, 195)),
+            .Fill = dotFill,
             .Stroke = New SolidColorBrush(Colors.WhiteSmoke),
             .StrokeThickness = 1.5,
             .ToolTip = "Common Intermediate"
@@ -1121,7 +1136,8 @@ Public Class SequenceSchemeView
     ''' straight to that target's connector control instead.
     ''' </summary>
     '''
-    Private Sub DrawMergeGroup(g As MergeGroup, stroke As Brush,
+    Private Sub DrawMergeGroup(g As MergeGroup, stroke As Brush, arrowFill As Brush, dotFill As Brush,
+                                thickness As Double, arrowSize As Double,
                                 targetCanvas As Canvas,
                                 panels As Dictionary(Of SequenceGraph.SequenceNode, StackPanel),
                                 connectorSteps As Dictionary(Of SequenceGraph.SequenceNode, SequenceStructure))
@@ -1149,7 +1165,7 @@ Public Class SequenceSchemeView
                 Dim p = panels(g.Sources(0))
                 Dim x1 = Canvas.GetLeft(p) + p.DesiredSize.Width
                 Dim y1 = Canvas.GetTop(p) + p.DesiredSize.Height / 2.0
-                DrawBezierArrow(x1, y1, cx, cy2, stroke, targetCanvas, showArrowhead:=False, straightApproach:=CONNECTOR_STRAIGHT_APPROACH)
+                DrawBezierArrow(x1, y1, cx, cy2, stroke, targetCanvas, showArrowhead:=False, straightApproach:=CONNECTOR_STRAIGHT_APPROACH, arrowFill:=arrowFill, thickness:=thickness, arrowSize:=arrowSize)
                 Return
             End If
 
@@ -1172,7 +1188,7 @@ Public Class SequenceSchemeView
                 fig.Segments.Add(New BezierSegment(New Point(x1 + dx, y1), New Point(curveEndX - dx, cy2), New Point(curveEndX, cy2), True))
                 Dim geo As New PathGeometry()
                 geo.Figures.Add(fig)
-                targetCanvas.Children.Add(New Path With {.Data = geo, .Stroke = stroke, .StrokeThickness = 2.0})
+                targetCanvas.Children.Add(New Path With {.Data = geo, .Stroke = stroke, .StrokeThickness = thickness})
             Next
 
             If approach > 0 Then
@@ -1180,7 +1196,7 @@ Public Class SequenceSchemeView
                 stubFig.Segments.Add(New LineSegment(New Point(cx, cy2), True))
                 Dim stubGeo As New PathGeometry()
                 stubGeo.Figures.Add(stubFig)
-                targetCanvas.Children.Add(New Path With {.Data = stubGeo, .Stroke = stroke, .StrokeThickness = 2.0})
+                targetCanvas.Children.Add(New Path With {.Data = stubGeo, .Stroke = stroke, .StrokeThickness = thickness})
             End If
 
             Return
@@ -1200,14 +1216,14 @@ Public Class SequenceSchemeView
             fig.Segments.Add(New BezierSegment(New Point(x1 + dx, y1), New Point(jx - dx, jy), New Point(jx, jy), True))
             Dim geo As New PathGeometry()
             geo.Figures.Add(fig)
-            targetCanvas.Children.Add(New Path With {.Data = geo, .Stroke = stroke, .StrokeThickness = 2.0})
+            targetCanvas.Children.Add(New Path With {.Data = geo, .Stroke = stroke, .StrokeThickness = thickness})
         Next
 
         Const DOT_DIAM As Double = 12.0
         Dim jDot As New Ellipse With {
             .Width = DOT_DIAM,
             .Height = DOT_DIAM,
-            .Fill = New SolidColorBrush(Color.FromRgb(80, 120, 195)),
+            .Fill = dotFill,
             .Stroke = New SolidColorBrush(Colors.WhiteSmoke),
             .StrokeThickness = 1.5,
             .ToolTip = "Common Intermediate"
@@ -1219,7 +1235,7 @@ Public Class SequenceSchemeView
         For Each tgt In g.Targets
             Dim connStep = connectorSteps(tgt)
             Dim cy2 = Canvas.GetTop(connStep) + connStep.GetArrowAnchorY()
-            DrawBezierArrow(jx, jy, cx, cy2, stroke, targetCanvas, showArrowhead:=False, straightApproach:=CONNECTOR_STRAIGHT_APPROACH)
+            DrawBezierArrow(jx, jy, cx, cy2, stroke, targetCanvas, showArrowhead:=False, straightApproach:=CONNECTOR_STRAIGHT_APPROACH, arrowFill:=arrowFill, thickness:=thickness, arrowSize:=arrowSize)
         Next
 
     End Sub
@@ -1257,7 +1273,10 @@ Public Class SequenceSchemeView
     Private Sub DrawBezierArrow(x1 As Double, y1 As Double, x2 As Double, y2 As Double, stroke As Brush, targetCanvas As Canvas,
                                  Optional showArrowhead As Boolean = True,
                                  Optional straightApproach As Double = 0.0,
-                                 Optional straightDeparture As Double = 0.0)
+                                 Optional straightDeparture As Double = 0.0,
+                                 Optional arrowFill As Brush = Nothing,
+                                 Optional thickness As Double = 2.0,
+                                 Optional arrowSize As Double = 9.0)
 
         Dim totalRun = x2 - x1
         Dim approach = Math.Max(0.0, Math.Min(straightApproach, totalRun * 0.4))
@@ -1282,17 +1301,16 @@ Public Class SequenceSchemeView
         targetCanvas.Children.Add(New Path With {
             .Data = geo,
             .Stroke = stroke,
-            .StrokeThickness = 2.0
+            .StrokeThickness = thickness
         })
 
-        If showArrowhead Then DrawArrowHead(x2, y2, targetCanvas)
+        If showArrowhead Then DrawArrowHead(x2, y2, arrowSize, arrowFill, targetCanvas)
 
     End Sub
 
 
-    Private Sub DrawArrowHead(tipX As Double, tipY As Double, targetCanvas As Canvas)
+    Private Sub DrawArrowHead(tipX As Double, tipY As Double, sz As Double, fill As Brush, targetCanvas As Canvas)
 
-        Dim sz = 9.0
         Dim half = Math.PI / 6.0
         Dim p1 = New Point(tipX + sz * Math.Cos(Math.PI + half), tipY + sz * Math.Sin(Math.PI + half))
         Dim p2 = New Point(tipX + sz * Math.Cos(Math.PI - half), tipY + sz * Math.Sin(Math.PI - half))
@@ -1305,7 +1323,7 @@ Public Class SequenceSchemeView
 
         targetCanvas.Children.Add(New Path With {
             .Data = geo,
-            .Fill = New SolidColorBrush(Color.FromArgb(175, 100, 150, 230))
+            .Fill = If(fill, New SolidColorBrush(Color.FromArgb(175, 100, 150, 230)))
         })
 
     End Sub
