@@ -65,8 +65,8 @@ Class MainWindow
                 _IsVersionUpgrade = True
             End If
 
-            'Set dark mode / light mode
             Me.IsDarkMode = .IsDarkMode
+            CustomControls.DarkModeHelper.ApplySkin(.IsDarkMode) 'apply skin explicitly to be on safe side
 
             '------------------------
             '_IsVersionUpgrade = True
@@ -307,7 +307,7 @@ Class MainWindow
     ''' </summary>
     ''' 
     Public Shared ReadOnly IsDarkModeProperty As DependencyProperty = DependencyProperty.Register(NameOf(IsDarkMode), GetType(Boolean), GetType(MainWindow),
-            New PropertyMetadata(False, AddressOf OnIsDarkModeChanged))
+            New PropertyMetadata(True, AddressOf OnIsDarkModeChanged))
 
     Public Property IsDarkMode As Boolean
         Get
@@ -841,13 +841,6 @@ Class MainWindow
             End If
 
         End If
-
-    End Sub
-
-
-    Private Sub chkLightMode_Changed() Handles chkLightMode.PreviewMouseDown
-
-        CustomControls.My.MySettings.Default.IsDarkMode = chkLightMode.IsChecked
 
     End Sub
 
