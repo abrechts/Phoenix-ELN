@@ -8,18 +8,23 @@
             Background="Transparent" d:Width="600" d:Height="150" >
 
     <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <!--This panel is always dark regardless of the active app skin -->
+                <ResourceDictionary Source="/CustomControls;component/Resources/SkinDark.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
 
-        <!-- ── Scrollbar track ── -->
-        <Style TargetType="ScrollBar">
-            <Setter Property="Background" Value="#0D0D22"/>
-        </Style>
-
+            <!-- ── Scrollbar track ── -->
+            <Style TargetType="ScrollBar">
+                <Setter Property="Background" Value="#0D0D22"/>
+            </Style>
+        </ResourceDictionary>
     </UserControl.Resources>
 
     <Grid>
 
         <ScrollViewer x:Name="GraphScroll"
-                      Style="{StaticResource DarkScrollViewerStyle}"
+                      Style="{StaticResource SkinScrollViewerStyle}"
                       HorizontalScrollBarVisibility="Auto"
                       VerticalScrollBarVisibility="Auto"
                       Background="Transparent"

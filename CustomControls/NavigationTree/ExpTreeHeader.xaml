@@ -26,8 +26,6 @@
 
     <UserControl.ContextMenu>
         <ContextMenu>
-            <!--<MenuItem x:Name="mnuBookmark" Icon="{StaticResource icoArrowRight}" Header="Bookmark"/>-->     
-            <!--<Separator Visibility="{Binding WorkflowState, Converter={StaticResource expStateVisConv}}"/>-->
             <Separator>
                 <Separator.Template>
                     <ControlTemplate TargetType="Separator">

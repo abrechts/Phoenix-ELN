@@ -37,8 +37,7 @@
     <SolidColorBrush x:Key="WorkflowInProgressFill" Color="#FFEE6E6E"/>
     <SolidColorBrush x:Key="WorkflowFinalizedFill" Color="#FF66A0DB"/>
 
-    <!--Scrollbar (unified flat scrollbar used app-wide via SkinScrollViewerTemplate; distinct from the
-        always-dark ScrollBarThumbBackground* keys in DarkModeCtrlStyles.xaml used by fixed-dark canvases)-->
+    <!--Scrollbar (unified flat scrollbar used app-wide via SkinScrollViewerTemplate)-->
     <SolidColorBrush x:Key="ScrollThumbBackground" Color="#FF686868"/>
     <SolidColorBrush x:Key="ScrollThumbBackgroundHover" Color="#FF909090"/>
     <SolidColorBrush x:Key="ScrollThumbBackgroundDragging" Color="#FFB0B0B0"/>

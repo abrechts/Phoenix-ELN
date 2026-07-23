@@ -10,6 +10,11 @@
         WindowStartupLocation="CenterScreen"
         Loaded="Window_Loaded" ShowInTaskbar="False"  KeyDown="Window_KeyDown" Opacity="0.95">
 
+    <Window.Resources>
+        <!--This window is always dark regardless of the active app skin.-->
+        <ResourceDictionary Source="/CustomControls;component/Resources/SkinDark.xaml"/>
+    </Window.Resources>
+
     <Grid>
         
         <Grid.ColumnDefinitions>
@@ -44,7 +49,7 @@
                 <Separator DockPanel.Dock="top" Margin="4,2,4,4"/>
 
                 <!-- Scrollable content area -->
-                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Style="{StaticResource DarkScrollViewerStyle}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Style="{StaticResource SkinScrollViewerStyle}">
                     
                     <StackPanel Margin="6,2,6,8">
                         
@@ -124,7 +129,7 @@
                 
             </Grid>
 
-            <ScrollViewer VerticalScrollBarVisibility="Visible" Style="{StaticResource DarkScrollViewerStyle}">
+            <ScrollViewer VerticalScrollBarVisibility="Visible" Style="{StaticResource SkinScrollViewerStyle}">
                 <WrapPanel x:Name="pnlSeqStructures" d:Height="80" HorizontalAlignment="Center"/>
             </ScrollViewer>
 

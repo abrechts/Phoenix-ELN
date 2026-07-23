@@ -12,6 +12,12 @@
         Height="750" MinHeight="600" Width="800" MinWidth="700" Background="#FF303036" >
 
     <Window.Resources>
+        <ResourceDictionary>
+            
+            <ResourceDictionary.MergedDictionaries>
+                <!--This window is always dark regardless of the active app skin.-->
+                <ResourceDictionary Source="/CustomControls;component/Resources/SkinDark.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
 
         <DataTemplate x:Key="rssGroupItem">
             <local:RssItemGroup/>
@@ -64,6 +70,8 @@
             </Style.Triggers>
         </Style>
 
+        </ResourceDictionary>
+        
     </Window.Resources>
 
     <Grid >
@@ -344,7 +352,7 @@
                 <Separator Grid.Row="0" Margin="0,20,0,6" Background="#FFA1A0A0" Height="1" VerticalAlignment="Bottom"/>
 
                 <ScrollViewer x:Name="scrlResults" Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" 
-                    MinHeight="80" Padding="4,2,4,4"  Style="{StaticResource DarkScrollViewerStyle}" >
+                    MinHeight="80" Padding="4,2,4,4"  Style="{StaticResource SkinScrollViewerStyle}" >
 
                     <Grid>
                         <ListBox x:Name="lstRssHitGroups" ItemsSource="{Binding}" ItemTemplate="{StaticResource rssGroupItem}" BorderThickness="0" 

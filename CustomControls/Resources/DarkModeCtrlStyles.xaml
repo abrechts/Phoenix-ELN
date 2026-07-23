@@ -336,125 +336,15 @@
 
 
 
-    <!-- Dark Mode ScrollViewer Style -->
+    <!-- ScrollViewer Style -->
     <!--==============================-->
 
-
-    <!-- ScrollBar Colors -->
-    
-    <SolidColorBrush x:Key="ScrollBarBackground" Color="Transparent"/>
-    <SolidColorBrush x:Key="ScrollBarThumbBackground" Color="#FF686868"/>
-    <SolidColorBrush x:Key="ScrollBarThumbBackgroundHover" Color="#FF909090"/>
-    <SolidColorBrush x:Key="ScrollBarThumbBackgroundDragging" Color="#FFB0B0B0"/>
-
-   
-    <!-- ScrollBar Style (sub-style) -->
-    
-    <Style x:Key="DarkScrollBarStyle" TargetType="{x:Type ScrollBar}">
-
-        <!--Reduce width and height of scrollbars-->   
-        <Style.Resources>
-            <sys:Double x:Key="{x:Static SystemParameters.VerticalScrollBarWidthKey}">10</sys:Double>
-            <sys:Double x:Key="{x:Static SystemParameters.HorizontalScrollBarHeightKey}">10</sys:Double>
-        </Style.Resources>
-
-        <Setter Property="Background" Value="{StaticResource ScrollBarBackground}"/>
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="{x:Type ScrollBar}">
-
-                    <Grid x:Name="Bg" Background="{TemplateBinding Background}" SnapsToDevicePixels="true">
-                        <Track x:Name="PART_Track" IsDirectionReversed="true" IsEnabled="{TemplateBinding IsMouseOver}">
-                            <Track.Thumb>
-
-                                <Thumb>
-                                    <Thumb.Style>
-                                        <Style TargetType="{x:Type Thumb}">
-                                            <Setter Property="Background" Value="{StaticResource ScrollBarThumbBackground}"/>
-                                            <Setter Property="Template">
-                                                <Setter.Value>
-                                                    <ControlTemplate TargetType="{x:Type Thumb}">
-                                                        <Rectangle Fill="{TemplateBinding Background}" RadiusX="3" RadiusY="3"/>
-                                                    </ControlTemplate>
-                                                </Setter.Value>
-                                            </Setter>
-                                            <Style.Triggers>
-                                                <Trigger Property="IsMouseOver" Value="true">
-                                                    <Setter Property="Background" Value="{StaticResource ScrollBarThumbBackgroundHover}"/>
-                                                </Trigger>
-                                                <Trigger Property="IsDragging" Value="true">
-                                                    <Setter Property="Background" Value="{StaticResource ScrollBarThumbBackgroundDragging}"/>
-                                                </Trigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Thumb.Style>
-                                </Thumb>
-                            </Track.Thumb>
-                        </Track>
-                    </Grid>
-
-                    <ControlTemplate.Triggers>
-                        <!--Corrects the scroll direction reverse for horizontal scrollbars-->
-                        <Trigger Property="Orientation" Value="Horizontal">
-                            <Setter TargetName="PART_Track" Property="IsDirectionReversed" Value="False"/>
-                        </Trigger>
-                    </ControlTemplate.Triggers>
-
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
-
-    <!-- *** Dark ScrollViewer Style *** -->
-
-    <ControlTemplate x:Key="DarkScrollViewerTemplate" TargetType="{x:Type ScrollViewer}">
-        <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition />
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition />
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
-
-            <!-- Content Presenter -->
-            <ScrollContentPresenter Grid.Column="0" Grid.Row="0"/>
-
-            <!-- Vertical ScrollBar -->
-            <ScrollBar x:Name="PART_VerticalScrollBar"
-                    Style="{StaticResource DarkScrollBarStyle}"
-                    Grid.Column="1" Grid.Row="0"
-                    Orientation="Vertical"
-                    Maximum="{TemplateBinding ScrollableHeight}"
-                    ViewportSize="{TemplateBinding ViewportHeight}"
-                    Value="{TemplateBinding VerticalOffset}"
-                    Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}"/>
-
-            <!-- Horizontal ScrollBar -->
-            <ScrollBar x:Name="PART_HorizontalScrollBar"
-                    Style="{StaticResource DarkScrollBarStyle}"
-                    Grid.Column="0" Grid.Row="1"
-                    Orientation="Horizontal"
-                    Maximum="{TemplateBinding ScrollableWidth}"
-                    ViewportSize="{TemplateBinding ViewportWidth}"
-                    Value="{TemplateBinding HorizontalOffset}"
-                    Visibility="{TemplateBinding ComputedHorizontalScrollBarVisibility}"/>
-        </Grid>
-    </ControlTemplate>
-
-    <Style x:Key="DarkScrollViewerStyle" TargetType="{x:Type ScrollViewer}">
-        <Setter Property="Template" Value="{StaticResource DarkScrollViewerTemplate}"/>
-    </Style>
-
-
-    <!-- *** Skin-following ScrollViewer Style (follows the active app skin) *** -->
-    <!--Structurally identical to DarkScrollBarStyle/DarkScrollViewerTemplate above, but the thumb brushes
-        are DynamicResource skin keys (ScrollThumbBackground*) instead of the fixed dark ones, so the same
-        flat scrollbar renders in both themes. Kept as a separate copy rather than repointing the Dark*
-        resources, since DarkScrollViewerStyle is also used explicitly, unconditionally, by panels that are
-        always dark regardless of app theme (SequenceGraph, dlgConnectGraph, dlgSearch, SequenceSchemeView) —
-        those must NOT follow the skin swap.-->
+    <!-- *** Skin-following ScrollViewer Style (single template, used everywhere) *** -->
+    <!--Thumb brushes are DynamicResource skin keys (ScrollThumbBackground*), so the same flat
+        scrollbar renders in both themes. Panels that must stay dark regardless of the active app
+        skin (SequenceGraph, dlgConnectGraph, dlgSearch, SequenceSchemeView) use this same style too,
+        but merge SkinDark.xaml into their own Resources to pin ScrollThumbBackground* (and every
+        other DynamicResource skin key) to the fixed dark values -->
 
     <Style x:Key="SkinScrollBarStyle" TargetType="{x:Type ScrollBar}">
 
@@ -554,9 +444,7 @@
 
     <!--Applies the unified flat scrollbar app-wide to any ScrollViewer (including ones inside a
         control's default template, e.g. TreeView/ListBox), unconditionally in both themes — the thumb
-        color follows the active skin via DynamicResource, so no trigger is needed here.
-        Controls that are always dark regardless of mode keep using DarkScrollViewerStyle/-Template
-        explicitly instead (see comment above).-->
+        color follows the active skin via DynamicResource, so no trigger is needed here.-->
 
     <Style TargetType="{x:Type ScrollViewer}">
         <Setter Property="Template" Value="{StaticResource SkinScrollViewerTemplate}"/>
