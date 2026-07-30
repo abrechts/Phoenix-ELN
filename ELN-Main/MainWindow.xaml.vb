@@ -21,6 +21,12 @@ Class MainWindow
 
     Private Property ExpDisplayList As ObservableCollection(Of tblExperiments)
 
+    ''' <summary>
+    ''' Stashes the original DisplayIndex of an experiment belonging to another local user,
+    ''' while it is temporarily previewed (DisplayIndex = -3) in the current user's tab bar.
+    ''' </summary>
+    Private ReadOnly ForeignExpOriginalDisplayIndex As New Dictionary(Of tblExperiments, Short?)
+
     Private WithEvents UpdateChecker As UpdateCheck
 
     Private _IsVersionUpgrade As Boolean = False
@@ -181,10 +187,10 @@ Class MainWindow
         AddHandler ExpTabHeader.PinStateChanged, AddressOf expTabHeader_PinStateChanged
         AddHandler StepSummary.RequestOpenExperiment, AddressOf ResultList_RequestOpenExperiment
         AddHandler RssItemGroup.RequestOpenExperiment, AddressOf RssItemGroup_RequestOpenExperiment
+        AddHandler StepExpSelector.RequestOpenExperiment, AddressOf StepExpSelector_RequestOpenExperiment
         AddHandler RssItemGroup.RequestStepConnections, AddressOf ExperimentContent_RequestSequencesDialog
         AddHandler ExperimentContent.RequestConnectionGraph, AddressOf ExperimentContent_RequestSequencesDialog
         AddHandler ExperimentContent.RequestStructureGraph, AddressOf ExperimentContent_RequestStructureGraph
-        AddHandler StepExpSelector.RequestOpenExperiment, AddressOf StepExpSelector_RequestOpenExperiment
         AddHandler ExperimentContent.ExperimentContextChanged, AddressOf ExperimentContent_ContextChanged
 
 
@@ -420,6 +426,16 @@ Class MainWindow
     ''' 
     Private Sub ApplyAllDataBindings(currUser As tblUsers)
 
+        'release any foreign-user experiment preview left over from the previous user's session
+        'before switching, so its owner's original pin/display state is restored instead of
+        'leaking across users (ExpDisplayList is Nothing on the very first, initial-login call).
+        'Not persisted here - DBContext is shared across users, so the in-memory restore is
+        'immediately visible to the query below; it's saved by the app's regular save points.
+
+        If ExpDisplayList IsNot Nothing Then
+            ReleaseForeignExpPreview()
+        End If
+
         '-- Assign initial contexts
 
         Me.DataContext = currUser
@@ -453,8 +469,8 @@ Class MainWindow
         'replace unpinned experiment
         If newExpItem IsNot Nothing Then
             With ExpDisplayList
-                If .Count > 0 AndAlso .Item(0).DisplayIndex = -2 AndAlso newExpItem.DisplayIndex > -2 Then
-                    .Insert(1, newExpItem) 'insert local experiment after server experiment
+                If .Count > 0 AndAlso .Item(0).DisplayIndex = -2 AndAlso newExpItem.DisplayIndex <> -2 Then
+                    .Insert(1, newExpItem) 'insert local (or foreign-preview) experiment after server experiment
                 Else
                     .Insert(0, newExpItem)
                 End If
@@ -471,6 +487,38 @@ Class MainWindow
         Return expItem.DisplayIndex IsNot Nothing
 
     End Function
+
+
+    ''' <summary>
+    ''' Releases the currently displayed foreign-user experiment preview tab (DisplayIndex = -3), if any,
+    ''' restoring its original owner's DisplayIndex rather than discarding it.
+    ''' </summary>
+    '''
+    Private Sub ReleaseForeignExpPreview()
+
+        Dim previewExp = ExpDisplayList.FirstOrDefault(Function(exp) exp.DisplayIndex.GetValueOrDefault() = -3)
+        If previewExp IsNot Nothing Then
+            RestoreForeignExpDisplayIndex(previewExp)
+            ExpDisplayList.Remove(previewExp)
+        End If
+
+    End Sub
+
+
+    ''' <summary>
+    ''' Restores the stashed original DisplayIndex of a foreign-user experiment that was
+    ''' temporarily previewed, so its owner's pin/open state reappears correctly for them.
+    ''' </summary>
+    '''
+    Private Sub RestoreForeignExpDisplayIndex(exp As tblExperiments)
+
+        Dim originalIndex As Short? = Nothing
+        If ForeignExpOriginalDisplayIndex.TryGetValue(exp, originalIndex) Then
+            ForeignExpOriginalDisplayIndex.Remove(exp)
+        End If
+        exp.DisplayIndex = originalIndex
+
+    End Sub
 
     ''' <summary>
     ''' Connect to server db for first time: Performs username duplicate checks with server database and offers 
@@ -1116,6 +1164,9 @@ Class MainWindow
             .Save()
         End With
 
+        'restore any still-open foreign-user experiment preview, so its owner's pin/open state isn't left stuck
+        ReleaseForeignExpPreview()
+
         'final save
         DBContext.SaveChanges()
 
@@ -1218,7 +1269,7 @@ Class MainWindow
 
             Else
 
-                'if server target exp originates from current user, then open it from local database
+                'if server target exp originates from current user, then open it from *local* database
                 If targetExp.UserID = CType(Me.DataContext, tblUsers).UserID Then
                     Dim localExp = DBContext.tblExperiments.Where(Function(exp) exp.ExperimentID = targetExp.ExperimentID).FirstOrDefault
                     If localExp IsNot Nothing Then
@@ -1227,7 +1278,7 @@ Class MainWindow
                     End If
                 End If
 
-                ' warn for too many open exp tabs
+                ' warn about too many open exp tabs
                 If tabExperiments.Items.Count > 4 AndAlso Not ExpDisplayList.First.DisplayIndex = -2 Then
                     Dim res = cbMsgBox.Display("The maximum of 5 open experiments will be" + vbCrLf +
                                     "exceeded if opening the server experiment." + vbCrLf + vbCrLf +
@@ -1317,25 +1368,39 @@ Class MainWindow
 
                     If firstLocalExp IsNot Nothing Then
 
-                        Select Case firstLocalExp.DisplayIndex
+                        If selExp.UserID = CType(Me.DataContext, tblUsers).UserID Then
 
-                            Case 0
+                            Select Case firstLocalExp.DisplayIndex
 
-                                'replace current leftmost exp tab
-                                firstLocalExp.DisplayIndex = Nothing
+                                Case 0
 
-                            Case -1
+                                    'replace current leftmost exp tab
+                                    firstLocalExp.DisplayIndex = Nothing
 
-                                'leftmost was pinned
-                                For i = localStartIndex + 1 To tabExperiments.Items.Count - 1
-                                    Dim expItem = CType(tabExperiments.Items(i), tblExperiments)
-                                    expItem.DisplayIndex += 1
-                                Next
-                                firstLocalExp.DisplayIndex = 1
+                                Case -1
 
-                        End Select
+                                    'leftmost was pinned
+                                    For i = localStartIndex + 1 To tabExperiments.Items.Count - 1
+                                        Dim expItem = CType(tabExperiments.Items(i), tblExperiments)
+                                        expItem.DisplayIndex += 1
+                                    Next
+                                    firstLocalExp.DisplayIndex = 1
 
-                        selExp.DisplayIndex = 0
+                            End Select
+
+                            selExp.DisplayIndex = 0
+
+                        Else
+
+                            'experiment owned by another local user (e.g. opened from a cross-user search
+                            'result): never overwrite the owner's real pin/display state, and never replace
+                            'or shift the current user's own tabs - just insert it as a transient preview
+                            'tab to the left of them instead
+                            ReleaseForeignExpPreview()
+                            ForeignExpOriginalDisplayIndex(selExp) = selExp.DisplayIndex
+                            selExp.DisplayIndex = -3
+
+                        End If
 
                         UpdateExperimentTabs(selExp)
                         DBContext.SaveChanges()     'no exp-level undo/redo required
@@ -1348,7 +1413,12 @@ Class MainWindow
 
                     ' no experiments present: rare special situation, but needs to be handled
                     Try
-                        selExp.DisplayIndex = 0
+                        If selExp.UserID = CType(Me.DataContext, tblUsers).UserID Then
+                            selExp.DisplayIndex = 0
+                        Else
+                            ForeignExpOriginalDisplayIndex(selExp) = selExp.DisplayIndex
+                            selExp.DisplayIndex = -3
+                        End If
                         UpdateExperimentTabs(selExp)
                         DBContext.SaveChanges()     'no exp-level undo/redo required
                         tabExperiments.SelectedIndex = 0
@@ -1397,6 +1467,13 @@ Class MainWindow
                 'release server experiment
                 targetExp.DisplayIndex = Nothing
                 tabExperiments.SelectedIndex = 1
+
+            Case -3
+
+                'release foreign local user experiment
+                RestoreForeignExpDisplayIndex(targetExp)
+                ExpDisplayList.Remove(targetExp)
+                tabExperiments.SelectedIndex = 0
 
             Case -1
 

@@ -21,7 +21,8 @@ Public Class ExpTabHeader
 
         '     Dim currExp = CType(Me.DataContext, tblExperiments)
 
-        If CType(Me.DataContext, tblExperiments).DisplayIndex = -2 Then
+        Dim displayIndex = CType(Me.DataContext, tblExperiments).DisplayIndex
+        If displayIndex = -2 OrElse displayIndex = -3 Then
             blkExpID.FontStyle = FontStyles.Italic
             icoPin.Content = "X"
         End If
@@ -70,6 +71,8 @@ Public Class PinToolTipConverter
         Select Case displayIndex
             Case -2
                 Return "Close server experiment"
+            Case -3
+                Return "Close experiment (owned by another local user)"
             Case -1
                 Return "Undo Pin"
             Case 0
