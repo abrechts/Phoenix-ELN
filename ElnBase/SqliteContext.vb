@@ -1,6 +1,4 @@
 
-Imports System.Windows
-Imports System.Windows.Documents
 Imports ElnCoreModel
 Imports Microsoft.EntityFrameworkCore
 
@@ -50,29 +48,10 @@ Public Class ElnDbContext
             'don't rely solely on DbUpgradeLocal.Upgrade having already run against this particular database
             'file - its invocation is gated by the app's own version-change detection, which doesn't reliably
             'fire for every database this context could end up wrapping.
-            Database.ExecuteSqlRaw(SearchIndexTableDDL)
+            FullTextSearch.EnsureSearchIndexTableExists(Me)
         End If
 
     End Sub
-
-
-    ''' <summary>
-    ''' Name of the full-text SearchIndex FTS5 virtual table. FTS5 backs this with several real shadow tables
-    ''' named "SearchIndexTableName_*" (_data, _idx, _content, _docsize, _config) - these, like the virtual
-    ''' table itself, are local-SQLite-only and must never be included in server bulk-upload/sync table scans.
-    ''' </summary>
-    '''
-    Friend Shared ReadOnly SearchIndexTableName As String = "SearchIndex"
-
-
-    ''' <summary>
-    ''' DDL for the full-text SearchIndex FTS5 virtual table. Shared between this self-heal check and
-    ''' DbUpgradeLocal's documented, versioned schema history, so the two definitions can't drift apart.
-    ''' </summary>
-    '''
-    Friend Shared ReadOnly SearchIndexTableDDL As String =
-        $"CREATE VIRTUAL TABLE IF NOT EXISTS {SearchIndexTableName} USING fts5(ProtocolItemID UNINDEXED, ExperimentID UNINDEXED, Content, " +
-        "tokenize=""unicode61 remove_diacritics 2"");"
 
 
     ''' <summary>
@@ -148,16 +127,19 @@ Public Class ElnDbContext
 
         'the full-text SearchIndex is an FTS5 virtual table specific to the local SQLite database - it doesn't
         'exist on the MySQL server context -> so save and exit here if in non-SqLite context
+
         If Not Database.IsSqlite() Then
             Return MyBase.SaveChanges()
         End If
 
         'capture the searchable changes now, while added/modified/deleted entity values and in-memory
         'relationship fixup (for same-unit-of-work parents) are still available
-        Dim searchIndexOps = CollectSearchIndexOps(added, modified, deleted)
+
+        Dim searchIndexOps = FullTextSearch.CollectSearchIndexOps(Me, added, modified, deleted)
 
         'both the entity changes and the SearchIndex maintenance must commit or roll back together,
         'since SearchIndex is a raw-SQL-maintained virtual table outside of EF's own change tracking/transaction
+
         Dim ownsTransaction = (Database.CurrentTransaction Is Nothing)
         Dim transaction = If(ownsTransaction, Database.BeginTransaction(), Database.CurrentTransaction)
 
@@ -165,7 +147,7 @@ Public Class ElnDbContext
 
             Dim result = MyBase.SaveChanges()
 
-            ApplySearchIndexOps(searchIndexOps)
+            FullTextSearch.ApplySearchIndexOps(Me, searchIndexOps)
 
             If ownsTransaction Then
                 transaction.Commit()
@@ -189,257 +171,6 @@ Public Class ElnDbContext
         End Try
 
     End Function
-
-
-    ''' <summary>
-    ''' Represents a pending change to the full-text SearchIndex, derived from a single added, modified or
-    ''' deleted protocol item satellite entity (reagent, product, solvent, comment, etc.).
-    ''' </summary>
-    '''
-    Private Class SearchIndexOp
-
-        Public Property ProtocolItemID As String
-        Public Property ExperimentID As String
-        Public Property Content As String
-        Public Property IsDelete As Boolean
-
-    End Class
-
-
-    ''' <summary>
-    ''' Builds the list of SearchIndex changes required for the given added, modified and deleted entities of
-    ''' the current unit of work. Only entities belonging to a protocol item satellite table are considered.
-    ''' </summary>
-    '''
-    Private Function CollectSearchIndexOps(added As IEnumerable(Of Object), modified As IEnumerable(Of Object),
-        deleted As IEnumerable(Of Object)) As List(Of SearchIndexOp)
-
-        Dim ops As New List(Of SearchIndexOp)
-
-        For Each entity In added.Concat(modified)
-
-            Dim protocolItemID As String = Nothing
-            If TryGetSearchableProtocolItemID(entity, protocolItemID) Then
-                ops.Add(New SearchIndexOp With {
-                    .ProtocolItemID = protocolItemID,
-                    .ExperimentID = GetExperimentIDForProtocolItem(protocolItemID),
-                    .Content = GetSearchableContent(entity),
-                    .IsDelete = False
-                })
-            End If
-
-        Next
-
-        For Each entity In deleted
-
-            Dim protocolItemID As String = Nothing
-            If TryGetSearchableProtocolItemID(entity, protocolItemID) Then
-                ops.Add(New SearchIndexOp With {.ProtocolItemID = protocolItemID, .IsDelete = True})
-            End If
-
-        Next
-
-        Return ops
-
-    End Function
-
-
-    ''' <summary>
-    ''' Applies the previously collected SearchIndex changes. Every change is a delete-then-(re)insert keyed by
-    ''' ProtocolItemID, since FTS5 has no natural upsert and the table has no other unique constraint to rely on.
-    ''' </summary>
-    '''
-    Private Sub ApplySearchIndexOps(ops As List(Of SearchIndexOp))
-
-        For Each op In ops
-
-            Database.ExecuteSqlRaw("DELETE FROM SearchIndex WHERE ProtocolItemID = {0}", op.ProtocolItemID)
-
-            If Not op.IsDelete Then
-                Database.ExecuteSqlRaw("INSERT INTO SearchIndex(ProtocolItemID, ExperimentID, Content) VALUES ({0}, {1}, {2})",
-                    op.ProtocolItemID, op.ExperimentID, op.Content)
-            End If
-
-        Next
-
-    End Sub
-
-
-    ''' <summary>
-    ''' Gets if the specified entity belongs to one of the protocol item satellite tables that feed the
-    ''' full-text SearchIndex, and if so, its owning ProtocolItemID.
-    ''' </summary>
-    '''
-    Private Shared Function TryGetSearchableProtocolItemID(entity As Object, ByRef protocolItemID As String) As Boolean
-
-        Select Case True
-
-            Case TypeOf entity Is tblReagents
-                protocolItemID = DirectCast(entity, tblReagents).ProtocolItemID
-            Case TypeOf entity Is tblProducts
-                protocolItemID = DirectCast(entity, tblProducts).ProtocolItemID
-            Case TypeOf entity Is tblSolvents
-                protocolItemID = DirectCast(entity, tblSolvents).ProtocolItemID
-            Case TypeOf entity Is tblAuxiliaries
-                protocolItemID = DirectCast(entity, tblAuxiliaries).ProtocolItemID
-            Case TypeOf entity Is tblRefReactants
-                protocolItemID = DirectCast(entity, tblRefReactants).ProtocolItemID
-            Case TypeOf entity Is tblSeparators
-                protocolItemID = DirectCast(entity, tblSeparators).ProtocolItemID
-            Case TypeOf entity Is tblEmbeddedFiles
-                protocolItemID = DirectCast(entity, tblEmbeddedFiles).ProtocolItemID
-            Case TypeOf entity Is tblComments
-                protocolItemID = DirectCast(entity, tblComments).ProtocolItemID
-            Case Else
-                protocolItemID = Nothing
-                Return False
-
-        End Select
-
-        Return True
-
-    End Function
-
-
-    ''' <summary>
-    ''' Extracts the plain-text searchable content of a protocol item satellite entity.
-    ''' </summary>
-    '''
-    Private Function GetSearchableContent(entity As Object) As String
-
-        Select Case True
-
-            Case TypeOf entity Is tblReagents
-                Dim item = DirectCast(entity, tblReagents)
-                Return item.Name + " " + item.Source
-            Case TypeOf entity Is tblProducts
-                Return DirectCast(entity, tblProducts).Name
-            Case TypeOf entity Is tblSolvents
-                Dim item = DirectCast(entity, tblSolvents)
-                Return item.Name + " " + item.Source
-            Case TypeOf entity Is tblAuxiliaries
-                Dim item = DirectCast(entity, tblAuxiliaries)
-                Return item.Name + " " + item.Source
-            Case TypeOf entity Is tblRefReactants
-                Dim item = DirectCast(entity, tblRefReactants)
-                Return item.Name + " " + item.Source
-            Case TypeOf entity Is tblSeparators
-                Return DirectCast(entity, tblSeparators).Title
-            Case TypeOf entity Is tblEmbeddedFiles
-                Dim item = DirectCast(entity, tblEmbeddedFiles)
-                Return item.FileName + " " + item.FileComment
-            Case TypeOf entity Is tblComments
-                Return ExtractPlainText(DirectCast(entity, tblComments).CommentFlowDoc)
-            Case Else
-                Return String.Empty
-
-        End Select
-
-    End Function
-
-
-    ''' <summary>
-    ''' Converts a comment's FlowDocument XAML into its plain-text content, for indexing purposes.
-    ''' </summary>
-    '''
-    Private Function ExtractPlainText(flowDocXaml As String) As String
-
-        If String.IsNullOrEmpty(flowDocXaml) Then
-            Return String.Empty
-        End If
-
-        Try
-            Dim doc = TryCast(Markup.XamlReader.Parse(flowDocXaml), FlowDocument)
-            If doc Is Nothing Then
-                Return String.Empty
-            End If
-            Return New TextRange(doc.ContentStart, doc.ContentEnd).Text
-        Catch
-            Return String.Empty
-        End Try
-
-    End Function
-
-
-    ''' <summary>
-    ''' Gets the owning ExperimentID for the given ProtocolItemID. Checks the change tracker first, since the
-    ''' parent protocol item may have been added or modified within the same still-uncommitted unit of work.
-    ''' </summary>
-    '''
-    Private Function GetExperimentIDForProtocolItem(protocolItemID As String) As String
-
-        Dim trackedParent = ChangeTracker.Entries(Of tblProtocolItems)().
-            FirstOrDefault(Function(e) e.Entity.GUID = protocolItemID AndAlso e.State <> EntityState.Detached)
-
-        If trackedParent IsNot Nothing Then
-            Return trackedParent.Entity.ExperimentID
-        End If
-
-        Return tblProtocolItems.AsNoTracking().
-            Where(Function(pi) pi.GUID = protocolItemID).
-            Select(Function(pi) pi.ExperimentID).
-            FirstOrDefault()
-
-    End Function
-
-
-    ''' <summary>
-    ''' Gets if the full-text SearchIndex currently contains no entries, e.g. because it was just created by
-    ''' a schema upgrade and still needs its initial backfill via <see cref="RebuildSearchIndex"/>.
-    ''' </summary>
-    '''
-    Public Function SearchIndexIsEmpty() As Boolean
-
-        If Not Database.IsSqlite() Then
-            Throw New NotSupportedException("The full-text SearchIndex only exists on the local SQLite database.")
-        End If
-
-        Return Database.SqlQueryRaw(Of Integer)("SELECT EXISTS(SELECT 1 FROM SearchIndex) AS Value").First() = 0
-
-    End Function
-
-
-    ''' <summary>
-    ''' Rebuilds the full-text SearchIndex from scratch based on the current contents of all protocol item
-    ''' satellite tables. Used for the initial backfill after the SearchIndex table is first created, and as a
-    ''' manual repair option should the incremental index ever be suspected to have drifted.
-    ''' </summary>
-    '''
-    Public Sub RebuildSearchIndex()
-
-        If Not Database.IsSqlite() Then
-            Throw New NotSupportedException("The full-text SearchIndex only exists on the local SQLite database.")
-        End If
-
-        Database.ExecuteSqlRaw("DELETE FROM SearchIndex")
-
-        Dim experimentIDsByProtocolItem = tblProtocolItems.AsNoTracking().
-            ToDictionary(Function(pi) pi.GUID, Function(pi) pi.ExperimentID)
-
-        'materialize each satellite table individually first (.ToList()) - chaining .Concat() directly on the
-        'IQueryable sources would make EF Core try to translate the whole union into a single incompatible SQL
-        'set operation instead of combining them in memory.
-        Dim allSatelliteEntities As IEnumerable(Of Object) =
-            tblReagents.AsNoTracking().ToList().Cast(Of Object)().
-            Concat(tblProducts.AsNoTracking().ToList().Cast(Of Object)()).
-            Concat(tblSolvents.AsNoTracking().ToList().Cast(Of Object)()).
-            Concat(tblAuxiliaries.AsNoTracking().ToList().Cast(Of Object)()).
-            Concat(tblRefReactants.AsNoTracking().ToList().Cast(Of Object)()).
-            Concat(tblSeparators.AsNoTracking().ToList().Cast(Of Object)()).
-            Concat(tblEmbeddedFiles.AsNoTracking().ToList().Cast(Of Object)()).
-            Concat(tblComments.AsNoTracking().ToList().Cast(Of Object)())
-
-        For Each entity In allSatelliteEntities
-
-            Dim protocolItemID As String = Nothing
-            If TryGetSearchableProtocolItemID(entity, protocolItemID) Then
-                Database.ExecuteSqlRaw("INSERT INTO SearchIndex(ProtocolItemID, ExperimentID, Content) VALUES ({0}, {1}, {2})",
-                    protocolItemID, experimentIDsByProtocolItem.GetValueOrDefault(protocolItemID), GetSearchableContent(entity))
-            End If
-
-        Next
-
-    End Sub
 
 
     ''' <summary>

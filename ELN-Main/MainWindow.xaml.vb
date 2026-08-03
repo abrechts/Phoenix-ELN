@@ -152,8 +152,8 @@ Class MainWindow
 
         'Backfill the full-text SearchIndex if it's empty, e.g. right after the virtual table was first created
         'by DbUpgradeLocal, or after a restore that brought in an older/emptied database.
-        If DBContext.SearchIndexIsEmpty() Then
-            DBContext.RebuildSearchIndex()
+        If FullTextSearch.IsSearchIndexEmpty(DBContext) Then
+            FullTextSearch.RebuildSearchIndex(DBContext)
         End If
 
         If isRestoreFromServer Then

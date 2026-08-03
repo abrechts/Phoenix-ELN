@@ -369,7 +369,7 @@ Public Class MySqlBulkUpload
             resReader = tblCmd.ExecuteReader()
             While resReader.Read
                 Dim tblName = resReader.GetString(0)
-                If Not (tblName = ElnDbContext.SearchIndexTableName OrElse tblName.StartsWith(ElnDbContext.SearchIndexTableName + "_")) Then
+                If Not (tblName = FullTextSearch.SearchIndexTableName OrElse tblName.StartsWith(FullTextSearch.SearchIndexTableName + "_")) Then
                     tblList.Add(tblName)
                 End If
             End While
