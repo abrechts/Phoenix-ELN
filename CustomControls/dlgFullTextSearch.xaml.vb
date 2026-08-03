@@ -60,11 +60,11 @@ Public Class dlgFullTextSearch
 
     Private Sub lstResults_PreviewMouseUp(sender As Object, e As MouseButtonEventArgs) Handles lstResults.PreviewMouseUp
 
-        Dim selExp As tblExperiments = lstResults.SelectedItem
+        Dim selHit As ExperimentSearchHit = lstResults.SelectedItem
 
-        If selExp IsNot Nothing Then
+        If selHit IsNot Nothing Then
             Dim openArgs As New StepExpOpenArgs
-            RaiseEvent RequestOpenExperiment(Me, selExp, False, openArgs)
+            RaiseEvent RequestOpenExperiment(Me, selHit.Experiment, False, openArgs)
         End If
 
     End Sub

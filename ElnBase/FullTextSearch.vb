@@ -299,18 +299,29 @@ Public Class FullTextSearch
 
 
     ''' <summary>
-    ''' Gets all experiments containing at least one protocol item matching the specified search term, ordered
-    ''' by relevance (best match first). Multiple whitespace-separated words in the search term are combined
-    ''' with AND, where each word may match in a *different* protocol item of the experiment - e.g. one word
-    ''' found in a reagent name and another in an unrelated comment still counts as a match.
+    ''' Marker characters wrapped around each matched term within <see cref="ExperimentSearchHit.Snippet"/>.
+    ''' Non-printable control characters are used (rather than e.g. HTML-like tags) so they can never collide
+    ''' with real indexed content. Consumers (e.g. a WPF attached property rendering the snippet) split on
+    ''' these to alternate between plain and highlighted runs.
     ''' </summary>
-    ''' <param name="searchTerm">Free-text search term.</param>
+    '''
+    Public Shared ReadOnly HighlightStartMarker As Char = ChrW(1)
+    Public Shared ReadOnly HighlightEndMarker As Char = ChrW(2)
+
+
+    ''' <summary>
+    ''' Gets all experiments containing at least one protocol item matching the specified search term, ordered
+    ''' by relevance (best match first). The whole search term is matched as a single literal phrase - e.g.
+    ''' searching "blue water" only finds experiments where those words occur adjacent to each other and in
+    ''' that order, not experiments where "blue" and "water" merely occur somewhere independently.
+    ''' </summary>
+    ''' <param name="searchTerm">Free-text search term, matched as one literal phrase.</param>
     ''' <param name="searchContext">Local SQLite database context to query.</param>
     '''
-    Public Function SearchExperiments(searchTerm As String, searchContext As ElnDbContext) As IEnumerable(Of tblExperiments)
+    Public Function SearchExperiments(searchTerm As String, searchContext As ElnDbContext) As IEnumerable(Of ExperimentSearchHit)
 
         If String.IsNullOrWhiteSpace(searchTerm) Then
-            Return Enumerable.Empty(Of tblExperiments)
+            Return Enumerable.Empty(Of ExperimentSearchHit)
         End If
 
         If Not searchContext.Database.IsSqlite() Then
@@ -318,23 +329,27 @@ Public Class FullTextSearch
             Throw New NotSupportedException("Full-text search is currently only implemented for the local SQLite database.")
         End If
 
-        Dim rankedIds = GetRankedExperimentIDs(searchContext, searchTerm)
+        Dim rankedExperiments = GetRankedExperimentIDs(searchContext, searchTerm)
 
         Dim experimentsByID = searchContext.tblExperiments.
-            Where(Function(exp) rankedIds.Contains(exp.ExperimentID)).
+            Where(Function(exp) rankedExperiments.Select(Function(r) r.ExperimentID).Contains(exp.ExperimentID)).
             ToDictionary(Function(exp) exp.ExperimentID)
 
         'preserve the relevance ranking order - the LINQ query above does not guarantee result order
-        Return rankedIds.
-            Where(Function(id) experimentsByID.ContainsKey(id)).
-            Select(Function(id) experimentsByID(id))
+        Return rankedExperiments.
+            Where(Function(r) experimentsByID.ContainsKey(r.ExperimentID)).
+            Select(Function(r) New ExperimentSearchHit With {
+                .Experiment = experimentsByID(r.ExperimentID),
+                .Snippet = r.Snippet
+            })
 
     End Function
 
 
     ''' <summary>
-    ''' A single SearchIndex hit: the matching protocol item, its owning experiment, and the bm25 relevance
-    ''' rank of that item for one query word (lower/more negative values are more relevant).
+    ''' A single SearchIndex hit: the matching protocol item, its owning experiment, the bm25 relevance rank
+    ''' of that item (lower/more negative values are more relevant), and a short highlighted excerpt of its
+    ''' content with the matched phrase wrapped in <see cref="HighlightStartMarker"/>/<see cref="HighlightEndMarker"/>.
     ''' </summary>
     '''
     Private Class RankedHit
@@ -342,84 +357,85 @@ Public Class FullTextSearch
         Public Property ProtocolItemID As String
         Public Property ExperimentID As String
         Public Property Rank As Double
+        Public Property Snippet As String
 
     End Class
 
 
     ''' <summary>
-    ''' Gets the ExperimentIDs matching every word of the search term, ordered by relevance (best match first).
-    ''' Each word is run as its own MATCH query and the resulting experiment sets are intersected in memory,
-    ''' rather than combining all words into a single MATCH expression - FTS5 would otherwise require every
-    ''' word to occur within the very same protocol item's indexed content, which is too strict for searching
-    ''' across an experiment's reagents, comments, products etc. as a whole.
+    ''' A single ranked search result: an experiment and a representative highlighted excerpt from its
+    ''' best-matching protocol item.
     ''' </summary>
     '''
-    Private Function GetRankedExperimentIDs(searchContext As ElnDbContext, searchTerm As String) As List(Of String)
+    Private Class RankedExperiment
 
-        Dim words = searchTerm.Split({" "c, ControlChars.Tab}, StringSplitOptions.RemoveEmptyEntries)
+        Public Property ExperimentID As String
+        Public Property Snippet As String
 
-        If words.Length = 0 Then
-            Return New List(Of String)
+    End Class
+
+
+    ''' <summary>
+    ''' Gets the experiments matching the search term as a single literal phrase, ordered by relevance (best
+    ''' match first), each with a representative highlighted excerpt.
+    ''' </summary>
+    '''
+    Private Function GetRankedExperimentIDs(searchContext As ElnDbContext, searchTerm As String) As List(Of RankedExperiment)
+
+        Dim hits = GetRankedHits(searchContext, QuotePhrase(searchTerm))
+
+        If hits.Count = 0 Then
+            Return New List(Of RankedExperiment)
         End If
 
-        Dim hitsPerWord = words.Select(Function(w) GetRankedHits(searchContext, QuoteTerm(w))).ToList()
-
-        Dim matchingIds = hitsPerWord.
-            Select(Function(hits) New HashSet(Of String)(hits.Select(Function(h) h.ExperimentID))).
-            Aggregate(Function(setA, setB) New HashSet(Of String)(setA.Intersect(setB)))
-
-        'best (lowest/most relevant) rank achieved by each distinct protocol item, across whichever query
-        'word(s) matched it - a row that happens to match more than one word must only count once, not once
-        'per word, otherwise multi-word searches would arbitrarily favor items that match many query words
-        'within a single row over items that match once but in several different rows.
-
-        Dim bestRankByItem As New Dictionary(Of String, Double)
-        Dim experimentIDByItem As New Dictionary(Of String, String)
-
-        For Each hits In hitsPerWord
-            For Each hit In hits
-                If matchingIds.Contains(hit.ExperimentID) Then
-                    If Not bestRankByItem.ContainsKey(hit.ProtocolItemID) OrElse hit.Rank < bestRankByItem(hit.ProtocolItemID) Then
-                        bestRankByItem(hit.ProtocolItemID) = hit.Rank
-                        experimentIDByItem(hit.ProtocolItemID) = hit.ExperimentID
-                    End If
-                End If
-            Next
-        Next
-
-        'an experiment's overall relevance is the SUM of the relevance of every distinct matching protocol
-        'item, not just its single best one - otherwise an experiment with several relevant reagents/comments
-        'would rank no higher than one with only a single (even if individually stronger) match, which doesn't
-        'reflect it being the more thoroughly relevant experiment overall.
-
+        'an experiment's overall relevance is the SUM of the relevance of every matching protocol item, not
+        'just its single best one - an experiment where the phrase occurs in several items should rank above
+        'one where it only occurs once, even if that single occurrence is individually a slightly stronger match.
         Dim totalRankByExperiment As New Dictionary(Of String, Double)
+        Dim bestRankByExperiment As New Dictionary(Of String, Double)
+        Dim bestSnippetByExperiment As New Dictionary(Of String, String)
 
-        For Each kvp In bestRankByItem
-            Dim experimentID = experimentIDByItem(kvp.Key)
-            totalRankByExperiment(experimentID) = totalRankByExperiment.GetValueOrDefault(experimentID, 0.0) + kvp.Value
+        For Each hit In hits
+
+            totalRankByExperiment(hit.ExperimentID) = totalRankByExperiment.GetValueOrDefault(hit.ExperimentID, 0.0) + hit.Rank
+
+            'the representative snippet shown for an experiment comes from its single best-ranked matching
+            'item - concatenating every matching item's snippet would defeat the point of a *compact* preview.
+            If Not bestRankByExperiment.ContainsKey(hit.ExperimentID) OrElse hit.Rank < bestRankByExperiment(hit.ExperimentID) Then
+                bestRankByExperiment(hit.ExperimentID) = hit.Rank
+                bestSnippetByExperiment(hit.ExperimentID) = hit.Snippet
+            End If
+
         Next
 
-        Return matchingIds.OrderBy(Function(id) totalRankByExperiment(id)).ToList()
+        Return totalRankByExperiment.Keys.
+            OrderBy(Function(id) totalRankByExperiment(id)).
+            Select(Function(id) New RankedExperiment With {.ExperimentID = id, .Snippet = bestSnippetByExperiment(id)}).
+            ToList()
 
     End Function
 
 
     ''' <summary>
-    ''' Runs a single-word FTS5 MATCH query, returning one entry per matching protocol item together with its
-    ''' owning experiment and bm25 relevance rank.
+    ''' Runs the phrase FTS5 MATCH query, returning one entry per matching protocol item together with its
+    ''' owning experiment, bm25 relevance rank, and a short highlighted excerpt (12 tokens, matched phrase
+    ''' wrapped in <see cref="HighlightStartMarker"/>/<see cref="HighlightEndMarker"/>).
     ''' </summary>
     '''
-    Private Shared Function GetRankedHits(searchContext As ElnDbContext, quotedTerm As String) As List(Of RankedHit)
+    Private Shared Function GetRankedHits(searchContext As ElnDbContext, quotedPhrase As String) As List(Of RankedHit)
 
         Dim hits As New List(Of RankedHit)
 
         Using command = searchContext.Database.GetDbConnection().CreateCommand()
 
-            command.CommandText = "SELECT ProtocolItemID, ExperimentID, bm25(SearchIndex) FROM SearchIndex WHERE SearchIndex MATCH @term"
+            'Content is column index 2 in the SearchIndex table (0=ProtocolItemID, 1=ExperimentID, 2=Content).
+            command.CommandText =
+                $"SELECT ProtocolItemID, ExperimentID, bm25(SearchIndex), snippet(SearchIndex, 2, char({AscW(HighlightStartMarker)}), char({AscW(HighlightEndMarker)}), '…', 12) " +
+                "FROM SearchIndex WHERE SearchIndex MATCH @term"
 
             Dim param = command.CreateParameter()
             param.ParameterName = "@term"
-            param.Value = quotedTerm
+            param.Value = quotedPhrase
             command.Parameters.Add(param)
 
             Dim wasClosed = (command.Connection.State <> ConnectionState.Open)
@@ -433,7 +449,8 @@ Public Class FullTextSearch
                         hits.Add(New RankedHit With {
                             .ProtocolItemID = reader.GetString(0),
                             .ExperimentID = reader.GetString(1),
-                            .Rank = reader.GetDouble(2)
+                            .Rank = reader.GetDouble(2),
+                            .Snippet = ExtendHighlightPastClosingBrackets(reader.GetString(3))
                         })
                     End While
                 End Using
@@ -451,15 +468,114 @@ Public Class FullTextSearch
 
 
     ''' <summary>
-    ''' Wraps a single word in double quotes for safe use in an FTS5 MATCH expression, escaping any embedded
-    ''' quote characters. Quoting avoids FTS5 query syntax errors for words containing characters with special
-    ''' meaning to FTS5 (-, *, :, parentheses, the AND/OR/NOT keywords, etc).
+    ''' Brackets snippet() will highlight - keyed by opening character, valued by its closing counterpart.
     ''' </summary>
     '''
-    Private Function QuoteTerm(term As String) As String
+    Private Shared ReadOnly ClosingBracketFor As New Dictionary(Of Char, Char) From {{"("c, ")"c}, {"["c, "]"c}, {"{"c, "}"c}}
 
-        Return """" + term.Replace("""", """""") + """"
+
+    ''' <summary>
+    ''' Extends each highlighted span in a snippet to include a closing bracket (')', ']', '}') that
+    ''' immediately follows it, provided its matching opening bracket already occurs earlier within that same
+    ''' span - e.g. a match on "Thickness(0)" highlights the whole "(0)", not just "(0" with the closing
+    ''' paren left outside. This is needed because snippet()/highlight() mark the exact matched token span:
+    ''' tokenization drops "(" and ")" as separators, so the last real token ends right before the closing
+    ''' bracket, which is technically not part of any token. Only a bracket whose opener is already inside the
+    ''' span gets pulled in, so an unrelated stray closing bracket right after a match isn't swallowed too.
+    ''' </summary>
+    '''
+    Private Shared Function ExtendHighlightPastClosingBrackets(snippet As String) As String
+
+        If String.IsNullOrEmpty(snippet) Then
+            Return snippet
+        End If
+
+        Dim result As New Text.StringBuilder(snippet.Length)
+        Dim openBrackets As New Stack(Of Char)
+        Dim inHighlight = False
+        Dim i = 0
+
+        While i < snippet.Length
+
+            Dim c = snippet(i)
+
+            If c = HighlightStartMarker Then
+
+                inHighlight = True
+                openBrackets.Clear()
+                result.Append(c)
+
+            ElseIf c = HighlightEndMarker Then
+
+                'pull in any immediately-following closing brackets that balance an opener seen earlier
+                'within this same highlighted span
+                Dim lookaheadIndex = i + 1
+                Dim pendingClosers As New Text.StringBuilder()
+
+                While openBrackets.Count > 0 AndAlso lookaheadIndex < snippet.Length AndAlso
+                    snippet(lookaheadIndex) = ClosingBracketFor(openBrackets.Peek())
+
+                    pendingClosers.Append(snippet(lookaheadIndex))
+                    openBrackets.Pop()
+                    lookaheadIndex += 1
+
+                End While
+
+                result.Append(pendingClosers)
+                result.Append(c)
+                i = lookaheadIndex - 1
+                inHighlight = False
+
+            Else
+
+                If inHighlight Then
+                    If ClosingBracketFor.ContainsKey(c) Then
+                        openBrackets.Push(c)
+                    ElseIf openBrackets.Count > 0 AndAlso c = ClosingBracketFor(openBrackets.Peek()) Then
+                        'this closing bracket already balances an opener seen earlier within the span
+                        '(e.g. the "]" in "(a[b]c)") - pop it back off rather than leaving it as a dangling
+                        'opener that a later character would be incorrectly matched against.
+                        openBrackets.Pop()
+                    End If
+                End If
+                result.Append(c)
+
+            End If
+
+            i += 1
+
+        End While
+
+        Return result.ToString()
 
     End Function
+
+
+    ''' <summary>
+    ''' Wraps the whole search term in double quotes as a single FTS5 phrase, escaping any embedded quote
+    ''' characters. A phrase query requires its tokens to occur adjacent and in that order within the same
+    ''' indexed row - this is what makes a multi-word search term match only the literal phrase typed, rather
+    ''' than each word independently. Quoting also avoids FTS5 query syntax errors for terms containing
+    ''' characters with special meaning to FTS5 (-, *, :, parentheses, the AND/OR/NOT keywords, etc).
+    ''' </summary>
+    '''
+    Private Shared Function QuotePhrase(searchTerm As String) As String
+
+        Return """" + searchTerm.Trim().Replace("""", """""") + """"
+
+    End Function
+
+End Class
+
+
+''' <summary>
+''' A single full-text search result: an experiment and a short excerpt from its best-matching protocol item,
+''' with the matched term(s) wrapped in FullTextSearch.HighlightStartMarker/HighlightEndMarker.
+''' </summary>
+'''
+Public Class ExperimentSearchHit
+
+    Public Property Experiment As tblExperiments
+    Public Property Snippet As String
 
 End Class

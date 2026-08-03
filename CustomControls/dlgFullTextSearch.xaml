@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:CustomControls"
         mc:Ignorable="d"
         Title="Full-Text Search" TextOptions.TextFormattingMode="Display" WindowStartupLocation="CenterOwner" ShowInTaskbar="False"
+        UseLayoutRounding="True"
         Height="550" MinHeight="350" Width="500" MinWidth="400" Background="#FF303036">
 
     <Window.Resources>
@@ -17,7 +18,13 @@
             </ResourceDictionary.MergedDictionaries>
 
             <DataTemplate x:Key="expResultItem">
-                <local:ExpTreeHeader Margin="0,3"/>
+                <StackPanel Margin="0,4">
+                    <local:ExpTreeHeader DataContext="{Binding Experiment}"/>
+                    <local:HighlightedSnippetView Margin="18,2,0,0" HorizontalAlignment="Stretch" FontSize="11.5" Opacity="0.85"
+                        Foreground="{DynamicResource BodyForeground}"
+                        SnapsToDevicePixels="True"
+                        Text="{Binding Snippet}"/>
+                </StackPanel>
             </DataTemplate>
 
         </ResourceDictionary>
