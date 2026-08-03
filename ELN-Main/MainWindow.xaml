@@ -138,6 +138,13 @@
                         </StackPanel>
                     </Button>
 
+                    <Button x:Name="btnFullTextSearch" HorizontalAlignment="Left" VerticalAlignment="Center" ToolTip="Full-text search across all experiments" Margin="2,0,0,0">
+                        <StackPanel Orientation="Horizontal">
+                            <ContentControl Content="{StaticResource icoSearch_Dark}" Height="16" Margin="0,1,4,0"/>
+                            <TextBlock Text="Search Text" Margin="0,0,2,0" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
                     <Separator Margin="2,2,0,2"/>
 
                     <Menu x:Name="mnuTools" TextBlock.FontFamily="Segoe UI" TextBlock.FontSize="13" Background="transparent" 

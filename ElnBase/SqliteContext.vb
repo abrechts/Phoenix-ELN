@@ -42,9 +42,37 @@ Public Class ElnDbContext
 
 
     Public Sub New(options As DbContextOptions)
+
         MyBase.New(options)
         TableInfo = GetTablesInfo()
+
+        If Database.IsSqlite() Then
+            'don't rely solely on DbUpgradeLocal.Upgrade having already run against this particular database
+            'file - its invocation is gated by the app's own version-change detection, which doesn't reliably
+            'fire for every database this context could end up wrapping.
+            Database.ExecuteSqlRaw(SearchIndexTableDDL)
+        End If
+
     End Sub
+
+
+    ''' <summary>
+    ''' Name of the full-text SearchIndex FTS5 virtual table. FTS5 backs this with several real shadow tables
+    ''' named "SearchIndexTableName_*" (_data, _idx, _content, _docsize, _config) - these, like the virtual
+    ''' table itself, are local-SQLite-only and must never be included in server bulk-upload/sync table scans.
+    ''' </summary>
+    '''
+    Friend Shared ReadOnly SearchIndexTableName As String = "SearchIndex"
+
+
+    ''' <summary>
+    ''' DDL for the full-text SearchIndex FTS5 virtual table. Shared between this self-heal check and
+    ''' DbUpgradeLocal's documented, versioned schema history, so the two definitions can't drift apart.
+    ''' </summary>
+    '''
+    Friend Shared ReadOnly SearchIndexTableDDL As String =
+        $"CREATE VIRTUAL TABLE IF NOT EXISTS {SearchIndexTableName} USING fts5(ProtocolItemID UNINDEXED, ExperimentID UNINDEXED, Content, " +
+        "tokenize=""unicode61 remove_diacritics 2"");"
 
 
     ''' <summary>
@@ -117,6 +145,12 @@ Public Class ElnDbContext
             End If
 
         Next
+
+        'the full-text SearchIndex is an FTS5 virtual table specific to the local SQLite database - it doesn't
+        'exist on the MySQL server context -> so save and exit here if in non-SqLite context
+        If Not Database.IsSqlite() Then
+            Return MyBase.SaveChanges()
+        End If
 
         'capture the searchable changes now, while added/modified/deleted entity values and in-memory
         'relationship fixup (for same-unit-of-work parents) are still available
@@ -356,6 +390,10 @@ Public Class ElnDbContext
     '''
     Public Function SearchIndexIsEmpty() As Boolean
 
+        If Not Database.IsSqlite() Then
+            Throw New NotSupportedException("The full-text SearchIndex only exists on the local SQLite database.")
+        End If
+
         Return Database.SqlQueryRaw(Of Integer)("SELECT EXISTS(SELECT 1 FROM SearchIndex) AS Value").First() = 0
 
     End Function
@@ -368,6 +406,10 @@ Public Class ElnDbContext
     ''' </summary>
     '''
     Public Sub RebuildSearchIndex()
+
+        If Not Database.IsSqlite() Then
+            Throw New NotSupportedException("The full-text SearchIndex only exists on the local SQLite database.")
+        End If
 
         Database.ExecuteSqlRaw("DELETE FROM SearchIndex")
 

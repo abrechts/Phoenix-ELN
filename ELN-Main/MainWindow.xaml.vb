@@ -194,6 +194,7 @@ Class MainWindow
         AddHandler StepSummary.RequestOpenExperiment, AddressOf ResultList_RequestOpenExperiment
         AddHandler RssItemGroup.RequestOpenExperiment, AddressOf RssItemGroup_RequestOpenExperiment
         AddHandler StepExpSelector.RequestOpenExperiment, AddressOf StepExpSelector_RequestOpenExperiment
+        AddHandler dlgFullTextSearch.RequestOpenExperiment, AddressOf FullTextSearch_RequestOpenExperiment
         AddHandler RssItemGroup.RequestStepConnections, AddressOf ExperimentContent_RequestSequencesDialog
         AddHandler ExperimentContent.RequestConnectionGraph, AddressOf ExperimentContent_RequestSequencesDialog
         AddHandler ExperimentContent.RequestStructureGraph, AddressOf ExperimentContent_RequestStructureGraph
@@ -1244,6 +1245,11 @@ Class MainWindow
     End Sub
 
 
+    Private Sub FullTextSearch_RequestOpenExperiment(sender As Object, targetExp As tblExperiments, isFromServer As Boolean, args As StepExpOpenArgs)
+        args.WasOpened = TryOpenExperiment(targetExp, isFromServer)
+    End Sub
+
+
     Private Function TryOpenExperiment(targetExp As tblExperiments, isFromServer As Boolean) As Boolean
 
         If targetExp Is Nothing Then
@@ -1740,6 +1746,18 @@ Class MainWindow
             .ShowDialog()
 
         End With
+
+    End Sub
+
+
+    Private Sub btnFullTextSearch_Click() Handles btnFullTextSearch.Click
+
+        Dim searchDlg As New dlgFullTextSearch With {
+            .LocalDBContext = DBContext,
+            .Owner = Me
+        }
+
+        searchDlg.ShowDialog()
 
     End Sub
 

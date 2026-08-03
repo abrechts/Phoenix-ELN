@@ -1,0 +1,59 @@
+<Window x:Class="dlgFullTextSearch"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CustomControls"
+        mc:Ignorable="d"
+        Title="Full-Text Search" TextOptions.TextFormattingMode="Display" WindowStartupLocation="CenterOwner" ShowInTaskbar="False"
+        Height="550" MinHeight="350" Width="500" MinWidth="400" Background="#FF303036">
+
+    <Window.Resources>
+        <ResourceDictionary>
+
+            <ResourceDictionary.MergedDictionaries>
+                <!--This window is always dark regardless of the active app skin.-->
+                <ResourceDictionary Source="/CustomControls;component/Resources/SkinDark.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
+            <DataTemplate x:Key="expResultItem">
+                <local:ExpTreeHeader Margin="0,3"/>
+            </DataTemplate>
+
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Margin="14">
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" TextWrapping="Wrap" Margin="0,0,0,8" Foreground="{DynamicResource BodyForeground}"
+            Text="Searches reagents, products, solvents, auxiliaries, reference reactants, separators, embedded file names/comments and comments, across all experiments."/>
+
+        <Grid Grid.Row="1" Margin="0,0,0,10">
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBox x:Name="txtSearchTerm" Grid.Column="0" Padding="5,4" VerticalContentAlignment="Center" FontSize="13"/>
+
+            <Button x:Name="btnRunSearch" Grid.Column="1" Content="Search" Padding="14,4" Margin="8,0,0,0" IsDefault="True"/>
+
+        </Grid>
+
+        <ListBox x:Name="lstResults" Grid.Row="2" Background="Transparent" BorderThickness="0" local:DarkModeHelper.IsDarkMode="True"
+            ScrollViewer.HorizontalScrollBarVisibility="Disabled" VirtualizingStackPanel.IsVirtualizing="False"
+            ItemTemplate="{StaticResource expResultItem}"/>
+
+        <TextBlock x:Name="blkHitInfo" Grid.Row="3" Margin="0,8,0,0" Opacity="0.8" Foreground="{DynamicResource BodyForeground}"/>
+
+    </Grid>
+
+</Window>

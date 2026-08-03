@@ -352,11 +352,15 @@ Public Class MySqlBulkUpload
 
 
     ''' <summary>
-    ''' Gets a list of all data tables. Assumes the connection to be open.
+    ''' Gets a list of all data tables, except for the virtual FTS5 SearchIndex table.
     ''' </summary>
     ''' <returns>List of table names.</returns>
-    ''' 
-    Friend Shared Function GetDataTableNames(sqliteConn As SqliteConnection) As List(Of String)
+    ''' <remarks>
+    ''' Excludes the full-text SearchIndex FTS5 virtual table and its backing shadow tables. These are
+    ''' local-SQLite-only and have no equivalent on the MySQL server.
+    ''' </remarks>
+    '''
+    Public Shared Function GetDataTableNames(sqliteConn As SqliteConnection) As List(Of String)
 
         Dim tblList As New List(Of String)
         Dim resReader As SqliteDataReader
@@ -364,7 +368,10 @@ Public Class MySqlBulkUpload
         Using tblCmd As New SqliteCommand("SELECT name FROM sqlite_master WHERE type='table'", sqliteConn)
             resReader = tblCmd.ExecuteReader()
             While resReader.Read
-                tblList.Add(resReader.GetString(0))
+                Dim tblName = resReader.GetString(0)
+                If Not (tblName = ElnDbContext.SearchIndexTableName OrElse tblName.StartsWith(ElnDbContext.SearchIndexTableName + "_")) Then
+                    tblList.Add(tblName)
+                End If
             End While
             resReader.Close()
         End Using
