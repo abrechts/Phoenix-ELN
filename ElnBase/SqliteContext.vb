@@ -270,7 +270,7 @@ Public Class ElnDbContext
     ''' full-text SearchIndex, and if so, its owning ProtocolItemID.
     ''' </summary>
     '''
-    Private Function TryGetSearchableProtocolItemID(entity As Object, ByRef protocolItemID As String) As Boolean
+    Private Shared Function TryGetSearchableProtocolItemID(entity As Object, ByRef protocolItemID As String) As Boolean
 
         Select Case True
 

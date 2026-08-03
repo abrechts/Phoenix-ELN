@@ -45,12 +45,13 @@ Public Class FullTextSearch
 
 
     ''' <summary>
-    ''' A single SearchIndex hit: the owning experiment and the bm25 relevance rank of the matching protocol
-    ''' item (lower/more negative values are more relevant).
+    ''' A single SearchIndex hit: the matching protocol item, its owning experiment, and the bm25 relevance
+    ''' rank of that item for one query word (lower/more negative values are more relevant).
     ''' </summary>
     '''
     Private Class RankedHit
 
+        Public Property ProtocolItemID As String
         Public Property ExperimentID As String
         Public Property Rank As Double
 
@@ -79,26 +80,45 @@ Public Class FullTextSearch
             Select(Function(hits) New HashSet(Of String)(hits.Select(Function(h) h.ExperimentID))).
             Aggregate(Function(setA, setB) New HashSet(Of String)(setA.Intersect(setB)))
 
-        Dim bestRankByID As New Dictionary(Of String, Double)
+        'best (lowest/most relevant) rank achieved by each distinct protocol item, across whichever query
+        'word(s) matched it - a row that happens to match more than one word must only count once, not once
+        'per word, otherwise multi-word searches would arbitrarily favor items that match many query words
+        'within a single row over items that match once but in several different rows.
+
+        Dim bestRankByItem As New Dictionary(Of String, Double)
+        Dim experimentIDByItem As New Dictionary(Of String, String)
 
         For Each hits In hitsPerWord
             For Each hit In hits
                 If matchingIds.Contains(hit.ExperimentID) Then
-                    If Not bestRankByID.ContainsKey(hit.ExperimentID) OrElse hit.Rank < bestRankByID(hit.ExperimentID) Then
-                        bestRankByID(hit.ExperimentID) = hit.Rank
+                    If Not bestRankByItem.ContainsKey(hit.ProtocolItemID) OrElse hit.Rank < bestRankByItem(hit.ProtocolItemID) Then
+                        bestRankByItem(hit.ProtocolItemID) = hit.Rank
+                        experimentIDByItem(hit.ProtocolItemID) = hit.ExperimentID
                     End If
                 End If
             Next
         Next
 
-        Return matchingIds.OrderBy(Function(id) bestRankByID(id)).ToList()
+        'an experiment's overall relevance is the SUM of the relevance of every distinct matching protocol
+        'item, not just its single best one - otherwise an experiment with several relevant reagents/comments
+        'would rank no higher than one with only a single (even if individually stronger) match, which doesn't
+        'reflect it being the more thoroughly relevant experiment overall.
+
+        Dim totalRankByExperiment As New Dictionary(Of String, Double)
+
+        For Each kvp In bestRankByItem
+            Dim experimentID = experimentIDByItem(kvp.Key)
+            totalRankByExperiment(experimentID) = totalRankByExperiment.GetValueOrDefault(experimentID, 0.0) + kvp.Value
+        Next
+
+        Return matchingIds.OrderBy(Function(id) totalRankByExperiment(id)).ToList()
 
     End Function
 
 
     ''' <summary>
-    ''' Runs a single-word FTS5 MATCH query, returning one entry per matching protocol item's owning
-    ''' experiment together with that item's bm25 relevance rank.
+    ''' Runs a single-word FTS5 MATCH query, returning one entry per matching protocol item together with its
+    ''' owning experiment and bm25 relevance rank.
     ''' </summary>
     '''
     Private Function GetRankedHits(searchContext As ElnDbContext, quotedTerm As String) As List(Of RankedHit)
@@ -107,7 +127,7 @@ Public Class FullTextSearch
 
         Using command = searchContext.Database.GetDbConnection().CreateCommand()
 
-            command.CommandText = "SELECT ExperimentID, bm25(SearchIndex) FROM SearchIndex WHERE SearchIndex MATCH @term"
+            command.CommandText = "SELECT ProtocolItemID, ExperimentID, bm25(SearchIndex) FROM SearchIndex WHERE SearchIndex MATCH @term"
 
             Dim param = command.CreateParameter()
             param.ParameterName = "@term"
@@ -122,7 +142,11 @@ Public Class FullTextSearch
             Try
                 Using reader = command.ExecuteReader()
                     While reader.Read()
-                        hits.Add(New RankedHit With {.ExperimentID = reader.GetString(0), .Rank = reader.GetDouble(1)})
+                        hits.Add(New RankedHit With {
+                            .ProtocolItemID = reader.GetString(0),
+                            .ExperimentID = reader.GetString(1),
+                            .Rank = reader.GetDouble(2)
+                        })
                     End While
                 End Using
             Finally
