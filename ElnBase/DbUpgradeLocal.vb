@@ -88,6 +88,16 @@ Public Class DbUpgradeLocal
                 DbAddColumn("tblExperiments", "IsRacemicProduct", "TINYINT", "0", sqliteConn)
             End If
 
+            ' --> introduced in version 5.1.0 (full-text search)
+
+            'FTS5 virtual table for full-text search across protocol item satellite tables (reagents, products,
+            'solvents, auxiliaries, reference reactants, separators, embedded files and comments). Kept in sync
+            'incrementally by ElnDbContext.SaveChanges; existing data is backfilled once via ElnDbContext.RebuildSearchIndex.
+            DbExecuteCmd(
+               "CREATE VIRTUAL TABLE IF NOT EXISTS SearchIndex USING fts5(ProtocolItemID UNINDEXED, ExperimentID UNINDEXED, Content, " +
+               "tokenize=""unicode61 remove_diacritics 2"");",
+               sqliteConn)
+
 
         End Using
 

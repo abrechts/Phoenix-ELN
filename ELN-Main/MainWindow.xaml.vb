@@ -150,6 +150,12 @@ Class MainWindow
             End If
         End If
 
+        'Backfill the full-text SearchIndex if it's empty, e.g. right after the virtual table was first created
+        'by DbUpgradeLocal, or after a restore that brought in an older/emptied database.
+        If DBContext.SearchIndexIsEmpty() Then
+            DBContext.RebuildSearchIndex()
+        End If
+
         If isRestoreFromServer Then
             '  Restored legacy DB's may be lacking tblProjFolders (from v.3.0.0 on) initializations. 
             ProjectFolders.SetMissingProjFolderRefs(DBContext)
