@@ -127,24 +127,29 @@ Public Class HighlightedSnippetView
 
 
     ''' <summary>
-    ''' Draws the given highlight geometry as one or more plain rectangles, each inflated by
+    ''' Draws the given highlight geometry as one plain rectangle per line it covers, each inflated by
     ''' <see cref="HorizontalHighlightPadding"/> on the left/right - rather than drawing the geometry's exact
-    ''' shape as-is - so the highlight doesn't hug the matched text quite so tightly. A highlighted phrase that
-    ''' wraps across lines produces a separate rectangle per line (a GeometryGroup), each padded independently,
-    ''' so padding is never added across the gap between two wrapped lines.
+    ''' shape, or its overall bounding box, as-is. A highlighted phrase that wraps across lines is NOT returned
+    ''' as a GeometryGroup (confirmed empirically) - it's a single PathGeometry with one closed figure per
+    ''' line. Taking that whole geometry's .Bounds directly would produce one rectangle spanning from the first
+    ''' line's start to the second line's end, incorrectly covering unrelated text in between; converting via
+    ''' PathGeometry.CreateFromGeometry and measuring each figure's bounds individually keeps each line's
+    ''' rectangle correctly isolated.
     ''' </summary>
     '''
     Private Shared Sub DrawPaddedHighlight(drawingContext As DrawingContext, geometry As Geometry)
 
-        Dim group = TryCast(geometry, GeometryGroup)
+        Dim decomposedGeometry = PathGeometry.CreateFromGeometry(geometry)
 
-        If group IsNot Nothing Then
-            For Each child In group.Children
-                drawingContext.DrawRectangle(HighlightBrush, Nothing, Rect.Inflate(child.Bounds, HorizontalHighlightPadding, 0))
-            Next
-        Else
+        If decomposedGeometry.Figures.Count = 0 Then
             drawingContext.DrawRectangle(HighlightBrush, Nothing, Rect.Inflate(geometry.Bounds, HorizontalHighlightPadding, 0))
+            Return
         End If
+
+        For Each figure In decomposedGeometry.Figures
+            Dim figureBounds = New PathGeometry({figure}).Bounds
+            drawingContext.DrawRectangle(HighlightBrush, Nothing, Rect.Inflate(figureBounds, HorizontalHighlightPadding, 0))
+        Next
 
     End Sub
 

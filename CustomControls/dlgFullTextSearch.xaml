@@ -18,9 +18,10 @@
             </ResourceDictionary.MergedDictionaries>
 
             <DataTemplate x:Key="expResultItem">
-                <StackPanel Margin="0,4">
+                <StackPanel Margin="0,4" HorizontalAlignment="Stretch">
                     <local:ExpTreeHeader DataContext="{Binding Experiment}"/>
-                    <local:HighlightedSnippetView Margin="18,2,0,0" HorizontalAlignment="Stretch" FontSize="11.5" Opacity="0.85"
+                    <Separator Background="LightGray" Height="0.8" Margin="18,4,0,4" Opacity="0.4"/>
+                    <local:HighlightedSnippetView Margin="18,0,0,0" HorizontalAlignment="Stretch" FontSize="11.5" Opacity="0.85"
                         Foreground="{DynamicResource BodyForeground}"
                         SnapsToDevicePixels="True"
                         Text="{Binding Snippet}"/>
@@ -56,6 +57,7 @@
         </Grid>
 
         <ListBox x:Name="lstResults" Grid.Row="2" Background="Transparent" BorderThickness="0" local:DarkModeHelper.IsDarkMode="True"
+            HorizontalContentAlignment="Stretch"
             ScrollViewer.HorizontalScrollBarVisibility="Disabled" VirtualizingStackPanel.IsVirtualizing="False"
             ItemTemplate="{StaticResource expResultItem}"/>
 
