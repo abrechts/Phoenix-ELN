@@ -215,6 +215,19 @@ Class MainWindow
         ApplyAllDataBindings(currUser)
         cboUsers.SelectedItem = currUser
 
+        'TEMP timing diagnostic: isolate EF/DB lazy-load cost from WPF TreeView layout cost for the
+        'experiment navigation tree, to verify the virtualization rework's impact on startup time.
+        Dim treeDataLoadSw = Stopwatch.StartNew()
+        DBContext.Entry(currUser).Collection(Function(u) u.tblProjects).Load()
+        For Each proj In currUser.tblProjects
+            DBContext.Entry(proj).Collection(Function(p) p.tblProjFolders).Load()
+            For Each folder In proj.tblProjFolders
+                DBContext.Entry(folder).Collection(Function(f) f.tblExperiments).Load()
+            Next
+        Next
+        treeDataLoadSw.Stop()
+        Debug.WriteLine($"[Startup timing] Eager-load project/folder/experiment tree (EF/DB): {treeDataLoadSw.ElapsedMilliseconds} ms")
+
         'update spell checker header with last used locale
         For Each spellItem In mnuSpelling.Items(0).items
             If TypeOf spellItem Is MenuItem Then
@@ -261,7 +274,13 @@ Class MainWindow
         Dim currExp = (From exp In currUser.tblExperiments Where exp.IsCurrent).FirstOrDefault
         If currExp IsNot Nothing Then
             Try
+                'TEMP timing diagnostic: by now the tree's navigation properties are already eager-loaded above,
+                'so this isolates pure WPF container-generation/layout cost, to verify the virtualization rework.
+                Dim treeLayoutSw = Stopwatch.StartNew()
                 expNavTree.ScrollExperimentIntoView(currExp)
+                treeLayoutSw.Stop()
+                Debug.WriteLine($"[Startup timing] TreeView container generation/layout (UI): {treeLayoutSw.ElapsedMilliseconds} ms")
+
                 Dim thisTab As TabItem = tabExperiments.ItemContainerGenerator.ContainerFromItem(currExp)
                 If thisTab IsNot Nothing Then
                     thisTab.IsSelected = True

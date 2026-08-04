@@ -24,16 +24,26 @@
     <Border CornerRadius="6" BorderThickness="1" Padding="4"
         Background="{DynamicResource InnerPanelBackground}" BorderBrush="{DynamicResource TreePanelBorder}">
 
-        <!--This TreeView should NOT be virtualized to allow the selection of experiment nodes currently not in view!-->
+        <!--Virtualized: selecting/scrolling to an experiment node currently scrolled out of view still works,
+            since ExperimentTree's container-lookup helpers walk the known Project -> ProjFolder -> Experiment
+            path, realizing each ancestor container in turn via VirtualizingPanel.BringIndexIntoViewPublic
+            instead of requiring the whole tree pre-realized.-->
         <TreeView x:Name="navTree" Background="Transparent"
             ItemsSource="{Binding tblProjects, Converter={StaticResource projectsCollectionViewConv}}"
             TreeViewItem.Selected="TreeViewItem_Selected" TreeViewItem.Unselected="TreeViewItem_Unselected" Padding="2,2,2,8" BorderThickness="0"
+            VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"
             dd:DragDrop.IsDragSource="True"
             dd:DragDrop.IsDropTarget="True"
             dd:DragDrop.UseDefaultDragAdorner="false"
             dd:DragDrop.DropTargetAdornerBrush="#FF6868FF"
             dd:DragDrop.EffectMoveAdornerTemplate="{x:Null}"
             dd:DragDrop.DropHandler="{StaticResource navTreeDropHandler}">
+
+            <TreeView.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel/>
+                </ItemsPanelTemplate>
+            </TreeView.ItemsPanel>
 
             <TreeView.Resources>
 
@@ -64,6 +74,16 @@
                     <Setter Property="Template" Value="{StaticResource ExperimentTreeViewItem}"/>
                     <Setter Property="IsExpanded" Value="{Binding IsNodeExpanded,Converter={StaticResource intToBooleanConv},
                         Mode=TwoWay}"/>
+                    <!--Every level (Project's Folders, Folder's Experiments) needs the same virtualizing panel as
+                        the root TreeView, so ExperimentTree's container-lookup helpers can realize an off-screen
+                        item's container at any depth, not just at the top level.-->
+                    <Setter Property="ItemsPanel">
+                        <Setter.Value>
+                            <ItemsPanelTemplate>
+                                <VirtualizingStackPanel/>
+                            </ItemsPanelTemplate>
+                        </Setter.Value>
+                    </Setter>
                 </Style>
 
             </TreeView.ItemContainerStyle>

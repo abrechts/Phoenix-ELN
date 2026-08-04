@@ -86,8 +86,12 @@ Public Class ExperimentTree
         projectConv.View.Refresh()   'navTree.Items.Refresh() does not work here
         navTree.UpdateLayout()
 
-        'Set project tree title to edit mode
-        Dim projHeader = WPFToolbox.FindVisualChild(Of ProjectTreeHeader)(Me)
+        'Set project tree title to edit mode. Look up newProject's own container specifically (rather than
+        'grabbing the first ProjectTreeHeader found anywhere under Me) and realize it first if needed - under
+        'virtualization, a blind visual-tree search could otherwise find the wrong (or no) header depending on
+        'scroll position.
+        Dim newProjTvi = GetOrRealizeContainer(navTree, newProject)
+        Dim projHeader = If(newProjTvi IsNot Nothing, WPFToolbox.FindVisualChild(Of ProjectTreeHeader)(newProjTvi), Nothing)
         projHeader?.BeginTitleEdit()
 
         ExperimentContent.DbContext.SaveChanges()
@@ -122,10 +126,12 @@ Public Class ExperimentTree
 
         RefreshItems()
 
-        Dim projTvi As TreeViewItem = navTree.ItemContainerGenerator.ContainerFromItem(currProject)
+        'realize currProject's container first (rather than a raw ContainerFromItem lookup) in case it's
+        'currently scrolled out of view and virtualized away
+        Dim projTvi As TreeViewItem = GetOrRealizeContainer(navTree, currProject)
         navTree.UpdateLayout()
 
-        Dim projFolderHeader = WPFToolbox.FindVisualChild(Of ProjFolderTreeHeader)(projTvi) 'takes first one encountered
+        Dim projFolderHeader = If(projTvi IsNot Nothing, WPFToolbox.FindVisualChild(Of ProjFolderTreeHeader)(projTvi), Nothing) 'takes first one encountered
         projFolderHeader?.BeginTitleEdit()
 
         ExperimentContent.DbContext.SaveChanges()
@@ -376,46 +382,55 @@ Public Class ExperimentTree
 
 
 
-    Private Function TreeViewItemFromData(tree As TreeView, data As Object) As TreeViewItem
+    ''' <summary>
+    ''' Gets the TreeViewItem container representing the specified experiment. Rather than a blind tree search,
+    ''' this walks directly down the known Project -> ProjFolder -> Experiment path (available directly off
+    ''' expEntry), realizing each ancestor container in turn via <see cref="GetOrRealizeContainer"/> if the
+    ''' virtualizing panel hasn't generated it yet because it's currently scrolled out of view. This never needs
+    ''' to realize unrelated sibling projects/folders/experiments just to search past them.
+    ''' </summary>
+    '''
+    Private Function TreeViewItemFromData(tree As TreeView, expEntry As tblExperiments) As TreeViewItem
 
-        ' Root-level lookup
-        tree.UpdateLayout()
-        Dim tvi = TryCast(tree.ItemContainerGenerator.ContainerFromItem(data), TreeViewItem)
-        If tvi IsNot Nothing Then Return tvi
+        Dim projectContainer = GetOrRealizeContainer(tree, expEntry.Project)
+        If projectContainer Is Nothing Then Return Nothing
 
-        ' Search recursively
-        For Each rootItem In tree.Items
-            Dim rootContainer = TryCast(tree.ItemContainerGenerator.ContainerFromItem(rootItem), TreeViewItem)
-            If rootContainer IsNot Nothing Then
-                Dim result = GetTreeViewItemRecursive(rootContainer, data)
-                If result IsNot Nothing Then Return result
-            End If
-        Next
+        projectContainer.IsExpanded = True
+        projectContainer.UpdateLayout()
 
-        Return Nothing
+        Dim folderContainer = GetOrRealizeContainer(projectContainer, expEntry.ProjFolder)
+        If folderContainer Is Nothing Then Return Nothing
+
+        folderContainer.IsExpanded = True
+        folderContainer.UpdateLayout()
+
+        Return GetOrRealizeContainer(folderContainer, expEntry)
 
     End Function
 
-    Private Function GetTreeViewItemRecursive(parent As TreeViewItem, data As Object) As TreeViewItem
 
-        ' Ensure children are generated
-        parent.IsExpanded = True
-        parent.UpdateLayout()
+    ''' <summary>
+    ''' Gets the TreeViewItem container for the given data item within the given ItemsControl (navTree itself,
+    ''' or an already-realized parent TreeViewItem), realizing it first if the virtualizing panel hasn't
+    ''' generated it yet - e.g. because the item is currently scrolled out of view.
+    ''' </summary>
+    '''
+    Private Function GetOrRealizeContainer(itemsControl As ItemsControl, data As Object) As TreeViewItem
 
-        ' Direct match?
-        Dim tvi = TryCast(parent.ItemContainerGenerator.ContainerFromItem(data), TreeViewItem)
-        If tvi IsNot Nothing Then Return tvi
+        Dim container = TryCast(itemsControl.ItemContainerGenerator.ContainerFromItem(data), TreeViewItem)
+        If container IsNot Nothing Then Return container
 
-        ' Search children
-        For Each child In parent.Items
-            Dim childContainer = TryCast(parent.ItemContainerGenerator.ContainerFromItem(child), TreeViewItem)
-            If childContainer IsNot Nothing Then
-                Dim result = GetTreeViewItemRecursive(childContainer, data)
-                If result IsNot Nothing Then Return result
-            End If
-        Next
+        Dim index = itemsControl.Items.IndexOf(data)
+        If index < 0 Then Return Nothing
 
-        Return Nothing
+        itemsControl.UpdateLayout() 'ensure the items host panel itself has been created before searching for it below
+
+        Dim itemsHost = WPFToolbox.FindVisualChild(Of VirtualizingStackPanel)(itemsControl)
+        itemsHost?.BringIndexIntoViewPublic(index) 'public wrapper for the otherwise-protected BringIndexIntoView
+
+        itemsControl.UpdateLayout() 'let the panel realize the now-brought-into-view container
+
+        Return TryCast(itemsControl.ItemContainerGenerator.ContainerFromItem(data), TreeViewItem)
 
     End Function
 
@@ -431,7 +446,6 @@ Public Class ExperimentTree
 
 
 End Class
-
 
 
 Public Class NavTreeDropHandler
