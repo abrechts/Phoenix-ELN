@@ -1,6 +1,6 @@
 Imports System.Data
-Imports System.Windows
-Imports System.Windows.Documents
+Imports System.Linq.Expressions
+Imports System.Xml.Linq
 Imports ElnCoreModel
 Imports Microsoft.EntityFrameworkCore
 
@@ -45,6 +45,21 @@ Public Class FullTextSearch
 
 
     ''' <summary>
+    ''' Deletes the full text search index table and its satellites from the specified SqLite database context.
+    ''' </summary>
+    ''' <remarks> The currently used SqLite editors don't allow this operation manually, since the FTS5 module 
+    ''' is missing there.</remarks>
+    ''' 
+    Public Shared Sub RemoveSearchIndexTable(searchContext As ElnDbContext)
+
+        If searchContext.Database.IsSqlite() Then
+            searchContext.Database.ExecuteSqlRaw("DROP TABLE SearchIndex")
+        End If
+
+    End Sub
+
+
+    ''' <summary>
     ''' Gets if the full-text SearchIndex currently contains no entries, e.g. because it was just created by
     ''' a schema upgrade and still needs its initial backfill via <see cref="RebuildSearchIndex"/>.
     ''' </summary>
@@ -61,6 +76,127 @@ Public Class FullTextSearch
 
 
     ''' <summary>
+    ''' A single searchable protocol item satellite row: its owning ProtocolItemID and computed text content.
+    ''' </summary>
+    '''
+    Private Class SearchableRow
+
+        Public Property ProtocolItemID As String
+        Public Property Content As String
+
+    End Class
+
+
+    ''' <summary>
+    ''' Per-table definitions of what's searchable, expressed as EF-translatable expression trees rather than
+    ''' plain functions, so each is a single source of truth used two different ways: RebuildSearchIndex passes
+    ''' one directly into a LINQ .Select(...), letting EF Core translate it into a SQL projection that only ever
+    ''' fetches the referenced columns - crucially, never an unreferenced BLOB column like
+    ''' tblEmbeddedFiles.FileBytes/IconImage, and the same protection automatically applies to any future table
+    ''' with a BLOB column, with no separate special-casing needed. CollectSearchIndexOps (the incremental,
+    ''' already-in-memory path) instead compiles the same expression into a delegate via SearchableEntityProjections
+    ''' below. tblComments is the one deliberate exception (see RebuildSearchIndex/GetSearchableRow) - extracting
+    ''' plain text from its FlowDocument XAML needs WPF's XamlReader, which can only run client-side, never as
+    ''' part of a translated SQL query.
+    ''' </summary>
+    '''
+    Private Shared ReadOnly ReagentProjection As Expression(Of Func(Of tblReagents, SearchableRow)) =
+        Function(item) New SearchableRow With {.ProtocolItemID = item.ProtocolItemID, .Content = item.Name + " " + item.Source}
+
+    Private Shared ReadOnly ProductProjection As Expression(Of Func(Of tblProducts, SearchableRow)) =
+        Function(item) New SearchableRow With {.ProtocolItemID = item.ProtocolItemID, .Content = item.Name}
+
+    Private Shared ReadOnly SolventProjection As Expression(Of Func(Of tblSolvents, SearchableRow)) =
+        Function(item) New SearchableRow With {.ProtocolItemID = item.ProtocolItemID, .Content = item.Name + " " + item.Source}
+
+    Private Shared ReadOnly AuxiliaryProjection As Expression(Of Func(Of tblAuxiliaries, SearchableRow)) =
+        Function(item) New SearchableRow With {.ProtocolItemID = item.ProtocolItemID, .Content = item.Name + " " + item.Source}
+
+    Private Shared ReadOnly RefReactantProjection As Expression(Of Func(Of tblRefReactants, SearchableRow)) =
+        Function(item) New SearchableRow With {.ProtocolItemID = item.ProtocolItemID, .Content = item.Name + " " + item.Source}
+
+    Private Shared ReadOnly SeparatorProjection As Expression(Of Func(Of tblSeparators, SearchableRow)) =
+        Function(item) New SearchableRow With {.ProtocolItemID = item.ProtocolItemID, .Content = item.Title}
+
+    Private Shared ReadOnly EmbeddedFileProjection As Expression(Of Func(Of tblEmbeddedFiles, SearchableRow)) =
+        Function(item) New SearchableRow With {.ProtocolItemID = item.ProtocolItemID, .Content = item.FileName + " " + item.FileComment}
+
+    ' tblComments is treated separately in RebuildSearchIndex, since plain text needs to be extracted from xaml
+
+
+    ''' <summary>
+    ''' Compiled, type-erased dispatch table derived from the projections above (never declared separately),
+    ''' keyed by entity CLR type. Used by the incremental (already-in-memory) path to find and invoke the right
+    ''' projection for a given tracked entity. Built once, lazily, on first use.
+    ''' </summary>
+    '''
+    Private Shared ReadOnly SearchableEntityProjections As New Lazy(Of Dictionary(Of Type, Func(Of Object, SearchableRow)))(
+        Function()
+
+            Dim dispatch As New Dictionary(Of Type, Func(Of Object, SearchableRow))
+
+            AddProjection(dispatch, ReagentProjection)
+            AddProjection(dispatch, ProductProjection)
+            AddProjection(dispatch, SolventProjection)
+            AddProjection(dispatch, AuxiliaryProjection)
+            AddProjection(dispatch, RefReactantProjection)
+            AddProjection(dispatch, SeparatorProjection)
+            AddProjection(dispatch, EmbeddedFileProjection)
+
+            Return dispatch
+
+        End Function)
+
+
+    Private Shared Sub AddProjection(Of TEntity As Class)(dispatch As Dictionary(Of Type, Func(Of Object, SearchableRow)),
+        projection As Expression(Of Func(Of TEntity, SearchableRow)))
+
+        Dim compiled = projection.Compile()
+        dispatch(GetType(TEntity)) = Function(entity) compiled(DirectCast(entity, TEntity))
+
+    End Sub
+
+
+    ''' <summary>
+    ''' Gets the searchable ProtocolItemID/Content for the given entity if it belongs to one of the protocol
+    ''' item satellite tables that feed the full-text SearchIndex, or Nothing if it doesn't.
+    ''' </summary>
+    ''' <remarks>
+    ''' Walks up the entity's actual runtime type hierarchy rather than looking up entity.GetType() directly,
+    ''' since lazy-loading proxies (Castle.Proxies.tblReagentsProxy etc. - confirmed for any entity that was
+    ''' loaded from the database, which in practice means every Modified/Deleted entity, not just newly-Added
+    ''' ones) are runtime subclasses of the real entity type, one level down, not the entity type itself. A
+    ''' dictionary lookup keyed by exact type alone would silently never match those, breaking indexing for
+    ''' edits to existing rows while incorrectly appearing to work fine for brand-new ones in casual testing.
+    ''' </remarks>
+    '''
+    Private Shared Function GetSearchableRow(entity As Object) As SearchableRow
+
+        Dim dispatch = SearchableEntityProjections.Value
+        Dim entityType = entity.GetType()
+
+        While entityType IsNot Nothing AndAlso entityType IsNot GetType(Object)
+
+            Dim projection As Func(Of Object, SearchableRow) = Nothing
+            If dispatch.TryGetValue(entityType, projection) Then
+                Return projection(entity)
+            End If
+
+            entityType = entityType.BaseType
+
+        End While
+
+        If TypeOf entity Is tblComments Then
+            Dim comment = DirectCast(entity, tblComments)
+            Return New SearchableRow With {.ProtocolItemID = comment.ProtocolItemID, .Content = ExtractPlainText(comment.CommentFlowDoc)}
+        End If
+
+        Return Nothing
+
+    End Function
+
+
+    ''' <summary>
     ''' Rebuilds the full-text SearchIndex from scratch based on the current contents of all protocol item
     ''' satellite tables. Used for the initial backfill after the SearchIndex table is first created, and as a
     ''' manual repair option should the incremental index ever be suspected to have drifted.
@@ -72,33 +208,64 @@ Public Class FullTextSearch
             Throw New NotSupportedException("The full-text SearchIndex only exists on the local SQLite database.")
         End If
 
-        searchContext.Database.ExecuteSqlRaw("DELETE FROM SearchIndex")
-
         Dim experimentIDsByProtocolItem = searchContext.tblProtocolItems.AsNoTracking().
             ToDictionary(Function(pi) pi.GUID, Function(pi) pi.ExperimentID)
 
-        'materialize each satellite table individually first (.ToList()) - chaining .Concat() directly on the
-        'IQueryable sources would make EF Core try to translate the whole union into a single incompatible SQL
-        'set operation instead of combining them in memory.
-        Dim allSatelliteEntities As IEnumerable(Of Object) =
-            searchContext.tblReagents.AsNoTracking().ToList().Cast(Of Object)().
-            Concat(searchContext.tblProducts.AsNoTracking().ToList().Cast(Of Object)()).
-            Concat(searchContext.tblSolvents.AsNoTracking().ToList().Cast(Of Object)()).
-            Concat(searchContext.tblAuxiliaries.AsNoTracking().ToList().Cast(Of Object)()).
-            Concat(searchContext.tblRefReactants.AsNoTracking().ToList().Cast(Of Object)()).
-            Concat(searchContext.tblSeparators.AsNoTracking().ToList().Cast(Of Object)()).
-            Concat(searchContext.tblEmbeddedFiles.AsNoTracking().ToList().Cast(Of Object)()).
-            Concat(searchContext.tblComments.AsNoTracking().ToList().Cast(Of Object)())
+        'each satellite table is queried through its own EF-translatable projection (declared once, above,
+        'and shared with the incremental path) - so the generated SQL only ever fetches the columns actually
+        'used for indexing, never an unreferenced BLOB column such as tblEmbeddedFiles.FileBytes/IconImage.
+        Dim allRows As New List(Of SearchableRow)
+        allRows.AddRange(searchContext.tblReagents.AsNoTracking().Select(ReagentProjection))
+        allRows.AddRange(searchContext.tblProducts.AsNoTracking().Select(ProductProjection))
+        allRows.AddRange(searchContext.tblSolvents.AsNoTracking().Select(SolventProjection))
+        allRows.AddRange(searchContext.tblAuxiliaries.AsNoTracking().Select(AuxiliaryProjection))
+        allRows.AddRange(searchContext.tblRefReactants.AsNoTracking().Select(RefReactantProjection))
+        allRows.AddRange(searchContext.tblSeparators.AsNoTracking().Select(SeparatorProjection))
+        allRows.AddRange(searchContext.tblEmbeddedFiles.AsNoTracking().Select(EmbeddedFileProjection))
 
-        For Each entity In allSatelliteEntities
+        'tblComments can't share the translatable-expression approach above - extracting plain text from its
+        'FlowDocument XAML (via WPF's XamlReader) can only run client-side, not inside a SQL query. Still keep
+        'its own SQL projection down to just (ProtocolItemID, CommentFlowDoc) rather than the full entity.
 
-            Dim protocolItemID As String = Nothing
-            If TryGetSearchableProtocolItemID(entity, protocolItemID) Then
+        allRows.AddRange(searchContext.tblComments.AsNoTracking().
+            Select(Function(c) New With {c.ProtocolItemID, c.CommentFlowDoc}).
+            AsEnumerable().
+            Select(Function(c) New SearchableRow With {.ProtocolItemID = c.ProtocolItemID, .Content = ExtractPlainText(c.CommentFlowDoc)}))
+
+        'wrap the whole rebuild in a single transaction - without this, every DELETE/INSERT below runs as its
+        'own autocommit transaction and fsyncs individually, which is what actually made this slow (not the
+        'FTS5 tokenizing work itself).
+
+        Dim ownsTransaction = (searchContext.Database.CurrentTransaction Is Nothing)
+        Dim transaction = If(ownsTransaction, searchContext.Database.BeginTransaction(), searchContext.Database.CurrentTransaction)
+
+        Try
+
+            searchContext.Database.ExecuteSqlRaw("DELETE FROM SearchIndex")
+
+            For Each row In allRows
                 searchContext.Database.ExecuteSqlRaw("INSERT INTO SearchIndex(ProtocolItemID, ExperimentID, Content) VALUES ({0}, {1}, {2})",
-                    protocolItemID, experimentIDsByProtocolItem.GetValueOrDefault(protocolItemID), GetSearchableContent(entity))
+                    row.ProtocolItemID, experimentIDsByProtocolItem.GetValueOrDefault(row.ProtocolItemID), row.Content)
+            Next
+
+            If ownsTransaction Then
+                transaction.Commit()
             End If
 
-        Next
+        Catch
+
+            If ownsTransaction Then
+                transaction.Rollback()
+            End If
+            Throw
+
+        Finally
+
+            If ownsTransaction Then
+                transaction.Dispose()
+            End If
+
+        End Try
 
     End Sub
 
@@ -132,12 +299,12 @@ Public Class FullTextSearch
 
         For Each entity In added.Concat(modified)
 
-            Dim protocolItemID As String = Nothing
-            If TryGetSearchableProtocolItemID(entity, protocolItemID) Then
+            Dim row = GetSearchableRow(entity)
+            If row IsNot Nothing Then
                 ops.Add(New SearchIndexOp With {
-                    .ProtocolItemID = protocolItemID,
-                    .ExperimentID = GetExperimentIDForProtocolItem(searchContext, protocolItemID),
-                    .Content = GetSearchableContent(entity),
+                    .ProtocolItemID = row.ProtocolItemID,
+                    .ExperimentID = GetExperimentIDForProtocolItem(searchContext, row.ProtocolItemID),
+                    .Content = row.Content,
                     .IsDelete = False
                 })
             End If
@@ -146,9 +313,9 @@ Public Class FullTextSearch
 
         For Each entity In deleted
 
-            Dim protocolItemID As String = Nothing
-            If TryGetSearchableProtocolItemID(entity, protocolItemID) Then
-                ops.Add(New SearchIndexOp With {.ProtocolItemID = protocolItemID, .IsDelete = True})
+            Dim row = GetSearchableRow(entity)
+            If row IsNot Nothing Then
+                ops.Add(New SearchIndexOp With {.ProtocolItemID = row.ProtocolItemID, .IsDelete = True})
             End If
 
         Next
@@ -181,81 +348,25 @@ Public Class FullTextSearch
 
 
     ''' <summary>
-    ''' Gets if the specified entity belongs to one of the protocol item satellite tables that feed the
-    ''' full-text SearchIndex, and if so, its owning ProtocolItemID.
+    ''' FlowDocument elements that represent an actual content break (a different paragraph, list item, table
+    ''' cell, etc.), warranting a space when concatenating their text with their surroundings. Everything else
+    ''' (Run, Span, Bold, Italic, Hyperlink, and critically the extra Run elements WPF uses for chemical-formula
+    ''' sub/superscripts via BaselineAlignment) is inline formatting that must stay seamlessly concatenated with
+    ''' its neighbors - otherwise e.g. "NH4Cl" would incorrectly split into separate "NH", "4", "Cl" tokens.
     ''' </summary>
     '''
-    Private Shared Function TryGetSearchableProtocolItemID(entity As Object, ByRef protocolItemID As String) As Boolean
-
-        Select Case True
-
-            Case TypeOf entity Is tblReagents
-                protocolItemID = DirectCast(entity, tblReagents).ProtocolItemID
-            Case TypeOf entity Is tblProducts
-                protocolItemID = DirectCast(entity, tblProducts).ProtocolItemID
-            Case TypeOf entity Is tblSolvents
-                protocolItemID = DirectCast(entity, tblSolvents).ProtocolItemID
-            Case TypeOf entity Is tblAuxiliaries
-                protocolItemID = DirectCast(entity, tblAuxiliaries).ProtocolItemID
-            Case TypeOf entity Is tblRefReactants
-                protocolItemID = DirectCast(entity, tblRefReactants).ProtocolItemID
-            Case TypeOf entity Is tblSeparators
-                protocolItemID = DirectCast(entity, tblSeparators).ProtocolItemID
-            Case TypeOf entity Is tblEmbeddedFiles
-                protocolItemID = DirectCast(entity, tblEmbeddedFiles).ProtocolItemID
-            Case TypeOf entity Is tblComments
-                protocolItemID = DirectCast(entity, tblComments).ProtocolItemID
-            Case Else
-                protocolItemID = Nothing
-                Return False
-
-        End Select
-
-        Return True
-
-    End Function
-
-
-    ''' <summary>
-    ''' Extracts the plain-text searchable content of a protocol item satellite entity.
-    ''' </summary>
-    '''
-    Private Shared Function GetSearchableContent(entity As Object) As String
-
-        Select Case True
-
-            Case TypeOf entity Is tblReagents
-                Dim item = DirectCast(entity, tblReagents)
-                Return item.Name + " " + item.Source
-            Case TypeOf entity Is tblProducts
-                Return DirectCast(entity, tblProducts).Name
-            Case TypeOf entity Is tblSolvents
-                Dim item = DirectCast(entity, tblSolvents)
-                Return item.Name + " " + item.Source
-            Case TypeOf entity Is tblAuxiliaries
-                Dim item = DirectCast(entity, tblAuxiliaries)
-                Return item.Name + " " + item.Source
-            Case TypeOf entity Is tblRefReactants
-                Dim item = DirectCast(entity, tblRefReactants)
-                Return item.Name + " " + item.Source
-            Case TypeOf entity Is tblSeparators
-                Return DirectCast(entity, tblSeparators).Title
-            Case TypeOf entity Is tblEmbeddedFiles
-                Dim item = DirectCast(entity, tblEmbeddedFiles)
-                Return item.FileName + " " + item.FileComment
-            Case TypeOf entity Is tblComments
-                Return ExtractPlainText(DirectCast(entity, tblComments).CommentFlowDoc)
-            Case Else
-                Return String.Empty
-
-        End Select
-
-    End Function
+    Private Shared ReadOnly BlockLevelFlowDocumentElements As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase) From {
+        "Paragraph", "List", "ListItem", "Section", "Table", "TableRowGroup", "TableRow", "TableCell", "BlockUIContainer", "LineBreak"
+    }
 
 
     ''' <summary>
     ''' Converts a comment's FlowDocument XAML into its plain-text content, for indexing purposes.
     ''' </summary>
+    ''' <remarks>
+    ''' Walks the XAML as plain XML (XDocument) instead of using Markup.XamlReader.Parse + TextRange, which
+    ''' builds a full WPF FlowDocument object graph. Measured ~35x slower over this app's real comment data.
+    ''' </remarks>
     '''
     Private Shared Function ExtractPlainText(flowDocXaml As String) As String
 
@@ -264,16 +375,59 @@ Public Class FullTextSearch
         End If
 
         Try
-            Dim doc = TryCast(Markup.XamlReader.Parse(flowDocXaml), FlowDocument)
-            If doc Is Nothing Then
+            Dim root = XDocument.Parse(flowDocXaml).Root
+            If root Is Nothing Then
                 Return String.Empty
             End If
-            Return New TextRange(doc.ContentStart, doc.ContentEnd).Text
+
+            Dim content As New Text.StringBuilder()
+            AppendFlowDocumentText(root, content)
+            Return content.ToString()
+
         Catch
             Return String.Empty
         End Try
 
     End Function
+
+
+    ''' <summary>
+    ''' Recursively appends the text content of a FlowDocument XAML element (and its descendants) to the given
+    ''' StringBuilder, inserting a separating space around block-level elements only (see
+    ''' BlockLevelFlowDocumentElements) so words never merge across a paragraph/list-item/etc. boundary, while
+    ''' inline formatting spans stay seamlessly concatenated with their surrounding text.
+    ''' </summary>
+    '''
+    Private Shared Sub AppendFlowDocumentText(element As XElement, content As Text.StringBuilder)
+
+        For Each node In element.Nodes()
+
+            Dim textNode = TryCast(node, XText)
+            If textNode IsNot Nothing Then
+                content.Append(textNode.Value)
+                Continue For
+            End If
+
+            Dim childElement = TryCast(node, XElement)
+            If childElement IsNot Nothing Then
+
+                Dim isBlockLevel = BlockLevelFlowDocumentElements.Contains(childElement.Name.LocalName)
+
+                If isBlockLevel Then
+                    content.Append(" "c)
+                End If
+
+                AppendFlowDocumentText(childElement, content)
+
+                If isBlockLevel Then
+                    content.Append(" "c)
+                End If
+
+            End If
+
+        Next
+
+    End Sub
 
 
     ''' <summary>
@@ -310,18 +464,29 @@ Public Class FullTextSearch
 
 
     ''' <summary>
+    ''' Upper bound on the number of experiments returned by <see cref="SearchExperiments"/>, so an overly
+    ''' broad search term (e.g. a common word like "and" or "the") can't return every experiment in the
+    ''' database. Once more experiments than this match, the lowest-relevance ones are cut off and
+    ''' <see cref="ExperimentSearchResult.WasTruncated"/> is set so the caller can inform the user.
+    ''' </summary>
+    '''
+    Public Shared ReadOnly MaxDisplayedResults As Integer = 200
+
+
+    ''' <summary>
     ''' Gets all experiments containing at least one protocol item matching the specified search term, ordered
     ''' by relevance (best match first). The whole search term is matched as a single literal phrase - e.g.
     ''' searching "blue water" only finds experiments where those words occur adjacent to each other and in
-    ''' that order, not experiments where "blue" and "water" merely occur somewhere independently.
+    ''' that order, not experiments where "blue" and "water" merely occur somewhere independently. Results are
+    ''' capped at <see cref="MaxDisplayedResults"/>.
     ''' </summary>
     ''' <param name="searchTerm">Free-text search term, matched as one literal phrase.</param>
     ''' <param name="searchContext">Local SQLite database context to query.</param>
     '''
-    Public Function SearchExperiments(searchTerm As String, searchContext As ElnDbContext) As IEnumerable(Of ExperimentSearchHit)
+    Public Function SearchExperiments(searchTerm As String, searchContext As ElnDbContext) As ExperimentSearchResult
 
         If String.IsNullOrWhiteSpace(searchTerm) Then
-            Return Enumerable.Empty(Of ExperimentSearchHit)
+            Return New ExperimentSearchResult With {.Hits = New List(Of ExperimentSearchHit), .WasTruncated = False}
         End If
 
         If Not searchContext.Database.IsSqlite() Then
@@ -331,17 +496,26 @@ Public Class FullTextSearch
 
         Dim rankedExperiments = GetRankedExperimentIDs(searchContext, searchTerm)
 
+        'cut off the least relevant experiments before even querying tblExperiments for them, rather than
+        'truncating the final result list - both cheaper and simpler, since ranking order is already established.
+        Dim wasTruncated = rankedExperiments.Count > MaxDisplayedResults
+        If wasTruncated Then
+            rankedExperiments = rankedExperiments.Take(MaxDisplayedResults).ToList()
+        End If
+
         Dim experimentsByID = searchContext.tblExperiments.
             Where(Function(exp) rankedExperiments.Select(Function(r) r.ExperimentID).Contains(exp.ExperimentID)).
             ToDictionary(Function(exp) exp.ExperimentID)
 
         'preserve the relevance ranking order - the LINQ query above does not guarantee result order
-        Return rankedExperiments.
+        Dim hits = rankedExperiments.
             Where(Function(r) experimentsByID.ContainsKey(r.ExperimentID)).
             Select(Function(r) New ExperimentSearchHit With {
                 .Experiment = experimentsByID(r.ExperimentID),
                 .Snippet = r.Snippet
-            })
+            }).ToList()
+
+        Return New ExperimentSearchResult With {.Hits = hits, .WasTruncated = wasTruncated}
 
     End Function
 
@@ -577,5 +751,19 @@ Public Class ExperimentSearchHit
 
     Public Property Experiment As tblExperiments
     Public Property Snippet As String
+
+End Class
+
+
+''' <summary>
+''' The outcome of a <see cref="FullTextSearch.SearchExperiments"/> call: the (possibly capped) list of
+''' matching experiments, and whether more matches existed than <see cref="FullTextSearch.MaxDisplayedResults"/>
+''' and were cut off, e.g. because the search term was too broad (a common word like "and" or "the").
+''' </summary>
+'''
+Public Class ExperimentSearchResult
+
+    Public Property Hits As List(Of ExperimentSearchHit)
+    Public Property WasTruncated As Boolean
 
 End Class

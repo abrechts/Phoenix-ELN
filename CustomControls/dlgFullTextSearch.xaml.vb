@@ -50,10 +50,11 @@ Public Class dlgFullTextSearch
             Exit Sub
         End If
 
-        Dim hits = _fullTextSearch.SearchExperiments(txtSearchTerm.Text, LocalDBContext).ToList()
+        Dim result = _fullTextSearch.SearchExperiments(txtSearchTerm.Text, LocalDBContext)
 
-        lstResults.ItemsSource = hits
-        blkHitInfo.Text = $"{hits.Count} experiment(s) found"
+        lstResults.ItemsSource = result.Hits
+        blkHitInfo.Text = $"{result.Hits.Count} experiment(s) found" +
+            If(result.WasTruncated, $" (search term too broad - showing the {FullTextSearch.MaxDisplayedResults} best matches only)", "")
 
     End Sub
 
