@@ -318,21 +318,23 @@ Public Class ExperimentTree
 
 
     ''' <summary>
-    ''' It the TreeViewItem of the specified expEntry is not visible in the current navigation view, it is 
-    ''' selected and scrolled to the top of the viewport.
+    ''' Selects the TreeViewItem of the specified expEntry, scrolling it into view first if it isn't currently
+    ''' visible (e.g. realized-but-scrolled-away, or not yet realized at all because it's virtualized out of view).
     ''' </summary>
     ''' <returns>The TreeViewItem representing the specified expEntry.</returns>
-    ''' 
+    '''
     Public Function ScrollExperimentIntoView(expEntry As tblExperiments) As TreeViewItem
 
         Dim selTvi As TreeViewItem = TreeViewItemFromData(navTree, expEntry)
 
         If selTvi IsNot Nothing Then
 
-            Dim scroller = WPFToolbox.FindVisualChild(Of ScrollViewer)(navTree)
-            If scroller IsNot Nothing AndAlso Not IsTreeViewItemVisible(scroller, selTvi) Then
-                scroller.ScrollToBottom()
-            End If
+            'raises RequestBringIntoView, which bubbles up through every ancestor (including nested virtualizing
+            'panels) and scrolls each one by exactly the minimum amount needed - unlike the old ScrollToBottom()
+            'fallback, this actually lands on the item regardless of how far away it currently is, but leaves it
+            'flush against whichever edge of the viewport it approached from.
+            selTvi.BringIntoView()
+            NudgeTowardsViewportCenter(selTvi)
 
             _suppressTreeSelectedEvent = True
             Try
@@ -346,6 +348,45 @@ Public Class ExperimentTree
         Return selTvi
 
     End Function
+
+
+    ''' <summary>
+    ''' Nudges navTree's scroll position, in whole item rows, so the given (already brought-into-view)
+    ''' TreeViewItem ends up closer to the vertical middle of the viewport instead of flush against whichever
+    ''' edge BringIntoView happened to land it on - purely cosmetic, so it's skipped if there isn't enough
+    ''' surrounding content to make a difference.
+    ''' </summary>
+    ''' <remarks>
+    ''' Works in on-screen pixels to measure direction/distance, then issues that many ScrollViewer.LineUp/
+    ''' LineDown calls rather than computing a VerticalOffset directly - navTree's virtualizing panels default
+    ''' to VirtualizingPanel.ScrollUnit=Item, under which VerticalOffset/ViewportHeight are in logical item
+    ''' units, not pixels, so LineUp/LineDown (which scroll by exactly one item under that mode) is the only
+    ''' unit-safe way to move a specific number of rows.
+    ''' </remarks>
+    '''
+    Private Sub NudgeTowardsViewportCenter(tvi As TreeViewItem)
+
+        Dim scroller = WPFToolbox.FindVisualChild(Of ScrollViewer)(navTree)
+        If scroller Is Nothing OrElse scroller.ActualHeight <= 0 Then Exit Sub
+
+        navTree.UpdateLayout() 'ensure tvi's position reflects the scroll BringIntoView just performed
+
+        Dim itemTop = tvi.TransformToAncestor(scroller).Transform(New Point(0, 0)).Y
+        Dim itemCenter = itemTop + tvi.ActualHeight / 2
+        Dim viewportCenter = scroller.ActualHeight / 2
+        Dim rowHeight = Math.Max(tvi.ActualHeight, 1)
+
+        Dim rowsToScroll = CInt(Math.Round((itemCenter - viewportCenter) / rowHeight))
+
+        For i = 1 To Math.Abs(rowsToScroll)
+            If rowsToScroll > 0 Then
+                scroller.LineDown()
+            Else
+                scroller.LineUp()
+            End If
+        Next
+
+    End Sub
 
 
 
@@ -431,16 +472,6 @@ Public Class ExperimentTree
         itemsControl.UpdateLayout() 'let the panel realize the now-brought-into-view container
 
         Return TryCast(itemsControl.ItemContainerGenerator.ContainerFromItem(data), TreeViewItem)
-
-    End Function
-
-
-    Private Shared Function IsTreeViewItemVisible(sv As ScrollViewer, tvi As TreeViewItem) As Boolean
-
-        Dim itemBounds As Rect = tvi.TransformToAncestor(sv).TransformBounds(New Rect(New Point(0, 0), tvi.RenderSize))
-        Dim viewport As New Rect(New Point(0, 0), New Size(sv.ViewportWidth, sv.ViewportHeight))
-
-        Return viewport.IntersectsWith(itemBounds)
 
     End Function
 
@@ -581,6 +612,10 @@ Public Class NavTreeDropHandler
             dragExperiment.ProjFolder = targetFolder
 
             navTree.Items.Refresh()
+
+            'scroll the dropped experiment into view at its new location - under virtualization it's easy to
+            'drop something into a folder that's currently nowhere near the scroll position it was dragged from
+            WPFToolbox.FindVisualParent(Of ExperimentTree)(navTree)?.ScrollExperimentIntoView(dragExperiment)
 
             'Set auto-save point
             Dim currExpContent = WPFToolbox.FindVisualChild(Of ExperimentContent)(ExperimentContent.TabExperimentsPresenter)
