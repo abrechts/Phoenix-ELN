@@ -117,8 +117,8 @@ Class MainWindow
 
             End If
 
-            'Create the the spell checker
-            SpellChecker.Initialize(.LastSpellCheckLocale, Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\Phoenix ELN Data\customWords.lex")
+            'Create the spell checker (required by UI controls that depend on it during initialization)
+            SpellChecker.Initialize(.LastSpellCheckLocale, Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) & "\Phoenix ELN Data\customWords.lex")
 
         End With
 
@@ -257,24 +257,24 @@ Class MainWindow
 
         End With
 
-        'scroll current experiment node into view and select its corresponding content tab (may be a pinned one)
+        'Defer expensive layout and scroll operations to after the first render pass completes.
+        'This allows the UI to become visible immediately instead of blocking on UpdateLayout().
         Dim currExp = (From exp In currUser.tblExperiments Where exp.IsCurrent).FirstOrDefault
         If currExp IsNot Nothing Then
-            Try
-                'this early in startup the window hasn't necessarily gone through a full layout pass yet, so
-                'expNavTree's ScrollViewer may still report a zero ActualHeight - force one first, since
-                'ScrollExperimentIntoView's BringIntoView/viewport-centering math depends on real dimensions.
-                Me.UpdateLayout()
-                expNavTree.ScrollExperimentIntoView(currExp)
-                Dim thisTab As TabItem = tabExperiments.ItemContainerGenerator.ContainerFromItem(currExp)
-                If thisTab IsNot Nothing Then
-                    thisTab.IsSelected = True
-                End If
-            Catch ex As Exception
-                'in case of any error, e.g. due to missing content, just ignore and continue with unselected tab
-                cbMsgBox.Display("Your last used experiment seems to have a technical issue. Please check its content.",
-                  MsgBoxStyle.Exclamation, "Startup Issue")
-            End Try
+            Dispatcher.BeginInvoke(Sub()
+                                       Try
+                                           Me.UpdateLayout()
+                                           expNavTree.ScrollExperimentIntoView(currExp)
+                                           Dim thisTab As TabItem = tabExperiments.ItemContainerGenerator.ContainerFromItem(currExp)
+                                           If thisTab IsNot Nothing Then
+                                               thisTab.IsSelected = True
+                                           End If
+                                       Catch ex As Exception
+                                           'in case of any error, e.g. due to missing content, just ignore and continue with unselected tab
+                                           cbMsgBox.Display("Your last used experiment seems to have a technical issue. Please check its content.",
+                      MsgBoxStyle.Exclamation, "Startup Issue")
+                                       End Try
+                                   End Sub, System.Windows.Threading.DispatcherPriority.ApplicationIdle)
         End If
 
         'start the periodic cleanup process for embedded document editing resources (currently set to every hour)
