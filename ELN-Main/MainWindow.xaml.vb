@@ -612,9 +612,9 @@ Class MainWindow
         ' Load local users into memory (prevents mixing contexts)
         Dim localUsers = DBContext.tblUsers.ToList()
 
-        ' Perform the comparison in memory
+        'Don't use string.equals() with StringComparison parameter for ignoring case, since this can't be translated to MySQL
         Dim conflictingUsers = localUsers.Where(Function(localUser) _
-        ServerDBContext.tblUsers.Any(Function(serverUser) serverUser.UserID.Equals(localUser.UserID, StringComparison.CurrentCultureIgnoreCase))).ToList()
+        ServerDBContext.tblUsers.Any(Function(serverUser) serverUser.UserID.ToLower = localUser.UserID.ToLower)).ToList()
 
         Return conflictingUsers
 
