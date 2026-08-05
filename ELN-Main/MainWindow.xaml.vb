@@ -160,7 +160,7 @@ Class MainWindow
         End If
 
         If isRestoreFromServer Then
-            '  Restored legacy DB's may be lacking tblProjFolders (from v.3.0.0 on) initializations. 
+            '  Restored legacy DB's may be lacking tblProjFolders (from v.3.0.0 on) initializations.
             ProjectFolders.SetMissingProjFolderRefs(DBContext)
             '  Reset all sync flags
             DBContext.ResetSyncFlags()
@@ -289,7 +289,7 @@ Class MainWindow
     ''' <summary>
     ''' Main window content rendered: Display startup messages here.
     ''' </summary>
-    ''' 
+    '''
     Private Sub Me_ContentRendered() Handles Me.ContentRendered
 
         ' determine if a data migration was performed
