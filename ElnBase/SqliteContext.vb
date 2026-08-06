@@ -14,13 +14,15 @@ Public Class SQLiteContext
 
         Dim optionsBuilder As New DbContextOptionsBuilder(Of ElnDataContext)
 
-        'Foreign Keys=True is required with the winsqlite3 provider: unlike e_sqlite3, the Windows
+        'IMPORTANT: Foreign Keys=True is required with the winsqlite3 provider: Unlike e_sqlite3, the Windows
         'system SQLite is not compiled with SQLITE_DEFAULT_FOREIGN_KEYS, so ON DELETE CASCADE
-        'would otherwise not be enforced.
+        'would otherwise not be enforced!
+
         Dim opts = optionsBuilder.UseSqlite("Data Source = " + sqliteFilePath + ";Foreign Keys=True")
 
         'Important! Lazy loading required to obtain populated hierarchical navigation model data.
         'Install Microsoft.EntityFrameworkCore.Proxies NuGet package to use the option below:
+
         opts.UseLazyLoadingProxies
 
         ElnContext = New ElnDbContext(opts.Options)
@@ -42,12 +44,14 @@ Public Class ElnDbContext
     Public Sub New(options As DbContextOptions)
 
         MyBase.New(options)
-        TableInfo = GetTablesInfo()
+
+        If TableInfo Is Nothing Then TableInfo = GetTablesInfo()
+
+        'SearchIndex table: Don't rely solely on DbUpgradeLocal.Upgrade having already run against this particular database
+        'file - its invocation is gated by the app's own version-change detection, which doesn't reliably
+        'fire for every database this context could end up wrapping (e.g. after restore from server, etc)
 
         If Database.IsSqlite() Then
-            'don't rely solely on DbUpgradeLocal.Upgrade having already run against this particular database
-            'file - its invocation is gated by the app's own version-change detection, which doesn't reliably
-            'fire for every database this context could end up wrapping.
             FullTextSearch.EnsureSearchIndexTableExists(Me)
         End If
 

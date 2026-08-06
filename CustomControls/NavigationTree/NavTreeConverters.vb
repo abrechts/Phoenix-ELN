@@ -6,6 +6,7 @@ Imports System.Windows.Data
 Imports ElnBase
 Imports ElnBase.ELNEnumerations
 Imports ElnBase.ELNCalculations
+Imports ElnCoreModel
 
 
 ''' <summary>
@@ -90,6 +91,123 @@ Public Class ExperimentsCollectionViewConverter
 
 End Class
 
+
+
+''' <summary>
+''' Returns the first few project folders (sorted the same way as the tree, by descending SequenceNr),
+''' capped at MaxItems. Used to keep the gong-wpf-dragdrop drag adorner preview for a dragged project
+''' short instead of rendering its complete, potentially very long, list of folders.
+''' </summary>
+'''
+Public Class DragPreviewFoldersConverter
+
+    Implements IValueConverter
+
+    Public Property MaxItems As Integer = 3
+
+    Public Function Convert(value As Object, targetType As Type, parameter As Object, culture As CultureInfo) As Object Implements IValueConverter.Convert
+
+        Dim folders = TryCast(value, IEnumerable(Of tblProjFolders))
+        If folders Is Nothing Then Return Nothing
+
+        Return folders.OrderByDescending(Function(f) f.SequenceNr).Take(MaxItems).ToList()
+
+    End Function
+
+    Public Function ConvertBack(value As Object, targetType As Type, parameter As Object, culture As CultureInfo) As Object Implements IValueConverter.ConvertBack
+        Throw New NotImplementedException()
+    End Function
+
+End Class
+
+
+''' <summary>
+''' Returns the first few experiments (sorted the same way as the tree, by descending ExperimentID),
+''' capped at MaxItems. Used to keep the gong-wpf-dragdrop drag adorner preview for a dragged folder
+''' short instead of rendering its complete, potentially very long, list of experiments.
+''' </summary>
+'''
+Public Class DragPreviewExperimentsConverter
+
+    Implements IValueConverter
+
+    Public Property MaxItems As Integer = 3
+
+    Public Function Convert(value As Object, targetType As Type, parameter As Object, culture As CultureInfo) As Object Implements IValueConverter.Convert
+
+        Dim experiments = TryCast(value, IEnumerable(Of tblExperiments))
+        If experiments Is Nothing Then Return Nothing
+
+        Return experiments.OrderByDescending(Function(exp) exp.ExperimentID).Take(MaxItems).ToList()
+
+    End Function
+
+    Public Function ConvertBack(value As Object, targetType As Type, parameter As Object, culture As CultureInfo) As Object Implements IValueConverter.ConvertBack
+        Throw New NotImplementedException()
+    End Function
+
+End Class
+
+
+''' <summary>
+''' Returns a "+ N more ..." hint string for the items beyond ConverterParameter (the same cap applied by
+''' DragPreviewFoldersConverter/DragPreviewExperimentsConverter), or an empty string if nothing was cut off.
+''' Pair with StringToVisibilityConverter to hide the hint when empty.
+''' </summary>
+'''
+Public Class RemainingItemsSummaryConverter
+
+    Implements IValueConverter
+
+    Public Function Convert(value As Object, targetType As Type, parameter As Object, culture As CultureInfo) As Object Implements IValueConverter.Convert
+
+        Dim items = TryCast(value, ICollection)
+        If items Is Nothing Then Return ""
+
+        Dim maxCount As Integer = System.Convert.ToInt32(parameter)
+        Dim remaining = items.Count - maxCount
+
+        Return If(remaining > 0, $"+ {remaining} more ...", "")
+
+    End Function
+
+    Public Function ConvertBack(value As Object, targetType As Type, parameter As Object, culture As CultureInfo) As Object Implements IValueConverter.ConvertBack
+        Throw New NotImplementedException()
+    End Function
+
+End Class
+
+
+''' <summary>
+''' Selects the lightweight header-only drag adorner preview (dd:DragDrop.DragAdornerTemplateSelector) matching the
+''' dragged item's type, so the gong-wpf-dragdrop preview shows only a capped summary instead of the default full
+''' screen-capture adorner (which renders the item's complete, currently rendered subtree as-is).
+''' </summary>
+'''
+Public Class DragAdornerTemplateSelector
+
+    Inherits DataTemplateSelector
+
+    Public Property ProjectTemplate As DataTemplate
+    Public Property FolderTemplate As DataTemplate
+    Public Property ExperimentTemplate As DataTemplate
+
+    Public Overrides Function SelectTemplate(item As Object, container As DependencyObject) As DataTemplate
+
+        Select Case True
+            Case TypeOf item Is tblProjects
+                Return ProjectTemplate
+            Case TypeOf item Is tblProjFolders
+                Return FolderTemplate
+            Case TypeOf item Is tblExperiments
+                Return ExperimentTemplate
+            Case Else
+                Return Nothing
+        End Select
+
+    End Function
+
+End Class
 
 
 Public Class TabStatusIconConverter

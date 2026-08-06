@@ -8,12 +8,30 @@
              d:DesignWidth="100" x:Name="editLabel">
 
     <Grid>
-        
-        <TextBox x:Name="txtTitle" d:Text="Title" Padding="2,-1,6,0" IsReadOnly="True"
+
+        <!--Display mode: a plain TextBlock (not a TextBoxBase), so that gong-wpf-dragdrop's
+            built-in hit-test exclusion for TextBoxBase/PasswordBox/etc. doesn't block drag
+            initiation while hovering the title. The TextBox below is only shown while editing.-->
+        <Border x:Name="displayBorder" BorderThickness="1" BorderBrush="Transparent" SnapsToDevicePixels="True">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsReadOnly, ElementName=txtTitle}" Value="False">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+            <TextBlock x:Name="txtDisplay" d:Text="Title" Padding="2,0,6,0" Margin="0,-1,0,0" Cursor="Arrow"
+                Text="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=local:TreeViewEditLabel}, Path=EditText}"
+                Foreground="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=local:TreeViewEditLabel}, Path=TitleForeground}"/>
+        </Border>
+
+        <TextBox x:Name="txtTitle" d:Text="Title" Padding="2,0,6,0" Margin="0,-1,0,0" IsReadOnly="True"
             Text="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=local:TreeViewEditLabel}, Path=EditText, Mode=TwoWay}"
             Foreground="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=local:TreeViewEditLabel}, Path=TitleForeground}"
             CaretBrush="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=local:TreeViewEditLabel}, Path=TitleForeground}">
-            
+
             <TextBox.Style>
                 <Style TargetType="TextBox">
                     <Setter Property="BorderThickness" Value="1"/>
@@ -21,6 +39,7 @@
                     <Setter Property="Background"      Value="Transparent"/>
                     <Setter Property="Cursor"          Value="Arrow"/>
                     <Setter Property="Focusable"       Value="False"/>
+                    <Setter Property="Visibility"      Value="Collapsed"/>
                     <Setter Property="Template">
                         <Setter.Value>
                             <ControlTemplate TargetType="TextBox">
@@ -36,11 +55,12 @@
                     <Style.Triggers>
                          <!--Edit mode-->
                         <Trigger Property="IsReadOnly" Value="False">
-                            <Setter Property="Background" Value="{StaticResource ActiveEditBackground}"/>
-                            <Setter Property="Cursor"     Value="IBeam"/>
-                            <Setter Property="Focusable"  Value="True"/>
+                            <Setter Property="Background"  Value="{StaticResource ActiveEditBackground}"/>
+                            <Setter Property="Cursor"      Value="IBeam"/>
+                            <Setter Property="Focusable"   Value="True"/>
+                            <Setter Property="Visibility"  Value="Visible"/>
                         </Trigger>
-                        <!--Dark mode + edit mode--> 
+                        <!--Dark mode + edit mode-->
                         <MultiDataTrigger>
                             <MultiDataTrigger.Conditions>
                                 <Condition Binding="{Binding Path=(local:DarkModeHelper.IsDarkMode), RelativeSource={RelativeSource Self}}" Value="True"/>
@@ -51,7 +71,7 @@
                     </Style.Triggers>
                 </Style>
             </TextBox.Style>
-            
+
         </TextBox>
     </Grid>
 

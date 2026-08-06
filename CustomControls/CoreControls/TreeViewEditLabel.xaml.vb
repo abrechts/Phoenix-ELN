@@ -134,6 +134,7 @@ Public Class TreeViewEditLabel
     Private Sub parentTreeViewItem_Unselected(sender As Object, e As RoutedEventArgs) Handles ParentTreeViewItem.Unselected
 
         HasFirstMouseClick = False
+        displayBorder.ClearValue(Border.BorderBrushProperty)
         txtTitle.ClearValue(TextBox.BorderBrushProperty)
 
     End Sub
@@ -143,21 +144,28 @@ Public Class TreeViewEditLabel
 
         If e.Key = Key.Escape AndAlso HasFirstMouseClick AndAlso Not IsInEdit Then
             HasFirstMouseClick = False
+            displayBorder.ClearValue(Border.BorderBrushProperty)
             txtTitle.ClearValue(TextBox.BorderBrushProperty)
         End If
 
     End Sub
 
 
-    Private Sub txtTitle_PreviewMouseLeftButtonUp() Handles txtTitle.PreviewMouseLeftButtonUp
-
-        If Not txtTitle.IsReadOnly Then Return  ' TextBox handles its own selection in edit mode
+    ''' <summary>
+    ''' Click detection happens on the display-mode TextBlock (txtDisplay), not on txtTitle itself:
+    ''' txtTitle is a TextBoxBase, which gong-wpf-dragdrop unconditionally excludes from drag
+    ''' initiation via its built-in hit-test check - keeping it collapsed until edit mode lets
+    ''' drag start normally while hovering the title text.
+    ''' </summary>
+    '''
+    Private Sub txtDisplay_PreviewMouseLeftButtonUp() Handles txtDisplay.PreviewMouseLeftButtonUp
 
         If Not HasFirstMouseClick Then
 
             IsInDoubleClickRange = True
             ClickDelayTimer.Start()
             HasFirstMouseClick = True
+            displayBorder.BorderBrush = EditBorderBrush
             txtTitle.BorderBrush = EditBorderBrush
 
         Else
@@ -166,6 +174,7 @@ Public Class TreeViewEditLabel
                 BeginEdit()
             Else
                 HasFirstMouseClick = False
+                displayBorder.ClearValue(Border.BorderBrushProperty)
                 txtTitle.ClearValue(TextBox.BorderBrushProperty)
             End If
 
@@ -248,6 +257,7 @@ Public Class TreeViewEditLabel
             ' If the event is not handled, the validation is assumed valid.
 
             txtTitle.IsReadOnly = True
+            displayBorder.ClearValue(Border.BorderBrushProperty)
             txtTitle.ClearValue(TextBox.BorderBrushProperty)
             HasFirstMouseClick = False
             IsInEdit = False

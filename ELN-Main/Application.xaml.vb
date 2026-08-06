@@ -12,15 +12,10 @@ Class Application
         AddHandler Me.DispatcherUnhandledException, AddressOf App_DispatcherUnhandledException
         MyBase.OnStartup(e)
 
-        'The splash's marquee animation needs its own thread's Dispatcher pumping to render smoothly.
-        'MainWindow's constructor below runs as one long uninterrupted synchronous call on the main UI
-        'thread, inside this very method, before Application.Run's own Dispatcher loop is even pumping -
-        'so nothing would get a chance to render on that thread in the meantime (verified: a same-thread
-        'Storyboard animation froze solid for the whole ~800ms blocking stretch, despite animating only
-        'RenderTransform, which should normally qualify for WPF's independent/render-thread animation
-        'path - that optimization still didn't help here, since the underlying issue is that the message
-        'pump itself never gets a turn, not which properties are being animated). A dedicated STA thread
-        'with its own Dispatcher.Run() loop is unaffected by the main thread being busy.
+        'Display a splash screen to hide initially white application window
+        '-------------------------------------------------------------------
+
+        'The splash's marquee animation needs its own thread's Dispatcher pumping to render the progress animation smoothly.
 
         Dim splash As SplashWindow = Nothing
         Dim splashDispatcher As Dispatcher = Nothing
@@ -40,14 +35,10 @@ Class Application
         splashThread.Start()
         splashReady.Wait()
 
-        'MainWindow's constructor pays ~500ms to construct its real ElnDbContext, almost all of it
-        'EF Core's one-time reflection-based model build (ElnDbContext's constructor eagerly touches
-        'Model.GetEntityTypes() via GetTablesInfo()). EF Core caches that compiled model per DbContext
-        'type, so warming it up here against a disposable in-memory database - as early and in parallel
-        'with everything else in this method - lets MainWindow's later real context construction hit an
-        'already-warm cache instead of paying the cost on the UI thread. Best-effort: if it fails for any
+        'MainWindow's constructor pays ~500ms to construct its real ElnDbContext. EF Core caches that compiled model per DbContext
+        'type, so warming it up here against a disposable in-memory database outside a UI thread. Best-effort: if it fails for any
         'reason, MainWindow's constructor simply pays the cost itself, same as before this existed.
-        
+
         Task.Run(Sub()
                      Try
                          Using warmup = New SQLiteContext(":memory:").ElnContext
@@ -62,9 +53,8 @@ Class Application
         'MainWindow's own constructor already decided where it belongs on screen (a saved position, or
         'CenterScreen). Stash that, then move it off the visible desktop for its initial Show() - Loaded
         'and ContentRendered still fire completely normally this way, since the window genuinely is being
-        'shown and rendered, just outside any monitor's viewport, so there's nothing for the user to see
-        'and no white flash. (Visibility.Hidden was tried first and doesn't work for this: WPF apparently
-        'never composites a Hidden window at all, so ContentRendered never fires and the app just hangs.)
+        'shown and rendered, just outside all connected monitor's viewports, so there's nothing for the user to see.
+
         Dim intendedLeft As Double
         Dim intendedTop As Double
 
@@ -86,11 +76,11 @@ Class Application
                                                  splashDispatcher.Invoke(Sub() splash.Close())
                                                  splashDispatcher.InvokeShutdown()
 
-                                                 'closing the splash (on its own thread) doesn't reliably
-                                                 'hand foreground activation to MainWindow - force it explicitly
-                                                 'so it doesn't end up sitting visible-but-behind other windows
-                                                 mainWin.Activate()
-                                             End Sub
+                                                'force window explicitly to foreground,
+                                                'so it doesn't end up sitting visible-but-behind other windows
+                                                mainWin.Activate()
+
+                                            End Sub
 
         mainWin.Show()
 

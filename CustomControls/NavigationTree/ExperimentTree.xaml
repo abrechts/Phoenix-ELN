@@ -11,13 +11,94 @@
              d:DesignHeight="450" d:DesignWidth="800">
 
     <UserControl.Resources>
-        
+
         <local:ProjectsCollectionViewConverter x:Key="projectsCollectionViewConv"/>
         <local:ProjectFoldersCollectionViewConverter x:Key="projectFoldersCollectionViewConv"/>
         <local:ExperimentsCollectionViewConverter x:Key="expCollectionViewConv"/>
         <local:BindingTypeConverter x:Key="bindingTypeConv"/>
         <local:IntegerToBooleanConverter x:Key="intToBooleanConv"/>
         <local:NavTreeDropHandler x:Key="navTreeDropHandler"/>
+
+        <!--Drag adorner previews (dd:DragDrop.DragAdornerTemplateSelector below): a lightweight header-only
+            + capped child-count summary, instead of gong-wpf-dragdrop's default full screen-capture adorner,
+            which renders the dragged item's complete, currently expanded subtree as-is and can get very long
+            for large projects/folders. Built from simple icon+title visuals rather than the full ProjectTreeHeader/
+            ProjFolderTreeHeader/ExpTreeHeader controls, since those assume a TreeViewItem ancestor and drive
+            editing/context menus that don't apply to a disconnected drag ghost.-->
+        
+        <local:StringToVisibilityConverter x:Key="strToVisibilityConv"/>
+        <local:DragPreviewFoldersConverter x:Key="dragPreviewFoldersConv"/>
+        <local:DragPreviewExperimentsConverter x:Key="dragPreviewExperimentsConv"/>
+        <local:RemainingItemsSummaryConverter x:Key="remainingItemsSummaryConv"/>
+
+        <Style x:Key="dragAdornerCard" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource InnerPanelBackground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource TreePanelBorder}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="5,4,8,4"/>
+            <Setter Property="MaxWidth" Value="240"/>
+            <Setter Property="IsHitTestVisible" Value="False"/>
+            <!--Seeds Foreground inheritance for descendant TextBlocks (child-row / "+N more" text) that don't set
+                their own Foreground - a Border has no Foreground of its own, so without this they default to
+                TextBlock's built-in black instead of following the active skin.-->
+            <Setter Property="TextElement.Foreground" Value="{DynamicResource BodyForeground}"/>
+        </Style>
+
+        <DataTemplate x:Key="dragAdornerProjectTemplate">
+            <Border Style="{StaticResource dragAdornerCard}">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <ContentControl Height="16" Margin="0,1,0,0" Content="{DynamicResource FolderClosedIcon}"/>
+                        <TextBlock Text="{Binding Title}" FontWeight="demibold" FontStyle="Italic" Margin="3,0,0,0"
+                            Foreground="{DynamicResource ProjectTitleForeground}"/>
+                    </StackPanel>
+                    <ItemsControl ItemsSource="{Binding tblProjFolders, Converter={StaticResource dragPreviewFoldersConv}}" Margin="19,2,0,0">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding FolderName}" FontStyle="Italic" FontSize="11.5" Opacity="0.7"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <TextBlock Margin="19,2,0,0" FontStyle="Italic" FontSize="11" Opacity="0.6"
+                        Text="{Binding tblProjFolders, Converter={StaticResource remainingItemsSummaryConv}, ConverterParameter=3}"
+                        Visibility="{Binding Text, RelativeSource={RelativeSource Self}, Converter={StaticResource strToVisibilityConv}}"/>
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate x:Key="dragAdornerFolderTemplate">
+            <Border Style="{StaticResource dragAdornerCard}">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <ContentControl Height="16" Content="{DynamicResource GrayDotIcon}"/>
+                        <TextBlock Text="{Binding FolderName}" FontWeight="demibold" FontStyle="Italic" Margin="3,0,0,0"
+                            Foreground="{DynamicResource TitleForeground}"/>
+                    </StackPanel>
+                    <ItemsControl ItemsSource="{Binding tblExperiments, Converter={StaticResource dragPreviewExperimentsConv}}" Margin="19,2,0,0">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding ExperimentID}" FontStyle="Italic" FontSize="11.5" Opacity="0.7"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <TextBlock Margin="19,2,0,0" FontStyle="Italic" FontSize="11" Opacity="0.6"
+                        Text="{Binding tblExperiments, Converter={StaticResource remainingItemsSummaryConv}, ConverterParameter=3}"
+                        Visibility="{Binding Text, RelativeSource={RelativeSource Self}, Converter={StaticResource strToVisibilityConv}}"/>
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate x:Key="dragAdornerExperimentTemplate">
+            <Border Style="{StaticResource dragAdornerCard}">
+                <TextBlock Text="{Binding ExperimentID}" FontStyle="Italic" Foreground="{DynamicResource ExperimentIdForeground}"/>
+            </Border>
+        </DataTemplate>
+
+        <local:DragAdornerTemplateSelector x:Key="dragAdornerSelector"
+            ProjectTemplate="{StaticResource dragAdornerProjectTemplate}"
+            FolderTemplate="{StaticResource dragAdornerFolderTemplate}"
+            ExperimentTemplate="{StaticResource dragAdornerExperimentTemplate}"/>
 
     </UserControl.Resources>
 
@@ -35,6 +116,7 @@
             dd:DragDrop.IsDragSource="True"
             dd:DragDrop.IsDropTarget="True"
             dd:DragDrop.UseDefaultDragAdorner="false"
+            dd:DragDrop.DragAdornerTemplateSelector="{StaticResource dragAdornerSelector}"
             dd:DragDrop.DropTargetAdornerBrush="#FF6868FF"
             dd:DragDrop.EffectMoveAdornerTemplate="{x:Null}"
             dd:DragDrop.DropHandler="{StaticResource navTreeDropHandler}">

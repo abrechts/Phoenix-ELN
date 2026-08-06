@@ -566,6 +566,8 @@ Public Class NavTreeDropHandler
                 ' drag project node
                 '-------------------
 
+                Dim dragProject = CType(.Data, tblProjects)
+
                 If TypeOf .TargetItem Is tblProjects AndAlso .TargetItem IsNot .Data Then
 
                     ''prevent inserting below itself
@@ -575,6 +577,40 @@ Public Class NavTreeDropHandler
                     'End If
 
                     If .InsertPosition = RelativeInsertPosition.BeforeTargetItem Then
+                        .DropTargetAdorner = DropTargetAdorners.Insert
+                        .Effects = DragDropEffects.Move
+                    End If
+
+                ElseIf TypeOf .TargetItem Is tblProjFolders Then
+
+                    'drag over the last folder of the last (bottom-most) project - reached instead of "TargetItem
+                    'Is Nothing" below when that project's last folder is collapsed or has no experiments, i.e.
+                    'for append at the very bottom of the whole project list (mirrors the tblExperiments case
+                    'used by the project-folder drag above)
+
+                    Dim targetFolder = CType(.TargetItem, tblProjFolders)
+                    Dim lastProject = (From p In dragProject.User.tblProjects Order By p.SequenceNr Ascending).First
+                    Dim lastProjectFolder = (From f In lastProject.tblProjFolders Order By f.SequenceNr Descending).LastOrDefault
+
+                    If lastProjectFolder IsNot Nothing AndAlso targetFolder Is lastProjectFolder AndAlso
+                      targetFolder.Project IsNot dragProject AndAlso .InsertPosition = RelativeInsertPosition.AfterTargetItem Then
+                        .DropTargetAdorner = DropTargetAdorners.Insert
+                        .Effects = DragDropEffects.Move
+                    End If
+
+                ElseIf TypeOf .TargetItem Is tblExperiments Then
+
+                    'drag over the last experiment of the last folder of the last (bottom-most) project, i.e.
+                    'for append at the very bottom of the whole project list
+
+                    Dim targetExp = CType(.TargetItem, tblExperiments)
+                    Dim lastProject = (From p In dragProject.User.tblProjects Order By p.SequenceNr Ascending).First
+                    Dim lastProjectFolder = (From f In lastProject.tblProjFolders Order By f.SequenceNr Descending).LastOrDefault
+                    Dim lastFolderExp = If(lastProjectFolder Is Nothing, Nothing,
+                        (From exp In lastProjectFolder.tblExperiments Order By exp.ExperimentID Descending).LastOrDefault)
+
+                    If lastFolderExp IsNot Nothing AndAlso targetExp Is lastFolderExp AndAlso
+                      targetExp.Project IsNot dragProject Then
                         .DropTargetAdorner = DropTargetAdorners.Insert
                         .Effects = DragDropEffects.Move
                     End If
@@ -711,9 +747,12 @@ Public Class NavTreeDropHandler
                 dragProject.SequenceNr = insertPos  'assign item
 
 
-            ElseIf dropInfo.TargetItem Is Nothing Then
+            ElseIf TypeOf dropInfo.TargetItem Is tblProjFolders OrElse TypeOf dropInfo.TargetItem Is tblExperiments _
+              OrElse dropInfo.TargetItem Is Nothing Then
 
-                ' append to the end of the collection
+                ' append to the end of the collection - reached either via empty space below everything
+                ' (TargetItem Is Nothing), or via the last folder / last experiment of the last project used
+                ' as an append proxy when that project is expanded (see IDropTarget_DragOver)
 
                 For Each proj In dragProject.User.tblProjects
                     If proj.SequenceNr < dragProject.SequenceNr Then
