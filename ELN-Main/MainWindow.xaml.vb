@@ -33,10 +33,13 @@ Class MainWindow
 
     Private _MigrationType As Integer = MigrationType.None
 
-
     Public Sub New()
 
-        Dim isRestoreFromServer As Boolean = False
+        'Apply the user's dark/light skin before InitializeComponent() builds the visual tree, so
+        'DynamicResource-bound brushes resolve to the correct skin on the very first paint, instead of
+        'briefly rendering the default skin until Me_Loaded's own ApplySkin call (kept there as a safety
+        'net for the rare case where a settings version upgrade changes the persisted value) catches up.
+        CustomControls.DarkModeHelper.ApplySkin(CustomControls.My.MySettings.Default.IsDarkMode)
 
         InitializeComponent()
 
@@ -46,6 +49,13 @@ Class MainWindow
             cbMsgBox.Display("Phoenix ELN is already running! ", MsgBoxStyle.Information, "Phoenix ELN")
             Application.Current.Shutdown()
         End If
+
+    End Sub
+
+
+    Private Sub Me_Loaded() Handles Me.Loaded
+
+        Dim isRestoreFromServer As Boolean = False
 
         Dim dbFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\Phoenix ELN Data"
         SQLiteDbPath = dbFolderPath + "\ElnData.db"
@@ -177,11 +187,6 @@ Class MainWindow
         RemainingDemoCountConverter.MaxDemoCount = 15
         RemainingDemoCountConverter.FactoryDemoCount = 6
 
-    End Sub
-
-
-    Private Sub Me_Loaded() Handles Me.Loaded
-
         'register shared events
         AddHandler Protocol.RequestSaveIcon, AddressOf Protocol_RequestSaveIcon
         AddHandler UndoRedo.CanUndoChanged, AddressOf UndoRedo_CanUndoChanged
@@ -291,6 +296,8 @@ Class MainWindow
     ''' </summary>
     '''
     Private Sub Me_ContentRendered() Handles Me.ContentRendered
+
+        pnlStartupOverlay.Visibility = Visibility.Collapsed
 
         ' determine if a data migration was performed
 

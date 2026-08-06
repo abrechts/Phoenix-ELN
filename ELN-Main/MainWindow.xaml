@@ -31,6 +31,8 @@
     </Window.Resources>
 
 
+    <Grid>
+
     <DockPanel Background="{DynamicResource WindowBackground}">
 
         <Border DockPanel.Dock="top" BorderBrush="gray" Margin="0,0,0,-1" >
@@ -442,5 +444,19 @@
         </Border>
 
     </DockPanel>
+
+        <!-- Covers the window during startupuntil Me_ContentRendered hides it  -->
+
+        <Border x:Name="pnlStartupOverlay" Background="{DynamicResource InnerPanelBackground}" d:Visibility="Collapsed">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,100">
+                <TextBlock Text="Phoenix ELN" FontSize="22" FontWeight="bold" Foreground="{DynamicResource BodyForeground}" HorizontalAlignment="Center" 
+                           Margin="0,0,0,12" FontStyle="Italic" />
+                <Separator/>
+                <TextBlock Text="Preparing your experiments ..." 
+                           FontSize="13" Foreground="{DynamicResource BodyForeground}" Margin="0,2,0,0" FontStyle="Italic"/>
+            </StackPanel>
+        </Border>
+
+    </Grid>
 
 </Window>
