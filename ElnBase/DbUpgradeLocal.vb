@@ -90,13 +90,10 @@ Public Class DbUpgradeLocal
 
             ' --> introduced in version 5.1.0 (full-text search)
 
-            'FTS5 virtual table for full-text search across protocol item satellite tables (reagents, products,
-            'solvents, auxiliaries, reference reactants, separators, embedded files and comments). Kept in sync
-            'incrementally by ElnDbContext.SaveChanges, via FullTextSearch; existing data is backfilled once via
-            'FullTextSearch.RebuildSearchIndex. ElnDbContext's constructor also creates this table defensively
-            '(same DDL, shared via FullTextSearch.SearchIndexTableDDL), since this Upgrade() call isn't guaranteed
-            'to have run yet against every database file the app may open (e.g. right after a restore from server).
-            DbExecuteCmd(FullTextSearch.SearchIndexTableDDL, sqliteConn)
+            'The full-text SearchIndex lives entirely in-memory (see FullTextSearch's dedicated ATTACHed
+            ':memory: connection), hydrated at startup from tblSearchIndex below - it never touches disk.
+            DbExecuteCmd(FullTextSearch.TblSearchIndexTableDDL, sqliteConn)
+            DbExecuteCmd(FullTextSearch.TblSearchIndexIndexDDL, sqliteConn)
 
 
         End Using

@@ -79,6 +79,26 @@ Public Class DbUpgradeServer
                 DbAddColumn("tblExperiments", "IsRacemicProduct", "TINYINT", "0", "ProjFolderID", serverConn)
             End If
 
+            ' --> introduced in version 5.1.0 (full-text search)
+
+            'Denormalized MySQL counterpart to the local SQLite FTS5 SearchIndex table (see FullTextSearch.vb):
+            'one row per protocol item, with Content already computed client-side (same string that's indexed
+            'locally) and pushed up via the normal sync mechanism. ExperimentID is duplicated here (rather than
+            'joined via ProtocolItemID -> tblProtocolItems) so that per-experiment relevance ranking doesn't need
+            'a join. A native FULLTEXT INDEX on Content is queried via MATCH...AGAINST instead of FTS5's MATCH.
+            Dim tblSearchIndexStr =
+               "CREATE TABLE IF NOT EXISTS tblSearchIndex (
+                ProtocolItemID VARCHAR(36) PRIMARY KEY NOT NULL,
+                ExperimentID VARCHAR(25) NOT NULL,
+                Content TEXT NOT NULL,
+                SyncState TINYINT DEFAULT 0,
+                KEY idx_tblSearchIndex_ExperimentID (ExperimentID),
+                FULLTEXT KEY ft_tblSearchIndex_Content (Content),
+                CONSTRAINT FK_tblSearchIndex_tblProtocolItems_ProtocolItemID FOREIGN KEY (ProtocolItemID) REFERENCES tblProtocolItems(GUID) ON DELETE CASCADE
+                ) ENGINE=InnoDB;"
+
+            DbExecuteCmd(tblSearchIndexStr, serverConn)
+
             ' --->
             'Important: If a DEFAULT VALUE for an SQLite column is specified, ALWAYS also assign it to the
             'server column to be added (could otherwise also lead to failed restore from server operation 

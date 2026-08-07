@@ -33,6 +33,8 @@ public partial class tblProtocolItems
 
     public virtual tblRefReactants? tblRefReactants { get; set; }
 
+    public virtual tblSearchIndex? tblSearchIndex { get; set; }
+
     public virtual tblSeparators? tblSeparators { get; set; }
 
     public virtual tblSolvents? tblSolvents { get; set; }

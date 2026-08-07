@@ -1,67 +1,134 @@
 Imports System.Data
 Imports System.Linq.Expressions
 Imports System.Xml.Linq
+Imports ElnBase.ELNEnumerations
 Imports ElnCoreModel
+Imports Microsoft.Data.Sqlite
 Imports Microsoft.EntityFrameworkCore
+Imports MySqlConnector
 
 ''' <summary>
-''' Owns everything related to the full-text SearchIndex FTS5 virtual table: its schema, keeping it in sync
-''' with the protocol item satellite tables (reagents, products, solvents, auxiliaries, reference reactants,
-''' separators, embedded files and comments), and querying it.
+''' Owns everything related to full-text search: the in-memory SearchIndex FTS5 virtual table (schema,
+''' hydration, querying), its persisted on-disk mirror tblSearchIndex (the sync-staging table server sync
+''' pushes up from), and keeping both in sync with the protocol item satellite tables (reagents, products,
+''' solvents, auxiliaries, reference reactants, separators, embedded files and comments).
 ''' </summary>
 '''
 Public Class FullTextSearch
 
     ''' <summary>
-    ''' Name of the full-text SearchIndex FTS5 virtual table. FTS5 backs this with several real shadow tables
-    ''' named "SearchIndexTableName_*" (_data, _idx, _content, _docsize, _config) - these, like the virtual
-    ''' table itself, are local-SQLite-only and must never be included in server bulk-upload/sync table scans.
+    ''' The dedicated, long-lived connection backing the in-memory full-text SearchIndex: a second connection to
+    ''' the same on-disk SQLite file DBContext uses (SQLite supports multiple concurrent readers), with a
+    ''' ':memory:' database ATTACHed as "mem" holding the actual FTS5 table. Kept open for the whole app session -
+    ''' closing it would discard the in-memory database along with everything indexed into it. Set once by
+    ''' <see cref="InitializeMemoryIndexConnection"/> at startup, before any search query or SaveChanges call
+    ''' touches the SearchIndex.
     ''' </summary>
     '''
-    Friend Shared ReadOnly SearchIndexTableName As String = "SearchIndex"
+    Public Shared Property MemoryIndexConnection As SqliteConnection
 
 
     ''' <summary>
-    ''' DDL for the full-text SearchIndex FTS5 virtual table. Shared between ElnDbContext's constructor
-    ''' self-heal check and DbUpgradeLocal's documented, versioned schema history, so the two can't drift apart.
+    ''' DDL for the full-text SearchIndex FTS5 virtual table, created inside the "mem" schema ATTACHed by
+    ''' <see cref="InitializeMemoryIndexConnection"/> - it never exists on disk.
     ''' </summary>
     '''
     Friend Shared ReadOnly SearchIndexTableDDL As String =
-        $"CREATE VIRTUAL TABLE IF NOT EXISTS {SearchIndexTableName} USING fts5(ProtocolItemID UNINDEXED, ExperimentID UNINDEXED, Content, " +
+        "CREATE VIRTUAL TABLE IF NOT EXISTS mem.SearchIndex USING fts5(ProtocolItemID UNINDEXED, ExperimentID UNINDEXED, Content, " +
         "tokenize=""unicode61 remove_diacritics 2"");"
 
 
     ''' <summary>
-    ''' Ensures the SearchIndex FTS5 virtual table exists. Called from ElnDbContext's constructor so full-text
-    ''' search works regardless of whether DbUpgradeLocal.Upgrade has already run against this particular
-    ''' database file (e.g. one just restored from the server, or carried over from an older/foreign installation).
+    ''' DDL for the persisted on-disk tblSearchIndex table (just the CREATE TABLE - kept as a single statement,
+    ''' since ExecuteSqlRaw's multi-statement support isn't guaranteed the way raw ADO.NET SqliteCommand's is).
+    ''' Shared between ElnDbContext's constructor self-heal check (<see cref="EnsureTblSearchIndexExists"/>) and
+    ''' DbUpgradeLocal's documented, versioned schema history, so the two can't drift apart.
     ''' </summary>
     '''
-    Friend Shared Sub EnsureSearchIndexTableExists(searchContext As ElnDbContext)
-
-        searchContext.Database.ExecuteSqlRaw(SearchIndexTableDDL)
-
-    End Sub
+    Friend Shared ReadOnly TblSearchIndexTableDDL As String =
+        "CREATE TABLE IF NOT EXISTS tblSearchIndex (
+        ProtocolItemID VARCHAR(36) PRIMARY KEY NOT NULL REFERENCES tblProtocolItems(GUID) ON DELETE CASCADE,
+        ExperimentID VARCHAR(25) NOT NULL,
+        Content TEXT NOT NULL,
+        SyncState TINYINT DEFAULT 0);"
 
 
     ''' <summary>
-    ''' Deletes the full text search index table and its satellites from the specified SqLite database context.
+    ''' DDL for tblSearchIndex's ExperimentID index. Shared for the same reason as <see cref="TblSearchIndexTableDDL"/>.
     ''' </summary>
-    ''' <remarks> The currently used SqLite editors don't allow this operation manually, since the FTS5 module 
-    ''' is missing there.</remarks>
-    ''' 
-    Public Shared Sub RemoveSearchIndexTable(searchContext As ElnDbContext)
+    '''
+    Friend Shared ReadOnly TblSearchIndexIndexDDL As String =
+        "CREATE INDEX IF NOT EXISTS idx_tblSearchIndex_ExperimentID ON tblSearchIndex(ExperimentID);"
 
-        If searchContext.Database.IsSqlite() Then
-            searchContext.Database.ExecuteSqlRaw("DROP TABLE SearchIndex")
-        End If
+
+    ''' <summary>
+    ''' Ensures the on-disk tblSearchIndex table exists. Called from ElnDbContext's constructor so full-text
+    ''' search works regardless of whether DbUpgradeLocal.Upgrade has already run against this particular
+    ''' database file - its invocation is gated by the app's own version-change detection, which doesn't fire
+    ''' on every run (e.g. no version bump since last launch) or reliably for every database this context could
+    ''' end up wrapping (e.g. one just restored from the server, or carried over from an older/foreign install).
+    ''' </summary>
+    '''
+    Friend Shared Sub EnsureTblSearchIndexExists(searchContext As ElnDbContext)
+
+        searchContext.Database.ExecuteSqlRaw(TblSearchIndexTableDDL)
+        searchContext.Database.ExecuteSqlRaw(TblSearchIndexIndexDDL)
 
     End Sub
 
 
     ''' <summary>
-    ''' Gets if the full-text SearchIndex currently contains no entries, e.g. because it was just created by
-    ''' a schema upgrade and still needs its initial backfill via <see cref="RebuildSearchIndex"/>.
+    ''' Opens <see cref="MemoryIndexConnection"/>: a second connection to the same on-disk SQLite file DBContext
+    ''' uses, with a ':memory:' database ATTACHed as "mem" holding the FTS5 SearchIndex table (freshly created
+    ''' and empty - callers still need to populate it via <see cref="HydrateMemoryIndex"/>). Must be called once
+    ''' at startup, before any search query or SaveChanges call touches the SearchIndex.
+    ''' </summary>
+    ''' <param name="sqliteFilePath">Path to the same local SQLite database file DBContext is opened against.</param>
+    '''
+    Public Shared Sub InitializeMemoryIndexConnection(sqliteFilePath As String)
+
+        MemoryIndexConnection = New SqliteConnection("Data Source=" + sqliteFilePath)
+        MemoryIndexConnection.Open()
+
+        Using command = MemoryIndexConnection.CreateCommand()
+            command.CommandText = "ATTACH DATABASE ':memory:' AS mem;"
+            command.ExecuteNonQuery()
+        End Using
+
+        Using command = MemoryIndexConnection.CreateCommand()
+            command.CommandText = SearchIndexTableDDL
+            command.ExecuteNonQuery()
+        End Using
+
+    End Sub
+
+
+    ''' <summary>
+    ''' Refills the in-memory FTS5 SearchIndex table from the persisted tblSearchIndex table via a single
+    ''' set-based INSERT...SELECT, executed entirely inside SQLite - no per-row .NET round-trips and no content
+    ''' recalculation, unlike <see cref="RebuildSearchIndex"/>. Called once at every app startup (the in-memory
+    ''' table always starts out empty each session, on top of whatever <see cref="InitializeMemoryIndexConnection"/>
+    ''' just created), after any one-time backfill of tblSearchIndex itself (see <see cref="RebuildSearchIndex"/>)
+    ''' has already completed. tblSearchIndex is read unqualified, resolving to "main" - the on-disk file that is
+    ''' this same connection's default schema (see InitializeMemoryIndexConnection).
+    ''' </summary>
+    '''
+    Public Shared Sub HydrateMemoryIndex()
+
+        Using command = MemoryIndexConnection.CreateCommand()
+            command.CommandText =
+                "DELETE FROM mem.SearchIndex;
+                INSERT INTO mem.SearchIndex(ProtocolItemID, ExperimentID, Content)
+                SELECT ProtocolItemID, ExperimentID, Content FROM tblSearchIndex;"
+            command.ExecuteNonQuery()
+        End Using
+
+    End Sub
+
+
+    ''' <summary>
+    ''' Gets if the persisted tblSearchIndex table currently contains no entries, e.g. because it was just
+    ''' created by a schema upgrade and still needs its initial backfill via <see cref="RebuildSearchIndex"/>.
     ''' </summary>
     '''
     Public Shared Function IsSearchIndexEmpty(searchContext As ElnDbContext) As Boolean
@@ -70,7 +137,7 @@ Public Class FullTextSearch
             Throw New NotSupportedException("The full-text SearchIndex only exists on the local SQLite database.")
         End If
 
-        Return searchContext.Database.SqlQueryRaw(Of Integer)("SELECT EXISTS(SELECT 1 FROM SearchIndex) AS Value").First() = 0
+        Return Not searchContext.tblSearchIndex.AsNoTracking().Any()
 
     End Function
 
@@ -95,33 +162,22 @@ Public Class FullTextSearch
     ''' tblEmbeddedFiles.FileBytes/IconImage, and the same protection automatically applies to any future table
     ''' with a BLOB column, with no separate special-casing needed. CollectSearchIndexOps (the incremental,
     ''' already-in-memory path) instead compiles the same expression into a delegate via SearchableEntityProjections
-    ''' below. tblComments is the one deliberate exception (see RebuildSearchIndex/GetSearchableRow) - extracting
-    ''' plain text from its FlowDocument XAML needs WPF's XamlReader, which can only run client-side, never as
-    ''' part of a translated SQL query.
+    ''' below. tblReagents, tblSolvents, tblAuxiliaries, tblProducts, tblRefReactants and tblComments are the
+    ''' deliberate exceptions (see RebuildSearchIndex/GetSearchableRow/Build*Content) - the first five's content
+    ''' combines several columns via ELNCalculations scaling logic that isn't SQL-translatable, and tblComments'
+    ''' plain text needs to be extracted from its FlowDocument XAML via WPF's XamlReader, which can only run
+    ''' client-side, never as part of a translated SQL query.
     ''' </summary>
     '''
-    Private Shared ReadOnly ReagentProjection As Expression(Of Func(Of tblReagents, SearchableRow)) =
-        Function(item) New SearchableRow With {.ProtocolItemID = item.ProtocolItemID, .Content = item.Name + " " + item.Source}
-
-    Private Shared ReadOnly ProductProjection As Expression(Of Func(Of tblProducts, SearchableRow)) =
-        Function(item) New SearchableRow With {.ProtocolItemID = item.ProtocolItemID, .Content = item.Name}
-
-    Private Shared ReadOnly SolventProjection As Expression(Of Func(Of tblSolvents, SearchableRow)) =
-        Function(item) New SearchableRow With {.ProtocolItemID = item.ProtocolItemID, .Content = item.Name + " " + item.Source}
-
-    Private Shared ReadOnly AuxiliaryProjection As Expression(Of Func(Of tblAuxiliaries, SearchableRow)) =
-        Function(item) New SearchableRow With {.ProtocolItemID = item.ProtocolItemID, .Content = item.Name + " " + item.Source}
-
-    Private Shared ReadOnly RefReactantProjection As Expression(Of Func(Of tblRefReactants, SearchableRow)) =
-        Function(item) New SearchableRow With {.ProtocolItemID = item.ProtocolItemID, .Content = item.Name + " " + item.Source}
-
     Private Shared ReadOnly SeparatorProjection As Expression(Of Func(Of tblSeparators, SearchableRow)) =
         Function(item) New SearchableRow With {.ProtocolItemID = item.ProtocolItemID, .Content = item.Title}
 
     Private Shared ReadOnly EmbeddedFileProjection As Expression(Of Func(Of tblEmbeddedFiles, SearchableRow)) =
         Function(item) New SearchableRow With {.ProtocolItemID = item.ProtocolItemID, .Content = item.FileName + " " + item.FileComment}
 
-    ' tblComments is treated separately in RebuildSearchIndex, since plain text needs to be extracted from xaml
+    ' tblReagents, tblSolvents, tblAuxiliaries, tblProducts, tblRefReactants and tblComments are treated separately,
+    ' see BuildReagentContent / BuildSolventContent / BuildAuxiliaryContent / BuildProductContent /
+    ' BuildRefReactantContent / ExtractPlainText
 
 
     ''' <summary>
@@ -135,11 +191,6 @@ Public Class FullTextSearch
 
             Dim dispatch As New Dictionary(Of Type, Func(Of Object, SearchableRow))
 
-            AddProjection(dispatch, ReagentProjection)
-            AddProjection(dispatch, ProductProjection)
-            AddProjection(dispatch, SolventProjection)
-            AddProjection(dispatch, AuxiliaryProjection)
-            AddProjection(dispatch, RefReactantProjection)
             AddProjection(dispatch, SeparatorProjection)
             AddProjection(dispatch, EmbeddedFileProjection)
 
@@ -155,6 +206,306 @@ Public Class FullTextSearch
         dispatch(GetType(TEntity)) = Function(entity) compiled(DirectCast(entity, TEntity))
 
     End Sub
+
+
+    ''' <summary>
+    ''' Builds a reagent's searchable content, e.g. "12.5 mg Triethylamine (2.50 M; 1.25 equiv; Merck 1234; 250 mmol;
+    ''' 98.5%; 120 mmol/g resin)" - the weighed amount/unit, name, and every other parameter
+    ''' CustomControls/Protocol Elements/Materials/ReagentContent.xaml displays (molarity, equivalents, source,
+    ''' mmols, purity, resin load), each included only when actually present. Always uses this one canonical
+    ''' form regardless of the experiment's IsDesignView state (which toggles which of the weight/equivalents
+    ''' pair is primary on screen) - search content isn't view-mode-dependent. Unlike the XAML display, empty
+    ''' parameters are omitted entirely rather than left as blank separators, since a search index has no use
+    ''' for placeholder tokens.
+    ''' </summary>
+    '''
+    Private Shared Function BuildReagentContent(name As String, source As String, grams As Double, density As Double?,
+        isDisplayAsVolume As Boolean, isMolarity As Boolean, equivalents As Double, molarity As Double?, mMols As Double,
+        purity As Double?, resinLoad As Double?) As String
+
+        Dim content As New Text.StringBuilder()
+        AppendAmountUnitPrefix(content, GetReagentWeightScale(grams, density, isDisplayAsVolume, isMolarity))
+        content.Append(name)
+
+        Dim detailParts = BuildMaterialDetailParts(equivalents, source, mMols, purity, resinLoad)
+        If isMolarity AndAlso molarity.HasValue Then
+            detailParts.Insert(0, ELNCalculations.SignificantDigitsString(molarity.Value, 3) + " M")
+        End If
+
+        AppendDetailParts(content, detailParts)
+        Return content.ToString()
+
+    End Function
+
+
+    ''' <summary>
+    ''' Gets the fitting weight/volume amount+unit for a reagent, mirroring WeightUnitConverter.Convert's core
+    ''' logic (CustomControls/Converters/AmountUnitConverters.vb) minus its WPF-binding-specific plumbing. For a
+    ''' molar reagent solution (IsMolarity), Grams actually holds the milliliters of solution, not a weight.
+    ''' </summary>
+    '''
+    Private Shared Function GetReagentWeightScale(grams As Double, density As Double?, isDisplayAsVolume As Boolean,
+        isMolarity As Boolean) As ELNCalculations.ScaleResult
+
+        Dim calcAsWeight = Not (isDisplayAsVolume Xor isMolarity)
+        If Not density.HasValue AndAlso Not (calcAsWeight Xor isMolarity) Then
+            Return Nothing
+        End If
+
+        If calcAsWeight Then
+            Dim effectiveGrams = If(isMolarity, grams * density.Value, grams)
+            Return ELNCalculations.ScaleWeight(effectiveGrams)
+        Else
+            Dim milliliters = If(Not isMolarity, grams / density.Value, grams)
+            Return ELNCalculations.ScaleVolume(milliliters)
+        End If
+
+    End Function
+
+
+    ''' <summary>
+    ''' Builds the (equivalents-unit; source; mmols; purity; resin load) detail parts shared by reagents and
+    ''' reference reactants - the two satellite tables whose material makeup is otherwise identical (weight/volume,
+    ''' equivalents, mmols, purity, resin load), differing only in whether a molar-solution concept applies
+    ''' (reagents) or not (reference reactants). Each part is included only when actually present. Uses the long
+    ''' "equiv"/"mEquiv" unit form (isShortUnit:=False), matching what ReagentContent.xaml/RefReactantContent.xaml
+    ''' actually display in their default (non-design, i.e. "non-equivalents") view - the design view's "eq"/"mq"
+    ''' shorthand is specific to that view's primary equivalents column, not used elsewhere.
+    ''' </summary>
+    '''
+    Private Shared Function BuildMaterialDetailParts(equivalents As Double, source As String, mMols As Double,
+        purity As Double?, resinLoad As Double?) As List(Of String)
+
+        Dim detailParts As New List(Of String)
+
+        Dim equivScale = ELNCalculations.ScaleEquivalent(equivalents, isShortUnit:=False)
+        If equivScale IsNot Nothing Then
+            detailParts.Add(ELNCalculations.SignificantDigitsString(equivScale.Amount, 3) + " " + equivScale.Unit)
+        End If
+
+        If Not String.IsNullOrEmpty(source) Then
+            detailParts.Add(source)
+        End If
+
+        Dim mMolScale = ELNCalculations.ScaleMMol(mMols)
+        If mMolScale IsNot Nothing Then
+            detailParts.Add(ELNCalculations.SignificantDigitsString(mMolScale.Amount, 3) + " " + mMolScale.Unit)
+        End If
+
+        If purity.HasValue Then
+            detailParts.Add(ELNCalculations.SignificantDigitsString(purity.Value, 3) + "%")
+        End If
+
+        If resinLoad.HasValue Then
+            detailParts.Add(ELNCalculations.SignificantDigitsString(resinLoad.Value, 3) + " mmol/g resin")
+        End If
+
+        Return detailParts
+
+    End Function
+
+
+    ''' <summary>
+    ''' Appends "{amount} {unit} " to content if scale is available (i.e. the underlying quantity is actually
+    ''' populated - ScaleWeight/ScaleVolume/etc. return Nothing for an unset/zero "just added" row), or nothing
+    ''' otherwise. Shared by every material content builder's leading amount+unit prefix.
+    ''' </summary>
+    '''
+    Private Shared Sub AppendAmountUnitPrefix(content As Text.StringBuilder, scale As ELNCalculations.ScaleResult)
+
+        If scale IsNot Nothing Then
+            content.Append(ELNCalculations.SignificantDigitsString(scale.Amount, 3)).Append(" "c).
+                Append(scale.Unit).Append(" "c)
+        End If
+
+    End Sub
+
+
+    ''' <summary>
+    ''' Appends " (part1; part2; ...)" to content if any detail parts were collected, or nothing otherwise. Shared
+    ''' by every material content builder's trailing parenthetical detail list.
+    ''' </summary>
+    '''
+    Private Shared Sub AppendDetailParts(content As Text.StringBuilder, detailParts As List(Of String))
+
+        If detailParts.Count > 0 Then
+            content.Append(" (").Append(String.Join("; ", detailParts)).Append(")"c)
+        End If
+
+    End Sub
+
+
+    ''' <summary>
+    ''' Builds a solvent's searchable content, e.g. "3.84 mL Methanol (1.52 volEquiv; Merck 12345)" - the
+    ''' volume/weight amount+unit, name, and (equivalents-unit; source), mirroring what CustomControls/Protocol
+    ''' Elements/Materials/SolventContent.xaml displays in its default (non-design) view - the design view's
+    ''' "vq"/"mv" shorthand is specific to that view's primary equivalents column, not used here. As with
+    ''' reagents, always uses this one canonical form regardless of IsDesignView, and omits parameters that
+    ''' aren't actually present rather than leaving blank separators.
+    ''' </summary>
+    '''
+    Private Shared Function BuildSolventContent(name As String, source As String, milliliters As Double, density As Double?,
+        isDisplayAsWeight As Boolean, isMolEquivalents As Boolean, equivalents As Double) As String
+
+        Dim content As New Text.StringBuilder()
+        AppendAmountUnitPrefix(content, GetSolventVolumeScale(milliliters, density, isDisplayAsWeight))
+        content.Append(name)
+
+        Dim detailParts As New List(Of String)
+
+        If equivalents <> 0 Then
+            Dim equivUnitText = If(isMolEquivalents, EquivUnit.molEquiv.ToString, EquivUnit.volEquiv.ToString)
+            detailParts.Add(ELNCalculations.SignificantDigitsString(equivalents, 3) + " " + equivUnitText)
+        End If
+
+        If Not String.IsNullOrEmpty(source) Then
+            detailParts.Add(source)
+        End If
+
+        AppendDetailParts(content, detailParts)
+        Return content.ToString()
+
+    End Function
+
+
+    ''' <summary>
+    ''' Gets the fitting volume/weight amount+unit for a solvent, mirroring VolumeUnitConverter.Convert's core
+    ''' logic (CustomControls/Converters/AmountUnitConverters.vb) minus its WPF-binding-specific plumbing.
+    ''' </summary>
+    '''
+    Private Shared Function GetSolventVolumeScale(milliliters As Double, density As Double?,
+        isDisplayAsWeight As Boolean) As ELNCalculations.ScaleResult
+
+        If Not isDisplayAsWeight Then
+            Return ELNCalculations.ScaleVolume(milliliters)
+        End If
+
+        If Not density.HasValue Then
+            Return Nothing
+        End If
+
+        Return ELNCalculations.ScaleWeight(milliliters * density.Value)
+
+    End Function
+
+
+    ''' <summary>
+    ''' Builds an auxiliary's searchable content, e.g. "120 mg Silicagel (1.52 wtEquiv; Merck 12345)" - the weighed
+    ''' amount+unit, name, and (equivalents; source), mirroring what CustomControls/Protocol Elements/Materials/
+    ''' AuxiliaryContent.xaml displays in its default (non-design) view. Reuses
+    ''' GetReagentWeightScale with isMolarity always False.
+    ''' </summary>
+    '''
+    Private Shared Function BuildAuxiliaryContent(name As String, source As String, grams As Double, density As Double?,
+        isDisplayAsVolume As Boolean, equivalents As Double) As String
+
+        Dim content As New Text.StringBuilder()
+        AppendAmountUnitPrefix(content, GetReagentWeightScale(grams, density, isDisplayAsVolume, isMolarity:=False))
+        content.Append(name)
+
+        Dim detailParts As New List(Of String)
+
+        If equivalents <> 0 Then
+            detailParts.Add(ELNCalculations.SignificantDigitsString(equivalents, 3) + " " + EquivUnit.wtEquiv.ToString)
+        End If
+
+        If Not String.IsNullOrEmpty(source) Then
+            detailParts.Add(source)
+        End If
+
+        AppendDetailParts(content, detailParts)
+        Return content.ToString()
+
+    End Function
+
+
+    ''' <summary>
+    ''' Builds a reference reactant's searchable content, e.g. "3.84 g Reactant A (1.25 equiv; Merck 12345; 250 mmol;
+    ''' 98.5%; 120 mmol/g resin)" - the weighed amount+unit, name, and every other parameter
+    ''' CustomControls/Protocol Elements/Materials/RefReactantContent.xaml displays. Identical field set to
+    ''' BuildReagentContent minus molarity (reference reactants have no molar-solution concept, hence
+    ''' GetReagentWeightScale is called with isMolarity always False, mirroring RefReactantContent.xaml's own
+    ''' WeightUnitConverter binding, which hardcodes that same "0" as its 4th MultiBinding value).
+    ''' </summary>
+    '''
+    Private Shared Function BuildRefReactantContent(name As String, source As String, grams As Double, density As Double?,
+        isDisplayAsVolume As Boolean, equivalents As Double, mMols As Double, purity As Double?, resinLoad As Double?) As String
+
+        Dim content As New Text.StringBuilder()
+        AppendAmountUnitPrefix(content, GetReagentWeightScale(grams, density, isDisplayAsVolume, isMolarity:=False))
+        content.Append(name)
+
+        AppendDetailParts(content, BuildMaterialDetailParts(equivalents, source, mMols, purity, resinLoad))
+        Return content.ToString()
+
+    End Function
+
+
+    ''' <summary>
+    ''' Builds a product's searchable content, e.g. "12.5 g ProductName (97.5% yield; 98.5% purity; 120 mmol/g
+    ''' resin; MW 234.35; EM 234.39; C5H8O2)" - the weighed amount+unit, name, and every other parameter
+    ''' CustomControls/Protocol Elements/Materials/ProductContent.xaml displays (yield, purity, resin load,
+    ''' molecular weight, exact mass, elemental formula). The raw ElementalFormula string is indexed directly -
+    ''' ElementalFormulaConverter only reformats it for on-screen subscript rendering, the underlying text is the
+    ''' same either way. Doesn't include the "A:"/"B:"/"C:" ProductIndex letter, since that's a positional display
+    ''' label, not searchable content. Yield and MolecularWeight have no nullable "unset" representation (unlike
+    ''' Purity/ExactMass/ResinLoad) but default to 0 before a product is actually worked up, so - unlike the XAML,
+    ''' which always renders them - both are only included once the product has an actual weighed amount (Grams).
+    ''' </summary>
+    '''
+    Private Shared Function BuildProductContent(name As String, grams As Double, yield As Double, molecularWeight As Double,
+        exactMass As Double?, elementalFormula As String, purity As Double?, resinLoad As Double?) As String
+
+        Dim content As New Text.StringBuilder()
+
+        Dim weightScale = ELNCalculations.ScaleWeight(grams)
+        AppendAmountUnitPrefix(content, weightScale)
+        content.Append(name)
+
+        Dim detailParts As New List(Of String)
+
+        If weightScale IsNot Nothing Then
+            detailParts.Add(FormatYieldPercent(yield) + " yield")
+        End If
+
+        If purity.HasValue Then
+            detailParts.Add(ELNCalculations.SignificantDigitsString(purity.Value, 3) + "% purity")
+        End If
+
+        If resinLoad.HasValue Then
+            detailParts.Add(ELNCalculations.SignificantDigitsString(resinLoad.Value, 3) + " mmol/g resin")
+        End If
+
+        If molecularWeight <> 0 Then
+            detailParts.Add("MW " + Format(molecularWeight, "0.00"))
+        End If
+
+        If exactMass.HasValue Then
+            detailParts.Add("EM " + Format(exactMass.Value, "0.00"))
+        End If
+
+        If Not String.IsNullOrEmpty(elementalFormula) Then
+            detailParts.Add(elementalFormula)
+        End If
+
+        AppendDetailParts(content, detailParts)
+        Return content.ToString()
+
+    End Function
+
+
+    ''' <summary>
+    ''' Formats a yield fraction as a percentage string, mirroring YieldConverter.Convert's core logic
+    ''' (CustomControls/Converters/AmountUnitConverters.vb) - 3 significant digits above 10%, 2 below (diminished
+    ''' precision for very low yields).
+    ''' </summary>
+    '''
+    Private Shared Function FormatYieldPercent(yield As Double) As String
+
+        Dim sigDigits = If(yield > 10, 3, 2)
+        Return ELNCalculations.SignificantDigitsString(yield, sigDigits) + "%"
+
+    End Function
 
 
     ''' <summary>
@@ -186,6 +537,52 @@ Public Class FullTextSearch
 
         End While
 
+        If TypeOf entity Is tblReagents Then
+            Dim reagent = DirectCast(entity, tblReagents)
+            Return New SearchableRow With {
+                .ProtocolItemID = reagent.ProtocolItemID,
+                .Content = BuildReagentContent(reagent.Name, reagent.Source, reagent.Grams, reagent.Density,
+                    CBool(reagent.IsDisplayAsVolume), CBool(reagent.IsMolarity), reagent.Equivalents, reagent.Molarity,
+                    reagent.MMols, reagent.Purity, reagent.ResinLoad)
+            }
+        End If
+
+        If TypeOf entity Is tblSolvents Then
+            Dim solvent = DirectCast(entity, tblSolvents)
+            Return New SearchableRow With {
+                .ProtocolItemID = solvent.ProtocolItemID,
+                .Content = BuildSolventContent(solvent.Name, solvent.Source, solvent.Milliliters, solvent.Density,
+                    CBool(solvent.IsDisplayAsWeight), CBool(solvent.IsMolEquivalents), solvent.Equivalents)
+            }
+        End If
+
+        If TypeOf entity Is tblAuxiliaries Then
+            Dim auxiliary = DirectCast(entity, tblAuxiliaries)
+            Return New SearchableRow With {
+                .ProtocolItemID = auxiliary.ProtocolItemID,
+                .Content = BuildAuxiliaryContent(auxiliary.Name, auxiliary.Source, auxiliary.Grams, auxiliary.Density,
+                    CBool(auxiliary.IsDisplayAsVolume), auxiliary.Equivalents)
+            }
+        End If
+
+        If TypeOf entity Is tblProducts Then
+            Dim product = DirectCast(entity, tblProducts)
+            Return New SearchableRow With {
+                .ProtocolItemID = product.ProtocolItemID,
+                .Content = BuildProductContent(product.Name, product.Grams, product.Yield, product.MolecularWeight,
+                    product.ExactMass, product.ElementalFormula, product.Purity, product.ResinLoad)
+            }
+        End If
+
+        If TypeOf entity Is tblRefReactants Then
+            Dim refReactant = DirectCast(entity, tblRefReactants)
+            Return New SearchableRow With {
+                .ProtocolItemID = refReactant.ProtocolItemID,
+                .Content = BuildRefReactantContent(refReactant.Name, refReactant.Source, refReactant.Grams, refReactant.Density,
+                    CBool(refReactant.IsDisplayAsVolume), refReactant.Equivalents, refReactant.MMols, refReactant.Purity, refReactant.ResinLoad)
+            }
+        End If
+
         If TypeOf entity Is tblComments Then
             Dim comment = DirectCast(entity, tblComments)
             Return New SearchableRow With {.ProtocolItemID = comment.ProtocolItemID, .Content = ExtractPlainText(comment.CommentFlowDoc)}
@@ -197,9 +594,11 @@ Public Class FullTextSearch
 
 
     ''' <summary>
-    ''' Rebuilds the full-text SearchIndex from scratch based on the current contents of all protocol item
-    ''' satellite tables. Used for the initial backfill after the SearchIndex table is first created, and as a
-    ''' manual repair option should the incremental index ever be suspected to have drifted.
+    ''' Rebuilds the persisted tblSearchIndex table from scratch based on the current contents of all protocol
+    ''' item satellite tables. Used for the one-time initial backfill after tblSearchIndex is first created (see
+    ''' MainWindow's startup sequence), and as a manual repair option should the incremental index ever be
+    ''' suspected to have drifted. Does NOT touch the in-memory FTS5 SearchIndex table directly - callers refresh
+    ''' that separately afterwards via <see cref="HydrateMemoryIndex"/>.
     ''' </summary>
     '''
     Public Shared Sub RebuildSearchIndex(searchContext As ElnDbContext)
@@ -214,12 +613,59 @@ Public Class FullTextSearch
         'each satellite table is queried through its own EF-translatable projection (declared once, above,
         'and shared with the incremental path) - so the generated SQL only ever fetches the columns actually
         'used for indexing, never an unreferenced BLOB column such as tblEmbeddedFiles.FileBytes/IconImage.
+
         Dim allRows As New List(Of SearchableRow)
-        allRows.AddRange(searchContext.tblReagents.AsNoTracking().Select(ReagentProjection))
-        allRows.AddRange(searchContext.tblProducts.AsNoTracking().Select(ProductProjection))
-        allRows.AddRange(searchContext.tblSolvents.AsNoTracking().Select(SolventProjection))
-        allRows.AddRange(searchContext.tblAuxiliaries.AsNoTracking().Select(AuxiliaryProjection))
-        allRows.AddRange(searchContext.tblRefReactants.AsNoTracking().Select(RefReactantProjection))
+
+        'tblReagents, tblSolvents and tblAuxiliaries can't share the translatable-expression approach above -
+        'their content combines several columns via ELNCalculations scaling logic that isn't SQL-translatable.
+        'Still keep each SQL projection down to just the columns actually needed, same as tblComments below.
+
+        allRows.AddRange(searchContext.tblReagents.AsNoTracking().
+            Select(Function(r) New With {r.ProtocolItemID, r.Name, r.Source, r.Grams, r.Density, r.IsDisplayAsVolume, r.IsMolarity,
+                r.Equivalents, r.Molarity, r.MMols, r.Purity, r.ResinLoad}).
+            AsEnumerable().
+            Select(Function(r) New SearchableRow With {
+                .ProtocolItemID = r.ProtocolItemID,
+                .Content = BuildReagentContent(r.Name, r.Source, r.Grams, r.Density, CBool(r.IsDisplayAsVolume), CBool(r.IsMolarity),
+                    r.Equivalents, r.Molarity, r.MMols, r.Purity, r.ResinLoad)
+            }))
+
+        allRows.AddRange(searchContext.tblSolvents.AsNoTracking().
+            Select(Function(s) New With {s.ProtocolItemID, s.Name, s.Source, s.Milliliters, s.Density, s.IsDisplayAsWeight,
+                s.IsMolEquivalents, s.Equivalents}).
+            AsEnumerable().
+            Select(Function(s) New SearchableRow With {
+                .ProtocolItemID = s.ProtocolItemID,
+                .Content = BuildSolventContent(s.Name, s.Source, s.Milliliters, s.Density, CBool(s.IsDisplayAsWeight),
+                    CBool(s.IsMolEquivalents), s.Equivalents)
+            }))
+
+        allRows.AddRange(searchContext.tblAuxiliaries.AsNoTracking().
+            Select(Function(a) New With {a.ProtocolItemID, a.Name, a.Source, a.Grams, a.Density, a.IsDisplayAsVolume, a.Equivalents}).
+            AsEnumerable().
+            Select(Function(a) New SearchableRow With {
+                .ProtocolItemID = a.ProtocolItemID,
+                .Content = BuildAuxiliaryContent(a.Name, a.Source, a.Grams, a.Density, CBool(a.IsDisplayAsVolume), a.Equivalents)
+            }))
+
+        allRows.AddRange(searchContext.tblProducts.AsNoTracking().
+            Select(Function(p) New With {p.ProtocolItemID, p.Name, p.Grams, p.Yield, p.MolecularWeight, p.ExactMass, p.ElementalFormula,
+                p.Purity, p.ResinLoad}).
+            AsEnumerable().
+            Select(Function(p) New SearchableRow With {
+                .ProtocolItemID = p.ProtocolItemID,
+                .Content = BuildProductContent(p.Name, p.Grams, p.Yield, p.MolecularWeight, p.ExactMass, p.ElementalFormula, p.Purity, p.ResinLoad)
+            }))
+
+        allRows.AddRange(searchContext.tblRefReactants.AsNoTracking().
+            Select(Function(r) New With {r.ProtocolItemID, r.Name, r.Source, r.Grams, r.Density, r.IsDisplayAsVolume, r.Equivalents,
+                r.MMols, r.Purity, r.ResinLoad}).
+            AsEnumerable().
+            Select(Function(r) New SearchableRow With {
+                .ProtocolItemID = r.ProtocolItemID,
+                .Content = BuildRefReactantContent(r.Name, r.Source, r.Grams, r.Density, CBool(r.IsDisplayAsVolume), r.Equivalents,
+                    r.MMols, r.Purity, r.ResinLoad)
+            }))
         allRows.AddRange(searchContext.tblSeparators.AsNoTracking().Select(SeparatorProjection))
         allRows.AddRange(searchContext.tblEmbeddedFiles.AsNoTracking().Select(EmbeddedFileProjection))
 
@@ -232,40 +678,19 @@ Public Class FullTextSearch
             AsEnumerable().
             Select(Function(c) New SearchableRow With {.ProtocolItemID = c.ProtocolItemID, .Content = ExtractPlainText(c.CommentFlowDoc)}))
 
-        'wrap the whole rebuild in a single transaction - without this, every DELETE/INSERT below runs as its
-        'own autocommit transaction and fsyncs individually, which is what actually made this slow (not the
-        'FTS5 tokenizing work itself).
+        'clear any existing rows (relevant for the manual-repair case; a no-op for the common one-time-backfill
+        'case, where tblSearchIndex starts out empty) and replace them with the freshly computed set. A single
+        'SaveChanges call below makes this atomic - no separate manual transaction needed here.
 
-        Dim ownsTransaction = (searchContext.Database.CurrentTransaction Is Nothing)
-        Dim transaction = If(ownsTransaction, searchContext.Database.BeginTransaction(), searchContext.Database.CurrentTransaction)
+        searchContext.tblSearchIndex.RemoveRange(searchContext.tblSearchIndex)
 
-        Try
+        searchContext.tblSearchIndex.AddRange(allRows.Select(Function(row) New tblSearchIndex With {
+            .ProtocolItemID = row.ProtocolItemID,
+            .ExperimentID = experimentIDsByProtocolItem.GetValueOrDefault(row.ProtocolItemID),
+            .Content = row.Content
+        }))
 
-            searchContext.Database.ExecuteSqlRaw("DELETE FROM SearchIndex")
-
-            For Each row In allRows
-                searchContext.Database.ExecuteSqlRaw("INSERT INTO SearchIndex(ProtocolItemID, ExperimentID, Content) VALUES ({0}, {1}, {2})",
-                    row.ProtocolItemID, experimentIDsByProtocolItem.GetValueOrDefault(row.ProtocolItemID), row.Content)
-            Next
-
-            If ownsTransaction Then
-                transaction.Commit()
-            End If
-
-        Catch
-
-            If ownsTransaction Then
-                transaction.Rollback()
-            End If
-            Throw
-
-        Finally
-
-            If ownsTransaction Then
-                transaction.Dispose()
-            End If
-
-        End Try
+        searchContext.SaveChanges()
 
     End Sub
 
@@ -326,23 +751,82 @@ Public Class FullTextSearch
 
 
     ''' <summary>
-    ''' Applies previously collected SearchIndex changes. Every change is a delete-then-(re)insert keyed by
-    ''' ProtocolItemID, since FTS5 has no natural upsert and the table has no other unique constraint to rely on.
-    ''' Called by ElnDbContext.SaveChanges after persisting, within the same transaction.
+    ''' Stages the persisted tblSearchIndex mirror row for each previously collected SearchIndex change, via
+    ''' ordinary EF Add/Remove/property mutation - deliberately NOT SaveChanges'd here. Called by
+    ''' ElnDbContext.SaveChanges before its own SyncState-assignment/tombstone loop runs, so that loop (which
+    ''' re-reads the ChangeTracker fresh at that later point) picks up these staged tblSearchIndex entries
+    ''' automatically and treats them exactly like any other satellite table edit - same SyncState/tombstone
+    ''' logic, no duplicated code here.
     ''' </summary>
     '''
-    Friend Shared Sub ApplySearchIndexOps(searchContext As ElnDbContext, ops As List(Of SearchIndexOp))
+    Friend Shared Sub StageSearchIndexEntityChanges(searchContext As ElnDbContext, ops As List(Of SearchIndexOp))
 
         For Each op In ops
 
-            searchContext.Database.ExecuteSqlRaw("DELETE FROM SearchIndex WHERE ProtocolItemID = {0}", op.ProtocolItemID)
+            Dim existing = searchContext.tblSearchIndex.Find(op.ProtocolItemID)
 
-            If Not op.IsDelete Then
-                searchContext.Database.ExecuteSqlRaw("INSERT INTO SearchIndex(ProtocolItemID, ExperimentID, Content) VALUES ({0}, {1}, {2})",
-                    op.ProtocolItemID, op.ExperimentID, op.Content)
+            If op.IsDelete Then
+
+                If existing IsNot Nothing Then
+                    searchContext.tblSearchIndex.Remove(existing)
+                End If
+
+            ElseIf existing IsNot Nothing Then
+
+                existing.ExperimentID = op.ExperimentID
+                existing.Content = op.Content
+
+            Else
+
+                searchContext.tblSearchIndex.Add(New tblSearchIndex With {
+                    .ProtocolItemID = op.ProtocolItemID,
+                    .ExperimentID = op.ExperimentID,
+                    .Content = op.Content
+                })
+
             End If
 
         Next
+
+    End Sub
+
+
+    ''' <summary>
+    ''' Applies previously collected SearchIndex changes to the in-memory FTS5 table. Every change is a
+    ''' delete-then-(re)insert keyed by ProtocolItemID, since FTS5 has no natural upsert and the table has no
+    ''' other unique constraint to rely on. Called by ElnDbContext.SaveChanges after persisting. Runs on
+    ''' MemoryIndexConnection - a separate connection/database from the on-disk one, so this is deliberately
+    ''' outside the on-disk SaveChanges transaction; that's fine, since the in-memory index is a derived cache
+    ''' rebuilt fresh every session (see HydrateMemoryIndex), not a durability-critical store.
+    ''' </summary>
+    '''
+    Friend Shared Sub ApplyMemoryIndexOps(ops As List(Of SearchIndexOp))
+
+        If ops Is Nothing OrElse ops.Count = 0 Then
+            Exit Sub
+        End If
+
+        Using command = MemoryIndexConnection.CreateCommand()
+
+            For Each op In ops
+
+                command.CommandText = "DELETE FROM mem.SearchIndex WHERE ProtocolItemID = @id"
+                command.Parameters.Clear()
+                command.Parameters.AddWithValue("@id", op.ProtocolItemID)
+                command.ExecuteNonQuery()
+
+                If Not op.IsDelete Then
+                    command.CommandText = "INSERT INTO mem.SearchIndex(ProtocolItemID, ExperimentID, Content) VALUES (@id, @exp, @content)"
+                    command.Parameters.Clear()
+                    command.Parameters.AddWithValue("@id", op.ProtocolItemID)
+                    command.Parameters.AddWithValue("@exp", op.ExperimentID)
+                    command.Parameters.AddWithValue("@content", op.Content)
+                    command.ExecuteNonQuery()
+                End If
+
+            Next
+
+        End Using
 
     End Sub
 
@@ -477,11 +961,16 @@ Public Class FullTextSearch
     ''' Gets all experiments containing at least one protocol item matching the specified search term, ordered
     ''' by relevance (best match first). The whole search term is matched as a single literal phrase - e.g.
     ''' searching "blue water" only finds experiments where those words occur adjacent to each other and in
-    ''' that order, not experiments where "blue" and "water" merely occur somewhere independently. Results are
-    ''' capped at <see cref="MaxDisplayedResults"/>.
+    ''' that order, not experiments where "blue" and "water" merely occur somewhere independently. The last word
+    ''' of the search term is matched as a prefix, so a still-being-typed or deliberately partial last word (e.g.
+    ''' "Allyl") still finds it as part of a longer indexed word (e.g. a reagent named "Allyltrimethylsilane") -
+    ''' every earlier word in a multi-word search still has to match a complete word. Results are capped at
+    ''' <see cref="MaxDisplayedResults"/>.
     ''' </summary>
-    ''' <param name="searchTerm">Free-text search term, matched as one literal phrase.</param>
-    ''' <param name="searchContext">Local SQLite database context to query.</param>
+    ''' <param name="searchTerm">Free-text search term, matched as one literal phrase with the last word as a prefix.</param>
+    ''' <param name="searchContext">Database context to query - either the local SQLite database (FTS5 SearchIndex)
+    ''' or the MySQL server (native FULLTEXT index on tblSearchIndex); dispatches on <see cref="DbContext.Database"/>'s
+    ''' provider.</param>
     '''
     Public Function SearchExperiments(searchTerm As String, searchContext As ElnDbContext) As ExperimentSearchResult
 
@@ -489,12 +978,9 @@ Public Class FullTextSearch
             Return New ExperimentSearchResult With {.Hits = New List(Of ExperimentSearchHit), .WasTruncated = False}
         End If
 
-        If Not searchContext.Database.IsSqlite() Then
-            'the MySQL server side uses native FULLTEXT indexes instead of an FTS5 SearchIndex table - not yet implemented
-            Throw New NotSupportedException("Full-text search is currently only implemented for the local SQLite database.")
-        End If
-
-        Dim rankedExperiments = GetRankedExperimentIDs(searchContext, searchTerm)
+        Dim rankedExperiments = If(searchContext.Database.IsSqlite(),
+            GetRankedExperimentIDs(searchTerm),
+            GetRankedExperimentIDsMySql(searchTerm, searchContext))
 
         'cut off the least relevant experiments before even querying tblExperiments for them, rather than
         'truncating the final result list - both cheaper and simpler, since ranking order is already established.
@@ -512,7 +998,8 @@ Public Class FullTextSearch
             Where(Function(r) experimentsByID.ContainsKey(r.ExperimentID)).
             Select(Function(r) New ExperimentSearchHit With {
                 .Experiment = experimentsByID(r.ExperimentID),
-                .Snippet = r.Snippet
+                .Snippet = r.Snippet,
+                .HitCount = r.HitCount
             }).ToList()
 
         Return New ExperimentSearchResult With {.Hits = hits, .WasTruncated = wasTruncated}
@@ -546,6 +1033,14 @@ Public Class FullTextSearch
         Public Property ExperimentID As String
         Public Property Snippet As String
 
+        ''' <summary>
+        ''' Number of matching protocol items within this experiment - i.e. how many hits
+        ''' <see cref="AggregateHitsByExperiment"/> summed together, of which only the single best-ranked one's
+        ''' Snippet is actually shown. Lets the UI indicate there's more to see than just the displayed snippet.
+        ''' </summary>
+        '''
+        Public Property HitCount As Integer
+
     End Class
 
 
@@ -554,27 +1049,63 @@ Public Class FullTextSearch
     ''' match first), each with a representative highlighted excerpt.
     ''' </summary>
     '''
-    Private Function GetRankedExperimentIDs(searchContext As ElnDbContext, searchTerm As String) As List(Of RankedExperiment)
+    Private Function GetRankedExperimentIDs(searchTerm As String) As List(Of RankedExperiment)
 
-        Dim hits = GetRankedHits(searchContext, QuotePhrase(searchTerm))
+        Return AggregateHitsByExperiment(GetRankedHits(QuotePhrase(searchTerm), searchTerm))
+
+    End Function
+
+
+    ''' <summary>
+    ''' Gets the experiments matching the search term - as a true adjacent phrase with prefix matching on the
+    ''' last word, full parity with the local FTS5 path - against the MySQL server's native FULLTEXT index,
+    ''' ordered by relevance (best match first), each with a representative excerpt.
+    ''' </summary>
+    ''' <remarks>
+    ''' Server-side counterpart to <see cref="GetRankedExperimentIDs"/> - see <see cref="GetRankedHitsMySql"/> and
+    ''' <see cref="MySqlCandidateQuery"/> for how true phrase-adjacency+prefix matching is achieved despite MySQL
+    ''' boolean mode being unable to express it directly (a loosened MySQL query narrows candidates via the
+    ''' FULLTEXT index, then each candidate is verified client-side). Aggregation once individual hits are
+    ''' obtained is identical, so both paths share <see cref="AggregateHitsByExperiment"/>. The raw searchTerm is
+    ''' passed through (not just the candidate query string) because the client-side verification/highlighting
+    ''' step needs it to locate the true match within each hit's Content.
+    ''' </remarks>
+    '''
+    Private Function GetRankedExperimentIDsMySql(searchTerm As String, searchContext As ElnDbContext) As List(Of RankedExperiment)
+
+        Return AggregateHitsByExperiment(GetRankedHitsMySql(searchTerm, MySqlCandidateQuery(searchTerm), searchContext))
+
+    End Function
+
+
+    ''' <summary>
+    ''' Groups per-protocol-item search hits (from either the local FTS5 or the MySQL query path) by owning
+    ''' experiment: an experiment's overall relevance is the SUM of the relevance of every matching protocol
+    ''' item, not just its single best one - an experiment where the phrase occurs in several items should rank
+    ''' above one where it only occurs once, even if that single occurrence is individually a slightly stronger
+    ''' match. The representative snippet shown for an experiment comes from its single best-ranked matching item
+    ''' - concatenating every matching item's snippet would defeat the point of a *compact* preview. Both hit
+    ''' sources use the same "lower Rank is more relevant" convention (bm25's native sign locally; negated
+    ''' MATCH...AGAINST relevance, whose native sign is the opposite, for MySQL - see <see cref="GetRankedHitsMySql"/>),
+    ''' so this aggregation step itself needs no knowledge of which backend produced the hits.
+    ''' </summary>
+    '''
+    Private Function AggregateHitsByExperiment(hits As List(Of RankedHit)) As List(Of RankedExperiment)
 
         If hits.Count = 0 Then
             Return New List(Of RankedExperiment)
         End If
 
-        'an experiment's overall relevance is the SUM of the relevance of every matching protocol item, not
-        'just its single best one - an experiment where the phrase occurs in several items should rank above
-        'one where it only occurs once, even if that single occurrence is individually a slightly stronger match.
         Dim totalRankByExperiment As New Dictionary(Of String, Double)
         Dim bestRankByExperiment As New Dictionary(Of String, Double)
         Dim bestSnippetByExperiment As New Dictionary(Of String, String)
+        Dim hitCountByExperiment As New Dictionary(Of String, Integer)
 
         For Each hit In hits
 
             totalRankByExperiment(hit.ExperimentID) = totalRankByExperiment.GetValueOrDefault(hit.ExperimentID, 0.0) + hit.Rank
+            hitCountByExperiment(hit.ExperimentID) = hitCountByExperiment.GetValueOrDefault(hit.ExperimentID, 0) + 1
 
-            'the representative snippet shown for an experiment comes from its single best-ranked matching
-            'item - concatenating every matching item's snippet would defeat the point of a *compact* preview.
             If Not bestRankByExperiment.ContainsKey(hit.ExperimentID) OrElse hit.Rank < bestRankByExperiment(hit.ExperimentID) Then
                 bestRankByExperiment(hit.ExperimentID) = hit.Rank
                 bestSnippetByExperiment(hit.ExperimentID) = hit.Snippet
@@ -584,59 +1115,276 @@ Public Class FullTextSearch
 
         Return totalRankByExperiment.Keys.
             OrderBy(Function(id) totalRankByExperiment(id)).
-            Select(Function(id) New RankedExperiment With {.ExperimentID = id, .Snippet = bestSnippetByExperiment(id)}).
+            Select(Function(id) New RankedExperiment With {
+                .ExperimentID = id,
+                .Snippet = bestSnippetByExperiment(id),
+                .HitCount = hitCountByExperiment(id)
+            }).
             ToList()
 
     End Function
 
 
     ''' <summary>
-    ''' Runs the phrase FTS5 MATCH query, returning one entry per matching protocol item together with its
-    ''' owning experiment, bm25 relevance rank, and a short highlighted excerpt (12 tokens, matched phrase
-    ''' wrapped in <see cref="HighlightStartMarker"/>/<see cref="HighlightEndMarker"/>).
+    ''' Runs the phrase FTS5 MATCH query against the in-memory SearchIndex table (via MemoryIndexConnection,
+    ''' kept open for the whole app session), returning one entry per matching protocol item together with its
+    ''' owning experiment, bm25 relevance rank, and a short highlighted excerpt built by the same
+    ''' <see cref="LocateSearchMatch"/>/<see cref="BuildSnippetFromMatch"/> client-side windowing the MySQL path
+    ''' uses (see <see cref="GetRankedHitsMySql"/>) - not FTS5's own <c>snippet()</c> SQL function.
     ''' </summary>
+    ''' <remarks>
+    ''' <c>snippet()</c> was used here originally, but its excerpt length is budgeted in FTS5's own *tokens*,
+    ''' which split on every hyphen/comma/paren/period exactly like MySQL's indexer does - so e.g. a hyphenated
+    ''' chemical name like "5-Bromo-2-chlorothiazole" eats 4 tokens out of the budget even though it displays as
+    ''' one short word, while the client-side windowing used for MySQL counts it as a single whitespace-delimited
+    ''' "word". At the same nominal budget this made the local excerpt end up visibly shorter than the MySQL one
+    ''' specifically for punctuation-dense chemical nomenclature (confirmed empirically against real experiment
+    ''' data - user-reported 2026-08-09). Switching the local path to the exact same word-window builder as the
+    ''' MySQL path removes the mismatch structurally instead of just retuning two separate numeric budgets that
+    ''' count differently - both backends now produce an excerpt via the same code and the same
+    ''' <see cref="SnippetWordBudget"/>, so they truncate at the same point for equivalent content by construction.
+    ''' </remarks>
     '''
-    Private Shared Function GetRankedHits(searchContext As ElnDbContext, quotedPhrase As String) As List(Of RankedHit)
+    Private Shared Function GetRankedHits(quotedPhrase As String, searchTerm As String) As List(Of RankedHit)
 
         Dim hits As New List(Of RankedHit)
 
-        Using command = searchContext.Database.GetDbConnection().CreateCommand()
+        Using command = MemoryIndexConnection.CreateCommand()
 
             'Content is column index 2 in the SearchIndex table (0=ProtocolItemID, 1=ExperimentID, 2=Content).
+            'bm25()/MATCH's left-hand side must reference the table unqualified - FTS5 parses that position
+            'specially and a schema-qualified "mem.SearchIndex" errors there ("no such column"), even though the
+            'ordinary FROM clause below is fine (and needs to be) qualified. Unqualified resolution is
+            'unambiguous since SearchIndex only ever exists in the "mem" schema, never in "main".
             command.CommandText =
-                $"SELECT ProtocolItemID, ExperimentID, bm25(SearchIndex), snippet(SearchIndex, 2, char({AscW(HighlightStartMarker)}), char({AscW(HighlightEndMarker)}), '…', 12) " +
-                "FROM SearchIndex WHERE SearchIndex MATCH @term"
+                "SELECT ProtocolItemID, ExperimentID, bm25(SearchIndex), Content " +
+                "FROM mem.SearchIndex WHERE SearchIndex MATCH @term"
 
             Dim param = command.CreateParameter()
             param.ParameterName = "@term"
             param.Value = quotedPhrase
             command.Parameters.Add(param)
 
-            Dim wasClosed = (command.Connection.State <> ConnectionState.Open)
-            If wasClosed Then
-                command.Connection.Open()
-            End If
+            Using reader = command.ExecuteReader()
+                While reader.Read()
 
-            Try
-                Using reader = command.ExecuteReader()
-                    While reader.Read()
-                        hits.Add(New RankedHit With {
-                            .ProtocolItemID = reader.GetString(0),
-                            .ExperimentID = reader.GetString(1),
-                            .Rank = reader.GetDouble(2),
-                            .Snippet = ExtendHighlightPastClosingBrackets(reader.GetString(3))
-                        })
-                    End While
-                End Using
-            Finally
-                If wasClosed Then
-                    command.Connection.Close()
-                End If
-            End Try
+                    Dim content = reader.GetString(3)
+                    Dim match = LocateSearchMatch(content, searchTerm)
+
+                    hits.Add(New RankedHit With {
+                        .ProtocolItemID = reader.GetString(0),
+                        .ExperimentID = reader.GetString(1),
+                        .Rank = reader.GetDouble(2),
+                        .Snippet = If(match IsNot Nothing AndAlso match.Success,
+                            BuildSnippetFromMatch(content, match), BuildTruncatedSnippet(content))
+                    })
+
+                End While
+            End Using
 
         End Using
 
         Return hits
+
+    End Function
+
+
+    ''' <summary>
+    ''' Runs a deliberately over-inclusive boolean-mode MATCH...AGAINST candidate query against the MySQL
+    ''' server's tblSearchIndex table (see <see cref="MySqlCandidateQuery"/>), then verifies each candidate
+    ''' row client-side via <see cref="LocateSearchMatch"/> - the same phrase-adjacency+prefix check
+    ''' <see cref="GetRankedHits"/>'s FTS5 path gets natively - keeping only rows that actually satisfy it and
+    ''' building their highlighted excerpt from the same located match. Returns one entry per surviving
+    ''' protocol item, with its owning experiment, relevance rank, and highlighted excerpt.
+    ''' </summary>
+    ''' <remarks>
+    ''' MySQL's MATCH...AGAINST relevance score is higher-is-better, the opposite of SQLite's bm25() convention
+    ''' that <see cref="AggregateHitsByExperiment"/>/<see cref="RankedHit"/> are built around (lower is more
+    ''' relevant) - negated here so both query paths produce RankedHit values with the same "lower is better"
+    ''' meaning, keeping the aggregation step itself backend-agnostic. For a multi-word search this score
+    ''' reflects the loosened candidate query (words present, not necessarily adjacent), not the true
+    ''' phrase-adjacent match verified afterward - an accepted imprecision, no worse than MySQL's relevance
+    ''' score already being a rougher signal than SQLite's bm25 to begin with.
+    ''' </remarks>
+    '''
+    Private Shared Function GetRankedHitsMySql(searchTerm As String, candidateQuery As String, searchContext As ElnDbContext) As List(Of RankedHit)
+
+        Dim hits As New List(Of RankedHit)
+
+        Dim connection = DirectCast(searchContext.Database.GetDbConnection(), MySqlConnection)
+        Dim wasClosed = connection.State <> ConnectionState.Open
+        If wasClosed Then
+            connection.Open()
+        End If
+
+        Try
+
+            Using command As New MySqlCommand(
+                "SELECT ProtocolItemID, ExperimentID, Content, MATCH(Content) AGAINST (@term IN BOOLEAN MODE) " +
+                "FROM tblSearchIndex WHERE MATCH(Content) AGAINST (@term IN BOOLEAN MODE)", connection)
+
+                command.Parameters.AddWithValue("@term", candidateQuery)
+
+                Using reader = command.ExecuteReader()
+                    While reader.Read()
+
+                        Dim content = reader.GetString(2)
+                        Dim match = LocateSearchMatch(content, searchTerm)
+
+                        'discards candidates the loosened query over-matched (multi-word: words present but not
+                        'actually adjacent/in order) - this is the client-side verification step that gives true
+                        'FTS5-parity phrase+prefix matching despite MySQL boolean mode being unable to express
+                        '"adjacent phrase, prefix on the last word" in a single query (see MySqlCandidateQuery).
+                        If match IsNot Nothing AndAlso match.Success Then
+                            hits.Add(New RankedHit With {
+                                .ProtocolItemID = reader.GetString(0),
+                                .ExperimentID = reader.GetString(1),
+                                .Rank = -reader.GetDouble(3),
+                                .Snippet = BuildSnippetFromMatch(content, match)
+                            })
+                        End If
+
+                    End While
+                End Using
+
+            End Using
+
+        Finally
+            If wasClosed Then
+                connection.Close()
+            End If
+        End Try
+
+        Return hits
+
+    End Function
+
+
+    ''' <summary>
+    ''' Locates searchTerm within a search hit's full Content via a case-insensitive Regex built from
+    ''' <see cref="SplitIntoMySqlWords"/>'s word split: single word -> prefix match (a complete word starting
+    ''' with the term); multiple words -> each word matched as a complete word, adjacent, in order (true phrase
+    ''' semantics). Shared by both backends: for MySQL (<see cref="GetRankedHitsMySql"/>) it both verifies a
+    ''' candidate is a genuine match (the loosened MySQL candidate query that found the row isn't itself
+    ''' authoritative - see <see cref="MySqlCandidateQuery"/>) and locates the excerpt window; for local FTS5
+    ''' (<see cref="GetRankedHits"/>) every row is already a confirmed match (FTS5's own MATCH is authoritative),
+    ''' so this is used purely to locate the excerpt window - via the returned Match, both build their highlighted
+    ''' excerpt through <see cref="BuildSnippetFromMatch"/>, guaranteeing identical truncation behavior for
+    ''' equivalent content on both backends.
+    ''' </summary>
+    ''' <remarks>
+    ''' The regex approximates rather than exactly replicates either backend's own tokenizer rules - acceptable
+    ''' for MySQL because this is the sole authority on adjacency/prefix correctness there (MySQL's own boolean-mode
+    ''' query can no longer express true phrase+prefix semantics at all, see <see cref="MySqlCandidateQuery"/>);
+    ''' acceptable for local FTS5 because <see cref="SplitIntoMySqlWords"/>'s "any non-letter/non-digit run is a
+    ''' separator" rule already closely mirrors FTS5's own default <c>unicode61</c> tokenizer rule, so in practice
+    ''' the two agree on where a "word" starts and ends. The last word always gets prefix treatment (<c>\w*</c>),
+    ''' every earlier word must match completely (<c>\b...\b</c>) - true for any number of words, matching FTS5's
+    ''' own <c>"word1 word2 ... lastWord"*</c> semantics exactly, not just the single-word case.
+    ''' </remarks>
+    '''
+    Private Shared Function LocateSearchMatch(content As String, searchTerm As String) As Text.RegularExpressions.Match
+
+        If String.IsNullOrEmpty(content) Then
+            Return Nothing
+        End If
+
+        Dim termWords = SplitIntoMySqlWords(searchTerm)
+
+        If termWords.Count = 0 Then
+            Return Nothing
+        End If
+
+        Dim exactWords = termWords.Take(termWords.Count - 1).Select(Function(w) "\b" + Text.RegularExpressions.Regex.Escape(w) + "\b")
+        Dim lastWordPrefix = "\b" + Text.RegularExpressions.Regex.Escape(termWords.Last()) + "\w*"
+
+        'joined by a run of non-alphanumeric characters, not just \s+, since MySQL's own word split (and
+        'therefore the words being matched here) treats e.g. a hyphen the same as whitespace - see
+        'SplitIntoMySqlWords - so "5-bromo" in the content must still match a query built from "5-bromo".
+
+        Dim pattern = String.Join("[^\p{L}\p{N}]+", exactWords.Append(lastWordPrefix))
+
+        Return Text.RegularExpressions.Regex.Match(content, pattern, Text.RegularExpressions.RegexOptions.IgnoreCase)
+
+    End Function
+
+
+    ''' <summary>
+    ''' Number of whitespace-delimited "words" a search excerpt should span in total (matched phrase plus
+    ''' surrounding context) - shared by both backends via <see cref="BuildSnippetFromMatch"/>, see
+    ''' <see cref="GetRankedHits"/>'s remarks for why the local FTS5 path no longer uses its own separate
+    ''' token-based <c>snippet()</c> budget.
+    ''' </summary>
+    '''
+    Private Const SnippetWordBudget As Integer = 13
+
+
+    ''' <summary>
+    ''' Builds a highlighted excerpt around an already-located match (see <see cref="LocateSearchMatch"/>):
+    ''' wraps the match in <see cref="HighlightStartMarker"/>/<see cref="HighlightEndMarker"/> and trims to a
+    ''' <see cref="SnippetWordBudget"/>-word window around it, with a leading/trailing "…" if trimmed. Used by
+    ''' both backends (<see cref="GetRankedHits"/> for local FTS5, <see cref="GetRankedHitsMySql"/> for MySQL,
+    ''' which has no native excerpt equivalent to FTS5's snippet() - MATCH...AGAINST only ever returns a
+    ''' relevance score) so the two produce excerpts of equivalent length for equivalent content by construction.
+    ''' </summary>
+    '''
+    Private Shared Function BuildSnippetFromMatch(content As String, match As Text.RegularExpressions.Match) As String
+
+        'whitespace-delimited tokens with their character positions - only used to pick a display window around
+        'the match, so this doesn't need to match either backend's own word/tokenizer rules exactly.
+
+        Dim tokens = Text.RegularExpressions.Regex.Matches(content, "\S+").Cast(Of Text.RegularExpressions.Match)().ToList()
+
+        Dim matchStartTokenIdx = tokens.FindIndex(Function(t) t.Index + t.Length > match.Index)
+        Dim matchEndTokenIdx = tokens.FindLastIndex(Function(t) t.Index < match.Index + match.Length)
+        If matchStartTokenIdx < 0 Then matchStartTokenIdx = 0
+        If matchEndTokenIdx < matchStartTokenIdx Then matchEndTokenIdx = matchStartTokenIdx
+
+        Dim matchWordCount = matchEndTokenIdx - matchStartTokenIdx + 1
+        Dim remaining = Math.Max(0, SnippetWordBudget - matchWordCount)
+        Dim before = remaining \ 2
+        Dim after = remaining - before
+
+        Dim startIdx = Math.Max(0, matchStartTokenIdx - before)
+        Dim endIdx = Math.Min(tokens.Count - 1, matchEndTokenIdx + after)
+
+        Dim windowStart = tokens(startIdx).Index
+        Dim windowEnd = tokens(endIdx).Index + tokens(endIdx).Length
+
+        Dim snippet As New Text.StringBuilder()
+        If startIdx > 0 Then
+            snippet.Append("…")
+        End If
+        snippet.Append(content.Substring(windowStart, match.Index - windowStart))
+        snippet.Append(HighlightStartMarker)
+        snippet.Append(content.Substring(match.Index, match.Length))
+        snippet.Append(HighlightEndMarker)
+        snippet.Append(content.Substring(match.Index + match.Length, windowEnd - (match.Index + match.Length)))
+        If endIdx < tokens.Count - 1 Then
+            snippet.Append("…")
+        End If
+
+        Return ExtendHighlightPastClosingBrackets(snippet.ToString())
+
+    End Function
+
+
+    ''' <summary>
+    ''' Fallback excerpt for <see cref="BuildMySqlSnippet"/>: the raw, un-highlighted Content, capped to a
+    ''' display-friendly length. Carries no <see cref="HighlightStartMarker"/>/<see cref="HighlightEndMarker"/>
+    ''' pair, which CustomControls/Converters/HighlightedSnippetView.vb already tolerates - it renders as plain,
+    ''' unhighlighted text when no markers are present.
+    ''' </summary>
+    '''
+    Private Shared Function BuildTruncatedSnippet(content As String) As String
+
+        Const maxLength As Integer = 150
+
+        If content Is Nothing OrElse content.Length <= maxLength Then
+            Return content
+        End If
+
+        Return content.Substring(0, maxLength) + "…"
 
     End Function
 
@@ -727,15 +1475,89 @@ Public Class FullTextSearch
 
     ''' <summary>
     ''' Wraps the whole search term in double quotes as a single FTS5 phrase, escaping any embedded quote
-    ''' characters. A phrase query requires its tokens to occur adjacent and in that order within the same
-    ''' indexed row - this is what makes a multi-word search term match only the literal phrase typed, rather
-    ''' than each word independently. Quoting also avoids FTS5 query syntax errors for terms containing
-    ''' characters with special meaning to FTS5 (-, *, :, parentheses, the AND/OR/NOT keywords, etc).
+    ''' characters, with a trailing "*" making the last token a prefix match. A phrase query requires its tokens
+    ''' to occur adjacent and in that order within the same indexed row - this is what makes a multi-word search
+    ''' term match only the literal phrase typed, rather than each word independently. Quoting also avoids FTS5
+    ''' query syntax errors for terms containing characters with special meaning to FTS5 (-, *, :, parentheses,
+    ''' the AND/OR/NOT keywords, etc). The trailing "*" is FTS5's documented syntax for turning the right-most
+    ''' token of a quoted phrase into a prefix query (e.g. "blue water"* matches "blue waterway" too, still
+    ''' requiring an exact, adjacent "blue") - without it, every token has to match a complete indexed word, so
+    ''' e.g. searching "Allyl" would never find a reagent named "Allyltrimethylsilane", since FTS5 tokenizes that
+    ''' name as one single word and a plain phrase query only ever matches whole tokens, never substrings of them.
     ''' </summary>
     '''
     Private Shared Function QuotePhrase(searchTerm As String) As String
 
-        Return """" + searchTerm.Trim().Replace("""", """""") + """"
+        Return """" + searchTerm.Trim().Replace("""", """""") + """*"
+
+    End Function
+
+
+    ''' <summary>
+    ''' Builds a deliberately over-inclusive MySQL boolean-mode query term for the search term: always just the
+    ''' last word with the trailing "*" truncation/prefix operator (unquoted), regardless of how many words the
+    ''' search term has - any earlier words are NOT included in the MySQL query at all.
+    ''' </summary>
+    ''' <remarks>
+    ''' <b>Why not a quoted phrase (empirically confirmed 2026-08-08):</b> the FTS5-style combination this
+    ''' originally tried - <c>"phrase"*</c>, wildcard right after the closing quote - is an outright MySQL syntax
+    ''' error (<c>syntax error, unexpected $end, expecting FTS_TERM or FTS_NUMB or '*'</c>), and a plain quoted
+    ''' phrase with no wildcard (<c>"phrase"</c>) is syntactically valid but requires the last word to match
+    ''' completely, breaking prefix matching for anyone still typing a multi-word search.
+    ''' <para>
+    ''' <b>Why not "+word1 +word2* ..." either (also empirically confirmed 2026-08-08):</b> the natural next
+    ''' attempt - require every earlier word exactly via <c>+word</c> and the last word via <c>+lastWord*</c> -
+    ''' turns out to reliably return zero rows whenever the wildcard term needs genuine prefix *expansion* to a
+    ''' longer indexed word (e.g. <c>+Maleic +aci*</c> against content containing "Maleic acid" - zero hits),
+    ''' even though <c>aci*</c> alone matches "acid" perfectly fine (confirmed: 145 hits) and <c>+dry +DCM*</c>
+    ''' alone also works fine (confirmed: 8 hits) - the latter only because "DCM*" trivially self-matches an
+    ''' already-complete word rather than needing genuine expansion. This reproduced consistently across three
+    ''' different word pairs and prefix lengths (3, 4, 5 characters), ruling out `innodb_ft_min_token_size` (3
+    ''' on this server) as the cause - it looks like an InnoDB FULLTEXT boolean-mode limitation combining a
+    ''' required exact term with a required genuine-expansion wildcard term, not a documented, workable syntax.
+    ''' </para>
+    ''' <para>
+    ''' <b>So this query drops the earlier-words requirement entirely</b> rather than fight an undocumented MySQL
+    ''' quirk: it's already just a candidate prefilter, not the final answer (<see cref="GetRankedHitsMySql"/>
+    ''' verifies every candidate client-side via <see cref="LocateSearchMatch"/> using the exact same
+    ''' adjacency+prefix semantics FTS5 gives natively, discarding false positives) - <c>lastWord*</c> alone is
+    ''' still a safe superset of the true matches (any row containing the true adjacent phrase necessarily
+    ''' contains a word starting with its last word), just a larger candidate set than the failed "+A +B*" form
+    ''' would have been, which the client-side regex pass still narrows to the correct result. Restores full
+    ''' behavioral parity with the local FTS5 path - true phrase-adjacency AND last-word-prefix matching for any
+    ''' number of words - without sacrificing FTS5's capability to match MySQL's syntax ceiling.
+    ''' </para>
+    ''' </remarks>
+    '''
+    Private Shared Function MySqlCandidateQuery(searchTerm As String) As String
+
+        Dim words = SplitIntoMySqlWords(searchTerm)
+
+        If words.Count = 0 Then
+            Return ""
+        End If
+
+        Return words.Last() + "*"
+
+    End Function
+
+
+    ''' <summary>
+    ''' Splits a search term into "words" the way MySQL's default FULLTEXT parser does: any run of characters
+    ''' that aren't letters or digits (not just whitespace) is a word separator - so e.g. <c>"5-bromo"</c>
+    ''' splits into <c>"5"</c> and <c>"bromo"</c>, same as MySQL's own indexer tokenized that text when it was
+    ''' stored. This also naturally strips MySQL boolean-mode operator characters (<c>+ - &lt; &gt; ( ) ~ * " @</c>)
+    ''' from the middle of a "word" instead of leaving them concatenated into a token that was never actually
+    ''' indexed (e.g. the old space-only split turned <c>"5-bromo"</c> into the single stripped word
+    ''' <c>"5bromo"</c>, which matches nothing - MySQL indexed <c>"5"</c> and <c>"bromo"</c> separately).
+    ''' Shared by <see cref="MySqlCandidateQuery"/> (building the MySQL query) and <see cref="LocateSearchMatch"/>
+    ''' (locating a match for either backend's excerpt), so the two stay consistent with each other and with
+    ''' MySQL's actual tokenizer.
+    ''' </summary>
+    '''
+    Private Shared Function SplitIntoMySqlWords(searchTerm As String) As List(Of String)
+
+        Return Text.RegularExpressions.Regex.Split(searchTerm.Trim(), "[^\p{L}\p{N}]+").Where(Function(w) w.Length > 0).ToList()
 
     End Function
 
@@ -751,6 +1573,25 @@ Public Class ExperimentSearchHit
 
     Public Property Experiment As tblExperiments
     Public Property Snippet As String
+
+    ''' <summary>
+    ''' Number of matching protocol items within this experiment - see FullTextSearch.RankedExperiment.HitCount.
+    ''' Only the single best-ranked one's Snippet is shown, so a value above 1 means there's more to see.
+    ''' </summary>
+    '''
+    Public Property HitCount As Integer
+
+    ''' <summary>
+    ''' "+N more hit(s)" if HitCount indicates additional matching protocol items exist beyond the one shown in
+    ''' Snippet, or an empty string otherwise - bindable directly as a label whose visibility is driven by
+    ''' whether it's empty (see dlgFullTextSearch.xaml's use of StringToVisibilityConverter).
+    ''' </summary>
+    '''
+    Public ReadOnly Property MoreHitsLabel As String
+        Get
+            Return If(HitCount > 1, $"+{HitCount - 1} more occurrence{If(HitCount = 2, "", "s")}", "")
+        End Get
+    End Property
 
 End Class
 

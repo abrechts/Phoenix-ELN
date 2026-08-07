@@ -47,12 +47,11 @@ Public Class ElnDbContext
 
         If TableInfo Is Nothing Then TableInfo = GetTablesInfo()
 
-        'SearchIndex table: Don't rely solely on DbUpgradeLocal.Upgrade having already run against this particular database
-        'file - its invocation is gated by the app's own version-change detection, which doesn't reliably
-        'fire for every database this context could end up wrapping (e.g. after restore from server, etc)
+        'tblSearchIndex: Don't rely solely on the version upgrade mechanism, an older database could also
+        'have been placed by restore from server or otherwise.
 
         If Database.IsSqlite() Then
-            FullTextSearch.EnsureSearchIndexTableExists(Me)
+            FullTextSearch.EnsureTblSearchIndexExists(Me)
         End If
 
     End Sub
@@ -96,6 +95,25 @@ Public Class ElnDbContext
     ''' 
     Public Overrides Function SaveChanges() As Integer
 
+        'capture the searchable changes now, while satellite entity values and in-memory relationship fixup
+        '(for same-unit-of-work parents) are still available, then stage the mirrored tblSearchIndex row
+        'changes into this same unit of work - the SyncState-assignment/tombstone loop below (which re-reads
+        'the ChangeTracker fresh) then picks these up automatically and treats them exactly like any other
+        'satellite table edit, with no duplicated SyncState/tombstone logic needed here.
+
+        Dim searchIndexOps As List(Of FullTextSearch.SearchIndexOp) = Nothing
+
+        If Database.IsSqlite() Then
+
+            Dim addedSatellites = From entry In ChangeTracker.Entries Where entry.State = EntityState.Added Select entry.Entity
+            Dim modifiedSatellites = From entry In ChangeTracker.Entries Where entry.State = EntityState.Modified Select entry.Entity
+            Dim deletedSatellites = From entry In ChangeTracker.Entries Where entry.State = EntityState.Deleted Select entry.Entity
+
+            searchIndexOps = FullTextSearch.CollectSearchIndexOps(Me, addedSatellites, modifiedSatellites, deletedSatellites)
+            FullTextSearch.StageSearchIndexEntityChanges(Me, searchIndexOps)
+
+        End If
+
         'get changes for server sync
 
         Dim modified = From entry In ChangeTracker.Entries Where entry.State = EntityState.Modified Select entry.Entity
@@ -129,50 +147,27 @@ Public Class ElnDbContext
 
         Next
 
-        'the full-text SearchIndex is an FTS5 virtual table specific to the local SQLite database - it doesn't
-        'exist on the MySQL server context -> so save and exit here if in non-SqLite context
+        'the full-text SearchIndex's in-memory FTS5 mirror is specific to the local SQLite database - it has
+        'no equivalent on the MySQL server context (tblSearchIndex itself needs no special handling there,
+        'it's just an ordinary synced satellite table) -> save and exit here if in non-SqLite context
 
         If Not Database.IsSqlite() Then
             Return MyBase.SaveChanges()
         End If
 
-        'capture the searchable changes now, while added/modified/deleted entity values and in-memory
-        'relationship fixup (for same-unit-of-work parents) are still available
+        'tblSearchIndex was staged into the ChangeTracker above, so this one call persists it atomically
+        'together with whatever satellite table edit triggered it - same as any other entity change.
 
-        Dim searchIndexOps = FullTextSearch.CollectSearchIndexOps(Me, added, modified, deleted)
+        Dim result = MyBase.SaveChanges()
 
-        'both the entity changes and the SearchIndex maintenance must commit or roll back together,
-        'since SearchIndex is a raw-SQL-maintained virtual table outside of EF's own change tracking/transaction
+        'the in-memory FTS5 mirror lives on a separate connection/database (MemoryIndexConnection) that can't
+        'share a transaction with the one above - deliberately applied after, and not rolled back together with
+        'it, since it's a derived cache rebuilt fresh every session (see FullTextSearch.HydrateMemoryIndex),
+        'not a durability-critical store.
 
-        Dim ownsTransaction = (Database.CurrentTransaction Is Nothing)
-        Dim transaction = If(ownsTransaction, Database.BeginTransaction(), Database.CurrentTransaction)
+        FullTextSearch.ApplyMemoryIndexOps(searchIndexOps)
 
-        Try
-
-            Dim result = MyBase.SaveChanges()
-
-            FullTextSearch.ApplySearchIndexOps(Me, searchIndexOps)
-
-            If ownsTransaction Then
-                transaction.Commit()
-            End If
-
-            Return result
-
-        Catch
-
-            If ownsTransaction Then
-                transaction.Rollback()
-            End If
-            Throw
-
-        Finally
-
-            If ownsTransaction Then
-                transaction.Dispose()
-            End If
-
-        End Try
+        Return result
 
     End Function
 
