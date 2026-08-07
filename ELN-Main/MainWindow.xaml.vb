@@ -163,10 +163,7 @@ Class MainWindow
         'Backfill the full-text SearchIndex if it's empty, e.g. right after the virtual table was first created
         'by DbUpgradeLocal, or after a restore that brought in an older/emptied database.
         If FullTextSearch.IsSearchIndexEmpty(DBContext) Then
-
-            DBContext.Database.ExecuteSqlRaw("DELETE FROM SearchIndex")
             FullTextSearch.RebuildSearchIndex(DBContext)
-
         End If
 
         If isRestoreFromServer Then

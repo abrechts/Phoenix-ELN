@@ -1,6 +1,7 @@
 Imports System.Data
 Imports System.Linq.Expressions
 Imports System.Xml.Linq
+Imports ElnBase.ELNEnumerations
 Imports ElnCoreModel
 Imports Microsoft.EntityFrameworkCore
 
@@ -95,33 +96,22 @@ Public Class FullTextSearch
     ''' tblEmbeddedFiles.FileBytes/IconImage, and the same protection automatically applies to any future table
     ''' with a BLOB column, with no separate special-casing needed. CollectSearchIndexOps (the incremental,
     ''' already-in-memory path) instead compiles the same expression into a delegate via SearchableEntityProjections
-    ''' below. tblComments is the one deliberate exception (see RebuildSearchIndex/GetSearchableRow) - extracting
-    ''' plain text from its FlowDocument XAML needs WPF's XamlReader, which can only run client-side, never as
-    ''' part of a translated SQL query.
+    ''' below. tblReagents, tblSolvents, tblAuxiliaries, tblProducts, tblRefReactants and tblComments are the
+    ''' deliberate exceptions (see RebuildSearchIndex/GetSearchableRow/Build*Content) - the first five's content
+    ''' combines several columns via ELNCalculations scaling logic that isn't SQL-translatable, and tblComments'
+    ''' plain text needs to be extracted from its FlowDocument XAML via WPF's XamlReader, which can only run
+    ''' client-side, never as part of a translated SQL query.
     ''' </summary>
     '''
-    Private Shared ReadOnly ReagentProjection As Expression(Of Func(Of tblReagents, SearchableRow)) =
-        Function(item) New SearchableRow With {.ProtocolItemID = item.ProtocolItemID, .Content = item.Name + " " + item.Source}
-
-    Private Shared ReadOnly ProductProjection As Expression(Of Func(Of tblProducts, SearchableRow)) =
-        Function(item) New SearchableRow With {.ProtocolItemID = item.ProtocolItemID, .Content = item.Name}
-
-    Private Shared ReadOnly SolventProjection As Expression(Of Func(Of tblSolvents, SearchableRow)) =
-        Function(item) New SearchableRow With {.ProtocolItemID = item.ProtocolItemID, .Content = item.Name + " " + item.Source}
-
-    Private Shared ReadOnly AuxiliaryProjection As Expression(Of Func(Of tblAuxiliaries, SearchableRow)) =
-        Function(item) New SearchableRow With {.ProtocolItemID = item.ProtocolItemID, .Content = item.Name + " " + item.Source}
-
-    Private Shared ReadOnly RefReactantProjection As Expression(Of Func(Of tblRefReactants, SearchableRow)) =
-        Function(item) New SearchableRow With {.ProtocolItemID = item.ProtocolItemID, .Content = item.Name + " " + item.Source}
-
     Private Shared ReadOnly SeparatorProjection As Expression(Of Func(Of tblSeparators, SearchableRow)) =
         Function(item) New SearchableRow With {.ProtocolItemID = item.ProtocolItemID, .Content = item.Title}
 
     Private Shared ReadOnly EmbeddedFileProjection As Expression(Of Func(Of tblEmbeddedFiles, SearchableRow)) =
         Function(item) New SearchableRow With {.ProtocolItemID = item.ProtocolItemID, .Content = item.FileName + " " + item.FileComment}
 
-    ' tblComments is treated separately in RebuildSearchIndex, since plain text needs to be extracted from xaml
+    ' tblReagents, tblSolvents, tblAuxiliaries, tblProducts, tblRefReactants and tblComments are treated separately,
+    ' see BuildReagentContent / BuildSolventContent / BuildAuxiliaryContent / BuildProductContent /
+    ' BuildRefReactantContent / ExtractPlainText
 
 
     ''' <summary>
@@ -135,11 +125,6 @@ Public Class FullTextSearch
 
             Dim dispatch As New Dictionary(Of Type, Func(Of Object, SearchableRow))
 
-            AddProjection(dispatch, ReagentProjection)
-            AddProjection(dispatch, ProductProjection)
-            AddProjection(dispatch, SolventProjection)
-            AddProjection(dispatch, AuxiliaryProjection)
-            AddProjection(dispatch, RefReactantProjection)
             AddProjection(dispatch, SeparatorProjection)
             AddProjection(dispatch, EmbeddedFileProjection)
 
@@ -155,6 +140,306 @@ Public Class FullTextSearch
         dispatch(GetType(TEntity)) = Function(entity) compiled(DirectCast(entity, TEntity))
 
     End Sub
+
+
+    ''' <summary>
+    ''' Builds a reagent's searchable content, e.g. "12.5 mg Triethylamine (2.50 M; 1.25 equiv; Merck 1234; 250 mmol;
+    ''' 98.5%; 120 mmol/g resin)" - the weighed amount/unit, name, and every other parameter
+    ''' CustomControls/Protocol Elements/Materials/ReagentContent.xaml displays (molarity, equivalents, source,
+    ''' mmols, purity, resin load), each included only when actually present. Always uses this one canonical
+    ''' form regardless of the experiment's IsDesignView state (which toggles which of the weight/equivalents
+    ''' pair is primary on screen) - search content isn't view-mode-dependent. Unlike the XAML display, empty
+    ''' parameters are omitted entirely rather than left as blank separators, since a search index has no use
+    ''' for placeholder tokens.
+    ''' </summary>
+    '''
+    Private Shared Function BuildReagentContent(name As String, source As String, grams As Double, density As Double?,
+        isDisplayAsVolume As Boolean, isMolarity As Boolean, equivalents As Double, molarity As Double?, mMols As Double,
+        purity As Double?, resinLoad As Double?) As String
+
+        Dim content As New Text.StringBuilder()
+        AppendAmountUnitPrefix(content, GetReagentWeightScale(grams, density, isDisplayAsVolume, isMolarity))
+        content.Append(name)
+
+        Dim detailParts = BuildMaterialDetailParts(equivalents, source, mMols, purity, resinLoad)
+        If isMolarity AndAlso molarity.HasValue Then
+            detailParts.Insert(0, ELNCalculations.SignificantDigitsString(molarity.Value, 3) + " M")
+        End If
+
+        AppendDetailParts(content, detailParts)
+        Return content.ToString()
+
+    End Function
+
+
+    ''' <summary>
+    ''' Gets the fitting weight/volume amount+unit for a reagent, mirroring WeightUnitConverter.Convert's core
+    ''' logic (CustomControls/Converters/AmountUnitConverters.vb) minus its WPF-binding-specific plumbing. For a
+    ''' molar reagent solution (IsMolarity), Grams actually holds the milliliters of solution, not a weight.
+    ''' </summary>
+    '''
+    Private Shared Function GetReagentWeightScale(grams As Double, density As Double?, isDisplayAsVolume As Boolean,
+        isMolarity As Boolean) As ELNCalculations.ScaleResult
+
+        Dim calcAsWeight = Not (isDisplayAsVolume Xor isMolarity)
+        If Not density.HasValue AndAlso Not (calcAsWeight Xor isMolarity) Then
+            Return Nothing
+        End If
+
+        If calcAsWeight Then
+            Dim effectiveGrams = If(isMolarity, grams * density.Value, grams)
+            Return ELNCalculations.ScaleWeight(effectiveGrams)
+        Else
+            Dim milliliters = If(Not isMolarity, grams / density.Value, grams)
+            Return ELNCalculations.ScaleVolume(milliliters)
+        End If
+
+    End Function
+
+
+    ''' <summary>
+    ''' Builds the (equivalents-unit; source; mmols; purity; resin load) detail parts shared by reagents and
+    ''' reference reactants - the two satellite tables whose material makeup is otherwise identical (weight/volume,
+    ''' equivalents, mmols, purity, resin load), differing only in whether a molar-solution concept applies
+    ''' (reagents) or not (reference reactants). Each part is included only when actually present. Uses the long
+    ''' "equiv"/"mEquiv" unit form (isShortUnit:=False), matching what ReagentContent.xaml/RefReactantContent.xaml
+    ''' actually display in their default (non-design, i.e. "non-equivalents") view - the design view's "eq"/"mq"
+    ''' shorthand is specific to that view's primary equivalents column, not used elsewhere.
+    ''' </summary>
+    '''
+    Private Shared Function BuildMaterialDetailParts(equivalents As Double, source As String, mMols As Double,
+        purity As Double?, resinLoad As Double?) As List(Of String)
+
+        Dim detailParts As New List(Of String)
+
+        Dim equivScale = ELNCalculations.ScaleEquivalent(equivalents, isShortUnit:=False)
+        If equivScale IsNot Nothing Then
+            detailParts.Add(ELNCalculations.SignificantDigitsString(equivScale.Amount, 3) + " " + equivScale.Unit)
+        End If
+
+        If Not String.IsNullOrEmpty(source) Then
+            detailParts.Add(source)
+        End If
+
+        Dim mMolScale = ELNCalculations.ScaleMMol(mMols)
+        If mMolScale IsNot Nothing Then
+            detailParts.Add(ELNCalculations.SignificantDigitsString(mMolScale.Amount, 3) + " " + mMolScale.Unit)
+        End If
+
+        If purity.HasValue Then
+            detailParts.Add(ELNCalculations.SignificantDigitsString(purity.Value, 3) + "%")
+        End If
+
+        If resinLoad.HasValue Then
+            detailParts.Add(ELNCalculations.SignificantDigitsString(resinLoad.Value, 3) + " mmol/g resin")
+        End If
+
+        Return detailParts
+
+    End Function
+
+
+    ''' <summary>
+    ''' Appends "{amount} {unit} " to content if scale is available (i.e. the underlying quantity is actually
+    ''' populated - ScaleWeight/ScaleVolume/etc. return Nothing for an unset/zero "just added" row), or nothing
+    ''' otherwise. Shared by every material content builder's leading amount+unit prefix.
+    ''' </summary>
+    '''
+    Private Shared Sub AppendAmountUnitPrefix(content As Text.StringBuilder, scale As ELNCalculations.ScaleResult)
+
+        If scale IsNot Nothing Then
+            content.Append(ELNCalculations.SignificantDigitsString(scale.Amount, 3)).Append(" "c).
+                Append(scale.Unit).Append(" "c)
+        End If
+
+    End Sub
+
+
+    ''' <summary>
+    ''' Appends " (part1; part2; ...)" to content if any detail parts were collected, or nothing otherwise. Shared
+    ''' by every material content builder's trailing parenthetical detail list.
+    ''' </summary>
+    '''
+    Private Shared Sub AppendDetailParts(content As Text.StringBuilder, detailParts As List(Of String))
+
+        If detailParts.Count > 0 Then
+            content.Append(" (").Append(String.Join("; ", detailParts)).Append(")"c)
+        End If
+
+    End Sub
+
+
+    ''' <summary>
+    ''' Builds a solvent's searchable content, e.g. "3.84 mL Methanol (1.52 volEquiv; Merck 12345)" - the
+    ''' volume/weight amount+unit, name, and (equivalents-unit; source), mirroring what CustomControls/Protocol
+    ''' Elements/Materials/SolventContent.xaml displays in its default (non-design) view - the design view's
+    ''' "vq"/"mv" shorthand is specific to that view's primary equivalents column, not used here. As with
+    ''' reagents, always uses this one canonical form regardless of IsDesignView, and omits parameters that
+    ''' aren't actually present rather than leaving blank separators.
+    ''' </summary>
+    '''
+    Private Shared Function BuildSolventContent(name As String, source As String, milliliters As Double, density As Double?,
+        isDisplayAsWeight As Boolean, isMolEquivalents As Boolean, equivalents As Double) As String
+
+        Dim content As New Text.StringBuilder()
+        AppendAmountUnitPrefix(content, GetSolventVolumeScale(milliliters, density, isDisplayAsWeight))
+        content.Append(name)
+
+        Dim detailParts As New List(Of String)
+
+        If equivalents <> 0 Then
+            Dim equivUnitText = If(isMolEquivalents, EquivUnit.molEquiv.ToString, EquivUnit.volEquiv.ToString)
+            detailParts.Add(ELNCalculations.SignificantDigitsString(equivalents, 3) + " " + equivUnitText)
+        End If
+
+        If Not String.IsNullOrEmpty(source) Then
+            detailParts.Add(source)
+        End If
+
+        AppendDetailParts(content, detailParts)
+        Return content.ToString()
+
+    End Function
+
+
+    ''' <summary>
+    ''' Gets the fitting volume/weight amount+unit for a solvent, mirroring VolumeUnitConverter.Convert's core
+    ''' logic (CustomControls/Converters/AmountUnitConverters.vb) minus its WPF-binding-specific plumbing.
+    ''' </summary>
+    '''
+    Private Shared Function GetSolventVolumeScale(milliliters As Double, density As Double?,
+        isDisplayAsWeight As Boolean) As ELNCalculations.ScaleResult
+
+        If Not isDisplayAsWeight Then
+            Return ELNCalculations.ScaleVolume(milliliters)
+        End If
+
+        If Not density.HasValue Then
+            Return Nothing
+        End If
+
+        Return ELNCalculations.ScaleWeight(milliliters * density.Value)
+
+    End Function
+
+
+    ''' <summary>
+    ''' Builds an auxiliary's searchable content, e.g. "120 mg Silicagel (1.52 wtEquiv; Merck 12345)" - the weighed
+    ''' amount+unit, name, and (equivalents; source), mirroring what CustomControls/Protocol Elements/Materials/
+    ''' AuxiliaryContent.xaml displays in its default (non-design) view. Reuses
+    ''' GetReagentWeightScale with isMolarity always False.
+    ''' </summary>
+    '''
+    Private Shared Function BuildAuxiliaryContent(name As String, source As String, grams As Double, density As Double?,
+        isDisplayAsVolume As Boolean, equivalents As Double) As String
+
+        Dim content As New Text.StringBuilder()
+        AppendAmountUnitPrefix(content, GetReagentWeightScale(grams, density, isDisplayAsVolume, isMolarity:=False))
+        content.Append(name)
+
+        Dim detailParts As New List(Of String)
+
+        If equivalents <> 0 Then
+            detailParts.Add(ELNCalculations.SignificantDigitsString(equivalents, 3) + " " + EquivUnit.wtEquiv.ToString)
+        End If
+
+        If Not String.IsNullOrEmpty(source) Then
+            detailParts.Add(source)
+        End If
+
+        AppendDetailParts(content, detailParts)
+        Return content.ToString()
+
+    End Function
+
+
+    ''' <summary>
+    ''' Builds a reference reactant's searchable content, e.g. "3.84 g Reactant A (1.25 equiv; Merck 12345; 250 mmol;
+    ''' 98.5%; 120 mmol/g resin)" - the weighed amount+unit, name, and every other parameter
+    ''' CustomControls/Protocol Elements/Materials/RefReactantContent.xaml displays. Identical field set to
+    ''' BuildReagentContent minus molarity (reference reactants have no molar-solution concept, hence
+    ''' GetReagentWeightScale is called with isMolarity always False, mirroring RefReactantContent.xaml's own
+    ''' WeightUnitConverter binding, which hardcodes that same "0" as its 4th MultiBinding value).
+    ''' </summary>
+    '''
+    Private Shared Function BuildRefReactantContent(name As String, source As String, grams As Double, density As Double?,
+        isDisplayAsVolume As Boolean, equivalents As Double, mMols As Double, purity As Double?, resinLoad As Double?) As String
+
+        Dim content As New Text.StringBuilder()
+        AppendAmountUnitPrefix(content, GetReagentWeightScale(grams, density, isDisplayAsVolume, isMolarity:=False))
+        content.Append(name)
+
+        AppendDetailParts(content, BuildMaterialDetailParts(equivalents, source, mMols, purity, resinLoad))
+        Return content.ToString()
+
+    End Function
+
+
+    ''' <summary>
+    ''' Builds a product's searchable content, e.g. "12.5 g ProductName (97.5% yield; 98.5% purity; 120 mmol/g
+    ''' resin; MW 234.35; EM 234.39; C5H8O2)" - the weighed amount+unit, name, and every other parameter
+    ''' CustomControls/Protocol Elements/Materials/ProductContent.xaml displays (yield, purity, resin load,
+    ''' molecular weight, exact mass, elemental formula). The raw ElementalFormula string is indexed directly -
+    ''' ElementalFormulaConverter only reformats it for on-screen subscript rendering, the underlying text is the
+    ''' same either way. Doesn't include the "A:"/"B:"/"C:" ProductIndex letter, since that's a positional display
+    ''' label, not searchable content. Yield and MolecularWeight have no nullable "unset" representation (unlike
+    ''' Purity/ExactMass/ResinLoad) but default to 0 before a product is actually worked up, so - unlike the XAML,
+    ''' which always renders them - both are only included once the product has an actual weighed amount (Grams).
+    ''' </summary>
+    '''
+    Private Shared Function BuildProductContent(name As String, grams As Double, yield As Double, molecularWeight As Double,
+        exactMass As Double?, elementalFormula As String, purity As Double?, resinLoad As Double?) As String
+
+        Dim content As New Text.StringBuilder()
+
+        Dim weightScale = ELNCalculations.ScaleWeight(grams)
+        AppendAmountUnitPrefix(content, weightScale)
+        content.Append(name)
+
+        Dim detailParts As New List(Of String)
+
+        If weightScale IsNot Nothing Then
+            detailParts.Add(FormatYieldPercent(yield) + " yield")
+        End If
+
+        If purity.HasValue Then
+            detailParts.Add(ELNCalculations.SignificantDigitsString(purity.Value, 3) + "% purity")
+        End If
+
+        If resinLoad.HasValue Then
+            detailParts.Add(ELNCalculations.SignificantDigitsString(resinLoad.Value, 3) + " mmol/g resin")
+        End If
+
+        If molecularWeight <> 0 Then
+            detailParts.Add("MW " + Format(molecularWeight, "0.00"))
+        End If
+
+        If exactMass.HasValue Then
+            detailParts.Add("EM " + Format(exactMass.Value, "0.00"))
+        End If
+
+        If Not String.IsNullOrEmpty(elementalFormula) Then
+            detailParts.Add(elementalFormula)
+        End If
+
+        AppendDetailParts(content, detailParts)
+        Return content.ToString()
+
+    End Function
+
+
+    ''' <summary>
+    ''' Formats a yield fraction as a percentage string, mirroring YieldConverter.Convert's core logic
+    ''' (CustomControls/Converters/AmountUnitConverters.vb) - 3 significant digits above 10%, 2 below (diminished
+    ''' precision for very low yields).
+    ''' </summary>
+    '''
+    Private Shared Function FormatYieldPercent(yield As Double) As String
+
+        Dim sigDigits = If(yield > 10, 3, 2)
+        Return ELNCalculations.SignificantDigitsString(yield, sigDigits) + "%"
+
+    End Function
 
 
     ''' <summary>
@@ -186,6 +471,52 @@ Public Class FullTextSearch
 
         End While
 
+        If TypeOf entity Is tblReagents Then
+            Dim reagent = DirectCast(entity, tblReagents)
+            Return New SearchableRow With {
+                .ProtocolItemID = reagent.ProtocolItemID,
+                .Content = BuildReagentContent(reagent.Name, reagent.Source, reagent.Grams, reagent.Density,
+                    CBool(reagent.IsDisplayAsVolume), CBool(reagent.IsMolarity), reagent.Equivalents, reagent.Molarity,
+                    reagent.MMols, reagent.Purity, reagent.ResinLoad)
+            }
+        End If
+
+        If TypeOf entity Is tblSolvents Then
+            Dim solvent = DirectCast(entity, tblSolvents)
+            Return New SearchableRow With {
+                .ProtocolItemID = solvent.ProtocolItemID,
+                .Content = BuildSolventContent(solvent.Name, solvent.Source, solvent.Milliliters, solvent.Density,
+                    CBool(solvent.IsDisplayAsWeight), CBool(solvent.IsMolEquivalents), solvent.Equivalents)
+            }
+        End If
+
+        If TypeOf entity Is tblAuxiliaries Then
+            Dim auxiliary = DirectCast(entity, tblAuxiliaries)
+            Return New SearchableRow With {
+                .ProtocolItemID = auxiliary.ProtocolItemID,
+                .Content = BuildAuxiliaryContent(auxiliary.Name, auxiliary.Source, auxiliary.Grams, auxiliary.Density,
+                    CBool(auxiliary.IsDisplayAsVolume), auxiliary.Equivalents)
+            }
+        End If
+
+        If TypeOf entity Is tblProducts Then
+            Dim product = DirectCast(entity, tblProducts)
+            Return New SearchableRow With {
+                .ProtocolItemID = product.ProtocolItemID,
+                .Content = BuildProductContent(product.Name, product.Grams, product.Yield, product.MolecularWeight,
+                    product.ExactMass, product.ElementalFormula, product.Purity, product.ResinLoad)
+            }
+        End If
+
+        If TypeOf entity Is tblRefReactants Then
+            Dim refReactant = DirectCast(entity, tblRefReactants)
+            Return New SearchableRow With {
+                .ProtocolItemID = refReactant.ProtocolItemID,
+                .Content = BuildRefReactantContent(refReactant.Name, refReactant.Source, refReactant.Grams, refReactant.Density,
+                    CBool(refReactant.IsDisplayAsVolume), refReactant.Equivalents, refReactant.MMols, refReactant.Purity, refReactant.ResinLoad)
+            }
+        End If
+
         If TypeOf entity Is tblComments Then
             Dim comment = DirectCast(entity, tblComments)
             Return New SearchableRow With {.ProtocolItemID = comment.ProtocolItemID, .Content = ExtractPlainText(comment.CommentFlowDoc)}
@@ -214,12 +545,59 @@ Public Class FullTextSearch
         'each satellite table is queried through its own EF-translatable projection (declared once, above,
         'and shared with the incremental path) - so the generated SQL only ever fetches the columns actually
         'used for indexing, never an unreferenced BLOB column such as tblEmbeddedFiles.FileBytes/IconImage.
+
         Dim allRows As New List(Of SearchableRow)
-        allRows.AddRange(searchContext.tblReagents.AsNoTracking().Select(ReagentProjection))
-        allRows.AddRange(searchContext.tblProducts.AsNoTracking().Select(ProductProjection))
-        allRows.AddRange(searchContext.tblSolvents.AsNoTracking().Select(SolventProjection))
-        allRows.AddRange(searchContext.tblAuxiliaries.AsNoTracking().Select(AuxiliaryProjection))
-        allRows.AddRange(searchContext.tblRefReactants.AsNoTracking().Select(RefReactantProjection))
+
+        'tblReagents, tblSolvents and tblAuxiliaries can't share the translatable-expression approach above -
+        'their content combines several columns via ELNCalculations scaling logic that isn't SQL-translatable.
+        'Still keep each SQL projection down to just the columns actually needed, same as tblComments below.
+
+        allRows.AddRange(searchContext.tblReagents.AsNoTracking().
+            Select(Function(r) New With {r.ProtocolItemID, r.Name, r.Source, r.Grams, r.Density, r.IsDisplayAsVolume, r.IsMolarity,
+                r.Equivalents, r.Molarity, r.MMols, r.Purity, r.ResinLoad}).
+            AsEnumerable().
+            Select(Function(r) New SearchableRow With {
+                .ProtocolItemID = r.ProtocolItemID,
+                .Content = BuildReagentContent(r.Name, r.Source, r.Grams, r.Density, CBool(r.IsDisplayAsVolume), CBool(r.IsMolarity),
+                    r.Equivalents, r.Molarity, r.MMols, r.Purity, r.ResinLoad)
+            }))
+
+        allRows.AddRange(searchContext.tblSolvents.AsNoTracking().
+            Select(Function(s) New With {s.ProtocolItemID, s.Name, s.Source, s.Milliliters, s.Density, s.IsDisplayAsWeight,
+                s.IsMolEquivalents, s.Equivalents}).
+            AsEnumerable().
+            Select(Function(s) New SearchableRow With {
+                .ProtocolItemID = s.ProtocolItemID,
+                .Content = BuildSolventContent(s.Name, s.Source, s.Milliliters, s.Density, CBool(s.IsDisplayAsWeight),
+                    CBool(s.IsMolEquivalents), s.Equivalents)
+            }))
+
+        allRows.AddRange(searchContext.tblAuxiliaries.AsNoTracking().
+            Select(Function(a) New With {a.ProtocolItemID, a.Name, a.Source, a.Grams, a.Density, a.IsDisplayAsVolume, a.Equivalents}).
+            AsEnumerable().
+            Select(Function(a) New SearchableRow With {
+                .ProtocolItemID = a.ProtocolItemID,
+                .Content = BuildAuxiliaryContent(a.Name, a.Source, a.Grams, a.Density, CBool(a.IsDisplayAsVolume), a.Equivalents)
+            }))
+
+        allRows.AddRange(searchContext.tblProducts.AsNoTracking().
+            Select(Function(p) New With {p.ProtocolItemID, p.Name, p.Grams, p.Yield, p.MolecularWeight, p.ExactMass, p.ElementalFormula,
+                p.Purity, p.ResinLoad}).
+            AsEnumerable().
+            Select(Function(p) New SearchableRow With {
+                .ProtocolItemID = p.ProtocolItemID,
+                .Content = BuildProductContent(p.Name, p.Grams, p.Yield, p.MolecularWeight, p.ExactMass, p.ElementalFormula, p.Purity, p.ResinLoad)
+            }))
+
+        allRows.AddRange(searchContext.tblRefReactants.AsNoTracking().
+            Select(Function(r) New With {r.ProtocolItemID, r.Name, r.Source, r.Grams, r.Density, r.IsDisplayAsVolume, r.Equivalents,
+                r.MMols, r.Purity, r.ResinLoad}).
+            AsEnumerable().
+            Select(Function(r) New SearchableRow With {
+                .ProtocolItemID = r.ProtocolItemID,
+                .Content = BuildRefReactantContent(r.Name, r.Source, r.Grams, r.Density, CBool(r.IsDisplayAsVolume), r.Equivalents,
+                    r.MMols, r.Purity, r.ResinLoad)
+            }))
         allRows.AddRange(searchContext.tblSeparators.AsNoTracking().Select(SeparatorProjection))
         allRows.AddRange(searchContext.tblEmbeddedFiles.AsNoTracking().Select(EmbeddedFileProjection))
 
@@ -477,10 +855,13 @@ Public Class FullTextSearch
     ''' Gets all experiments containing at least one protocol item matching the specified search term, ordered
     ''' by relevance (best match first). The whole search term is matched as a single literal phrase - e.g.
     ''' searching "blue water" only finds experiments where those words occur adjacent to each other and in
-    ''' that order, not experiments where "blue" and "water" merely occur somewhere independently. Results are
-    ''' capped at <see cref="MaxDisplayedResults"/>.
+    ''' that order, not experiments where "blue" and "water" merely occur somewhere independently. The last word
+    ''' of the search term is matched as a prefix, so a still-being-typed or deliberately partial last word (e.g.
+    ''' "Allyl") still finds it as part of a longer indexed word (e.g. a reagent named "Allyltrimethylsilane") -
+    ''' every earlier word in a multi-word search still has to match a complete word. Results are capped at
+    ''' <see cref="MaxDisplayedResults"/>.
     ''' </summary>
-    ''' <param name="searchTerm">Free-text search term, matched as one literal phrase.</param>
+    ''' <param name="searchTerm">Free-text search term, matched as one literal phrase with the last word as a prefix.</param>
     ''' <param name="searchContext">Local SQLite database context to query.</param>
     '''
     Public Function SearchExperiments(searchTerm As String, searchContext As ElnDbContext) As ExperimentSearchResult
@@ -727,15 +1108,20 @@ Public Class FullTextSearch
 
     ''' <summary>
     ''' Wraps the whole search term in double quotes as a single FTS5 phrase, escaping any embedded quote
-    ''' characters. A phrase query requires its tokens to occur adjacent and in that order within the same
-    ''' indexed row - this is what makes a multi-word search term match only the literal phrase typed, rather
-    ''' than each word independently. Quoting also avoids FTS5 query syntax errors for terms containing
-    ''' characters with special meaning to FTS5 (-, *, :, parentheses, the AND/OR/NOT keywords, etc).
+    ''' characters, with a trailing "*" making the last token a prefix match. A phrase query requires its tokens
+    ''' to occur adjacent and in that order within the same indexed row - this is what makes a multi-word search
+    ''' term match only the literal phrase typed, rather than each word independently. Quoting also avoids FTS5
+    ''' query syntax errors for terms containing characters with special meaning to FTS5 (-, *, :, parentheses,
+    ''' the AND/OR/NOT keywords, etc). The trailing "*" is FTS5's documented syntax for turning the right-most
+    ''' token of a quoted phrase into a prefix query (e.g. "blue water"* matches "blue waterway" too, still
+    ''' requiring an exact, adjacent "blue") - without it, every token has to match a complete indexed word, so
+    ''' e.g. searching "Allyl" would never find a reagent named "Allyltrimethylsilane", since FTS5 tokenizes that
+    ''' name as one single word and a plain phrase query only ever matches whole tokens, never substrings of them.
     ''' </summary>
     '''
     Private Shared Function QuotePhrase(searchTerm As String) As String
 
-        Return """" + searchTerm.Trim().Replace("""", """""") + """"
+        Return """" + searchTerm.Trim().Replace("""", """""") + """*"
 
     End Function
 
