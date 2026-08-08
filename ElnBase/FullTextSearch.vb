@@ -3,66 +3,131 @@ Imports System.Linq.Expressions
 Imports System.Xml.Linq
 Imports ElnBase.ELNEnumerations
 Imports ElnCoreModel
+Imports Microsoft.Data.Sqlite
 Imports Microsoft.EntityFrameworkCore
 
 ''' <summary>
-''' Owns everything related to the full-text SearchIndex FTS5 virtual table: its schema, keeping it in sync
-''' with the protocol item satellite tables (reagents, products, solvents, auxiliaries, reference reactants,
-''' separators, embedded files and comments), and querying it.
+''' Owns everything related to full-text search: the in-memory SearchIndex FTS5 virtual table (schema,
+''' hydration, querying), its persisted on-disk mirror tblSearchIndex (the sync-staging table server sync
+''' pushes up from), and keeping both in sync with the protocol item satellite tables (reagents, products,
+''' solvents, auxiliaries, reference reactants, separators, embedded files and comments).
 ''' </summary>
 '''
 Public Class FullTextSearch
 
     ''' <summary>
-    ''' Name of the full-text SearchIndex FTS5 virtual table. FTS5 backs this with several real shadow tables
-    ''' named "SearchIndexTableName_*" (_data, _idx, _content, _docsize, _config) - these, like the virtual
-    ''' table itself, are local-SQLite-only and must never be included in server bulk-upload/sync table scans.
+    ''' The dedicated, long-lived connection backing the in-memory full-text SearchIndex: a second connection to
+    ''' the same on-disk SQLite file DBContext uses (SQLite supports multiple concurrent readers), with a
+    ''' ':memory:' database ATTACHed as "mem" holding the actual FTS5 table. Kept open for the whole app session -
+    ''' closing it would discard the in-memory database along with everything indexed into it. Set once by
+    ''' <see cref="InitializeMemoryIndexConnection"/> at startup, before any search query or SaveChanges call
+    ''' touches the SearchIndex.
     ''' </summary>
     '''
-    Friend Shared ReadOnly SearchIndexTableName As String = "SearchIndex"
+    Public Shared Property MemoryIndexConnection As SqliteConnection
 
 
     ''' <summary>
-    ''' DDL for the full-text SearchIndex FTS5 virtual table. Shared between ElnDbContext's constructor
-    ''' self-heal check and DbUpgradeLocal's documented, versioned schema history, so the two can't drift apart.
+    ''' DDL for the full-text SearchIndex FTS5 virtual table, created inside the "mem" schema ATTACHed by
+    ''' <see cref="InitializeMemoryIndexConnection"/> - it never exists on disk.
     ''' </summary>
     '''
     Friend Shared ReadOnly SearchIndexTableDDL As String =
-        $"CREATE VIRTUAL TABLE IF NOT EXISTS {SearchIndexTableName} USING fts5(ProtocolItemID UNINDEXED, ExperimentID UNINDEXED, Content, " +
+        "CREATE VIRTUAL TABLE IF NOT EXISTS mem.SearchIndex USING fts5(ProtocolItemID UNINDEXED, ExperimentID UNINDEXED, Content, " +
         "tokenize=""unicode61 remove_diacritics 2"");"
 
 
     ''' <summary>
-    ''' Ensures the SearchIndex FTS5 virtual table exists. Called from ElnDbContext's constructor so full-text
-    ''' search works regardless of whether DbUpgradeLocal.Upgrade has already run against this particular
-    ''' database file (e.g. one just restored from the server, or carried over from an older/foreign installation).
+    ''' DDL for the persisted on-disk tblSearchIndex table (just the CREATE TABLE - kept as a single statement,
+    ''' since ExecuteSqlRaw's multi-statement support isn't guaranteed the way raw ADO.NET SqliteCommand's is).
+    ''' Shared between ElnDbContext's constructor self-heal check (<see cref="EnsureTblSearchIndexExists"/>) and
+    ''' DbUpgradeLocal's documented, versioned schema history, so the two can't drift apart.
     ''' </summary>
     '''
-    Friend Shared Sub EnsureSearchIndexTableExists(searchContext As ElnDbContext)
-
-        searchContext.Database.ExecuteSqlRaw(SearchIndexTableDDL)
-
-    End Sub
+    Friend Shared ReadOnly TblSearchIndexTableDDL As String =
+        "CREATE TABLE IF NOT EXISTS tblSearchIndex (
+        ProtocolItemID VARCHAR(36) PRIMARY KEY NOT NULL REFERENCES tblProtocolItems(GUID) ON DELETE CASCADE,
+        ExperimentID VARCHAR(25) NOT NULL,
+        Content TEXT NOT NULL,
+        SyncState TINYINT DEFAULT 0);"
 
 
     ''' <summary>
-    ''' Deletes the full text search index table and its satellites from the specified SqLite database context.
+    ''' DDL for tblSearchIndex's ExperimentID index. Shared for the same reason as <see cref="TblSearchIndexTableDDL"/>.
     ''' </summary>
-    ''' <remarks> The currently used SqLite editors don't allow this operation manually, since the FTS5 module 
-    ''' is missing there.</remarks>
-    ''' 
-    Public Shared Sub RemoveSearchIndexTable(searchContext As ElnDbContext)
+    '''
+    Friend Shared ReadOnly TblSearchIndexIndexDDL As String =
+        "CREATE INDEX IF NOT EXISTS idx_tblSearchIndex_ExperimentID ON tblSearchIndex(ExperimentID);"
 
-        If searchContext.Database.IsSqlite() Then
-            searchContext.Database.ExecuteSqlRaw("DROP TABLE SearchIndex")
-        End If
+
+    ''' <summary>
+    ''' Ensures the on-disk tblSearchIndex table exists. Called from ElnDbContext's constructor so full-text
+    ''' search works regardless of whether DbUpgradeLocal.Upgrade has already run against this particular
+    ''' database file - its invocation is gated by the app's own version-change detection, which doesn't fire
+    ''' on every run (e.g. no version bump since last launch) or reliably for every database this context could
+    ''' end up wrapping (e.g. one just restored from the server, or carried over from an older/foreign install).
+    ''' </summary>
+    '''
+    Friend Shared Sub EnsureTblSearchIndexExists(searchContext As ElnDbContext)
+
+        searchContext.Database.ExecuteSqlRaw(TblSearchIndexTableDDL)
+        searchContext.Database.ExecuteSqlRaw(TblSearchIndexIndexDDL)
 
     End Sub
 
 
     ''' <summary>
-    ''' Gets if the full-text SearchIndex currently contains no entries, e.g. because it was just created by
-    ''' a schema upgrade and still needs its initial backfill via <see cref="RebuildSearchIndex"/>.
+    ''' Opens <see cref="MemoryIndexConnection"/>: a second connection to the same on-disk SQLite file DBContext
+    ''' uses, with a ':memory:' database ATTACHed as "mem" holding the FTS5 SearchIndex table (freshly created
+    ''' and empty - callers still need to populate it via <see cref="HydrateMemoryIndex"/>). Must be called once
+    ''' at startup, before any search query or SaveChanges call touches the SearchIndex.
+    ''' </summary>
+    ''' <param name="sqliteFilePath">Path to the same local SQLite database file DBContext is opened against.</param>
+    '''
+    Public Shared Sub InitializeMemoryIndexConnection(sqliteFilePath As String)
+
+        MemoryIndexConnection = New SqliteConnection("Data Source=" + sqliteFilePath)
+        MemoryIndexConnection.Open()
+
+        Using command = MemoryIndexConnection.CreateCommand()
+            command.CommandText = "ATTACH DATABASE ':memory:' AS mem;"
+            command.ExecuteNonQuery()
+        End Using
+
+        Using command = MemoryIndexConnection.CreateCommand()
+            command.CommandText = SearchIndexTableDDL
+            command.ExecuteNonQuery()
+        End Using
+
+    End Sub
+
+
+    ''' <summary>
+    ''' Refills the in-memory FTS5 SearchIndex table from the persisted tblSearchIndex table via a single
+    ''' set-based INSERT...SELECT, executed entirely inside SQLite - no per-row .NET round-trips and no content
+    ''' recalculation, unlike <see cref="RebuildSearchIndex"/>. Called once at every app startup (the in-memory
+    ''' table always starts out empty each session, on top of whatever <see cref="InitializeMemoryIndexConnection"/>
+    ''' just created), after any one-time backfill of tblSearchIndex itself (see <see cref="RebuildSearchIndex"/>)
+    ''' has already completed. tblSearchIndex is read unqualified, resolving to "main" - the on-disk file that is
+    ''' this same connection's default schema (see InitializeMemoryIndexConnection).
+    ''' </summary>
+    '''
+    Public Shared Sub HydrateMemoryIndex()
+
+        Using command = MemoryIndexConnection.CreateCommand()
+            command.CommandText =
+                "DELETE FROM mem.SearchIndex;
+                INSERT INTO mem.SearchIndex(ProtocolItemID, ExperimentID, Content)
+                SELECT ProtocolItemID, ExperimentID, Content FROM tblSearchIndex;"
+            command.ExecuteNonQuery()
+        End Using
+
+    End Sub
+
+
+    ''' <summary>
+    ''' Gets if the persisted tblSearchIndex table currently contains no entries, e.g. because it was just
+    ''' created by a schema upgrade and still needs its initial backfill via <see cref="RebuildSearchIndex"/>.
     ''' </summary>
     '''
     Public Shared Function IsSearchIndexEmpty(searchContext As ElnDbContext) As Boolean
@@ -71,7 +136,7 @@ Public Class FullTextSearch
             Throw New NotSupportedException("The full-text SearchIndex only exists on the local SQLite database.")
         End If
 
-        Return searchContext.Database.SqlQueryRaw(Of Integer)("SELECT EXISTS(SELECT 1 FROM SearchIndex) AS Value").First() = 0
+        Return Not searchContext.tblSearchIndex.AsNoTracking().Any()
 
     End Function
 
@@ -528,9 +593,11 @@ Public Class FullTextSearch
 
 
     ''' <summary>
-    ''' Rebuilds the full-text SearchIndex from scratch based on the current contents of all protocol item
-    ''' satellite tables. Used for the initial backfill after the SearchIndex table is first created, and as a
-    ''' manual repair option should the incremental index ever be suspected to have drifted.
+    ''' Rebuilds the persisted tblSearchIndex table from scratch based on the current contents of all protocol
+    ''' item satellite tables. Used for the one-time initial backfill after tblSearchIndex is first created (see
+    ''' MainWindow's startup sequence), and as a manual repair option should the incremental index ever be
+    ''' suspected to have drifted. Does NOT touch the in-memory FTS5 SearchIndex table directly - callers refresh
+    ''' that separately afterwards via <see cref="HydrateMemoryIndex"/>.
     ''' </summary>
     '''
     Public Shared Sub RebuildSearchIndex(searchContext As ElnDbContext)
@@ -610,40 +677,19 @@ Public Class FullTextSearch
             AsEnumerable().
             Select(Function(c) New SearchableRow With {.ProtocolItemID = c.ProtocolItemID, .Content = ExtractPlainText(c.CommentFlowDoc)}))
 
-        'wrap the whole rebuild in a single transaction - without this, every DELETE/INSERT below runs as its
-        'own autocommit transaction and fsyncs individually, which is what actually made this slow (not the
-        'FTS5 tokenizing work itself).
+        'clear any existing rows (relevant for the manual-repair case; a no-op for the common one-time-backfill
+        'case, where tblSearchIndex starts out empty) and replace them with the freshly computed set. A single
+        'SaveChanges call below makes this atomic - no separate manual transaction needed here.
 
-        Dim ownsTransaction = (searchContext.Database.CurrentTransaction Is Nothing)
-        Dim transaction = If(ownsTransaction, searchContext.Database.BeginTransaction(), searchContext.Database.CurrentTransaction)
+        searchContext.tblSearchIndex.RemoveRange(searchContext.tblSearchIndex)
 
-        Try
+        searchContext.tblSearchIndex.AddRange(allRows.Select(Function(row) New tblSearchIndex With {
+            .ProtocolItemID = row.ProtocolItemID,
+            .ExperimentID = experimentIDsByProtocolItem.GetValueOrDefault(row.ProtocolItemID),
+            .Content = row.Content
+        }))
 
-            searchContext.Database.ExecuteSqlRaw("DELETE FROM SearchIndex")
-
-            For Each row In allRows
-                searchContext.Database.ExecuteSqlRaw("INSERT INTO SearchIndex(ProtocolItemID, ExperimentID, Content) VALUES ({0}, {1}, {2})",
-                    row.ProtocolItemID, experimentIDsByProtocolItem.GetValueOrDefault(row.ProtocolItemID), row.Content)
-            Next
-
-            If ownsTransaction Then
-                transaction.Commit()
-            End If
-
-        Catch
-
-            If ownsTransaction Then
-                transaction.Rollback()
-            End If
-            Throw
-
-        Finally
-
-            If ownsTransaction Then
-                transaction.Dispose()
-            End If
-
-        End Try
+        searchContext.SaveChanges()
 
     End Sub
 
@@ -704,23 +750,82 @@ Public Class FullTextSearch
 
 
     ''' <summary>
-    ''' Applies previously collected SearchIndex changes. Every change is a delete-then-(re)insert keyed by
-    ''' ProtocolItemID, since FTS5 has no natural upsert and the table has no other unique constraint to rely on.
-    ''' Called by ElnDbContext.SaveChanges after persisting, within the same transaction.
+    ''' Stages the persisted tblSearchIndex mirror row for each previously collected SearchIndex change, via
+    ''' ordinary EF Add/Remove/property mutation - deliberately NOT SaveChanges'd here. Called by
+    ''' ElnDbContext.SaveChanges before its own SyncState-assignment/tombstone loop runs, so that loop (which
+    ''' re-reads the ChangeTracker fresh at that later point) picks up these staged tblSearchIndex entries
+    ''' automatically and treats them exactly like any other satellite table edit - same SyncState/tombstone
+    ''' logic, no duplicated code here.
     ''' </summary>
     '''
-    Friend Shared Sub ApplySearchIndexOps(searchContext As ElnDbContext, ops As List(Of SearchIndexOp))
+    Friend Shared Sub StageSearchIndexEntityChanges(searchContext As ElnDbContext, ops As List(Of SearchIndexOp))
 
         For Each op In ops
 
-            searchContext.Database.ExecuteSqlRaw("DELETE FROM SearchIndex WHERE ProtocolItemID = {0}", op.ProtocolItemID)
+            Dim existing = searchContext.tblSearchIndex.Find(op.ProtocolItemID)
 
-            If Not op.IsDelete Then
-                searchContext.Database.ExecuteSqlRaw("INSERT INTO SearchIndex(ProtocolItemID, ExperimentID, Content) VALUES ({0}, {1}, {2})",
-                    op.ProtocolItemID, op.ExperimentID, op.Content)
+            If op.IsDelete Then
+
+                If existing IsNot Nothing Then
+                    searchContext.tblSearchIndex.Remove(existing)
+                End If
+
+            ElseIf existing IsNot Nothing Then
+
+                existing.ExperimentID = op.ExperimentID
+                existing.Content = op.Content
+
+            Else
+
+                searchContext.tblSearchIndex.Add(New tblSearchIndex With {
+                    .ProtocolItemID = op.ProtocolItemID,
+                    .ExperimentID = op.ExperimentID,
+                    .Content = op.Content
+                })
+
             End If
 
         Next
+
+    End Sub
+
+
+    ''' <summary>
+    ''' Applies previously collected SearchIndex changes to the in-memory FTS5 table. Every change is a
+    ''' delete-then-(re)insert keyed by ProtocolItemID, since FTS5 has no natural upsert and the table has no
+    ''' other unique constraint to rely on. Called by ElnDbContext.SaveChanges after persisting. Runs on
+    ''' MemoryIndexConnection - a separate connection/database from the on-disk one, so this is deliberately
+    ''' outside the on-disk SaveChanges transaction; that's fine, since the in-memory index is a derived cache
+    ''' rebuilt fresh every session (see HydrateMemoryIndex), not a durability-critical store.
+    ''' </summary>
+    '''
+    Friend Shared Sub ApplyMemoryIndexOps(ops As List(Of SearchIndexOp))
+
+        If ops Is Nothing OrElse ops.Count = 0 Then
+            Exit Sub
+        End If
+
+        Using command = MemoryIndexConnection.CreateCommand()
+
+            For Each op In ops
+
+                command.CommandText = "DELETE FROM mem.SearchIndex WHERE ProtocolItemID = @id"
+                command.Parameters.Clear()
+                command.Parameters.AddWithValue("@id", op.ProtocolItemID)
+                command.ExecuteNonQuery()
+
+                If Not op.IsDelete Then
+                    command.CommandText = "INSERT INTO mem.SearchIndex(ProtocolItemID, ExperimentID, Content) VALUES (@id, @exp, @content)"
+                    command.Parameters.Clear()
+                    command.Parameters.AddWithValue("@id", op.ProtocolItemID)
+                    command.Parameters.AddWithValue("@exp", op.ExperimentID)
+                    command.Parameters.AddWithValue("@content", op.Content)
+                    command.ExecuteNonQuery()
+                End If
+
+            Next
+
+        End Using
 
     End Sub
 
@@ -875,7 +980,7 @@ Public Class FullTextSearch
             Throw New NotSupportedException("Full-text search is currently only implemented for the local SQLite database.")
         End If
 
-        Dim rankedExperiments = GetRankedExperimentIDs(searchContext, searchTerm)
+        Dim rankedExperiments = GetRankedExperimentIDs(searchTerm)
 
         'cut off the least relevant experiments before even querying tblExperiments for them, rather than
         'truncating the final result list - both cheaper and simpler, since ranking order is already established.
@@ -935,9 +1040,9 @@ Public Class FullTextSearch
     ''' match first), each with a representative highlighted excerpt.
     ''' </summary>
     '''
-    Private Function GetRankedExperimentIDs(searchContext As ElnDbContext, searchTerm As String) As List(Of RankedExperiment)
+    Private Function GetRankedExperimentIDs(searchTerm As String) As List(Of RankedExperiment)
 
-        Dim hits = GetRankedHits(searchContext, QuotePhrase(searchTerm))
+        Dim hits = GetRankedHits(QuotePhrase(searchTerm))
 
         If hits.Count = 0 Then
             Return New List(Of RankedExperiment)
@@ -972,48 +1077,42 @@ Public Class FullTextSearch
 
 
     ''' <summary>
-    ''' Runs the phrase FTS5 MATCH query, returning one entry per matching protocol item together with its
+    ''' Runs the phrase FTS5 MATCH query against the in-memory SearchIndex table (via MemoryIndexConnection,
+    ''' kept open for the whole app session), returning one entry per matching protocol item together with its
     ''' owning experiment, bm25 relevance rank, and a short highlighted excerpt (12 tokens, matched phrase
     ''' wrapped in <see cref="HighlightStartMarker"/>/<see cref="HighlightEndMarker"/>).
     ''' </summary>
     '''
-    Private Shared Function GetRankedHits(searchContext As ElnDbContext, quotedPhrase As String) As List(Of RankedHit)
+    Private Shared Function GetRankedHits(quotedPhrase As String) As List(Of RankedHit)
 
         Dim hits As New List(Of RankedHit)
 
-        Using command = searchContext.Database.GetDbConnection().CreateCommand()
+        Using command = MemoryIndexConnection.CreateCommand()
 
             'Content is column index 2 in the SearchIndex table (0=ProtocolItemID, 1=ExperimentID, 2=Content).
+            'bm25()/snippet()/MATCH's left-hand side must reference the table unqualified - FTS5 parses that
+            'position specially and a schema-qualified "mem.SearchIndex" errors there ("no such column"), even
+            'though the ordinary FROM clause below is fine (and needs to be) qualified. Unqualified resolution
+            'is unambiguous since SearchIndex only ever exists in the "mem" schema, never in "main".
             command.CommandText =
                 $"SELECT ProtocolItemID, ExperimentID, bm25(SearchIndex), snippet(SearchIndex, 2, char({AscW(HighlightStartMarker)}), char({AscW(HighlightEndMarker)}), '…', 12) " +
-                "FROM SearchIndex WHERE SearchIndex MATCH @term"
+                "FROM mem.SearchIndex WHERE SearchIndex MATCH @term"
 
             Dim param = command.CreateParameter()
             param.ParameterName = "@term"
             param.Value = quotedPhrase
             command.Parameters.Add(param)
 
-            Dim wasClosed = (command.Connection.State <> ConnectionState.Open)
-            If wasClosed Then
-                command.Connection.Open()
-            End If
-
-            Try
-                Using reader = command.ExecuteReader()
-                    While reader.Read()
-                        hits.Add(New RankedHit With {
-                            .ProtocolItemID = reader.GetString(0),
-                            .ExperimentID = reader.GetString(1),
-                            .Rank = reader.GetDouble(2),
-                            .Snippet = ExtendHighlightPastClosingBrackets(reader.GetString(3))
-                        })
-                    End While
-                End Using
-            Finally
-                If wasClosed Then
-                    command.Connection.Close()
-                End If
-            End Try
+            Using reader = command.ExecuteReader()
+                While reader.Read()
+                    hits.Add(New RankedHit With {
+                        .ProtocolItemID = reader.GetString(0),
+                        .ExperimentID = reader.GetString(1),
+                        .Rank = reader.GetDouble(2),
+                        .Snippet = ExtendHighlightPastClosingBrackets(reader.GetString(3))
+                    })
+                End While
+            End Using
 
         End Using
 

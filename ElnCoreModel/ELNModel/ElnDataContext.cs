@@ -39,6 +39,8 @@ public partial class ElnDataContext : DbContext
 
     public virtual DbSet<tblRefReactants> tblRefReactants { get; set; }
 
+    public virtual DbSet<tblSearchIndex> tblSearchIndex { get; set; }
+
     public virtual DbSet<tblSeparators> tblSeparators { get; set; }
 
     public virtual DbSet<tblSolvents> tblSolvents { get; set; }
@@ -332,6 +334,22 @@ public partial class ElnDataContext : DbContext
                 .HasColumnType("TINYINT");
 
             entity.HasOne(d => d.ProtocolItem).WithOne(p => p.tblRefReactants).HasForeignKey<tblRefReactants>(d => d.ProtocolItemID);
+        });
+
+        modelBuilder.Entity<tblSearchIndex>(entity =>
+        {
+            entity.HasKey(e => e.ProtocolItemID);
+
+            entity.HasIndex(e => e.ExperimentID, "idx_tblSearchIndex_ExperimentID");
+
+            entity.Property(e => e.ProtocolItemID).HasColumnType("VARCHAR(36)");
+            entity.Property(e => e.ExperimentID).HasColumnType("VARCHAR(25)");
+            entity.Property(e => e.Content).HasColumnType("TEXT");
+            entity.Property(e => e.SyncState)
+                .HasDefaultValue((byte)0)
+                .HasColumnType("TINYINT");
+
+            entity.HasOne(d => d.ProtocolItem).WithOne(p => p.tblSearchIndex).HasForeignKey<tblSearchIndex>(d => d.ProtocolItemID);
         });
 
         modelBuilder.Entity<tblSeparators>(entity =>
