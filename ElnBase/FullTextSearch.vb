@@ -5,6 +5,7 @@ Imports ElnBase.ELNEnumerations
 Imports ElnCoreModel
 Imports Microsoft.Data.Sqlite
 Imports Microsoft.EntityFrameworkCore
+Imports MySqlConnector
 
 ''' <summary>
 ''' Owns everything related to full-text search: the in-memory SearchIndex FTS5 virtual table (schema,
@@ -967,7 +968,9 @@ Public Class FullTextSearch
     ''' <see cref="MaxDisplayedResults"/>.
     ''' </summary>
     ''' <param name="searchTerm">Free-text search term, matched as one literal phrase with the last word as a prefix.</param>
-    ''' <param name="searchContext">Local SQLite database context to query.</param>
+    ''' <param name="searchContext">Database context to query - either the local SQLite database (FTS5 SearchIndex)
+    ''' or the MySQL server (native FULLTEXT index on tblSearchIndex); dispatches on <see cref="DbContext.Database"/>'s
+    ''' provider.</param>
     '''
     Public Function SearchExperiments(searchTerm As String, searchContext As ElnDbContext) As ExperimentSearchResult
 
@@ -975,12 +978,9 @@ Public Class FullTextSearch
             Return New ExperimentSearchResult With {.Hits = New List(Of ExperimentSearchHit), .WasTruncated = False}
         End If
 
-        If Not searchContext.Database.IsSqlite() Then
-            'the MySQL server side uses native FULLTEXT indexes instead of an FTS5 SearchIndex table - not yet implemented
-            Throw New NotSupportedException("Full-text search is currently only implemented for the local SQLite database.")
-        End If
-
-        Dim rankedExperiments = GetRankedExperimentIDs(searchTerm)
+        Dim rankedExperiments = If(searchContext.Database.IsSqlite(),
+            GetRankedExperimentIDs(searchTerm),
+            GetRankedExperimentIDsMySql(searchTerm, searchContext))
 
         'cut off the least relevant experiments before even querying tblExperiments for them, rather than
         'truncating the final result list - both cheaper and simpler, since ranking order is already established.
@@ -998,7 +998,8 @@ Public Class FullTextSearch
             Where(Function(r) experimentsByID.ContainsKey(r.ExperimentID)).
             Select(Function(r) New ExperimentSearchHit With {
                 .Experiment = experimentsByID(r.ExperimentID),
-                .Snippet = r.Snippet
+                .Snippet = r.Snippet,
+                .HitCount = r.HitCount
             }).ToList()
 
         Return New ExperimentSearchResult With {.Hits = hits, .WasTruncated = wasTruncated}
@@ -1032,6 +1033,14 @@ Public Class FullTextSearch
         Public Property ExperimentID As String
         Public Property Snippet As String
 
+        ''' <summary>
+        ''' Number of matching protocol items within this experiment - i.e. how many hits
+        ''' <see cref="AggregateHitsByExperiment"/> summed together, of which only the single best-ranked one's
+        ''' Snippet is actually shown. Lets the UI indicate there's more to see than just the displayed snippet.
+        ''' </summary>
+        '''
+        Public Property HitCount As Integer
+
     End Class
 
 
@@ -1042,25 +1051,61 @@ Public Class FullTextSearch
     '''
     Private Function GetRankedExperimentIDs(searchTerm As String) As List(Of RankedExperiment)
 
-        Dim hits = GetRankedHits(QuotePhrase(searchTerm))
+        Return AggregateHitsByExperiment(GetRankedHits(QuotePhrase(searchTerm), searchTerm))
+
+    End Function
+
+
+    ''' <summary>
+    ''' Gets the experiments matching the search term - as a true adjacent phrase with prefix matching on the
+    ''' last word, full parity with the local FTS5 path - against the MySQL server's native FULLTEXT index,
+    ''' ordered by relevance (best match first), each with a representative excerpt.
+    ''' </summary>
+    ''' <remarks>
+    ''' Server-side counterpart to <see cref="GetRankedExperimentIDs"/> - see <see cref="GetRankedHitsMySql"/> and
+    ''' <see cref="MySqlCandidateQuery"/> for how true phrase-adjacency+prefix matching is achieved despite MySQL
+    ''' boolean mode being unable to express it directly (a loosened MySQL query narrows candidates via the
+    ''' FULLTEXT index, then each candidate is verified client-side). Aggregation once individual hits are
+    ''' obtained is identical, so both paths share <see cref="AggregateHitsByExperiment"/>. The raw searchTerm is
+    ''' passed through (not just the candidate query string) because the client-side verification/highlighting
+    ''' step needs it to locate the true match within each hit's Content.
+    ''' </remarks>
+    '''
+    Private Function GetRankedExperimentIDsMySql(searchTerm As String, searchContext As ElnDbContext) As List(Of RankedExperiment)
+
+        Return AggregateHitsByExperiment(GetRankedHitsMySql(searchTerm, MySqlCandidateQuery(searchTerm), searchContext))
+
+    End Function
+
+
+    ''' <summary>
+    ''' Groups per-protocol-item search hits (from either the local FTS5 or the MySQL query path) by owning
+    ''' experiment: an experiment's overall relevance is the SUM of the relevance of every matching protocol
+    ''' item, not just its single best one - an experiment where the phrase occurs in several items should rank
+    ''' above one where it only occurs once, even if that single occurrence is individually a slightly stronger
+    ''' match. The representative snippet shown for an experiment comes from its single best-ranked matching item
+    ''' - concatenating every matching item's snippet would defeat the point of a *compact* preview. Both hit
+    ''' sources use the same "lower Rank is more relevant" convention (bm25's native sign locally; negated
+    ''' MATCH...AGAINST relevance, whose native sign is the opposite, for MySQL - see <see cref="GetRankedHitsMySql"/>),
+    ''' so this aggregation step itself needs no knowledge of which backend produced the hits.
+    ''' </summary>
+    '''
+    Private Function AggregateHitsByExperiment(hits As List(Of RankedHit)) As List(Of RankedExperiment)
 
         If hits.Count = 0 Then
             Return New List(Of RankedExperiment)
         End If
 
-        'an experiment's overall relevance is the SUM of the relevance of every matching protocol item, not
-        'just its single best one - an experiment where the phrase occurs in several items should rank above
-        'one where it only occurs once, even if that single occurrence is individually a slightly stronger match.
         Dim totalRankByExperiment As New Dictionary(Of String, Double)
         Dim bestRankByExperiment As New Dictionary(Of String, Double)
         Dim bestSnippetByExperiment As New Dictionary(Of String, String)
+        Dim hitCountByExperiment As New Dictionary(Of String, Integer)
 
         For Each hit In hits
 
             totalRankByExperiment(hit.ExperimentID) = totalRankByExperiment.GetValueOrDefault(hit.ExperimentID, 0.0) + hit.Rank
+            hitCountByExperiment(hit.ExperimentID) = hitCountByExperiment.GetValueOrDefault(hit.ExperimentID, 0) + 1
 
-            'the representative snippet shown for an experiment comes from its single best-ranked matching
-            'item - concatenating every matching item's snippet would defeat the point of a *compact* preview.
             If Not bestRankByExperiment.ContainsKey(hit.ExperimentID) OrElse hit.Rank < bestRankByExperiment(hit.ExperimentID) Then
                 bestRankByExperiment(hit.ExperimentID) = hit.Rank
                 bestSnippetByExperiment(hit.ExperimentID) = hit.Snippet
@@ -1070,7 +1115,11 @@ Public Class FullTextSearch
 
         Return totalRankByExperiment.Keys.
             OrderBy(Function(id) totalRankByExperiment(id)).
-            Select(Function(id) New RankedExperiment With {.ExperimentID = id, .Snippet = bestSnippetByExperiment(id)}).
+            Select(Function(id) New RankedExperiment With {
+                .ExperimentID = id,
+                .Snippet = bestSnippetByExperiment(id),
+                .HitCount = hitCountByExperiment(id)
+            }).
             ToList()
 
     End Function
@@ -1079,23 +1128,36 @@ Public Class FullTextSearch
     ''' <summary>
     ''' Runs the phrase FTS5 MATCH query against the in-memory SearchIndex table (via MemoryIndexConnection,
     ''' kept open for the whole app session), returning one entry per matching protocol item together with its
-    ''' owning experiment, bm25 relevance rank, and a short highlighted excerpt (12 tokens, matched phrase
-    ''' wrapped in <see cref="HighlightStartMarker"/>/<see cref="HighlightEndMarker"/>).
+    ''' owning experiment, bm25 relevance rank, and a short highlighted excerpt built by the same
+    ''' <see cref="LocateSearchMatch"/>/<see cref="BuildSnippetFromMatch"/> client-side windowing the MySQL path
+    ''' uses (see <see cref="GetRankedHitsMySql"/>) - not FTS5's own <c>snippet()</c> SQL function.
     ''' </summary>
+    ''' <remarks>
+    ''' <c>snippet()</c> was used here originally, but its excerpt length is budgeted in FTS5's own *tokens*,
+    ''' which split on every hyphen/comma/paren/period exactly like MySQL's indexer does - so e.g. a hyphenated
+    ''' chemical name like "5-Bromo-2-chlorothiazole" eats 4 tokens out of the budget even though it displays as
+    ''' one short word, while the client-side windowing used for MySQL counts it as a single whitespace-delimited
+    ''' "word". At the same nominal budget this made the local excerpt end up visibly shorter than the MySQL one
+    ''' specifically for punctuation-dense chemical nomenclature (confirmed empirically against real experiment
+    ''' data - user-reported 2026-08-09). Switching the local path to the exact same word-window builder as the
+    ''' MySQL path removes the mismatch structurally instead of just retuning two separate numeric budgets that
+    ''' count differently - both backends now produce an excerpt via the same code and the same
+    ''' <see cref="SnippetWordBudget"/>, so they truncate at the same point for equivalent content by construction.
+    ''' </remarks>
     '''
-    Private Shared Function GetRankedHits(quotedPhrase As String) As List(Of RankedHit)
+    Private Shared Function GetRankedHits(quotedPhrase As String, searchTerm As String) As List(Of RankedHit)
 
         Dim hits As New List(Of RankedHit)
 
         Using command = MemoryIndexConnection.CreateCommand()
 
             'Content is column index 2 in the SearchIndex table (0=ProtocolItemID, 1=ExperimentID, 2=Content).
-            'bm25()/snippet()/MATCH's left-hand side must reference the table unqualified - FTS5 parses that
-            'position specially and a schema-qualified "mem.SearchIndex" errors there ("no such column"), even
-            'though the ordinary FROM clause below is fine (and needs to be) qualified. Unqualified resolution
-            'is unambiguous since SearchIndex only ever exists in the "mem" schema, never in "main".
+            'bm25()/MATCH's left-hand side must reference the table unqualified - FTS5 parses that position
+            'specially and a schema-qualified "mem.SearchIndex" errors there ("no such column"), even though the
+            'ordinary FROM clause below is fine (and needs to be) qualified. Unqualified resolution is
+            'unambiguous since SearchIndex only ever exists in the "mem" schema, never in "main".
             command.CommandText =
-                $"SELECT ProtocolItemID, ExperimentID, bm25(SearchIndex), snippet(SearchIndex, 2, char({AscW(HighlightStartMarker)}), char({AscW(HighlightEndMarker)}), '…', 12) " +
+                "SELECT ProtocolItemID, ExperimentID, bm25(SearchIndex), Content " +
                 "FROM mem.SearchIndex WHERE SearchIndex MATCH @term"
 
             Dim param = command.CreateParameter()
@@ -1105,18 +1167,224 @@ Public Class FullTextSearch
 
             Using reader = command.ExecuteReader()
                 While reader.Read()
+
+                    Dim content = reader.GetString(3)
+                    Dim match = LocateSearchMatch(content, searchTerm)
+
                     hits.Add(New RankedHit With {
                         .ProtocolItemID = reader.GetString(0),
                         .ExperimentID = reader.GetString(1),
                         .Rank = reader.GetDouble(2),
-                        .Snippet = ExtendHighlightPastClosingBrackets(reader.GetString(3))
+                        .Snippet = If(match IsNot Nothing AndAlso match.Success,
+                            BuildSnippetFromMatch(content, match), BuildTruncatedSnippet(content))
                     })
+
                 End While
             End Using
 
         End Using
 
         Return hits
+
+    End Function
+
+
+    ''' <summary>
+    ''' Runs a deliberately over-inclusive boolean-mode MATCH...AGAINST candidate query against the MySQL
+    ''' server's tblSearchIndex table (see <see cref="MySqlCandidateQuery"/>), then verifies each candidate
+    ''' row client-side via <see cref="LocateSearchMatch"/> - the same phrase-adjacency+prefix check
+    ''' <see cref="GetRankedHits"/>'s FTS5 path gets natively - keeping only rows that actually satisfy it and
+    ''' building their highlighted excerpt from the same located match. Returns one entry per surviving
+    ''' protocol item, with its owning experiment, relevance rank, and highlighted excerpt.
+    ''' </summary>
+    ''' <remarks>
+    ''' MySQL's MATCH...AGAINST relevance score is higher-is-better, the opposite of SQLite's bm25() convention
+    ''' that <see cref="AggregateHitsByExperiment"/>/<see cref="RankedHit"/> are built around (lower is more
+    ''' relevant) - negated here so both query paths produce RankedHit values with the same "lower is better"
+    ''' meaning, keeping the aggregation step itself backend-agnostic. For a multi-word search this score
+    ''' reflects the loosened candidate query (words present, not necessarily adjacent), not the true
+    ''' phrase-adjacent match verified afterward - an accepted imprecision, no worse than MySQL's relevance
+    ''' score already being a rougher signal than SQLite's bm25 to begin with.
+    ''' </remarks>
+    '''
+    Private Shared Function GetRankedHitsMySql(searchTerm As String, candidateQuery As String, searchContext As ElnDbContext) As List(Of RankedHit)
+
+        Dim hits As New List(Of RankedHit)
+
+        Dim connection = DirectCast(searchContext.Database.GetDbConnection(), MySqlConnection)
+        Dim wasClosed = connection.State <> ConnectionState.Open
+        If wasClosed Then
+            connection.Open()
+        End If
+
+        Try
+
+            Using command As New MySqlCommand(
+                "SELECT ProtocolItemID, ExperimentID, Content, MATCH(Content) AGAINST (@term IN BOOLEAN MODE) " +
+                "FROM tblSearchIndex WHERE MATCH(Content) AGAINST (@term IN BOOLEAN MODE)", connection)
+
+                command.Parameters.AddWithValue("@term", candidateQuery)
+
+                Using reader = command.ExecuteReader()
+                    While reader.Read()
+
+                        Dim content = reader.GetString(2)
+                        Dim match = LocateSearchMatch(content, searchTerm)
+
+                        'discards candidates the loosened query over-matched (multi-word: words present but not
+                        'actually adjacent/in order) - this is the client-side verification step that gives true
+                        'FTS5-parity phrase+prefix matching despite MySQL boolean mode being unable to express
+                        '"adjacent phrase, prefix on the last word" in a single query (see MySqlCandidateQuery).
+                        If match IsNot Nothing AndAlso match.Success Then
+                            hits.Add(New RankedHit With {
+                                .ProtocolItemID = reader.GetString(0),
+                                .ExperimentID = reader.GetString(1),
+                                .Rank = -reader.GetDouble(3),
+                                .Snippet = BuildSnippetFromMatch(content, match)
+                            })
+                        End If
+
+                    End While
+                End Using
+
+            End Using
+
+        Finally
+            If wasClosed Then
+                connection.Close()
+            End If
+        End Try
+
+        Return hits
+
+    End Function
+
+
+    ''' <summary>
+    ''' Locates searchTerm within a search hit's full Content via a case-insensitive Regex built from
+    ''' <see cref="SplitIntoMySqlWords"/>'s word split: single word -> prefix match (a complete word starting
+    ''' with the term); multiple words -> each word matched as a complete word, adjacent, in order (true phrase
+    ''' semantics). Shared by both backends: for MySQL (<see cref="GetRankedHitsMySql"/>) it both verifies a
+    ''' candidate is a genuine match (the loosened MySQL candidate query that found the row isn't itself
+    ''' authoritative - see <see cref="MySqlCandidateQuery"/>) and locates the excerpt window; for local FTS5
+    ''' (<see cref="GetRankedHits"/>) every row is already a confirmed match (FTS5's own MATCH is authoritative),
+    ''' so this is used purely to locate the excerpt window - via the returned Match, both build their highlighted
+    ''' excerpt through <see cref="BuildSnippetFromMatch"/>, guaranteeing identical truncation behavior for
+    ''' equivalent content on both backends.
+    ''' </summary>
+    ''' <remarks>
+    ''' The regex approximates rather than exactly replicates either backend's own tokenizer rules - acceptable
+    ''' for MySQL because this is the sole authority on adjacency/prefix correctness there (MySQL's own boolean-mode
+    ''' query can no longer express true phrase+prefix semantics at all, see <see cref="MySqlCandidateQuery"/>);
+    ''' acceptable for local FTS5 because <see cref="SplitIntoMySqlWords"/>'s "any non-letter/non-digit run is a
+    ''' separator" rule already closely mirrors FTS5's own default <c>unicode61</c> tokenizer rule, so in practice
+    ''' the two agree on where a "word" starts and ends. The last word always gets prefix treatment (<c>\w*</c>),
+    ''' every earlier word must match completely (<c>\b...\b</c>) - true for any number of words, matching FTS5's
+    ''' own <c>"word1 word2 ... lastWord"*</c> semantics exactly, not just the single-word case.
+    ''' </remarks>
+    '''
+    Private Shared Function LocateSearchMatch(content As String, searchTerm As String) As Text.RegularExpressions.Match
+
+        If String.IsNullOrEmpty(content) Then
+            Return Nothing
+        End If
+
+        Dim termWords = SplitIntoMySqlWords(searchTerm)
+
+        If termWords.Count = 0 Then
+            Return Nothing
+        End If
+
+        Dim exactWords = termWords.Take(termWords.Count - 1).Select(Function(w) "\b" + Text.RegularExpressions.Regex.Escape(w) + "\b")
+        Dim lastWordPrefix = "\b" + Text.RegularExpressions.Regex.Escape(termWords.Last()) + "\w*"
+
+        'joined by a run of non-alphanumeric characters, not just \s+, since MySQL's own word split (and
+        'therefore the words being matched here) treats e.g. a hyphen the same as whitespace - see
+        'SplitIntoMySqlWords - so "5-bromo" in the content must still match a query built from "5-bromo".
+
+        Dim pattern = String.Join("[^\p{L}\p{N}]+", exactWords.Append(lastWordPrefix))
+
+        Return Text.RegularExpressions.Regex.Match(content, pattern, Text.RegularExpressions.RegexOptions.IgnoreCase)
+
+    End Function
+
+
+    ''' <summary>
+    ''' Number of whitespace-delimited "words" a search excerpt should span in total (matched phrase plus
+    ''' surrounding context) - shared by both backends via <see cref="BuildSnippetFromMatch"/>, see
+    ''' <see cref="GetRankedHits"/>'s remarks for why the local FTS5 path no longer uses its own separate
+    ''' token-based <c>snippet()</c> budget.
+    ''' </summary>
+    '''
+    Private Const SnippetWordBudget As Integer = 13
+
+
+    ''' <summary>
+    ''' Builds a highlighted excerpt around an already-located match (see <see cref="LocateSearchMatch"/>):
+    ''' wraps the match in <see cref="HighlightStartMarker"/>/<see cref="HighlightEndMarker"/> and trims to a
+    ''' <see cref="SnippetWordBudget"/>-word window around it, with a leading/trailing "…" if trimmed. Used by
+    ''' both backends (<see cref="GetRankedHits"/> for local FTS5, <see cref="GetRankedHitsMySql"/> for MySQL,
+    ''' which has no native excerpt equivalent to FTS5's snippet() - MATCH...AGAINST only ever returns a
+    ''' relevance score) so the two produce excerpts of equivalent length for equivalent content by construction.
+    ''' </summary>
+    '''
+    Private Shared Function BuildSnippetFromMatch(content As String, match As Text.RegularExpressions.Match) As String
+
+        'whitespace-delimited tokens with their character positions - only used to pick a display window around
+        'the match, so this doesn't need to match either backend's own word/tokenizer rules exactly.
+
+        Dim tokens = Text.RegularExpressions.Regex.Matches(content, "\S+").Cast(Of Text.RegularExpressions.Match)().ToList()
+
+        Dim matchStartTokenIdx = tokens.FindIndex(Function(t) t.Index + t.Length > match.Index)
+        Dim matchEndTokenIdx = tokens.FindLastIndex(Function(t) t.Index < match.Index + match.Length)
+        If matchStartTokenIdx < 0 Then matchStartTokenIdx = 0
+        If matchEndTokenIdx < matchStartTokenIdx Then matchEndTokenIdx = matchStartTokenIdx
+
+        Dim matchWordCount = matchEndTokenIdx - matchStartTokenIdx + 1
+        Dim remaining = Math.Max(0, SnippetWordBudget - matchWordCount)
+        Dim before = remaining \ 2
+        Dim after = remaining - before
+
+        Dim startIdx = Math.Max(0, matchStartTokenIdx - before)
+        Dim endIdx = Math.Min(tokens.Count - 1, matchEndTokenIdx + after)
+
+        Dim windowStart = tokens(startIdx).Index
+        Dim windowEnd = tokens(endIdx).Index + tokens(endIdx).Length
+
+        Dim snippet As New Text.StringBuilder()
+        If startIdx > 0 Then
+            snippet.Append("…")
+        End If
+        snippet.Append(content.Substring(windowStart, match.Index - windowStart))
+        snippet.Append(HighlightStartMarker)
+        snippet.Append(content.Substring(match.Index, match.Length))
+        snippet.Append(HighlightEndMarker)
+        snippet.Append(content.Substring(match.Index + match.Length, windowEnd - (match.Index + match.Length)))
+        If endIdx < tokens.Count - 1 Then
+            snippet.Append("…")
+        End If
+
+        Return ExtendHighlightPastClosingBrackets(snippet.ToString())
+
+    End Function
+
+
+    ''' <summary>
+    ''' Fallback excerpt for <see cref="BuildMySqlSnippet"/>: the raw, un-highlighted Content, capped to a
+    ''' display-friendly length. Carries no <see cref="HighlightStartMarker"/>/<see cref="HighlightEndMarker"/>
+    ''' pair, which CustomControls/Converters/HighlightedSnippetView.vb already tolerates - it renders as plain,
+    ''' unhighlighted text when no markers are present.
+    ''' </summary>
+    '''
+    Private Shared Function BuildTruncatedSnippet(content As String) As String
+
+        Const maxLength As Integer = 150
+
+        If content Is Nothing OrElse content.Length <= maxLength Then
+            Return content
+        End If
+
+        Return content.Substring(0, maxLength) + "…"
 
     End Function
 
@@ -1224,6 +1492,75 @@ Public Class FullTextSearch
 
     End Function
 
+
+    ''' <summary>
+    ''' Builds a deliberately over-inclusive MySQL boolean-mode query term for the search term: always just the
+    ''' last word with the trailing "*" truncation/prefix operator (unquoted), regardless of how many words the
+    ''' search term has - any earlier words are NOT included in the MySQL query at all.
+    ''' </summary>
+    ''' <remarks>
+    ''' <b>Why not a quoted phrase (empirically confirmed 2026-08-08):</b> the FTS5-style combination this
+    ''' originally tried - <c>"phrase"*</c>, wildcard right after the closing quote - is an outright MySQL syntax
+    ''' error (<c>syntax error, unexpected $end, expecting FTS_TERM or FTS_NUMB or '*'</c>), and a plain quoted
+    ''' phrase with no wildcard (<c>"phrase"</c>) is syntactically valid but requires the last word to match
+    ''' completely, breaking prefix matching for anyone still typing a multi-word search.
+    ''' <para>
+    ''' <b>Why not "+word1 +word2* ..." either (also empirically confirmed 2026-08-08):</b> the natural next
+    ''' attempt - require every earlier word exactly via <c>+word</c> and the last word via <c>+lastWord*</c> -
+    ''' turns out to reliably return zero rows whenever the wildcard term needs genuine prefix *expansion* to a
+    ''' longer indexed word (e.g. <c>+Maleic +aci*</c> against content containing "Maleic acid" - zero hits),
+    ''' even though <c>aci*</c> alone matches "acid" perfectly fine (confirmed: 145 hits) and <c>+dry +DCM*</c>
+    ''' alone also works fine (confirmed: 8 hits) - the latter only because "DCM*" trivially self-matches an
+    ''' already-complete word rather than needing genuine expansion. This reproduced consistently across three
+    ''' different word pairs and prefix lengths (3, 4, 5 characters), ruling out `innodb_ft_min_token_size` (3
+    ''' on this server) as the cause - it looks like an InnoDB FULLTEXT boolean-mode limitation combining a
+    ''' required exact term with a required genuine-expansion wildcard term, not a documented, workable syntax.
+    ''' </para>
+    ''' <para>
+    ''' <b>So this query drops the earlier-words requirement entirely</b> rather than fight an undocumented MySQL
+    ''' quirk: it's already just a candidate prefilter, not the final answer (<see cref="GetRankedHitsMySql"/>
+    ''' verifies every candidate client-side via <see cref="LocateSearchMatch"/> using the exact same
+    ''' adjacency+prefix semantics FTS5 gives natively, discarding false positives) - <c>lastWord*</c> alone is
+    ''' still a safe superset of the true matches (any row containing the true adjacent phrase necessarily
+    ''' contains a word starting with its last word), just a larger candidate set than the failed "+A +B*" form
+    ''' would have been, which the client-side regex pass still narrows to the correct result. Restores full
+    ''' behavioral parity with the local FTS5 path - true phrase-adjacency AND last-word-prefix matching for any
+    ''' number of words - without sacrificing FTS5's capability to match MySQL's syntax ceiling.
+    ''' </para>
+    ''' </remarks>
+    '''
+    Private Shared Function MySqlCandidateQuery(searchTerm As String) As String
+
+        Dim words = SplitIntoMySqlWords(searchTerm)
+
+        If words.Count = 0 Then
+            Return ""
+        End If
+
+        Return words.Last() + "*"
+
+    End Function
+
+
+    ''' <summary>
+    ''' Splits a search term into "words" the way MySQL's default FULLTEXT parser does: any run of characters
+    ''' that aren't letters or digits (not just whitespace) is a word separator - so e.g. <c>"5-bromo"</c>
+    ''' splits into <c>"5"</c> and <c>"bromo"</c>, same as MySQL's own indexer tokenized that text when it was
+    ''' stored. This also naturally strips MySQL boolean-mode operator characters (<c>+ - &lt; &gt; ( ) ~ * " @</c>)
+    ''' from the middle of a "word" instead of leaving them concatenated into a token that was never actually
+    ''' indexed (e.g. the old space-only split turned <c>"5-bromo"</c> into the single stripped word
+    ''' <c>"5bromo"</c>, which matches nothing - MySQL indexed <c>"5"</c> and <c>"bromo"</c> separately).
+    ''' Shared by <see cref="MySqlCandidateQuery"/> (building the MySQL query) and <see cref="LocateSearchMatch"/>
+    ''' (locating a match for either backend's excerpt), so the two stay consistent with each other and with
+    ''' MySQL's actual tokenizer.
+    ''' </summary>
+    '''
+    Private Shared Function SplitIntoMySqlWords(searchTerm As String) As List(Of String)
+
+        Return Text.RegularExpressions.Regex.Split(searchTerm.Trim(), "[^\p{L}\p{N}]+").Where(Function(w) w.Length > 0).ToList()
+
+    End Function
+
 End Class
 
 
@@ -1236,6 +1573,25 @@ Public Class ExperimentSearchHit
 
     Public Property Experiment As tblExperiments
     Public Property Snippet As String
+
+    ''' <summary>
+    ''' Number of matching protocol items within this experiment - see FullTextSearch.RankedExperiment.HitCount.
+    ''' Only the single best-ranked one's Snippet is shown, so a value above 1 means there's more to see.
+    ''' </summary>
+    '''
+    Public Property HitCount As Integer
+
+    ''' <summary>
+    ''' "+N more hit(s)" if HitCount indicates additional matching protocol items exist beyond the one shown in
+    ''' Snippet, or an empty string otherwise - bindable directly as a label whose visibility is driven by
+    ''' whether it's empty (see dlgFullTextSearch.xaml's use of StringToVisibilityConverter).
+    ''' </summary>
+    '''
+    Public ReadOnly Property MoreHitsLabel As String
+        Get
+            Return If(HitCount > 1, $"+{HitCount - 1} more occurrence{If(HitCount = 2, "", "s")}", "")
+        End Get
+    End Property
 
 End Class
 

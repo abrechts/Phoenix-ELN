@@ -442,12 +442,63 @@
     </Style>
 
 
+    <!--Same chrome as SkinScrollViewerTemplate, but with the outer Grid's Margin bound to Padding - used
+        only for PART_ContentHost below, so TextBox/PasswordBox/RichTextBox's own Padding (forwarded onto
+        their PART_ContentHost ScrollViewer by their own default template) actually reaches the screen.-->
+    <ControlTemplate x:Key="TextHostScrollViewerTemplate" TargetType="{x:Type ScrollViewer}">
+        <Grid Margin="{TemplateBinding Padding}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Content Presenter -->
+            <ScrollContentPresenter Grid.Column="0" Grid.Row="0"/>
+
+            <!-- Vertical ScrollBar -->
+            <ScrollBar x:Name="PART_VerticalScrollBar"
+                    Style="{StaticResource SkinScrollBarStyle}"
+                    Grid.Column="1" Grid.Row="0"
+                    Orientation="Vertical"
+                    Maximum="{TemplateBinding ScrollableHeight}"
+                    ViewportSize="{TemplateBinding ViewportHeight}"
+                    Value="{TemplateBinding VerticalOffset}"
+                    Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}"/>
+
+            <!-- Horizontal ScrollBar -->
+            <ScrollBar x:Name="PART_HorizontalScrollBar"
+                    Style="{StaticResource SkinScrollBarStyle}"
+                    Grid.Column="0" Grid.Row="1"
+                    Orientation="Horizontal"
+                    Maximum="{TemplateBinding ScrollableWidth}"
+                    ViewportSize="{TemplateBinding ViewportWidth}"
+                    Value="{TemplateBinding HorizontalOffset}"
+                    Visibility="{TemplateBinding ComputedHorizontalScrollBarVisibility}"/>
+        </Grid>
+    </ControlTemplate>
+
+
     <!--Applies the unified flat scrollbar app-wide to any ScrollViewer (including ones inside a
         control's default template, e.g. TreeView/ListBox), unconditionally in both themes — the thumb
-        color follows the active skin via DynamicResource, so no trigger is needed here.-->
+        color follows the active skin via DynamicResource, so no trigger is needed here.
+
+        Exception: PART_ContentHost is the fixed, WPF-internal name TextBox/PasswordBox/RichTextBox's own
+        default template gives to their inner ScrollViewer - no other stock control's built-in template
+        uses that name for a ScrollViewer part. Swapping in TextHostScrollViewerTemplate just for that name
+        keeps the same flat scrollbar chrome everywhere, but stops it from swallowing those controls'
+        Padding (see the dlgFullTextSearch txtSearchTerm Padding investigation).-->
 
     <Style TargetType="{x:Type ScrollViewer}">
         <Setter Property="Template" Value="{StaticResource SkinScrollViewerTemplate}"/>
+        <Style.Triggers>
+            <Trigger Property="Name" Value="PART_ContentHost">
+                <Setter Property="Template" Value="{StaticResource TextHostScrollViewerTemplate}"/>
+            </Trigger>
+        </Style.Triggers>
     </Style>
 
 

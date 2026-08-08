@@ -165,22 +165,25 @@ Class MainWindow
             End If
         End If
 
-        'Backfill the persisted tblSearchIndex table if it's empty, e.g. right after it was first created by
-        'DbUpgradeLocal, or after a restore that brought in an older/emptied database.
-        If FullTextSearch.IsSearchIndexEmpty(DBContext) Then
-            FullTextSearch.RebuildSearchIndex(DBContext)
-        End If
-
-        'Fill the in-memory FTS5 SearchIndex from tblSearchIndex - always, since the in-memory table starts
-        'out empty every session (a fast, single set-based copy; see FullTextSearch.HydrateMemoryIndex).
-        FullTextSearch.HydrateMemoryIndex()
-
         If isRestoreFromServer Then
             '  Restored legacy DB's may be lacking tblProjFolders (from v.3.0.0 on) initializations.
             ProjectFolders.SetMissingProjFolderRefs(DBContext)
             '  Reset all sync flags
             DBContext.ResetSyncFlags()
         End If
+
+        'Backfill the persisted tblSearchIndex table if it's empty, e.g. right after it was first created by
+        'DbUpgradeLocal, or after running with the seed database, or a restore that brought in an older/emptied database. Must run AFTER the
+        'isRestoreFromServer block above, not before to preserve the sync flags for tblSearchIndex.
+
+        If FullTextSearch.IsSearchIndexEmpty(DBContext) Then
+            FullTextSearch.RebuildSearchIndex(DBContext)
+        End If
+
+        'Fill the in-memory FTS5 SearchIndex from tblSearchIndex - always, since the in-memory table starts
+        'out empty every session (a fast, single set-based copy; see FullTextSearch.HydrateMemoryIndex).
+
+        FullTextSearch.HydrateMemoryIndex()
 
         ApplicationVersion = GetType(MainWindow).Assembly.GetName().Version
         DBContext.tblDatabaseInfo.First.CurrAppVersion = ApplicationVersion.ToString
@@ -1774,6 +1777,7 @@ Class MainWindow
 
         Dim searchDlg As New dlgFullTextSearch With {
             .LocalDBContext = DBContext,
+            .ServerDBContext = ServerDBContext,
             .Owner = Me
         }
 

@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Resources\Application.ico" />
+    <Resource Include="Resources\Application.ico" />
   </ItemGroup>
 
   <ItemGroup>

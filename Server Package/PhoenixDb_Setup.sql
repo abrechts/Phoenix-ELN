@@ -270,6 +270,7 @@ CREATE TABLE IF NOT EXISTS `tblSearchIndex` (
   `ProtocolItemID` varchar(36) NOT NULL,
   `ExperimentID` varchar(25) NOT NULL,
   `Content` text NOT NULL,
+  `SyncState` tinyint(4) DEFAULT 0,
   PRIMARY KEY (`ProtocolItemID`),
   KEY `idx_tblSearchIndex_ExperimentID` (`ExperimentID`),
   FULLTEXT KEY `ft_tblSearchIndex_Content` (`Content`),

@@ -91,6 +91,7 @@ Public Class DbUpgradeServer
                 ProtocolItemID VARCHAR(36) PRIMARY KEY NOT NULL,
                 ExperimentID VARCHAR(25) NOT NULL,
                 Content TEXT NOT NULL,
+                SyncState TINYINT DEFAULT 0,
                 KEY idx_tblSearchIndex_ExperimentID (ExperimentID),
                 FULLTEXT KEY ft_tblSearchIndex_Content (Content),
                 CONSTRAINT FK_tblSearchIndex_tblProtocolItems_ProtocolItemID FOREIGN KEY (ProtocolItemID) REFERENCES tblProtocolItems(GUID) ON DELETE CASCADE

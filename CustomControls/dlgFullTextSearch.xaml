@@ -17,14 +17,20 @@
                 <ResourceDictionary Source="/CustomControls;component/Resources/SkinDark.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
+            <local:StringToVisibilityConverter x:Key="stringToVisConv"/>
+
             <DataTemplate x:Key="expResultItem">
-                <StackPanel Margin="0,4" HorizontalAlignment="Stretch">
+                <StackPanel Margin="0,2" HorizontalAlignment="Stretch">
                     <local:ExpTreeHeader DataContext="{Binding Experiment}"/>
-                    <Separator Background="LightGray" Height="0.8" Margin="18,4,0,4" Opacity="0.4"/>
+                    <Separator Background="LightGray" Height="0.9" Margin="16,1,0,4" Opacity="0.4"/>
                     <local:HighlightedSnippetView Margin="18,0,0,0" HorizontalAlignment="Stretch" FontSize="11.5" Opacity="0.85"
                         Foreground="{DynamicResource BodyForeground}"
                         SnapsToDevicePixels="True"
                         Text="{Binding Snippet}"/>
+                    <TextBlock Margin="18,1,0,0" FontSize="10.5" FontStyle="Italic" Opacity="0.6"
+                        Foreground="{DynamicResource BodyForeground}"
+                        Text="{Binding MoreHitsLabel}"
+                        Visibility="{Binding MoreHitsLabel, Converter={StaticResource stringToVisConv}}"/>
                 </StackPanel>
             </DataTemplate>
 
@@ -48,11 +54,14 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <TextBox x:Name="txtSearchTerm" Grid.Column="0" Padding="5,4" VerticalContentAlignment="Center" FontSize="13"/>
+            <TextBox x:Name="txtSearchTerm" Grid.Column="0" VerticalContentAlignment="Center" FontSize="13" VerticalAlignment="Center" Padding="8,4,5,4"/>
 
-            <Button x:Name="btnRunSearch" Grid.Column="1" Content="Search" Padding="14,4" Margin="8,0,0,0" IsDefault="True"/>
+            <CheckBox x:Name="chkServerSearch" Grid.Column="1" Content="Server" Foreground="White" VerticalAlignment="Center" Margin="8,0,0,0"/>
+
+            <Button x:Name="btnRunSearch" Grid.Column="2" Content="Search" Padding="14,4" Margin="8,0,0,0" IsDefault="True"/>
 
         </Grid>
 

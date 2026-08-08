@@ -9,7 +9,7 @@
         xmlns:local="clr-namespace:ChemBytes"
         mc:Ignorable="d" 
         d:DataContext="{d:DesignInstance Type=data:tblUsers}"
-        Title="Phoenix ELN" Width="1330" Height="850" MinHeight="800" MinWidth="1330">
+        Title="Phoenix ELN" Icon="Resources/Application.ico" Width="1330" Height="850" MinHeight="800" MinWidth="1330">
 
     <Window.Resources>
 
@@ -39,229 +39,231 @@
 
             <Grid>
 
-                <ToolBar x:Name="mainToolbar" Focusable="true"
+                    <ToolBar x:Name="mainToolbar" Focusable="true"
                    FontFamily="Segoe UI" FontSize="13" Margin="-4,0,1,0" Padding="0,1,0,1"
                    BorderThickness="0,0,0,1" >
 
-                    <ToolBar.Style >
-                        <Style TargetType="ToolBar" BasedOn="{StaticResource ToolBarWithoutOverflowBarStyle}">
-                            <Setter Property="Background" Value="{DynamicResource MainMenuBackground}"/>
-                            <Setter Property="BorderBrush" Value="{DynamicResource MainMenuBorder}"/>
-                        </Style>
-                    </ToolBar.Style>
+                        <ToolBar.Style >
+                            <Style TargetType="ToolBar" BasedOn="{StaticResource ToolBarWithoutOverflowBarStyle}">
+                                <Setter Property="Background" Value="{DynamicResource MainMenuBackground}"/>
+                                <Setter Property="BorderBrush" Value="{DynamicResource MainMenuBorder}"/>
+                            </Style>
+                        </ToolBar.Style>
 
-                    <!--disabled button styles-->
-                    <ToolBar.Resources>
+                        <!--disabled button styles-->
+                        <ToolBar.Resources>
 
-                        <Style TargetType="TextBlock">
-                            <Setter Property="Foreground" Value="WhiteSmoke"/>
-                            <Style.Triggers>
-                                <Trigger Property="IsEnabled" Value="false">
-                                    <Setter Property="Opacity" Value="0.5"/>
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="WhiteSmoke"/>
+                                <Style.Triggers>
+                                    <Trigger Property="IsEnabled" Value="false">
+                                        <Setter Property="Opacity" Value="0.5"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
 
-                        <Style TargetType="ContentControl">
-                            <Setter Property="Foreground" Value="WhiteSmoke"/>
-                            <Style.Triggers>
-                                <Trigger Property="IsEnabled" Value="false">
-                                    <Setter Property="Opacity" Value="0.6"/>
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
+                            <Style TargetType="ContentControl">
+                                <Setter Property="Foreground" Value="WhiteSmoke"/>
+                                <Style.Triggers>
+                                    <Trigger Property="IsEnabled" Value="false">
+                                        <Setter Property="Opacity" Value="0.6"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
 
-                    </ToolBar.Resources>
-                  
-                    <Button x:Name="btnPrint" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="4,0,0,0">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="🖶" FontSize="18" Margin="2,-2" Foreground="#FFA8DCFC"  />
-                            <TextBlock Text="Print" Margin="0,1,2,0" VerticalAlignment="Center" />
-                        </StackPanel>
-                    </Button>
+                        </ToolBar.Resources>
 
-                    <Button x:Name="btnPDF" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ToolTip="Save experiment to PDF" >
-                        <ContentControl Height="16" Margin="2,-1,4,-2">
-                            <Border Background="#FF5B5B5B" CornerRadius="3" BorderThickness="1" BorderBrush="LightSkyBlue" >
-                                <TextBlock Text="PDF" FontSize="10" FontWeight="demiBold" Margin="4,0,3,0" Foreground="White"
+                        <Button x:Name="btnPrint" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="4,0,0,0">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="🖶" FontSize="18" Margin="2,-2" Foreground="#FFA8DCFC"  />
+                                <TextBlock Text="Print" Margin="0,1,2,0" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+
+                        <Button x:Name="btnPDF" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ToolTip="Save experiment to PDF" >
+                            <ContentControl Height="16" Margin="2,-1,4,-2">
+                                <Border Background="#FF5B5B5B" CornerRadius="3" BorderThickness="1" BorderBrush="LightSkyBlue" >
+                                    <TextBlock Text="PDF" FontSize="10" FontWeight="demiBold" Margin="4,0,3,0" Foreground="White"
                             FontFamily="Calibri" VerticalAlignment="Center" />
-                            </Border>
-                        </ContentControl>
-                    </Button>
+                                </Border>
+                            </ContentControl>
+                        </Button>
 
-                    <Button x:Name="btnExport" HorizontalAlignment="Left" VerticalAlignment="Center" 
+                        <Button x:Name="btnExport" HorizontalAlignment="Left" VerticalAlignment="Center" 
                       ToolTip="Export experiment for import by another user">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="⤓" FontSize="18" Margin="0,-2,2,-2" Foreground="lightskyblue" FontWeight="demibold"/>
-                            <TextBlock Text="Export" Margin="0,0,2,0" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </Button>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="⤓" FontSize="18" Margin="0,-2,2,-2" Foreground="lightskyblue" FontWeight="demibold"/>
+                                <TextBlock Text="Export" Margin="0,0,2,0" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
 
-                    <Separator/>
+                        <Separator/>
 
-                    <ToggleButton x:Name="chkDesignView" ToolTip="Sets protocol view on equivalents first."
+                        <ToggleButton x:Name="chkDesignView" ToolTip="Sets protocol view on equivalents first."
                         IsChecked="{Binding ElementName=tabExperiments, Path=SelectedContent.IsDesignView}">
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center" >
-                            <ContentControl Content="{StaticResource icoToggleEquivs}" Height="16" Margin="2,0,4,-1"/>
-                            <TextBlock Text="Equiv" VerticalAlignment="Center" Margin="0,0,2,0"/>
-                        </StackPanel>
-                    </ToggleButton>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center" >
+                                <ContentControl Content="{StaticResource icoToggleEquivs}" Height="16" Margin="2,0,4,-1"/>
+                                <TextBlock Text="Equiv" VerticalAlignment="Center" Margin="0,0,2,0"/>
+                            </StackPanel>
+                        </ToggleButton>
 
-                    <Button x:Name="btnClear" HorizontalAlignment="Left" VerticalAlignment="Center" 
+                        <Button x:Name="btnClear" HorizontalAlignment="Left" VerticalAlignment="Center" 
                         ToolTip="Deletes all protocol entries, except the reference reactant.">
-                        <StackPanel Orientation="Horizontal">
-                            <ContentControl Content="{StaticResource icoDeleteListItem_Dark}" Height="16" Margin="0,0,3,0"/>
-                            <TextBlock Text="Clear" Margin="0,0,2,0" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </Button>
+                            <StackPanel Orientation="Horizontal">
+                                <ContentControl Content="{StaticResource icoDeleteListItem_Dark}" Height="16" Margin="0,0,3,0"/>
+                                <TextBlock Text="Clear" Margin="0,0,2,0" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
 
-                    <Separator/>
+                        <Separator/>
 
-                    <Button x:Name="btnUndo" HorizontalAlignment="Left" IsEnabled="false" VerticalAlignment="Center" ToolTip="Undo">
-                        <StackPanel Orientation="Horizontal">
-                            <ContentControl Content="{StaticResource icoUndo_Dark}" Height="14" Margin="0,0,2,0"/>
-                            <TextBlock Text="Undo" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </Button>
+                        <Button x:Name="btnUndo" HorizontalAlignment="Left" IsEnabled="false" VerticalAlignment="Center" ToolTip="Undo">
+                            <StackPanel Orientation="Horizontal">
+                                <ContentControl Content="{StaticResource icoUndo_Dark}" Height="14" Margin="0,0,2,0"/>
+                                <TextBlock Text="Undo" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
 
-                    <Button x:Name="btnRedo" HorizontalAlignment="Left" IsEnabled="false" ToolTip="Undo">
-                        <StackPanel Orientation="Horizontal">
-                            <ContentControl Content="{StaticResource icoRedo_Dark}" Height="14" Margin="0,0,2,0"/>
-                            <TextBlock Text="Redo" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </Button>
+                        <Button x:Name="btnRedo" HorizontalAlignment="Left" IsEnabled="false" ToolTip="Undo">
+                            <StackPanel Orientation="Horizontal">
+                                <ContentControl Content="{StaticResource icoRedo_Dark}" Height="14" Margin="0,0,2,0"/>
+                                <TextBlock Text="Redo" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
 
-                    <Separator/>
+                        <Separator/>
 
-                    <Button x:Name="btnSearch" HorizontalAlignment="Left" VerticalAlignment="Center" ToolTip="Find experiments" Margin="2,0,0,0">
-                        <StackPanel Orientation="Horizontal">
-                            <ContentControl Content="{StaticResource icoSearch_Dark}" Height="16" Margin="0,1,4,0"/>
-                            <TextBlock Text="Search" Margin="0,0,2,0" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </Button>
+                        <Button x:Name="btnSearch" HorizontalAlignment="Left" VerticalAlignment="Center" ToolTip="Find experiments" Margin="2,0,0,0">
+                            <StackPanel Orientation="Horizontal">
+                                <ContentControl Content="{StaticResource icoSearch_Dark}" Height="16" Margin="0,1,4,0"/>
+                                <TextBlock Text="Search" Margin="0,0,2,0" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
 
-                    <Button x:Name="btnFullTextSearch" HorizontalAlignment="Left" VerticalAlignment="Center" ToolTip="Full-text search across all experiments" 
+                        <Button x:Name="btnFullTextSearch" HorizontalAlignment="Left" VerticalAlignment="Center" ToolTip="Full-text search across all experiments" 
                       Margin="2,0,0,0" Visibility="visible">
-                        <StackPanel Orientation="Horizontal">
-                            <ContentControl Content="{StaticResource icoSearch_Dark}" Height="16" Margin="0,1,4,0"/>
-                            <TextBlock Text="Search Text" Margin="0,0,2,0" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </Button>
+                            <StackPanel Orientation="Horizontal">
+                                <ContentControl Content="{StaticResource icoSearch_Dark}" Height="16" Margin="0,1,4,0"/>
+                                <TextBlock Text="Search Text" Margin="0,0,2,0" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
 
-                    <Separator Margin="2,2,0,2"/>
+                        <Separator Margin="2,2,0,2"/>
 
-                    <Menu x:Name="mnuTools" TextBlock.FontFamily="Segoe UI" TextBlock.FontSize="13" Background="transparent" 
+                        <Menu x:Name="mnuTools" TextBlock.FontFamily="Segoe UI" TextBlock.FontSize="13" Background="transparent" 
                         VerticalAlignment="Center" Margin="3,0,0,0">
-                        
-                        <Menu.Resources>
-                            <Style TargetType="{x:Type MenuItem}" BasedOn="{StaticResource DarkModeMenuStyle}"/>
-                        </Menu.Resources>
 
-                        <MenuItem Header="Tools" Margin="1,1,1,0">
+                            <Menu.Resources>
+                                <Style TargetType="{x:Type MenuItem}" BasedOn="{StaticResource DarkModeMenuStyle}"/>
+                            </Menu.Resources>
 
-                            <MenuItem.Icon>
-                                <StackPanel Orientation="Horizontal" VerticalAlignment="center">
-                                    <TextBlock Text="⚙" FontSize="13" Foreground="lightskyblue"/>
-                                </StackPanel>
-                            </MenuItem.Icon>
+                            <MenuItem Header="Tools" Margin="1,1,1,0">
 
-                            <MenuItem x:Name="btnEditUser" Header="User Properties ..." Icon="{StaticResource icoEditUser_Dark}" Margin="0,3,0,0"/>
-                            <MenuItem x:Name="btnAddUser" Header="Add a User ..." Icon="{StaticResource icoAddUser2_Dark}" Margin="0,0,0,2"/>
-                            
-                            <Separator/>
-                            
-                            <MenuItem x:Name="btnConnect" Header="Server Connection ..." Margin="0,2,0,-1" 
+                                <MenuItem.Icon>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="center">
+                                        <TextBlock Text="⚙" FontSize="13" Foreground="lightskyblue"/>
+                                    </StackPanel>
+                                </MenuItem.Icon>
+
+                                <MenuItem x:Name="btnEditUser" Header="User Properties ..." Icon="{StaticResource icoEditUser_Dark}" Margin="0,3,0,0"/>
+                                <MenuItem x:Name="btnAddUser" Header="Add a User ..." Icon="{StaticResource icoAddUser2_Dark}" Margin="0,0,0,2"/>
+
+                                <Separator/>
+
+                                <MenuItem x:Name="btnConnect" Header="Server Connection ..." Margin="0,2,0,-1" 
                                     IsEnabled="{Binding ElementName=tabExperiments, Path=SelectedContent.UserID, Converter={StaticResource demoToBoolConv},
                                 ConverterParameter=invert}"/>
-                            <MenuItem x:Name="btnRestore" Header="Restore from Server ..." Margin="0,0,0,2"/>
+                                <MenuItem x:Name="btnRestore" Header="Restore from Server ..." Margin="0,0,0,2"/>
 
-                            <Separator/>
+                                <Separator/>
 
-                            <MenuItem Header="ELN Data Migration" Margin="0,2,0,0">
-                                <MenuItem x:Name="mnuCreatePackage" Header="Create Transfer Pack ..."/>
-                                <MenuItem x:Name="mnuImportPackage" Header="Import Transfer Pack ..." />
+                                <MenuItem Header="ELN Data Migration" Margin="0,2,0,0">
+                                    <MenuItem x:Name="mnuCreatePackage" Header="Create Transfer Pack ..."/>
+                                    <MenuItem x:Name="mnuImportPackage" Header="Import Transfer Pack ..." />
+                                </MenuItem>
+
                             </MenuItem>
+                        </Menu>
 
-                        </MenuItem>
-                    </Menu>
+                        <Separator/>
 
-                    <Separator/>
+                        <Menu x:Name="mnuSpelling" TextBlock.FontFamily="Segoe UI" TextBlock.FontSize="13" Background="Transparent" Padding="1,0,0,1" >
 
-                    <Menu x:Name="mnuSpelling" TextBlock.FontFamily="Segoe UI" TextBlock.FontSize="13" Background="Transparent" Padding="1,0,0,1" >
+                            <Menu.Resources>
+                                <Style TargetType="{x:Type MenuItem}" BasedOn="{StaticResource DarkModeMenuStyle}"/>
+                            </Menu.Resources>
 
-                        <Menu.Resources>
-                            <Style TargetType="{x:Type MenuItem}" BasedOn="{StaticResource DarkModeMenuStyle}"/>
-                        </Menu.Resources>
+                            <MenuItem VerticalAlignment="Center" Padding="2,2" ToolTip="Spell checking language" Margin="2,2,2,0">
 
-                        <MenuItem VerticalAlignment="Center" Padding="2,2" ToolTip="Spell checking language" Margin="2,2,2,0">
-
-                            <MenuItem.Icon>
-                                <ContentControl x:Name="imgSpell" Content="{StaticResource icoSpellCheck_Dark}"/>
-                            </MenuItem.Icon>
-                            <MenuItem.Header>
-                                <TextBlock x:Name="txtSpellHeader" Text="Off" VerticalAlignment="Center" Margin="0,0,2,0"/>
-                            </MenuItem.Header>
-                            
-                            <MenuItem x:Name="mnuSpellOff" Header="Off" Tag="" Margin="0,1" ToolTip="No spell checking"/>
-
-                            <Separator Style="{StaticResource DarkMenuNoIconsSeparatorStyle}"/>
-                            
-                            <MenuItem x:Name="mnuSpellDE" Header="DE" Tag="de-DE" Margin="0,1" ToolTip="German"/>
-                            <MenuItem x:Name="mnuSpellEnUS" Header="EN(US)" Tag="en-US" Margin="0,1" ToolTip="English (US)"/>
-                            <MenuItem x:Name="mnuSpellEnGB" Header="EN(GB)" Tag="en-GB" Margin="0,1" ToolTip="English (GB)"/>
-                            <MenuItem x:Name="mnuSpellES" Header="ES" Tag="es-ES" Margin="0,1" ToolTip="Spanish"/>
-                            <MenuItem x:Name="mnuSpellFR" Header="FR" Tag="fr-FR" Margin="0,1" ToolTip="French"/>
-                            <MenuItem x:Name="mnuSpellIT" Header="IT" Tag="it-IT" Margin="0,1" ToolTip="Italian"/>
-                            <MenuItem x:Name="mnuSpellPT" Header="PT" Tag="pt-PT" Margin="0,1" ToolTip="Portugiese"/>
-
-                            <Separator Style="{StaticResource DarkMenuNoIconsSeparatorStyle}"/>
-
-                            <MenuItem x:Name="mnuDict" Header="Custom Dictionary ..." Margin="0,1"/>
-
-                        </MenuItem>
-                    </Menu>
-
-                    <Separator/>
-
-                    <Menu TextBlock.FontFamily="Segoe UI" TextBlock.FontSize="13" Background="Transparent" Padding="1,0,0,0" VerticalAlignment="Center">
-                        <Menu.Resources>
-                            <Style TargetType="{x:Type MenuItem}" BasedOn="{StaticResource DarkModeMenuStyle}"/>
-                        </Menu.Resources>
-
-                        <MenuItem Header="Help" VerticalAlignment="Center" Padding="2,0,4,0" Margin="1,1,1,0">
-                            
-                            <MenuItem.Icon>
-                                <StackPanel Orientation="Horizontal" >
-                                    <TextBlock Text="🛈" FontSize="18" Margin="0,0,3,0" Foreground="LightSkyBlue" VerticalAlignment="Center" />
-                                </StackPanel>
-                            </MenuItem.Icon>
-                            
-                            <MenuItem x:Name="mnuHelp" Header="Help Docs..." Margin="0,0">
                                 <MenuItem.Icon>
-                                    <ContentControl Content="{StaticResource icoInfo}" Height="16"/>
+                                    <ContentControl x:Name="imgSpell" Content="{StaticResource icoSpellCheck_Dark}"/>
                                 </MenuItem.Icon>
+                                <MenuItem.Header>
+                                    <TextBlock x:Name="txtSpellHeader" Text="Off" VerticalAlignment="Center" Margin="0,0,2,0"/>
+                                </MenuItem.Header>
+
+                                <MenuItem x:Name="mnuSpellOff" Header="Off" Tag="" Margin="0,1" ToolTip="No spell checking"/>
+
+                                <Separator Style="{StaticResource DarkMenuNoIconsSeparatorStyle}"/>
+
+                                <MenuItem x:Name="mnuSpellDE" Header="DE" Tag="de-DE" Margin="0,1" ToolTip="German"/>
+                                <MenuItem x:Name="mnuSpellEnUS" Header="EN(US)" Tag="en-US" Margin="0,1" ToolTip="English (US)"/>
+                                <MenuItem x:Name="mnuSpellEnGB" Header="EN(GB)" Tag="en-GB" Margin="0,1" ToolTip="English (GB)"/>
+                                <MenuItem x:Name="mnuSpellES" Header="ES" Tag="es-ES" Margin="0,1" ToolTip="Spanish"/>
+                                <MenuItem x:Name="mnuSpellFR" Header="FR" Tag="fr-FR" Margin="0,1" ToolTip="French"/>
+                                <MenuItem x:Name="mnuSpellIT" Header="IT" Tag="it-IT" Margin="0,1" ToolTip="Italian"/>
+                                <MenuItem x:Name="mnuSpellPT" Header="PT" Tag="pt-PT" Margin="0,1" ToolTip="Portugiese"/>
+
+                                <Separator Style="{StaticResource DarkMenuNoIconsSeparatorStyle}"/>
+
+                                <MenuItem x:Name="mnuDict" Header="Custom Dictionary ..." Margin="0,1"/>
+
                             </MenuItem>
-                            <MenuItem x:Name="mnuAbout" Header="About Phoenix ELN ..." Margin="0,1"/>
-                            <MenuItem x:Name="mnuCheckForUpdates" Header="Check for updates ..." Margin="0,1" />
-                        </MenuItem>
-                    </Menu>
+                        </Menu>
 
-                    <Separator/>
+                        <Separator/>
 
-                    <ToggleButton x:Name="chkLightMode" Margin="0,1,0,0"
-                        IsChecked="{Binding IsDarkMode, RelativeSource={RelativeSource AncestorType={x:Type local:MainWindow}}, Mode=TwoWay, Converter={StaticResource boolInvertConv}}"
-                        ToolTip="Toggle dark / light mode" VerticalAlignment="Center">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="🔅" FontSize="13" Foreground="LightBlue" Margin="0,0,2,0"/>
-                            <TextBlock Text="Mode" Margin="0,0,2,0"/>
-                        </StackPanel>
-                    </ToggleButton>
-                    
-                    <Separator/>
+                        <ToggleButton x:Name="chkLightMode" Margin="0,1,0,0"
+                            IsChecked="{Binding IsDarkMode, RelativeSource={RelativeSource AncestorType={x:Type local:MainWindow}}, Mode=TwoWay, 
+                              Converter={StaticResource boolInvertConv}}"
+                            ToolTip="Toggle dark / light mode" VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="🔅" FontSize="13" Foreground="LightBlue" Margin="0,0,2,0"/>
+                                <TextBlock Text="Mode" Margin="0,0,2,0"/>
+                            </StackPanel>
+                        </ToggleButton>
 
-                </ToolBar>
+                        <Separator/>
 
-                <custom:MainStatusBar x:Name="mainStatusInfo" HorizontalAlignment="Right" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                        <Menu TextBlock.FontFamily="Segoe UI" TextBlock.FontSize="13" Background="Transparent" Padding="1,0,0,0" VerticalAlignment="Center">
+                            <Menu.Resources>
+                                <Style TargetType="{x:Type MenuItem}" BasedOn="{StaticResource DarkModeMenuStyle}"/>
+                            </Menu.Resources>
+                            
+                            <MenuItem Header="Help" VerticalAlignment="Center" Padding="2,0,4,0" Margin="1,1,1,0">
+                               
+                                <MenuItem.Icon>
+                                    <StackPanel Orientation="Horizontal" >
+                                        <TextBlock Text="🛈" FontSize="18" Margin="0,0,3,0" Foreground="LightSkyBlue" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </MenuItem.Icon>
+
+                                <MenuItem x:Name="mnuHelp" Header="Help Docs..." Margin="0,0">
+                                    <MenuItem.Icon>
+                                        <ContentControl Content="{StaticResource icoInfo}" Height="16"/>
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem x:Name="mnuAbout" Header="About Phoenix ELN ..." Margin="0,1"/>
+                                <MenuItem x:Name="mnuCheckForUpdates" Header="Check for updates ..." Margin="0,1" />
+                            </MenuItem>
+
+                        </Menu>
+
+                        <Separator/>
+
+                    </ToolBar>
+
+                    <custom:MainStatusBar x:Name="mainStatusInfo" HorizontalAlignment="Right" Margin="0,0,6,0" VerticalAlignment="Center"/>
 
             </Grid>
         </Border>
