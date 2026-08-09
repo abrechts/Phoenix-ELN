@@ -1,6 +1,5 @@
 Imports System.Data
 Imports System.Linq.Expressions
-Imports System.Xml.Linq
 Imports ElnBase.ELNEnumerations
 Imports ElnCoreModel
 Imports Microsoft.Data.Sqlite
@@ -15,6 +14,68 @@ Imports MySqlConnector
 ''' </summary>
 '''
 Public Class FullTextSearch
+
+    ''' <summary>
+    ''' Upper bound on the number of experiments returned by <see cref="SearchExperiments"/>, so an overly
+    ''' broad search term (e.g. a common word like "and" or "the") can't return every experiment in the
+    ''' database. Once more experiments than this match, the lowest-relevance ones are cut off and
+    ''' <see cref="ExperimentSearchResult.WasTruncated"/> is set so the caller can inform the user.
+    ''' </summary>
+    '''
+    Public Shared ReadOnly MaxDisplayedResults As Integer = 200
+
+
+    ''' <summary>
+    ''' Gets all experiments containing at least one protocol item matching the specified search term, ordered
+    ''' by relevance (best match first). When querying the server database, only finalized experiments are 
+    ''' returned, the others are considered work in progress. Local searches return all experiments.
+    ''' The whole search term is matched as a single literal phrase - e.g. searching "blue water" only finds experiments
+    ''' where those words occur adjacent to each other and in that order, 
+    ''' not experiments where "blue" and "water" merely occur somewhere independently. The last word
+    ''' of the search term is matched as a prefix, so a still-being-typed or deliberately partial last word (e.g.
+    ''' "Allyl") still finds it as part of a longer indexed word (e.g. a reagent named "Allyltrimethylsilane") -
+    ''' every earlier word in a multi-word search still has to match a complete word. Results are capped at
+    ''' <see cref="MaxDisplayedResults"/>.
+    ''' </summary>
+    ''' <param name="searchTerm">Free-text search term, matched as one literal phrase with the last word as a prefix.</param>
+    ''' <param name="searchContext">Database context to query - either the local SQLite database (FTS5 SearchIndex)
+    ''' or the MySQL server (native FULLTEXT index on tblSearchIndex); dispatches on <see cref="DbContext.Database"/>'s
+    ''' provider.</param>
+    '''
+    Public Function SearchExperiments(searchTerm As String, searchContext As ElnDbContext) As ExperimentSearchResult
+
+        If String.IsNullOrWhiteSpace(searchTerm) Then
+            Return New ExperimentSearchResult With {.Hits = New List(Of ExperimentSearchHit), .WasTruncated = False}
+        End If
+
+        Dim rankedExperiments = If(searchContext.Database.IsSqlite(),
+            GetRankedExperimentIDs(searchTerm),
+            GetRankedExperimentIDsMySql(searchTerm, searchContext))
+
+        'cut off the least relevant experiments before even querying tblExperiments for them, rather than
+        'truncating the final result list - both cheaper and simpler, since ranking order is already established.
+        Dim wasTruncated = rankedExperiments.Count > MaxDisplayedResults
+        If wasTruncated Then
+            rankedExperiments = rankedExperiments.Take(MaxDisplayedResults).ToList()
+        End If
+
+        Dim experimentsByID = searchContext.tblExperiments.
+            Where(Function(exp) rankedExperiments.Select(Function(r) r.ExperimentID).Contains(exp.ExperimentID)).
+            ToDictionary(Function(exp) exp.ExperimentID)
+
+        'preserve the relevance ranking order - the LINQ query above does not guarantee result order
+        Dim hits = rankedExperiments.
+            Where(Function(r) experimentsByID.ContainsKey(r.ExperimentID)).
+            Select(Function(r) New ExperimentSearchHit With {
+                .Experiment = experimentsByID(r.ExperimentID),
+                .Snippet = r.Snippet,
+                .HitCount = r.HitCount
+            }).ToList()
+
+        Return New ExperimentSearchResult With {.Hits = hits, .WasTruncated = wasTruncated}
+
+    End Function
+
 
     ''' <summary>
     ''' The dedicated, long-lived connection backing the in-memory full-text SearchIndex: a second connection to
@@ -948,66 +1009,6 @@ Public Class FullTextSearch
 
 
     ''' <summary>
-    ''' Upper bound on the number of experiments returned by <see cref="SearchExperiments"/>, so an overly
-    ''' broad search term (e.g. a common word like "and" or "the") can't return every experiment in the
-    ''' database. Once more experiments than this match, the lowest-relevance ones are cut off and
-    ''' <see cref="ExperimentSearchResult.WasTruncated"/> is set so the caller can inform the user.
-    ''' </summary>
-    '''
-    Public Shared ReadOnly MaxDisplayedResults As Integer = 200
-
-
-    ''' <summary>
-    ''' Gets all experiments containing at least one protocol item matching the specified search term, ordered
-    ''' by relevance (best match first). The whole search term is matched as a single literal phrase - e.g.
-    ''' searching "blue water" only finds experiments where those words occur adjacent to each other and in
-    ''' that order, not experiments where "blue" and "water" merely occur somewhere independently. The last word
-    ''' of the search term is matched as a prefix, so a still-being-typed or deliberately partial last word (e.g.
-    ''' "Allyl") still finds it as part of a longer indexed word (e.g. a reagent named "Allyltrimethylsilane") -
-    ''' every earlier word in a multi-word search still has to match a complete word. Results are capped at
-    ''' <see cref="MaxDisplayedResults"/>.
-    ''' </summary>
-    ''' <param name="searchTerm">Free-text search term, matched as one literal phrase with the last word as a prefix.</param>
-    ''' <param name="searchContext">Database context to query - either the local SQLite database (FTS5 SearchIndex)
-    ''' or the MySQL server (native FULLTEXT index on tblSearchIndex); dispatches on <see cref="DbContext.Database"/>'s
-    ''' provider.</param>
-    '''
-    Public Function SearchExperiments(searchTerm As String, searchContext As ElnDbContext) As ExperimentSearchResult
-
-        If String.IsNullOrWhiteSpace(searchTerm) Then
-            Return New ExperimentSearchResult With {.Hits = New List(Of ExperimentSearchHit), .WasTruncated = False}
-        End If
-
-        Dim rankedExperiments = If(searchContext.Database.IsSqlite(),
-            GetRankedExperimentIDs(searchTerm),
-            GetRankedExperimentIDsMySql(searchTerm, searchContext))
-
-        'cut off the least relevant experiments before even querying tblExperiments for them, rather than
-        'truncating the final result list - both cheaper and simpler, since ranking order is already established.
-        Dim wasTruncated = rankedExperiments.Count > MaxDisplayedResults
-        If wasTruncated Then
-            rankedExperiments = rankedExperiments.Take(MaxDisplayedResults).ToList()
-        End If
-
-        Dim experimentsByID = searchContext.tblExperiments.
-            Where(Function(exp) rankedExperiments.Select(Function(r) r.ExperimentID).Contains(exp.ExperimentID)).
-            ToDictionary(Function(exp) exp.ExperimentID)
-
-        'preserve the relevance ranking order - the LINQ query above does not guarantee result order
-        Dim hits = rankedExperiments.
-            Where(Function(r) experimentsByID.ContainsKey(r.ExperimentID)).
-            Select(Function(r) New ExperimentSearchHit With {
-                .Experiment = experimentsByID(r.ExperimentID),
-                .Snippet = r.Snippet,
-                .HitCount = r.HitCount
-            }).ToList()
-
-        Return New ExperimentSearchResult With {.Hits = hits, .WasTruncated = wasTruncated}
-
-    End Function
-
-
-    ''' <summary>
     ''' A single SearchIndex hit: the matching protocol item, its owning experiment, the bm25 relevance rank
     ''' of that item (lower/more negative values are more relevant), and a short highlighted excerpt of its
     ''' content with the matched phrase wrapped in <see cref="HighlightStartMarker"/>/<see cref="HighlightEndMarker"/>.
@@ -1191,11 +1192,12 @@ Public Class FullTextSearch
 
     ''' <summary>
     ''' Runs a deliberately over-inclusive boolean-mode MATCH...AGAINST candidate query against the MySQL
-    ''' server's tblSearchIndex table (see <see cref="MySqlCandidateQuery"/>), then verifies each candidate
-    ''' row client-side via <see cref="LocateSearchMatch"/> - the same phrase-adjacency+prefix check
-    ''' <see cref="GetRankedHits"/>'s FTS5 path gets natively - keeping only rows that actually satisfy it and
-    ''' building their highlighted excerpt from the same located match. Returns one entry per surviving
-    ''' protocol item, with its owning experiment, relevance rank, and highlighted excerpt.
+    ''' server's tblSearchIndex table (see <see cref="MySqlCandidateQuery"/>), joined against tblExperiments to
+    ''' restrict candidates to finalized experiments only, then verifies each candidate row client-side via
+    ''' <see cref="LocateSearchMatch"/> - the same phrase-adjacency+prefix check <see cref="GetRankedHits"/>'s
+    ''' FTS5 path gets natively - keeping only rows that actually satisfy it and building their highlighted
+    ''' excerpt from the same located match. Returns one entry per surviving protocol item, with its owning
+    ''' experiment, relevance rank, and highlighted excerpt.
     ''' </summary>
     ''' <remarks>
     ''' MySQL's MATCH...AGAINST relevance score is higher-is-better, the opposite of SQLite's bm25() convention
@@ -1205,6 +1207,13 @@ Public Class FullTextSearch
     ''' reflects the loosened candidate query (words present, not necessarily adjacent), not the true
     ''' phrase-adjacent match verified afterward - an accepted imprecision, no worse than MySQL's relevance
     ''' score already being a rougher signal than SQLite's bm25 to begin with.
+    ''' <para>
+    ''' Unlike the local FTS5 path (<see cref="GetRankedHits"/>), which returns matches from experiments of any
+    ''' workflow state, this filters to WorkflowState = 1 (Finalized) only - unfinalized experiments are
+    ''' work-in-progress, fine to surface for one's own local experiments, but not when searching other users'
+    ''' experiments on the server. Consistent with how other search types (e.g. StepExpSelector's server
+    ''' experiment picker) already restrict server-side results to finalized experiments.
+    ''' </para>
     ''' </remarks>
     '''
     Private Shared Function GetRankedHitsMySql(searchTerm As String, candidateQuery As String, searchContext As ElnDbContext) As List(Of RankedHit)
@@ -1220,8 +1229,9 @@ Public Class FullTextSearch
         Try
 
             Using command As New MySqlCommand(
-                "SELECT ProtocolItemID, ExperimentID, Content, MATCH(Content) AGAINST (@term IN BOOLEAN MODE) " +
-                "FROM tblSearchIndex WHERE MATCH(Content) AGAINST (@term IN BOOLEAN MODE)", connection)
+                "SELECT si.ProtocolItemID, si.ExperimentID, si.Content, MATCH(si.Content) AGAINST (@term IN BOOLEAN MODE) " +
+                "FROM tblSearchIndex si INNER JOIN tblExperiments exp ON exp.ExperimentID = si.ExperimentID " +
+                "WHERE MATCH(si.Content) AGAINST (@term IN BOOLEAN MODE) AND exp.WorkflowState = 1", connection)
 
                 command.Parameters.AddWithValue("@term", candidateQuery)
 
@@ -1316,7 +1326,7 @@ Public Class FullTextSearch
     ''' token-based <c>snippet()</c> budget.
     ''' </summary>
     '''
-    Private Const SnippetWordBudget As Integer = 13
+    Private Const SnippetWordBudget As Integer = 14
 
 
     ''' <summary>
