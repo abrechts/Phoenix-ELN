@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Title="Full-Text Search" TextOptions.TextFormattingMode="Display" WindowStartupLocation="CenterOwner" ShowInTaskbar="False"
         UseLayoutRounding="True"
-        Height="550" MinHeight="350" Width="500" MinWidth="400" Background="#FF303036">
+        Height="550" MinHeight="350" Width="490" MinWidth="450" MaxWidth="500" Background="#FF303036">
 
     <Window.Resources>
         <ResourceDictionary>
@@ -37,41 +37,55 @@
         </ResourceDictionary>
     </Window.Resources>
 
-    <Grid Margin="14">
+    <Grid Margin="20,14,20,8">
 
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" TextWrapping="Wrap" Margin="0,0,0,8" Foreground="{DynamicResource BodyForeground}"
-            Text="Searches reagents, products, solvents, auxiliaries, reference reactants, separators, embedded file names/comments and comments, across all experiments."/>
+        <StackPanel Grid.Row="0">
 
-        <Grid Grid.Row="1" Margin="0,0,0,10">
+            <Grid VerticalAlignment="Center">
+                <TextBlock x:Name="blkServerInfo" Text="ⓘ finalized exp only" HorizontalAlignment="Left" Foreground="#FFFEFE9F" 
+                     Visibility="Collapsed" d:Visibility="Visible"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="center">
+                    <TextBlock Text="Full-Text Search" FontWeight="Bold" HorizontalAlignment="Center" FontSize="13.5" Foreground="LightBlue"/>
+                    <ContentControl x:Name="icoInfo" Content="{StaticResource icoInfo}" Cursor="Hand" Height="14" Margin="6,1,1,0" Opacity="0.9"/>
+                </StackPanel>
+                <CheckBox x:Name="chkServerSearch" Content="Server search" Foreground="White" VerticalAlignment="Center" Margin="0,1,0,0" HorizontalAlignment="Right"/>
+            </Grid>
 
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
+            <Separator Margin="0,4,0,4" Height="0.9"/>
 
-            <TextBox x:Name="txtSearchTerm" Grid.Column="0" VerticalContentAlignment="Center" FontSize="13" VerticalAlignment="Center" Padding="8,4,5,4"/>
+            <TextBlock TextWrapping="Wrap" Margin="0,2,0,2" Foreground="{DynamicResource BodyForeground}"
+                Text="Search all experiment content for occurrences of the specified text (embedded document content is not searchable)."/>
 
-            <CheckBox x:Name="chkServerSearch" Grid.Column="1" Content="Server" Foreground="White" VerticalAlignment="Center" Margin="8,0,0,0"/>
+            <Grid >
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBox x:Name="txtSearchTerm" Grid.Column="0" VerticalContentAlignment="Center" FontSize="13" VerticalAlignment="Center" Padding="2,1,5,2"
+                    d:Text="Allyl"/>
+                <Button x:Name="btnRunSearch" Grid.Column="1" HorizontalAlignment="right" Content="Search" Padding="14,4" Margin="8,0,0,0" IsDefault="True"/>
+            </Grid>
 
-            <Button x:Name="btnRunSearch" Grid.Column="2" Content="Search" Padding="14,4" Margin="8,0,0,0" IsDefault="True"/>
+            <Separator Margin="0,6,0,6" Height="0.9"/>
 
-        </Grid>
-
-        <ListBox x:Name="lstResults" Grid.Row="2" Background="Transparent" BorderThickness="0" local:DarkModeHelper.IsDarkMode="True"
+        </StackPanel>
+        
+        <ListBox x:Name="lstResults" Grid.Row="1" Background="Transparent" BorderThickness="0" local:DarkModeHelper.IsDarkMode="True"
             HorizontalContentAlignment="Stretch"
             ScrollViewer.HorizontalScrollBarVisibility="Disabled" VirtualizingStackPanel.IsVirtualizing="False"
-            ItemTemplate="{StaticResource expResultItem}"/>
+            ItemTemplate="{StaticResource expResultItem}" Padding="0,0,0,4"/>
 
-        <TextBlock x:Name="blkHitInfo" Grid.Row="3" Margin="0,8,0,0" Opacity="0.8" Foreground="{DynamicResource BodyForeground}"/>
-
+        <StackPanel Grid.Row="2" >
+            <Separator Margin="0,4,0,4" Height="0.9"/>
+            <TextBlock x:Name="blkHitInfo" HorizontalAlignment="Center" Foreground="lightblue"/>
+        </StackPanel>
+        
     </Grid>
 
 </Window>

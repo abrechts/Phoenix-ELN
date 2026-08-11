@@ -234,7 +234,7 @@ Public Class FullTextSearch
         Function(item) New SearchableRow With {.ProtocolItemID = item.ProtocolItemID, .Content = item.Title}
 
     Private Shared ReadOnly EmbeddedFileProjection As Expression(Of Func(Of tblEmbeddedFiles, SearchableRow)) =
-        Function(item) New SearchableRow With {.ProtocolItemID = item.ProtocolItemID, .Content = item.FileName + " " + item.FileComment}
+        Function(item) New SearchableRow With {.ProtocolItemID = item.ProtocolItemID, .Content = item.FileComment}
 
     ' tblReagents, tblSolvents, tblAuxiliaries, tblProducts, tblRefReactants and tblComments are treated separately,
     ' see BuildReagentContent / BuildSolventContent / BuildAuxiliaryContent / BuildProductContent /

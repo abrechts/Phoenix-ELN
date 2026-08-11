@@ -100,7 +100,10 @@ Public Class RestoreFromServer
 
                     AddEntity(child)
 
-                    'handle child final downstream 1:1 relationship if present
+                    'handle child final downstream 1:1 relationships if present
+                    'note: a protocol item can have MORE THAN ONE non-null downstream 1:1 nav at once
+                    '(e.g. its content-specific table alongside tblSearchIndex), so all of them must be
+                    'added - do not stop after the first hit
 
                     Dim navItems = ServerContext.Entry(child).Navigations
                     Dim collItems = ServerContext.Entry(child).Collections
@@ -118,7 +121,6 @@ Public Class RestoreFromServer
                                 End If
 
                                 AddEntity(nav.CurrentValue)
-                                Exit For
 
                             End If
                         Next

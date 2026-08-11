@@ -1,3 +1,4 @@
+Imports System.Windows
 Imports System.Windows.Input
 Imports ElnBase
 Imports ElnCoreModel
@@ -57,10 +58,8 @@ Public Class dlgFullTextSearch
 
     Private Sub chkServer_Check() Handles chkServerSearch.Checked, chkServerSearch.Unchecked
 
-        'ensure user action, not programmatic
-        If chkServerSearch.IsMouseOver Then
-            RunSearch()
-        End If
+        blkServerInfo.Visibility = If(chkServerSearch.IsChecked, Visibility.Visible, Visibility.Collapsed)
+        RunSearch()
 
     End Sub
 
@@ -79,9 +78,8 @@ Public Class dlgFullTextSearch
         Dim result = _fullTextSearch.SearchExperiments(txtSearchTerm.Text, searchContext)
 
         lstResults.ItemsSource = result.Hits
-        blkHitInfo.Text = $"{result.Hits.Count} experiment(s) found" +
-            If(_lastSearchWasServer, " (server)", "") +
-            If(result.WasTruncated, $" (search term too broad - showing the {FullTextSearch.MaxDisplayedResults} best matches only)", "")
+        blkHitInfo.Text = $"{result.Hits.Count} " + If(_lastSearchWasServer, "finalized ", "") + "experiment(s) found" +
+            If(result.WasTruncated, $" - showing the {FullTextSearch.MaxDisplayedResults} best matches only", "")
 
     End Sub
 
