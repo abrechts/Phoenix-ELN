@@ -449,7 +449,7 @@
 
         <!-- Covers the window during startup until Me_ContentRendered hides it  -->
 
-        <Border x:Name="pnlStartupOverlay" Background="{DynamicResource InnerPanelBackground}" d:Visibility="visible">
+        <Border x:Name="pnlStartupOverlay" Background="{DynamicResource InnerPanelBackground}" d:Visibility="collapsed">
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,100">
                 <TextBlock Text="Phoenix ELN" FontSize="22" FontWeight="bold" Foreground="{DynamicResource BodyForeground}" HorizontalAlignment="Center" 
                            Margin="0,0,0,6" FontStyle="Italic" />

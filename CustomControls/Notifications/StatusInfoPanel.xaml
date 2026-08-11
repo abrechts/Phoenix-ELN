@@ -121,7 +121,7 @@
                         <ContentControl Content="{DynamicResource WarningCircleIcon}" Height="16" VerticalAlignment="center" 
                             ToolTipService.InitialShowDelay="250"                                            
                             Visibility="{Binding tblExperiments,Converter={StaticResource unfinalizedWarningVisConv}}"
-                            ToolTip="Finalize your experiments after completion&#x0a;for status feedback and protection against&#x0a;unintended changes (can be reverted)." Margin="2,0,0,0" />
+                            ToolTip="Finalize your experiments after completion for&#x0a;status feedback, search visibility and protection &#x0a;against unintended changes (can be reverted)." Margin="2,0,0,0" />
 
                     </StackPanel>
 

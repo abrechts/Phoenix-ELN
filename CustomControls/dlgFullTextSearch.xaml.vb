@@ -58,7 +58,6 @@ Public Class dlgFullTextSearch
 
     Private Sub chkServer_Check() Handles chkServerSearch.Checked, chkServerSearch.Unchecked
 
-        blkServerInfo.Visibility = If(chkServerSearch.IsChecked, Visibility.Visible, Visibility.Collapsed)
         RunSearch()
 
     End Sub

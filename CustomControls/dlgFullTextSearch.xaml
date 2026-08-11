@@ -48,19 +48,18 @@
         <StackPanel Grid.Row="0">
 
             <Grid VerticalAlignment="Center">
-                <TextBlock x:Name="blkServerInfo" Text="ⓘ finalized exp only" HorizontalAlignment="Left" Foreground="#FFFEFE9F" 
-                     Visibility="Collapsed" d:Visibility="Visible"/>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="center">
-                    <TextBlock Text="Full-Text Search" FontWeight="Bold" HorizontalAlignment="Center" FontSize="13.5" Foreground="LightBlue"/>
-                    <ContentControl x:Name="icoInfo" Content="{StaticResource icoInfo}" Cursor="Hand" Height="14" Margin="6,1,1,0" Opacity="0.9"/>
+                    <TextBlock Text="Full-Text Search" FontWeight="Bold" HorizontalAlignment="Center" FontSize="14" Foreground="LightBlue"/>
+                    <ContentControl x:Name="icoInfo" Content="{StaticResource icoInfo}" Cursor="Hand" Height="14" Margin="6,2,1,0" Opacity="0.9"/>
                 </StackPanel>
-                <CheckBox x:Name="chkServerSearch" Content="Server search" Foreground="White" VerticalAlignment="Center" Margin="0,1,0,0" HorizontalAlignment="Right"/>
+                <CheckBox x:Name="chkServerSearch" Content="Server Search" Foreground="White" VerticalAlignment="Center" Margin="0,2,2,0" 
+                   FontSize="11.5" HorizontalAlignment="Right"/>
             </Grid>
 
-            <Separator Margin="0,4,0,4" Height="0.9"/>
+            <Separator Margin="0,8,0,8" Height="0.9"/>
 
-            <TextBlock TextWrapping="Wrap" Margin="0,2,0,2" Foreground="{DynamicResource BodyForeground}"
-                Text="Search all experiment content for occurrences of the specified text (embedded document content is not searchable)."/>
+            <TextBlock TextWrapping="Wrap" Margin="0,2,0,2" Foreground="lightgray"
+                Text="Finds text anywhere in all finalized experiments:"/>
 
             <Grid >
                 <Grid.ColumnDefinitions>
