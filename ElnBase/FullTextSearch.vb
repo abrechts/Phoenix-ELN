@@ -27,8 +27,8 @@ Public Class FullTextSearch
 
     ''' <summary>
     ''' Gets all experiments containing at least one protocol item matching the specified search term, ordered
-    ''' by relevance (best match first). When querying the server database, only finalized experiments are 
-    ''' returned, the others are considered work in progress. Local searches return all experiments.
+    ''' by relevance (best match first). Only finalized experiments are returned, whether searching locally or
+    ''' on the server - unfinalized experiments are considered work in progress.
     ''' The whole search term is matched as a single literal phrase - e.g. searching "blue water" only finds experiments
     ''' where those words occur adjacent to each other and in that order, 
     ''' not experiments where "blue" and "water" merely occur somewhere independently. The last word
@@ -1144,6 +1144,12 @@ Public Class FullTextSearch
     ''' MySQL path removes the mismatch structurally instead of just retuning two separate numeric budgets that
     ''' count differently - both backends now produce an excerpt via the same code and the same
     ''' <see cref="SnippetWordBudget"/>, so they truncate at the same point for equivalent content by construction.
+    ''' <para>
+    ''' Joined against tblExperiments to restrict hits to finalized experiments only, same as
+    ''' <see cref="GetRankedHitsMySql"/> - filtering here, before the top-<see cref="MaxDisplayedResults"/> cutoff
+    ''' in <see cref="SearchExperiments"/>, so a search doesn't lose finalized matches to the cap being filled up
+    ''' by unfinalized ones ranked above them.
+    ''' </para>
     ''' </remarks>
     '''
     Private Shared Function GetRankedHits(quotedPhrase As String, searchTerm As String) As List(Of RankedHit)
@@ -1155,11 +1161,12 @@ Public Class FullTextSearch
             'Content is column index 2 in the SearchIndex table (0=ProtocolItemID, 1=ExperimentID, 2=Content).
             'bm25()/MATCH's left-hand side must reference the table unqualified - FTS5 parses that position
             'specially and a schema-qualified "mem.SearchIndex" errors there ("no such column"), even though the
-            'ordinary FROM clause below is fine (and needs to be) qualified. Unqualified resolution is
+            'ordinary FROM/JOIN clauses below are fine (and need to be) qualified. Unqualified resolution is
             'unambiguous since SearchIndex only ever exists in the "mem" schema, never in "main".
             command.CommandText =
-                "SELECT ProtocolItemID, ExperimentID, bm25(SearchIndex), Content " +
-                "FROM mem.SearchIndex WHERE SearchIndex MATCH @term"
+                "SELECT SearchIndex.ProtocolItemID, SearchIndex.ExperimentID, bm25(SearchIndex), SearchIndex.Content " +
+                "FROM mem.SearchIndex INNER JOIN main.tblExperiments ON main.tblExperiments.ExperimentID = SearchIndex.ExperimentID " +
+                "WHERE SearchIndex MATCH @term AND main.tblExperiments.WorkflowState = 1"
 
             Dim param = command.CreateParameter()
             param.ParameterName = "@term"
@@ -1208,11 +1215,10 @@ Public Class FullTextSearch
     ''' phrase-adjacent match verified afterward - an accepted imprecision, no worse than MySQL's relevance
     ''' score already being a rougher signal than SQLite's bm25 to begin with.
     ''' <para>
-    ''' Unlike the local FTS5 path (<see cref="GetRankedHits"/>), which returns matches from experiments of any
-    ''' workflow state, this filters to WorkflowState = 1 (Finalized) only - unfinalized experiments are
-    ''' work-in-progress, fine to surface for one's own local experiments, but not when searching other users'
-    ''' experiments on the server. Consistent with how other search types (e.g. StepExpSelector's server
-    ''' experiment picker) already restrict server-side results to finalized experiments.
+    ''' Filters to WorkflowState = 1 (Finalized) only, same as the local FTS5 path (<see cref="GetRankedHits"/>) -
+    ''' unfinalized experiments are work-in-progress and excluded from search results everywhere, not just when
+    ''' searching other users' experiments on the server. Consistent with how other search types (e.g.
+    ''' StepExpSelector's server experiment picker) already restrict server-side results to finalized experiments.
     ''' </para>
     ''' </remarks>
     '''

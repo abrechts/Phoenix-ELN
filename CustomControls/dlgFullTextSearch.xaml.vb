@@ -77,7 +77,7 @@ Public Class dlgFullTextSearch
         Dim result = _fullTextSearch.SearchExperiments(txtSearchTerm.Text, searchContext)
 
         lstResults.ItemsSource = result.Hits
-        blkHitInfo.Text = $"{result.Hits.Count} " + If(_lastSearchWasServer, "finalized ", "") + "experiment(s) found" +
+        blkHitInfo.Text = $"{result.Hits.Count} experiment(s) found" +
             If(result.WasTruncated, $" - showing the {FullTextSearch.MaxDisplayedResults} best matches only", "")
 
     End Sub
