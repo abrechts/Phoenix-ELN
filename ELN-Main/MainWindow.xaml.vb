@@ -250,7 +250,7 @@ Class MainWindow
 
                         If .IsServerQuery Then
                             'disable search until server conn established
-                            btnSearch.IsEnabled = False
+                            mnuSearch.IsEnabled = False
                         End If
 
                         ServerSync.CreateServerContextAsync(.ServerName, .ServerDbUserName, .ServerDbPassword, .ServerPort,
@@ -382,7 +382,7 @@ Class MainWindow
         Me.Cursor = Cursors.Arrow
         Me.ForceCursor = False
 
-        btnSearch.IsEnabled = True
+        mnuSearch.IsEnabled = True
 
         If serverContext IsNot Nothing Then
 
@@ -1747,7 +1747,7 @@ Class MainWindow
     End Sub
 
 
-    Private Sub btnSearch_Click() Handles btnSearch.Click
+    Private Sub mnuSearchRSS_Click() Handles mnuSearchRSS.MouseUp
 
         Dim searchDlg As New dlgSearch
         With searchDlg
@@ -1773,7 +1773,7 @@ Class MainWindow
     End Sub
 
 
-    Private Sub btnFullTextSearch_Click() Handles btnFullTextSearch.Click
+    Private Sub mnuFullTextSearch_Click() Handles mnuSearchFullText.MouseUp
 
         Dim searchDlg As New dlgFullTextSearch With {
             .LocalDBContext = DBContext,

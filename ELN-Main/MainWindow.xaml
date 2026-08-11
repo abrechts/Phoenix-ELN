@@ -132,21 +132,27 @@
                         </Button>
 
                         <Separator/>
+                        
+                        <Menu x:Name="mnuSearch" TextBlock.FontFamily="Segoe UI" TextBlock.FontSize="13" Background="transparent" 
+                            VerticalAlignment="Center" Margin="3,0,0,0">
 
-                        <Button x:Name="btnSearch" HorizontalAlignment="Left" VerticalAlignment="Center" ToolTip="Find experiments" Margin="2,0,0,0">
-                            <StackPanel Orientation="Horizontal">
-                                <ContentControl Content="{StaticResource icoSearch_Dark}" Height="16" Margin="0,1,4,0"/>
-                                <TextBlock Text="Search" Margin="0,0,2,0" VerticalAlignment="Center"/>
-                            </StackPanel>
-                        </Button>
+                            <Menu.Resources>
+                                <Style TargetType="{x:Type MenuItem}" BasedOn="{StaticResource DarkModeMenuStyle}"/>
+                            </Menu.Resources>
 
-                        <Button x:Name="btnFullTextSearch" HorizontalAlignment="Left" VerticalAlignment="Center" ToolTip="Full-text search across all experiments" 
-                      Margin="2,0,0,0" Visibility="visible">
-                            <StackPanel Orientation="Horizontal">
-                                <ContentControl Content="{StaticResource icoSearch_Dark}" Height="16" Margin="0,1,4,0"/>
-                                <TextBlock Text="Search Text" Margin="0,0,2,0" VerticalAlignment="Center"/>
-                            </StackPanel>
-                        </Button>
+                            <MenuItem Header="Search" Margin="1,1,1,0">
+
+                                <MenuItem.Icon>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="center">
+                                        <ContentControl Content="{StaticResource icoSearch_Dark}" Height="16" Margin="0,1,4,0"/>
+                                    </StackPanel>
+                                </MenuItem.Icon>
+
+                                <TextBlock x:Name="mnuSearchRSS" Text="Rxn Substructure ..." Margin="0,2,0,0"/>
+                                <TextBlock x:Name="mnuSearchFullText" Text="Full Text ..."/>
+                               
+                            </MenuItem>
+                        </Menu>
 
                         <Separator Margin="2,2,0,2"/>
 

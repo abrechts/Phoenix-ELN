@@ -58,8 +58,7 @@
 
             <Separator Margin="0,8,0,8" Height="0.9"/>
 
-            <TextBlock TextWrapping="Wrap" Margin="0,2,0,2" Foreground="lightgray"
-                Text="Finds text anywhere in all finalized experiments:"/>
+            <TextBlock TextWrapping="Wrap" Margin="0,2,0,2" Foreground="lightgray" Text="Find text within all finalized experiments (local or server):"/>
 
             <Grid >
                 <Grid.ColumnDefinitions>
