@@ -218,6 +218,26 @@ Public Class ExperimentTree
 
 
     ''' <summary>
+    ''' Collapses all currently expanded experiment group (folder) nodes in the tree, leaving
+    ''' project nodes as they are. Since IsExpanded is two-way bound directly to IsNodeExpanded,
+    ''' this only needs to update the underlying data - no TreeViewItem containers need to be
+    ''' realized/walked.
+    ''' </summary>
+    '''
+    Public Sub CollapseAll()
+
+        Dim currUser = CType(Me.DataContext, tblUsers)
+
+        For Each proj In currUser.tblProjects
+            For Each folder In proj.tblProjFolders
+                folder.IsNodeExpanded = 0
+            Next
+        Next
+
+    End Sub
+
+
+    ''' <summary>
     ''' Gets the currently highest project sequence number of the current user.  
     ''' </summary>
     ''' <returns>Highest sequence number, or -1 if no projects present so far.</returns>

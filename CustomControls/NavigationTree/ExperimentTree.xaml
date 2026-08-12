@@ -39,10 +39,12 @@
             <Setter Property="Padding" Value="5,4,8,4"/>
             <Setter Property="MaxWidth" Value="240"/>
             <Setter Property="IsHitTestVisible" Value="False"/>
+            
             <!--Seeds Foreground inheritance for descendant TextBlocks (child-row / "+N more" text) that don't set
                 their own Foreground - a Border has no Foreground of its own, so without this they default to
                 TextBlock's built-in black instead of following the active skin.-->
             <Setter Property="TextElement.Foreground" Value="{DynamicResource BodyForeground}"/>
+            
         </Style>
 
         <DataTemplate x:Key="dragAdornerProjectTemplate">
@@ -109,6 +111,7 @@
             since ExperimentTree's container-lookup helpers walk the known Project -> ProjFolder -> Experiment
             path, realizing each ancestor container in turn via VirtualizingPanel.BringIndexIntoViewPublic
             instead of requiring the whole tree pre-realized.-->
+        
         <TreeView x:Name="navTree" Background="Transparent"
             ItemsSource="{Binding tblProjects, Converter={StaticResource projectsCollectionViewConv}}"
             TreeViewItem.Selected="TreeViewItem_Selected" TreeViewItem.Unselected="TreeViewItem_Unselected" Padding="2,2,2,8" BorderThickness="0"
@@ -152,10 +155,12 @@
             <TreeView.ItemContainerStyle>
 
                 <Style TargetType="{x:Type TreeViewItem}">
+                    
                     <!--Specifies the selection/deselection background behavior of the expItem-->
                     <Setter Property="Template" Value="{StaticResource ExperimentTreeViewItem}"/>
                     <Setter Property="IsExpanded" Value="{Binding IsNodeExpanded,Converter={StaticResource intToBooleanConv},
                         Mode=TwoWay}"/>
+                    
                     <!--Every level (Project's Folders, Folder's Experiments) needs the same virtualizing panel as
                         the root TreeView, so ExperimentTree's container-lookup helpers can realize an off-screen
                         item's container at any depth, not just at the top level.-->
@@ -166,6 +171,7 @@
                             </ItemsPanelTemplate>
                         </Setter.Value>
                     </Setter>
+                    
                 </Style>
 
             </TreeView.ItemContainerStyle>

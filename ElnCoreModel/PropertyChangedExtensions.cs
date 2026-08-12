@@ -15,6 +15,10 @@ public partial class tblProjects : INotifyPropertyChanged
 {
 }
 
+public partial class tblProjFolders : INotifyPropertyChanged
+{
+}
+
 public partial class tblExperiments : INotifyPropertyChanged
 {
 }

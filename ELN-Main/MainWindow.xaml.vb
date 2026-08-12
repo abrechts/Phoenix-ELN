@@ -1575,6 +1575,23 @@ Class MainWindow
     End Sub
 
 
+    Private Sub btnCollapseAll_Click() Handles btnCollapseAll.Click
+
+        expNavTree.CollapseAll()
+
+    End Sub
+
+
+    Private Sub btnLocateExperiment_Click() Handles btnLocateExperiment.Click
+
+        Dim currExp = TryCast(SelectedExpContent()?.DataContext, tblExperiments)
+        If currExp IsNot Nothing Then
+            expNavTree.ScrollExperimentIntoView(currExp)
+        End If
+
+    End Sub
+
+
     Private Sub btnPrint_Click() Handles btnPrint.Click
 
         ExperimentPrint.Print(SelectedExpContent, False, Me)
