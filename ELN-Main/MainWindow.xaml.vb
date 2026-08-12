@@ -227,7 +227,7 @@ Class MainWindow
 
         'connect local database model with UI
         ApplyAllDataBindings(currUser)
-        cboUsers.SelectedItem = currUser
+        expNavTree.cboUsers.SelectedItem = currUser
 
         'update spell checker header with last used locale
         For Each spellItem In mnuSpelling.Items(0).items
@@ -899,25 +899,19 @@ Class MainWindow
     End Sub
 
 
-    Private Sub cboUsers_SelectionChanged(sender As Object, e As SelectionChangedEventArgs) Handles cboUsers.SelectionChanged
+    Private Sub expNavTree_SelectedUserChanged(sender As Object, currUser As tblUsers) Handles expNavTree.SelectedUserChanged
 
-        If cboUsers.SelectedItem IsNot Nothing Then
+        'set user as current
+        For Each user In DBContext.tblUsers
+            user.IsCurrent = 0
+        Next
+        currUser.IsCurrent = 1
 
-            Dim currUser = CType(cboUsers.SelectedItem, tblUsers)
+        ApplyAllDataBindings(currUser)
 
-            'set user as current
-            For Each user In DBContext.tblUsers
-                user.IsCurrent = 0
-            Next
-            currUser.IsCurrent = 1
-
-            ApplyAllDataBindings(currUser)
-
-            Dim currExp = (From exp In currUser.tblExperiments Where exp.IsCurrent = 1).FirstOrDefault
-            If currExp IsNot Nothing Then
-                expNavTree.SelectExperiment(currExp)
-            End If
-
+        Dim currExp = (From exp In currUser.tblExperiments Where exp.IsCurrent = 1).FirstOrDefault
+        If currExp IsNot Nothing Then
+            expNavTree.SelectExperiment(currExp)
         End If
 
     End Sub
@@ -956,7 +950,7 @@ Class MainWindow
                 ApplyAllDataBindings(currUser)
 
                 expNavTree.SelectExperiment(currUser.tblExperiments.First)
-                cboUsers.SelectedItem = currUser
+                expNavTree.cboUsers.SelectedItem = currUser
 
                 Dim res2 = cbMsgBox.Display("Done! - If the optional Phoenix ELN server " + vbCrLf +
                             "database is installed in your environment," + vbCrLf +
@@ -982,9 +976,9 @@ Class MainWindow
                 ApplyAllDataBindings(newUserEntry)
 
                 'cvs does not update automatically on added items
-                Dim cvsSortedUsers As CollectionViewSource = FindResource("cvsSortedUsers")
+                Dim cvsSortedUsers As CollectionViewSource = expNavTree.FindResource("cvsSortedUsers")
                 cvsSortedUsers.View.Refresh()
-                cboUsers.SelectedItem = newUserEntry
+                expNavTree.cboUsers.SelectedItem = newUserEntry
 
                 expNavTree.SelectExperiment(newUserEntry.tblExperiments.First)
 
@@ -1561,28 +1555,7 @@ Class MainWindow
     End Sub
 
 
-    Private Sub btnAddProject_Click() Handles btnAddProject.Click
-
-        expNavTree.AddProject()
-
-    End Sub
-
-
-    Private Sub btnAddFolder_Click() Handles btnAddFolder.Click
-
-        expNavTree.AddExpGroup()
-
-    End Sub
-
-
-    Private Sub btnCollapseAll_Click() Handles btnCollapseAll.Click
-
-        expNavTree.CollapseAll()
-
-    End Sub
-
-
-    Private Sub btnLocateExperiment_Click() Handles btnLocateExperiment.Click
+    Private Sub expNavTree_RequestLocateCurrentExperiment(sender As Object) Handles expNavTree.RequestLocateCurrentExperiment
 
         Dim currExp = TryCast(SelectedExpContent()?.DataContext, tblExperiments)
         If currExp IsNot Nothing Then

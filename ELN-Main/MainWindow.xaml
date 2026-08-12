@@ -4,8 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:custom="clr-namespace:CustomControls;assembly=CustomControls"
-        xmlns:data="clr-namespace:ElnCoreModel;assembly=ElnCoreModel" 
-        xmlns:componentModel="clr-namespace:System.ComponentModel;assembly=WindowsBase"
+        xmlns:data="clr-namespace:ElnCoreModel;assembly=ElnCoreModel"
         xmlns:local="clr-namespace:ChemBytes"
         mc:Ignorable="d" 
         d:DataContext="{d:DesignInstance Type=data:tblUsers}"
@@ -18,53 +17,6 @@
             <custom:DemoVisibilityConverter x:Key="demoVisConv"/>
             <custom:DemoToBooleanConverter x:Key="demoToBoolConv"/>
             <custom:BooleanInvertConverter x:Key="boolInvertConv"/>
-
-            <!-- Nav tree toolbar button chrome: plain icon buttons (no hover-text-color trigger needed) -->
-            <Style x:Key="NavToolbarIconButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
-                <Setter Property="Background" Value="{DynamicResource InputBackground}"/>
-                <Setter Property="BorderThickness" Value="0"/>
-            </Style>
-
-            <!-- Nav tree toolbar button chrome: icon+text buttons (dark+hover reverts text to Black) -->
-            <Style x:Key="NavToolbarTextButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
-                <Setter Property="Background" Value="{DynamicResource InputBackground}"/>
-                <Setter Property="BorderThickness" Value="0"/>
-                <Setter Property="Foreground" Value="{DynamicResource BodyForeground}"/>
-                <Style.Triggers>
-                    <MultiDataTrigger>
-                        <MultiDataTrigger.Conditions>
-                            <Condition Binding="{Binding IsDarkMode, ElementName=mainWin}" Value="True"/>
-                            <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource Self}}" Value="True"/>
-                        </MultiDataTrigger.Conditions>
-                        <Setter Property="Foreground" Value="Black"/>
-                    </MultiDataTrigger>
-                </Style.Triggers>
-            </Style>
-
-            <!-- Nav tree toolbar icon hover-swap: base Content comes from the DarkModeHelper.BaseContent
-                 attached DP (set per-instance to the theme-aware DynamicResource icon). While the ancestor
-                 Button is hovered in dark mode, Content reverts to HoverOverrideContent (the fixed light
-                 icon) so it stays legible against the button's light hover highlight.
-                 Base value must be a Style Setter (not a local attribute) so the trigger can override it. -->
-            <Style x:Key="IconHoverSwapStyle" TargetType="ContentControl">
-                <Setter Property="Content" Value="{Binding Path=(custom:DarkModeHelper.BaseContent), RelativeSource={RelativeSource Self}}"/>
-                <Style.Triggers>
-                    <MultiDataTrigger>
-                        <MultiDataTrigger.Conditions>
-                            <Condition Binding="{Binding IsDarkMode, ElementName=mainWin}" Value="True"/>
-                            <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=Button}}" Value="True"/>
-                        </MultiDataTrigger.Conditions>
-                        <Setter Property="Content" Value="{Binding Path=(custom:DarkModeHelper.HoverOverrideContent), RelativeSource={RelativeSource Self}}"/>
-                    </MultiDataTrigger>
-                </Style.Triggers>
-            </Style>
-
-            <!-- cboUsers sequenceNr sorting -->
-            <CollectionViewSource x:Key="cvsSortedUsers" Source="{Binding Database.tblUsers}">
-                <CollectionViewSource.SortDescriptions>
-                    <componentModel:SortDescription PropertyName="SequenceNr" Direction="Ascending"/>
-                </CollectionViewSource.SortDescriptions>
-            </CollectionViewSource>
 
         </ResourceDictionary>
 
@@ -330,61 +282,8 @@
                 Background="{DynamicResource NavPanelBackground}" BorderBrush="{DynamicResource PanelBorder}">
                 <DockPanel>
 
-                    <DockPanel DockPanel.Dock="top" Margin="6,6,6,0" HorizontalAlignment="Left">
-
-                        <custom:ThemedComboBox x:Name="cboUsers" CornerRadius="6" BorderThickness="1" Margin="1,0,2,0" VerticalAlignment="Center" 
-                                MinWidth="94" FontSize="11.5" FontFamily="Verdana" 
-                                ItemsSource="{Binding Source={StaticResource cvsSortedUsers}}" DisplayMemberPath="UserID" 
-                                IsDarkMode="{Binding IsDarkMode, RelativeSource={RelativeSource AncestorType={x:Type local:MainWindow}}}" 
-                                IconDark="{StaticResource icoUser2_Dark}"
-                                IconLight="{StaticResource icoUser2}" 
-                                ItemMouseOverBackgroundDark="#FF1E4B6D" 
-                                BorderBrushDark="#FF6D6D6D" 
-                                BackgroundDark="#FF333333"/>
-
-                        <Button x:Name="btnAddProject" Style="{StaticResource NavToolbarTextButtonStyle}" VerticalAlignment="Center"
-                          ToolTip="Add a new project" Margin="4,0,4,0" Padding="3,1,5,4">
-                            <StackPanel Orientation="Horizontal">
-                                <ContentControl Style="{StaticResource IconHoverSwapStyle}" Height="16" Margin="3,1,4,0"
-                                    custom:DarkModeHelper.BaseContent="{DynamicResource NewFolderIcon}"
-                                    custom:DarkModeHelper.HoverOverrideContent="{StaticResource icoNewFolder}"/>
-                                <TextBlock Text="Add" Margin="0,0,2,-2" VerticalAlignment="Center" FontFamily="Verdana" FontSize="11.5"/>
-                            </StackPanel>
-                        </Button>
-
-                        <Button x:Name="btnAddFolder" Style="{StaticResource NavToolbarTextButtonStyle}" VerticalAlignment="Center" Margin="0,0,0,0" Padding="3,1,3,3"
-                            ToolTip="Add an experiment group to the current project.&#x0a;----------------------------------------------------&#x0a;Experiment groups let you organize your project experiments into user-defined &#x0a;categories such as ‘Preliminary Experiments’, ‘Optimized Synthesis’, ‘Step 1’, etc.  &#x0a;&#x0a;Initially, all project experiments are in the default group ‘All experiments’.&#x0a;">
-                            <StackPanel Orientation="Horizontal">
-                                <Grid>
-                                    <ContentControl Style="{StaticResource IconHoverSwapStyle}" Height="16" HorizontalAlignment="Left" Margin="6,2,0,0"
-                                        custom:DarkModeHelper.BaseContent="{DynamicResource GrayDotIcon}"
-                                        custom:DarkModeHelper.HoverOverrideContent="{StaticResource icoGrayDot}"/>
-                                    <ContentControl Style="{StaticResource IconHoverSwapStyle}" Height="12" HorizontalAlignment="Left" VerticalAlignment="Top"
-                                        custom:DarkModeHelper.BaseContent="{DynamicResource NewIcon}"
-                                        custom:DarkModeHelper.HoverOverrideContent="{StaticResource icoNew}"/>
-                                </Grid>
-                                <TextBlock Text="Add" Margin="0,0,4,0" VerticalAlignment="Center" FontFamily="Verdana" FontSize="11.5"/>
-                            </StackPanel>
-                        </Button>
-
-                            <Button x:Name="btnCollapseAll" Style="{StaticResource NavToolbarIconButtonStyle}" VerticalAlignment="Center" Margin="4,0,0,0" Padding="3,1,3,3"
-                            ToolTip="Collapse all expanded project groups">
-                                <ContentControl Style="{StaticResource IconHoverSwapStyle}" Height="16" Width="14" Margin="1,1,1,0"
-                                    custom:DarkModeHelper.BaseContent="{DynamicResource CollapseAllIcon}"
-                                    custom:DarkModeHelper.HoverOverrideContent="{StaticResource icoCollapseAll}"/>
-                            </Button>
-
-                            <Button x:Name="btnLocateExperiment" Style="{StaticResource NavToolbarIconButtonStyle}" VerticalAlignment="Center" Margin="4,0,0,0" Padding="3,1,3,3"
-                            ToolTip="Expand to the current experiment.">
-                                <ContentControl Style="{StaticResource IconHoverSwapStyle}" Height="16" Width="16" Margin="1,1,1,0"
-                                    custom:DarkModeHelper.BaseContent="{DynamicResource LocateExperimentIcon}"
-                                    custom:DarkModeHelper.HoverOverrideContent="{StaticResource icoLocateExperiment}"/>
-                            </Button>
-
-                        </DockPanel>
-
                     <custom:ExperimentTree x:Name="expNavTree" FontFamily="Calibri" FontSize="13" Margin="6"/>
-                    
+
                 </DockPanel>
             </Border>
         </Grid>

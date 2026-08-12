@@ -11,6 +11,14 @@ Public Class ExperimentTree
 
     Public Event RequestAddExperiment(sender As Object, projFolderEntry As tblProjFolders)
 
+    ' Raised instead of scrolling directly, since "the currently displayed experiment" is
+    ' MainWindow-level state (which tab is open) that ExperimentTree has no access to.
+    Public Event RequestLocateCurrentExperiment(sender As Object)
+
+    ' Raised instead of handling the switch directly, since reacting to a user change
+    ' (ApplyAllDataBindings etc.) is MainWindow-level state well beyond the tree itself.
+    Public Event SelectedUserChanged(sender As Object, newUser As tblUsers)
+
 
     ' Prevents TreeViewItem_Selected from raising a redundant, reentrant ExperimentSelected event
     ' when SelectExperiment already raises it explicitly (see ScrollExperimentIntoView).
@@ -21,6 +29,43 @@ Public Class ExperimentTree
 
         ' This call is required by the designer.
         InitializeComponent()
+
+    End Sub
+
+
+    Private Sub btnAddProject_Click(sender As Object, e As RoutedEventArgs)
+
+        AddProject()
+
+    End Sub
+
+
+    Private Sub btnAddFolder_Click(sender As Object, e As RoutedEventArgs)
+
+        AddExpGroup()
+
+    End Sub
+
+
+    Private Sub btnCollapseAll_Click(sender As Object, e As RoutedEventArgs)
+
+        CollapseAll()
+
+    End Sub
+
+
+    Private Sub btnLocateExperiment_Click(sender As Object, e As RoutedEventArgs)
+
+        RaiseEvent RequestLocateCurrentExperiment(Me)
+
+    End Sub
+
+
+    Private Sub cboUsers_SelectionChanged(sender As Object, e As SelectionChangedEventArgs)
+
+        If cboUsers.SelectedItem IsNot Nothing Then
+            RaiseEvent SelectedUserChanged(Me, CType(cboUsers.SelectedItem, tblUsers))
+        End If
 
     End Sub
 
