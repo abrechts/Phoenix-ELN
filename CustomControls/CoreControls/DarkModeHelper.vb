@@ -30,6 +30,47 @@ Public Class DarkModeHelper
     End Sub
 
     ''' <summary>
+    ''' Attached DPs used to parameterize the shared IconHoverSwapStyle. BaseContent is the
+    ''' normal, already theme-aware icon (a DynamicResource skin forwarder that tracks light/dark
+    ''' on its own). HoverOverrideContent is a fixed icon substituted only while the ancestor
+    ''' Button is hovered in dark mode, because the button's hover highlight is light-colored even
+    ''' in dark mode, so the dark-themed icon would lose contrast against it - this is a hover/theme
+    ''' interaction state, not a theme swap, so it can't be expressed by BaseContent's DynamicResource
+    ''' alone.
+    ''' </summary>
+    '''
+    Public Shared ReadOnly BaseContentProperty As DependencyProperty =
+        DependencyProperty.RegisterAttached("BaseContent", GetType(Object), GetType(DarkModeHelper))
+
+    Public Shared Function GetBaseContent(obj As DependencyObject) As Object
+
+        Return obj.GetValue(BaseContentProperty)
+
+    End Function
+
+    Public Shared Sub SetBaseContent(obj As DependencyObject, value As Object)
+
+        obj.SetValue(BaseContentProperty, value)
+
+    End Sub
+
+    Public Shared ReadOnly HoverOverrideContentProperty As DependencyProperty =
+        DependencyProperty.RegisterAttached("HoverOverrideContent", GetType(Object), GetType(DarkModeHelper))
+
+    Public Shared Function GetHoverOverrideContent(obj As DependencyObject) As Object
+
+        Return obj.GetValue(HoverOverrideContentProperty)
+
+    End Function
+
+    Public Shared Sub SetHoverOverrideContent(obj As DependencyObject, value As Object)
+
+        obj.SetValue(HoverOverrideContentProperty, value)
+
+    End Sub
+
+
+    ''' <summary>
     ''' Replaces the application level skin resource dictionary (SkinLight.xaml/SkinDark.xaml),
     ''' updating all brushes referenced via DynamicResource. Both skins define an identical
     ''' set of role-named brush keys.

@@ -19,6 +19,46 @@
             <custom:DemoToBooleanConverter x:Key="demoToBoolConv"/>
             <custom:BooleanInvertConverter x:Key="boolInvertConv"/>
 
+            <!-- Nav tree toolbar button chrome: plain icon buttons (no hover-text-color trigger needed) -->
+            <Style x:Key="NavToolbarIconButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                <Setter Property="Background" Value="{DynamicResource InputBackground}"/>
+                <Setter Property="BorderThickness" Value="0"/>
+            </Style>
+
+            <!-- Nav tree toolbar button chrome: icon+text buttons (dark+hover reverts text to Black) -->
+            <Style x:Key="NavToolbarTextButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                <Setter Property="Background" Value="{DynamicResource InputBackground}"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Foreground" Value="{DynamicResource BodyForeground}"/>
+                <Style.Triggers>
+                    <MultiDataTrigger>
+                        <MultiDataTrigger.Conditions>
+                            <Condition Binding="{Binding IsDarkMode, ElementName=mainWin}" Value="True"/>
+                            <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource Self}}" Value="True"/>
+                        </MultiDataTrigger.Conditions>
+                        <Setter Property="Foreground" Value="Black"/>
+                    </MultiDataTrigger>
+                </Style.Triggers>
+            </Style>
+
+            <!-- Nav tree toolbar icon hover-swap: base Content comes from the DarkModeHelper.BaseContent
+                 attached DP (set per-instance to the theme-aware DynamicResource icon). While the ancestor
+                 Button is hovered in dark mode, Content reverts to HoverOverrideContent (the fixed light
+                 icon) so it stays legible against the button's light hover highlight.
+                 Base value must be a Style Setter (not a local attribute) so the trigger can override it. -->
+            <Style x:Key="IconHoverSwapStyle" TargetType="ContentControl">
+                <Setter Property="Content" Value="{Binding Path=(custom:DarkModeHelper.BaseContent), RelativeSource={RelativeSource Self}}"/>
+                <Style.Triggers>
+                    <MultiDataTrigger>
+                        <MultiDataTrigger.Conditions>
+                            <Condition Binding="{Binding IsDarkMode, ElementName=mainWin}" Value="True"/>
+                            <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=Button}}" Value="True"/>
+                        </MultiDataTrigger.Conditions>
+                        <Setter Property="Content" Value="{Binding Path=(custom:DarkModeHelper.HoverOverrideContent), RelativeSource={RelativeSource Self}}"/>
+                    </MultiDataTrigger>
+                </Style.Triggers>
+            </Style>
+
             <!-- cboUsers sequenceNr sorting -->
             <CollectionViewSource x:Key="cvsSortedUsers" Source="{Binding Database.tblUsers}">
                 <CollectionViewSource.SortDescriptions>
@@ -302,168 +342,43 @@
                                 BorderBrushDark="#FF6D6D6D" 
                                 BackgroundDark="#FF333333"/>
 
-                        <Button x:Name="btnAddProject" VerticalAlignment="Center" ToolTip="Add a new project" Margin="4,0,4,0" 
-                          Padding="3,1,5,4" >
-                            <Button.Style>
-                                <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
-                                    <Setter Property="Background" Value="{DynamicResource InputBackground}"/>
-                                    <Setter Property="BorderThickness" Value="0"/>
-                                    <Setter Property="TextBlock.Foreground" Value="{DynamicResource BodyForeground}"/>
-                                    <Style.Triggers>
-                                        <MultiDataTrigger>
-                                            <MultiDataTrigger.Conditions>
-                                                <Condition Binding="{Binding IsDarkMode, ElementName=mainWin}" Value="True"/>
-                                                <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource Self}}" Value="True"/>
-                                            </MultiDataTrigger.Conditions>
-                                            <Setter Property="TextBlock.Foreground" Value="Black"/>
-                                        </MultiDataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Button.Style>
+                        <Button x:Name="btnAddProject" Style="{StaticResource NavToolbarTextButtonStyle}" VerticalAlignment="Center"
+                          ToolTip="Add a new project" Margin="4,0,4,0" Padding="3,1,5,4">
                             <StackPanel Orientation="Horizontal">
-                                <ContentControl Height="16" Margin="3,1,4,0">
-                                    <ContentControl.Style>
-                                        <Style TargetType="ContentControl">
-                                            <Setter Property="Content" Value="{DynamicResource NewFolderIcon}"/>
-                                            <Style.Triggers>
-                                                <MultiDataTrigger>
-                                                    <MultiDataTrigger.Conditions>
-                                                        <Condition Binding="{Binding IsDarkMode, ElementName=mainWin}" Value="True"/>
-                                                        <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=Button}}" Value="True"/>
-                                                    </MultiDataTrigger.Conditions>
-                                                    <Setter Property="Content" Value="{StaticResource icoNewFolder}"/>
-                                                </MultiDataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </ContentControl.Style>
-                                </ContentControl>
+                                <ContentControl Style="{StaticResource IconHoverSwapStyle}" Height="16" Margin="3,1,4,0"
+                                    custom:DarkModeHelper.BaseContent="{DynamicResource NewFolderIcon}"
+                                    custom:DarkModeHelper.HoverOverrideContent="{StaticResource icoNewFolder}"/>
                                 <TextBlock Text="Add" Margin="0,0,2,-2" VerticalAlignment="Center" FontFamily="Verdana" FontSize="11.5"/>
                             </StackPanel>
                         </Button>
 
-                        <Button x:Name="btnAddFolder" VerticalAlignment="Center" Margin="0,0,0,0" Padding="3,1,3,3"
+                        <Button x:Name="btnAddFolder" Style="{StaticResource NavToolbarTextButtonStyle}" VerticalAlignment="Center" Margin="0,0,0,0" Padding="3,1,3,3"
                             ToolTip="Add an experiment group to the current project.&#x0a;----------------------------------------------------&#x0a;Experiment groups let you organize your project experiments into user-defined &#x0a;categories such as ‘Preliminary Experiments’, ‘Optimized Synthesis’, ‘Step 1’, etc.  &#x0a;&#x0a;Initially, all project experiments are in the default group ‘All experiments’.&#x0a;">
-                            <Button.Style>
-                                <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
-                                    <Setter Property="Background" Value="{DynamicResource InputBackground}"/>
-                                    <Setter Property="BorderThickness" Value="0"/>
-                                    <Setter Property="Foreground" Value="{DynamicResource BodyForeground}"/>
-                                    <Style.Triggers>
-                                        <MultiDataTrigger>
-                                            <MultiDataTrigger.Conditions>
-                                                <Condition Binding="{Binding IsDarkMode, ElementName=mainWin}" Value="True"/>
-                                                <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource Self}}" Value="True"/>
-                                            </MultiDataTrigger.Conditions>
-                                            <Setter Property="Foreground" Value="Black"/>
-                                        </MultiDataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Button.Style>
                             <StackPanel Orientation="Horizontal">
                                 <Grid>
-                                    <ContentControl Height="16" HorizontalAlignment="Left" Margin="6,2,0,0">
-                                        <ContentControl.Style>
-                                            <Style TargetType="ContentControl">
-                                                <Setter Property="Content" Value="{DynamicResource GrayDotIcon}"/>
-                                                <Style.Triggers>
-                                                    <MultiDataTrigger>
-                                                        <MultiDataTrigger.Conditions>
-                                                            <Condition Binding="{Binding IsDarkMode, ElementName=mainWin}" Value="True"/>
-                                                            <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=Button}}" Value="True"/>
-                                                        </MultiDataTrigger.Conditions>
-                                                        <Setter Property="Content" Value="{StaticResource icoGrayDot}"/>
-                                                    </MultiDataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </ContentControl.Style>
-                                    </ContentControl>
-                                    <ContentControl Height="12" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top">
-                                        <ContentControl.Style>
-                                            <Style TargetType="ContentControl">
-                                                <Setter Property="Content" Value="{DynamicResource NewIcon}"/>
-                                                <Style.Triggers>
-                                                    <MultiDataTrigger>
-                                                        <MultiDataTrigger.Conditions>
-                                                            <Condition Binding="{Binding IsDarkMode, ElementName=mainWin}" Value="True"/>
-                                                            <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=Button}}" Value="True"/>
-                                                        </MultiDataTrigger.Conditions>
-                                                        <Setter Property="Content" Value="{StaticResource icoNew}"/>
-                                                    </MultiDataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </ContentControl.Style>
-                                    </ContentControl>
+                                    <ContentControl Style="{StaticResource IconHoverSwapStyle}" Height="16" HorizontalAlignment="Left" Margin="6,2,0,0"
+                                        custom:DarkModeHelper.BaseContent="{DynamicResource GrayDotIcon}"
+                                        custom:DarkModeHelper.HoverOverrideContent="{StaticResource icoGrayDot}"/>
+                                    <ContentControl Style="{StaticResource IconHoverSwapStyle}" Height="12" HorizontalAlignment="Left" VerticalAlignment="Top"
+                                        custom:DarkModeHelper.BaseContent="{DynamicResource NewIcon}"
+                                        custom:DarkModeHelper.HoverOverrideContent="{StaticResource icoNew}"/>
                                 </Grid>
                                 <TextBlock Text="Add" Margin="0,0,4,0" VerticalAlignment="Center" FontFamily="Verdana" FontSize="11.5"/>
                             </StackPanel>
                         </Button>
 
-                            <Button x:Name="btnCollapseAll" VerticalAlignment="Center" Margin="4,0,0,0" Padding="3,1,3,3"
+                            <Button x:Name="btnCollapseAll" Style="{StaticResource NavToolbarIconButtonStyle}" VerticalAlignment="Center" Margin="4,0,0,0" Padding="3,1,3,3"
                             ToolTip="Collapse all expanded project groups">
-                                <Button.Style>
-                                    <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
-                                        <Setter Property="Background" Value="{DynamicResource InputBackground}"/>
-                                        <Setter Property="BorderThickness" Value="0"/>
-                                        <Style.Triggers>
-                                            <MultiDataTrigger>
-                                                <MultiDataTrigger.Conditions>
-                                                    <Condition Binding="{Binding IsDarkMode, ElementName=mainWin}" Value="True"/>
-                                                    <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource Self}}" Value="True"/>
-                                                </MultiDataTrigger.Conditions>
-                                            </MultiDataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Button.Style>
-                                <ContentControl Height="16" Width="14" Margin="1,1,1,0">
-                                    <ContentControl.Style>
-                                        <Style TargetType="ContentControl">
-                                            <Setter Property="Content" Value="{DynamicResource CollapseAllIcon}"/>
-                                            <Style.Triggers>
-                                                <MultiDataTrigger>
-                                                    <MultiDataTrigger.Conditions>
-                                                        <Condition Binding="{Binding IsDarkMode, ElementName=mainWin}" Value="True"/>
-                                                        <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=Button}}" Value="True"/>
-                                                    </MultiDataTrigger.Conditions>
-                                                    <Setter Property="Content" Value="{StaticResource icoCollapseAll}"/>
-                                                </MultiDataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </ContentControl.Style>
-                                </ContentControl>
+                                <ContentControl Style="{StaticResource IconHoverSwapStyle}" Height="16" Width="14" Margin="1,1,1,0"
+                                    custom:DarkModeHelper.BaseContent="{DynamicResource CollapseAllIcon}"
+                                    custom:DarkModeHelper.HoverOverrideContent="{StaticResource icoCollapseAll}"/>
                             </Button>
 
-                            <Button x:Name="btnLocateExperiment" VerticalAlignment="Center" Margin="4,0,0,0" Padding="3,1,3,3"
+                            <Button x:Name="btnLocateExperiment" Style="{StaticResource NavToolbarIconButtonStyle}" VerticalAlignment="Center" Margin="4,0,0,0" Padding="3,1,3,3"
                             ToolTip="Expand to the current experiment.">
-                                <Button.Style>
-                                    <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
-                                        <Setter Property="Background" Value="{DynamicResource InputBackground}"/>
-                                        <Setter Property="BorderThickness" Value="0"/>
-                                        <Style.Triggers>
-                                            <MultiDataTrigger>
-                                                <MultiDataTrigger.Conditions>
-                                                    <Condition Binding="{Binding IsDarkMode, ElementName=mainWin}" Value="True"/>
-                                                    <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource Self}}" Value="True"/>
-                                                </MultiDataTrigger.Conditions>
-                                            </MultiDataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Button.Style>
-                                <ContentControl Height="16" Width="16" Margin="1,1,1,0">
-                                    <ContentControl.Style>
-                                        <Style TargetType="ContentControl">
-                                            <Setter Property="Content" Value="{DynamicResource LocateExperimentIcon}"/>
-                                            <Style.Triggers>
-                                                <MultiDataTrigger>
-                                                    <MultiDataTrigger.Conditions>
-                                                        <Condition Binding="{Binding IsDarkMode, ElementName=mainWin}" Value="True"/>
-                                                        <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=Button}}" Value="True"/>
-                                                    </MultiDataTrigger.Conditions>
-                                                    <Setter Property="Content" Value="{StaticResource icoLocateExperiment}"/>
-                                                </MultiDataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </ContentControl.Style>
-                                </ContentControl>
+                                <ContentControl Style="{StaticResource IconHoverSwapStyle}" Height="16" Width="16" Margin="1,1,1,0"
+                                    custom:DarkModeHelper.BaseContent="{DynamicResource LocateExperimentIcon}"
+                                    custom:DarkModeHelper.HoverOverrideContent="{StaticResource icoLocateExperiment}"/>
                             </Button>
 
                         </DockPanel>
