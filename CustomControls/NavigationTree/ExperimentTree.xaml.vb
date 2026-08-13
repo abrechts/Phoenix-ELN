@@ -13,15 +13,18 @@ Public Class ExperimentTree
 
     ' Raised instead of scrolling directly, since "the currently displayed experiment" is
     ' MainWindow-level state (which tab is open) that ExperimentTree has no access to.
+
     Public Event RequestLocateCurrentExperiment(sender As Object)
 
     ' Raised instead of handling the switch directly, since reacting to a user change
     ' (ApplyAllDataBindings etc.) is MainWindow-level state well beyond the tree itself.
+
     Public Event SelectedUserChanged(sender As Object, newUser As tblUsers)
 
 
     ' Prevents TreeViewItem_Selected from raising a redundant, reentrant ExperimentSelected event
     ' when SelectExperiment already raises it explicitly (see ScrollExperimentIntoView).
+
     Private _suppressTreeSelectedEvent As Boolean = False
 
 
@@ -47,15 +50,76 @@ Public Class ExperimentTree
     End Sub
 
 
+    Private Sub btnNavMenu_Click(sender As Object, e As RoutedEventArgs)
+
+        If Not navMenuPopup.IsOpen Then RefreshNavMenuSkin()
+        navMenuPopup.IsOpen = Not navMenuPopup.IsOpen
+
+    End Sub
+
+
+    ' Popup content is logically disconnected from the tree that ApplySkin's resource-dictionary
+    ' swap invalidates, so every DynamicResource binding inside navMenuPopup freezes at whichever
+    ' skin was active when the popup was first realized. Re-applying SetResourceReference forces
+    ' each one to look up the currently active skin fresh. Add new menu items' brushes/icons here too.
+
+    Private Sub RefreshNavMenuSkin()
+
+        navMenuBorder.SetResourceReference(Border.BackgroundProperty, "InnerPanelBackground")
+        navMenuBorder.SetResourceReference(Border.BorderBrushProperty, "TreePanelBorder")
+
+        ' Foreground is refreshed by reapplying the Style rather than SetResourceReference: a local
+        ' value permanently outranks Style triggers, which would silence NavToolbarTextButtonStyle's
+        ' dark+hover MultiDataTrigger (Foreground -> Black, needed since the hover highlight itself
+        ' stays light-colored in dark mode). Reapplying the Style re-evaluates its own DynamicResource
+        ' Setter fresh while leaving the trigger free to still override it on hover.
+        RefreshButtonStyle(btnCollapseAll)
+        RefreshButtonStyle(btnExpandAll)
+        RefreshButtonStyle(btnLocateExperiment)
+
+        iconCollapseAll.SetResourceReference(DarkModeHelper.BaseContentProperty, "CollapseAllIcon")
+        iconExpandAll.SetResourceReference(DarkModeHelper.BaseContentProperty, "ExpandAllIcon")
+        iconLocateExperiment.SetResourceReference(DarkModeHelper.BaseContentProperty, "LocateExperimentIcon")
+
+    End Sub
+
+
+    Private Sub RefreshButtonStyle(btn As Button)
+
+        Dim navTextButtonStyle = TryCast(Me.TryFindResource("NavToolbarTextButtonStyle"), Style)
+        btn.Style = Nothing
+        btn.Style = navTextButtonStyle
+
+    End Sub
+
+
     Private Sub btnCollapseAll_Click(sender As Object, e As RoutedEventArgs)
 
-        CollapseAll()
+        navMenuPopup.IsOpen = False
+        CollapseExperiments()
+
+    End Sub
+
+
+    Private Sub btnCollapseProjects_Click(sender As Object, e As RoutedEventArgs)
+
+        navMenuPopup.IsOpen = False
+        CollapseProjects()
+
+    End Sub
+
+
+    Private Sub btnExpandAll_Click()
+
+        navMenuPopup.IsOpen = False
+        ExpandAll()
 
     End Sub
 
 
     Private Sub btnLocateExperiment_Click(sender As Object, e As RoutedEventArgs)
 
+        navMenuPopup.IsOpen = False
         RaiseEvent RequestLocateCurrentExperiment(Me)
 
     End Sub
@@ -262,20 +326,39 @@ Public Class ExperimentTree
     End Sub
 
 
-    ''' <summary>
-    ''' Collapses all currently expanded experiment group (folder) nodes in the tree, leaving
-    ''' project nodes as they are. Since IsExpanded is two-way bound directly to IsNodeExpanded,
-    ''' this only needs to update the underlying data - no TreeViewItem containers need to be
-    ''' realized/walked.
-    ''' </summary>
-    '''
-    Public Sub CollapseAll()
+    Public Sub CollapseExperiments()
 
         Dim currUser = CType(Me.DataContext, tblUsers)
 
         For Each proj In currUser.tblProjects
             For Each folder In proj.tblProjFolders
                 folder.IsNodeExpanded = 0
+            Next
+        Next
+
+    End Sub
+
+
+    Public Sub CollapseProjects()
+
+        Dim currUser = CType(Me.DataContext, tblUsers)
+
+        For Each proj In currUser.tblProjects
+            proj.IsNodeExpanded = 0
+        Next
+
+    End Sub
+
+
+
+    Public Sub ExpandAll()
+
+        Dim currUser = CType(Me.DataContext, tblUsers)
+
+        For Each proj In currUser.tblProjects
+            proj.IsNodeExpanded = 1
+            For Each folder In proj.tblProjFolders
+                folder.IsNodeExpanded = 1
             Next
         Next
 

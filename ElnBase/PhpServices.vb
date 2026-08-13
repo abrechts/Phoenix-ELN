@@ -35,7 +35,7 @@ Public Class PhpServices
     ''' <param name="appVersion">The installed/upgraded application version</param>
     ''' <param name="expContext">The current local database context.</param>
     ''' 
-    Public Shared Async Sub SendInstallInfo(appVersion As String, expContext As ElnDbContext, isServerEnabled As Boolean)
+    Public Shared Async Sub SendInstallInfo(appVersion As String, expContext As ElnDbContext, isServerEnabled As Boolean, isDarkMode As Boolean)
 
         Dim UTCOffset = TimeZoneInfo.Local.BaseUtcOffset.TotalHours.ToString()
         Dim nonDemoExpCount = Aggregate exp In expContext.tblExperiments Into Count(exp.UserID <> "demo")
@@ -51,6 +51,7 @@ Public Class PhpServices
             .Add("OSVersion", OSVersion)
             .Add("OSBits", OSBits)
             .Add("expCount", nonDemoExpCount.ToString)
+            .Add("isDarkMode", If(isDarkMode, 1, 0))
             .Add("serverEnabled", If(isServerEnabled, 1, 0))
         End With
 

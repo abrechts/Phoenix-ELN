@@ -266,7 +266,7 @@
             </Grid>
         </Border>
 
-        <Grid DockPanel.Dock="left" Width="316">
+        <Grid DockPanel.Dock="left" Width="325">
             <Grid.Style>
                 <Style TargetType="Grid">
                     <Style.Triggers>

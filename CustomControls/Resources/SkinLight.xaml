@@ -53,6 +53,8 @@
     <ContentControl x:Key="FolderClosedIcon" x:Shared="false" Content="{StaticResource icoFolderClosed}"/>
     <ContentControl x:Key="WarningCircleIcon" x:Shared="false" Content="{StaticResource icoWarningCircleRed}"/>
     <ContentControl x:Key="CollapseAllIcon" x:Shared="false" Content="{StaticResource icoCollapseAll}"/>
+    <ContentControl x:Key="ExpandAllIcon" x:Shared="false" Content="{StaticResource icoExpandAll}"/>
     <ContentControl x:Key="LocateExperimentIcon" x:Shared="false" Content="{StaticResource icoLocateExperiment}"/>
+    <ContentControl x:Key="TreeViewOptionsIcon" x:Shared="false" Content="{StaticResource icoTreeViewOptions}"/>
 
 </ResourceDictionary>

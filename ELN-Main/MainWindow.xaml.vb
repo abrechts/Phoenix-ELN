@@ -190,7 +190,7 @@ Class MainWindow
 
         'Version update: Send install statistics
         If _IsVersionUpgrade Then
-            PhpServices.SendInstallInfo(ApplicationVersion.ToString(3), DBContext, CustomControls.My.MySettings.Default.IsServerSpecified)
+            PhpServices.SendInstallInfo(ApplicationVersion.ToString(3), DBContext, CustomControls.My.MySettings.Default.IsServerSpecified, Me.IsDarkMode)
         End If
 
         RemainingDemoCountConverter.MaxDemoCount = 15
