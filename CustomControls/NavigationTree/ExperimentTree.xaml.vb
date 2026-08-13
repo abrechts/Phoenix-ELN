@@ -13,15 +13,18 @@ Public Class ExperimentTree
 
     ' Raised instead of scrolling directly, since "the currently displayed experiment" is
     ' MainWindow-level state (which tab is open) that ExperimentTree has no access to.
+
     Public Event RequestLocateCurrentExperiment(sender As Object)
 
     ' Raised instead of handling the switch directly, since reacting to a user change
     ' (ApplyAllDataBindings etc.) is MainWindow-level state well beyond the tree itself.
+
     Public Event SelectedUserChanged(sender As Object, newUser As tblUsers)
 
 
     ' Prevents TreeViewItem_Selected from raising a redundant, reentrant ExperimentSelected event
     ' when SelectExperiment already raises it explicitly (see ScrollExperimentIntoView).
+
     Private _suppressTreeSelectedEvent As Boolean = False
 
 
@@ -50,6 +53,13 @@ Public Class ExperimentTree
     Private Sub btnCollapseAll_Click(sender As Object, e As RoutedEventArgs)
 
         CollapseAll()
+
+    End Sub
+
+
+    Private Sub btnExpandAll_Click()
+
+        ExpandAll()
 
     End Sub
 
@@ -264,9 +274,7 @@ Public Class ExperimentTree
 
     ''' <summary>
     ''' Collapses all currently expanded experiment group (folder) nodes in the tree, leaving
-    ''' project nodes as they are. Since IsExpanded is two-way bound directly to IsNodeExpanded,
-    ''' this only needs to update the underlying data - no TreeViewItem containers need to be
-    ''' realized/walked.
+    ''' project nodes as they are.
     ''' </summary>
     '''
     Public Sub CollapseAll()
@@ -276,6 +284,20 @@ Public Class ExperimentTree
         For Each proj In currUser.tblProjects
             For Each folder In proj.tblProjFolders
                 folder.IsNodeExpanded = 0
+            Next
+        Next
+
+    End Sub
+
+
+    Public Sub ExpandAll()
+
+        Dim currUser = CType(Me.DataContext, tblUsers)
+
+        For Each proj In currUser.tblProjects
+            proj.IsNodeExpanded = True
+            For Each folder In proj.tblProjFolders
+                folder.IsNodeExpanded = 1
             Next
         Next
 
