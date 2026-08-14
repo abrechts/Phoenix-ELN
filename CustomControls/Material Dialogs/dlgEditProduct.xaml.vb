@@ -107,6 +107,7 @@ Public Class dlgEditProduct
             pnlResinLoad.Visibility = If(SketchInfo.Products(0).IsAttachedToResin, Visibility.Visible, Visibility.Collapsed)
             blkMW.Text = SketchInfo.Products(0).Molweight.ToString("0.00")
             txtMatName.Text = If(ProductEntry.Name, "Product")
+            txtBatchID.Text = ProductEntry.BatchID
             SetTheoreticAmount()
 
         End If
@@ -119,6 +120,7 @@ Public Class dlgEditProduct
         pnlResinLoad.Visibility = If(SketchInfo.Products(1).IsAttachedToResin, Visibility.Visible, Visibility.Collapsed)
         blkMW.Text = SketchInfo.Products(1).Molweight.ToString("0.00")
         txtMatName.Text = If(ProductEntry.Name, "Side Prod 1")
+        txtBatchID.Text = ProductEntry.BatchID
         SetTheoreticAmount()
 
     End Sub
@@ -129,6 +131,7 @@ Public Class dlgEditProduct
         pnlResinLoad.Visibility = If(SketchInfo.Products(2).IsAttachedToResin, Visibility.Visible, Visibility.Collapsed)
         blkMW.Text = SketchInfo.Products(2).Molweight.ToString("0.00")
         txtMatName.Text = If(ProductEntry.Name, "Side Prod 2")
+        txtBatchID.Text = ProductEntry.BatchID
         SetTheoreticAmount()
 
     End Sub
@@ -141,6 +144,7 @@ Public Class dlgEditProduct
         With ProductEntry
 
             txtMatName.Text = .Name
+            txtBatchID.Text = .BatchID
             numPurity.Text = If(.Purity, "")
             numResinLoad.Value = .ResinLoad
             SelectProductButton(.ProductIndex)
@@ -205,6 +209,7 @@ Public Class dlgEditProduct
         With ProductEntry
             .Grams = ConvertToGrams(numMatAmount.Value, ToWeightUnit(cboMatUnit.Text))
             .Name = txtMatName.Text
+            .BatchID = txtBatchID.Text
             .Purity = numPurity.Value
             .MolecularWeight = SketchInfo.Products(.ProductIndex).Molweight
             .ExactMass = SketchInfo.Products(.ProductIndex).ExactMass
