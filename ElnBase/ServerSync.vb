@@ -233,8 +233,20 @@ Public Class ServerSync
                 syncItem.ClonedEntity = CloneSyncEntity(syncItem)
             Next
 
-            '- Get deleted entries
-            For Each entry In LocalContext.sync_Tombstone
+            'Tombstone entries that also have a pending add/modify in this same pass must be dropped from
+            'the tombstone table first - otherwise Remove() cancels the paired Add to a no-op, yet both
+            'syncItems still get marked Completed, silently losing the row with no error and no retry.
+            '
+            Dim addedOrModifiedKeys As New HashSet(Of String)(
+                syncItems.Select(Function(si) si.TableName + "|" + si.KeyValue))
+
+            For Each entry In LocalContext.sync_Tombstone.ToList()
+
+                If addedOrModifiedKeys.Contains(entry.TableName + "|" + entry.PrimaryKeyVal) Then
+                    LocalContext.sync_Tombstone.Remove(entry)
+                    Continue For
+                End If
+
                 Dim syncItem As New ServerSyncItem
                 With syncItem
                     .KeyValue = entry.PrimaryKeyVal

@@ -29,28 +29,38 @@ Public Class FullTextSearch
     ''' Gets all experiments containing at least one protocol item matching the specified search term, ordered
     ''' by relevance (best match first). Only finalized experiments are returned, whether searching locally or
     ''' on the server - unfinalized experiments are considered work in progress.
-    ''' The whole search term is matched as a single literal phrase - e.g. searching "blue water" only finds experiments
-    ''' where those words occur adjacent to each other and in that order, 
+    ''' Each individual phrase is matched literally - e.g. searching "blue water" only finds experiments
+    ''' where those words occur adjacent to each other and in that order,
     ''' not experiments where "blue" and "water" merely occur somewhere independently. The last word
-    ''' of the search term is matched as a prefix, so a still-being-typed or deliberately partial last word (e.g.
+    ''' of a phrase is matched as a prefix, so a still-being-typed or deliberately partial last word (e.g.
     ''' "Allyl") still finds it as part of a longer indexed word (e.g. a reagent named "Allyltrimethylsilane") -
-    ''' every earlier word in a multi-word search still has to match a complete word. Results are capped at
+    ''' every earlier word in a multi-word phrase still has to match a complete word. Results are capped at
     ''' <see cref="MaxDisplayedResults"/>.
+    ''' <para>
+    ''' Multiple phrases can be combined with AND semantics by delimiting them with ";" (e.g. "reagent A; solvent
+    ''' X") - an experiment only matches if every phrase is found somewhere in it, not necessarily within the same
+    ''' protocol item. See <see cref="SplitIntoPhrases"/>/<see cref="CombinePhraseResults"/>.
+    ''' </para>
     ''' </summary>
-    ''' <param name="searchTerm">Free-text search term, matched as one literal phrase with the last word as a prefix.</param>
+    ''' <param name="searchTerm">Free-text search term: one literal phrase, or several delimited by ";", each
+    ''' matched with its last word as a prefix and AND-combined.</param>
     ''' <param name="searchContext">Database context to query - either the local SQLite database (FTS5 SearchIndex)
     ''' or the MySQL server (native FULLTEXT index on tblSearchIndex); dispatches on <see cref="DbContext.Database"/>'s
     ''' provider.</param>
     '''
     Public Function SearchExperiments(searchTerm As String, searchContext As ElnDbContext) As ExperimentSearchResult
 
-        If String.IsNullOrWhiteSpace(searchTerm) Then
+        Dim phrases = SplitIntoPhrases(searchTerm)
+        If phrases.Count = 0 Then
             Return New ExperimentSearchResult With {.Hits = New List(Of ExperimentSearchHit), .WasTruncated = False}
         End If
 
-        Dim rankedExperiments = If(searchContext.Database.IsSqlite(),
-            GetRankedExperimentIDs(searchTerm),
-            GetRankedExperimentIDsMySql(searchTerm, searchContext))
+        Dim isSqlite = searchContext.Database.IsSqlite()
+        Dim perPhraseResults = phrases.
+            Select(Function(phrase) If(isSqlite, GetRankedExperimentIDs(phrase), GetRankedExperimentIDsMySql(phrase, searchContext))).
+            ToList()
+
+        Dim rankedExperiments = CombinePhraseResults(perPhraseResults)
 
         'cut off the least relevant experiments before even querying tblExperiments for them, rather than
         'truncating the final result list - both cheaper and simpler, since ranking order is already established.
@@ -73,6 +83,82 @@ Public Class FullTextSearch
             }).ToList()
 
         Return New ExperimentSearchResult With {.Hits = hits, .WasTruncated = wasTruncated}
+
+    End Function
+
+
+    ''' <summary>
+    ''' Splits a raw search-box entry into one or more literal phrases delimited by ";", trimming surrounding
+    ''' whitespace from each and discarding any that end up empty (e.g. a leading/trailing/doubled delimiter, or
+    ''' an all-whitespace entry). The common case - no ";" present - yields a single phrase, so
+    ''' <see cref="SearchExperiments"/> behaves exactly as it did before multi-phrase support was added.
+    ''' </summary>
+    '''
+    Private Shared Function SplitIntoPhrases(searchTerm As String) As List(Of String)
+
+        If String.IsNullOrWhiteSpace(searchTerm) Then
+            Return New List(Of String)
+        End If
+
+        Return searchTerm.Split(";"c).Select(Function(phrase) phrase.Trim()).Where(Function(phrase) phrase.Length > 0).ToList()
+
+    End Function
+
+
+    ''' <summary>
+    ''' Separator inserted between each AND-combined phrase's own snippet when building the single combined
+    ''' snippet shown for a multi-phrase search hit (see <see cref="CombinePhraseResults"/>) - visually distinct
+    ''' from the "…" truncation marker each individual snippet may already carry.
+    ''' </summary>
+    '''
+    Private Const PhraseSnippetSeparator As String = "  •  "
+
+
+    ''' <summary>
+    ''' Combines each phrase's independently ranked experiment list into a single AND-combined, re-ranked list:
+    ''' only experiments present in *every* phrase's results survive (a phrase can be satisfied by a different
+    ''' protocol item than the others, so this intersects by ExperimentID rather than requiring a single item to
+    ''' match every phrase), and a surviving experiment's combined relevance is the sum of its per-phrase ranks -
+    ''' consistent with how <see cref="AggregateHitsByExperiment"/> already sums per-item ranks into a per-phrase
+    ''' experiment rank. The combined snippet concatenates every phrase's own representative snippet (each
+    ''' already highlighted independently), so the result explains why the experiment matched each phrase, not
+    ''' just one of them. The single-phrase case (the common one) is returned unchanged - no combining needed.
+    ''' </summary>
+    '''
+    Private Function CombinePhraseResults(perPhraseResults As List(Of List(Of RankedExperiment))) As List(Of RankedExperiment)
+
+        If perPhraseResults.Count = 1 Then
+            Return perPhraseResults(0)
+        End If
+
+        Dim perPhraseByExperiment = perPhraseResults.
+            Select(Function(phraseHits) phraseHits.ToDictionary(Function(hit) hit.ExperimentID)).
+            ToList()
+
+        Dim commonExperimentIDs As IEnumerable(Of String) = perPhraseByExperiment(0).Keys
+        For i = 1 To perPhraseByExperiment.Count - 1
+            commonExperimentIDs = commonExperimentIDs.Intersect(perPhraseByExperiment(i).Keys)
+        Next
+
+        Return commonExperimentIDs.
+            Select(Function(experimentID)
+                       Dim matchesPerPhrase = perPhraseByExperiment.Select(Function(dict) dict(experimentID)).ToList()
+
+                       'the combined snippet already shows one representative excerpt per phrase (see Snippet
+                       'below), not just a single overall excerpt - so only occurrences beyond that one-per-phrase
+                       'already-shown set count as "more": each phrase contributes (its own HitCount - 1) hidden
+                       'occurrences, plus the 1 baseline hit that IS accounted for by the combined snippet.
+                       Dim hiddenHitCount = matchesPerPhrase.Sum(Function(m) m.HitCount - 1) + 1
+
+                       Return New RankedExperiment With {
+                           .ExperimentID = experimentID,
+                           .Rank = matchesPerPhrase.Sum(Function(m) m.Rank),
+                           .Snippet = String.Join(PhraseSnippetSeparator, matchesPerPhrase.Select(Function(m) m.Snippet)),
+                           .HitCount = hiddenHitCount
+                       }
+                   End Function).
+            OrderBy(Function(r) r.Rank).
+            ToList()
 
     End Function
 
@@ -504,17 +590,16 @@ Public Class FullTextSearch
 
     ''' <summary>
     ''' Builds a product's searchable content, e.g. "12.5 g ProductName (97.5% yield; 98.5% purity; 120 mmol/g
-    ''' resin; MW 234.35; EM 234.39; C5H8O2)" - the weighed amount+unit, name, and every other parameter
+    ''' resin; MW 234.35; EM 234.39; C9H12O3)" - the weighed amount+unit, name, and every other parameter
     ''' CustomControls/Protocol Elements/Materials/ProductContent.xaml displays (yield, purity, resin load,
-    ''' molecular weight, exact mass, elemental formula). The raw ElementalFormula string is indexed directly -
-    ''' ElementalFormulaConverter only reformats it for on-screen subscript rendering, the underlying text is the
-    ''' same either way. Doesn't include the "A:"/"B:"/"C:" ProductIndex letter, since that's a positional display
-    ''' label, not searchable content. Yield and MolecularWeight have no nullable "unset" representation (unlike
-    ''' Purity/ExactMass/ResinLoad) but default to 0 before a product is actually worked up, so - unlike the XAML,
-    ''' which always renders them - both are only included once the product has an actual weighed amount (Grams).
+    ''' molecular weight, exact mass, elemental formula). Doesn't include the "A:"/"B:"/"C:" ProductIndex letter,
+    ''' since that's a positional display label, not searchable content. Yield and MolecularWeight have no
+    ''' nullable "unset" representation (unlike Purity/ExactMass/ResinLoad) but default to 0 before a product is
+    ''' actually worked up, so - unlike the XAML, which always renders them - both are only included once the
+    ''' product has an actual weighed amount (Grams).
     ''' </summary>
     '''
-    Private Shared Function BuildProductContent(name As String, grams As Double, yield As Double, molecularWeight As Double,
+    Private Shared Function BuildProductContent(name As String, grams As Double, yield As Double, batchID As String, molecularWeight As Double,
         exactMass As Double?, elementalFormula As String, purity As Double?, resinLoad As Double?) As String
 
         Dim content As New Text.StringBuilder()
@@ -524,6 +609,10 @@ Public Class FullTextSearch
         content.Append(name)
 
         Dim detailParts As New List(Of String)
+
+        If Not String.IsNullOrEmpty(batchID) Then
+            detailParts.Add("batch-ID: " + batchID)
+        End If
 
         If weightScale IsNot Nothing Then
             detailParts.Add(FormatYieldPercent(yield) + " yield")
@@ -546,11 +635,34 @@ Public Class FullTextSearch
         End If
 
         If Not String.IsNullOrEmpty(elementalFormula) Then
-            detailParts.Add(elementalFormula)
+            detailParts.Add(NormalizeElementalFormulaDigits(elementalFormula))
         End If
 
         AppendDetailParts(content, detailParts)
         Return content.ToString()
+
+    End Function
+
+
+    ''' <summary>
+    ''' Converts Unicode subscript digits (₀-₉, U+2080-U+2089) in an elemental formula to plain ASCII digits,
+    ''' e.g. "C₉H₁₂O₃" -> "C9H12O3". SketchArea's structure editor (EFString) always returns the Unicode-subscript
+    ''' form - that's fine for on-screen display (ElementalFormulaConverter's baseline-shift is a no-op on these
+    ''' characters, but the glyphs already look like subscripts either way) - but neither FTS5 nor MySQL FULLTEXT
+    ''' tokenize U+2089 as equivalent to the ASCII digit "9", so an unnormalized index would never match a user
+    ''' typing an ordinary formula on the keyboard. Verified empirically (2026-08-14): tblProducts.ElementalFormula
+    ''' is stored as actual Unicode subscript characters, not plain digits as previously assumed.
+    ''' </summary>
+    Private Shared Function NormalizeElementalFormulaDigits(elementalFormula As String) As String
+
+        Dim chars = elementalFormula.ToCharArray()
+        For i = 0 To chars.Length - 1
+            Dim codePoint = AscW(chars(i))
+            If codePoint >= &H2080 AndAlso codePoint <= &H2089 Then
+                chars(i) = ChrW(codePoint - &H2080 + AscW("0"c))
+            End If
+        Next
+        Return New String(chars)
 
     End Function
 
@@ -630,7 +742,7 @@ Public Class FullTextSearch
             Dim product = DirectCast(entity, tblProducts)
             Return New SearchableRow With {
                 .ProtocolItemID = product.ProtocolItemID,
-                .Content = BuildProductContent(product.Name, product.Grams, product.Yield, product.MolecularWeight,
+                .Content = BuildProductContent(product.Name, product.Grams, product.Yield, product.BatchID, product.MolecularWeight,
                     product.ExactMass, product.ElementalFormula, product.Purity, product.ResinLoad)
             }
         End If
@@ -710,12 +822,12 @@ Public Class FullTextSearch
             }))
 
         allRows.AddRange(searchContext.tblProducts.AsNoTracking().
-            Select(Function(p) New With {p.ProtocolItemID, p.Name, p.Grams, p.Yield, p.MolecularWeight, p.ExactMass, p.ElementalFormula,
+            Select(Function(p) New With {p.ProtocolItemID, p.Name, p.Grams, p.Yield, p.BatchID, p.MolecularWeight, p.ExactMass, p.ElementalFormula,
                 p.Purity, p.ResinLoad}).
             AsEnumerable().
             Select(Function(p) New SearchableRow With {
                 .ProtocolItemID = p.ProtocolItemID,
-                .Content = BuildProductContent(p.Name, p.Grams, p.Yield, p.MolecularWeight, p.ExactMass, p.ElementalFormula, p.Purity, p.ResinLoad)
+                .Content = BuildProductContent(p.Name, p.Grams, p.Yield, p.BatchID, p.MolecularWeight, p.ExactMass, p.ElementalFormula, p.Purity, p.ResinLoad)
             }))
 
         allRows.AddRange(searchContext.tblRefReactants.AsNoTracking().
@@ -739,17 +851,46 @@ Public Class FullTextSearch
             AsEnumerable().
             Select(Function(c) New SearchableRow With {.ProtocolItemID = c.ProtocolItemID, .Content = ExtractPlainText(c.CommentFlowDoc)}))
 
-        'clear any existing rows (relevant for the manual-repair case; a no-op for the common one-time-backfill
-        'case, where tblSearchIndex starts out empty) and replace them with the freshly computed set. A single
-        'SaveChanges call below makes this atomic - no separate manual transaction needed here.
+        'Diff against the existing rows instead of a blanket RemoveRange+AddRange (relevant for the manual-repair
+        'case; the common one-time-backfill case just has an empty existingByID, so every row falls into the
+        '"new" branch below). A blanket delete+recreate previously reused the same ProtocolItemID primary key for
+        'both a tombstone (Deleted) and a fresh Add within the same SaveChanges call - harmless locally, but a real
+        'bug for server sync: ServerSync.SynchronizeAsync gathers all Added/Modified sync items for every table
+        'first, then appends all sync_Tombstone deletes *after* them into one combined list, and SyncToServer
+        'stages every item from that list onto the same ServerContext change tracker before a single SaveChanges
+        'flushes it. So the tombstone delete for a given key is always staged after that key's Add/Update in the
+        'same pass, and - since both operations end up tracking the very same server-side entity once the Add is
+        'recognized as an Update against an already-existing server row - the later Remove() wins, leaving the row
+        'deleted on the server with the new content never persisted. Updating existing rows in place (and only
+        'adding/removing rows whose ProtocolItemID actually appeared/disappeared) avoids ever pairing a tombstone
+        'with an Add for the same key in one sync pass. A single SaveChanges call below still makes the whole
+        'update atomic - no separate manual transaction needed here.
 
-        searchContext.tblSearchIndex.RemoveRange(searchContext.tblSearchIndex)
+        Dim existingByID = searchContext.tblSearchIndex.ToDictionary(Function(r) r.ProtocolItemID)
+        Dim computedIDs As New HashSet(Of String)(allRows.Select(Function(row) row.ProtocolItemID))
 
-        searchContext.tblSearchIndex.AddRange(allRows.Select(Function(row) New tblSearchIndex With {
-            .ProtocolItemID = row.ProtocolItemID,
-            .ExperimentID = experimentIDsByProtocolItem.GetValueOrDefault(row.ProtocolItemID),
-            .Content = row.Content
-        }))
+        For Each row In allRows
+            Dim experimentID = experimentIDsByProtocolItem.GetValueOrDefault(row.ProtocolItemID)
+            Dim existing As tblSearchIndex = Nothing
+            If existingByID.TryGetValue(row.ProtocolItemID, existing) Then
+                If existing.Content <> row.Content OrElse existing.ExperimentID <> experimentID Then
+                    existing.Content = row.Content
+                    existing.ExperimentID = experimentID
+                End If
+            Else
+                searchContext.tblSearchIndex.Add(New tblSearchIndex With {
+                    .ProtocolItemID = row.ProtocolItemID,
+                    .ExperimentID = experimentID,
+                    .Content = row.Content
+                })
+            End If
+        Next
+
+        For Each existingEntry In existingByID
+            If Not computedIDs.Contains(existingEntry.Key) Then
+                searchContext.tblSearchIndex.Remove(existingEntry.Value)
+            End If
+        Next
 
         searchContext.SaveChanges()
 
@@ -1042,6 +1183,15 @@ Public Class FullTextSearch
         '''
         Public Property HitCount As Integer
 
+        ''' <summary>
+        ''' This experiment's overall relevance - the sum of every matching protocol item's rank (see
+        ''' <see cref="AggregateHitsByExperiment"/>), lower/more negative meaning more relevant. Exposed (rather
+        ''' than kept as a purely local aggregation detail) so <see cref="CombinePhraseResults"/> can re-rank
+        ''' experiments matching several AND-combined phrases by their combined relevance.
+        ''' </summary>
+        '''
+        Public Property Rank As Double
+
     End Class
 
 
@@ -1119,7 +1269,8 @@ Public Class FullTextSearch
             Select(Function(id) New RankedExperiment With {
                 .ExperimentID = id,
                 .Snippet = bestSnippetByExperiment(id),
-                .HitCount = hitCountByExperiment(id)
+                .HitCount = hitCountByExperiment(id),
+                .Rank = totalRankByExperiment(id)
             }).
             ToList()
 
