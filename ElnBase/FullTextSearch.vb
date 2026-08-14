@@ -29,28 +29,38 @@ Public Class FullTextSearch
     ''' Gets all experiments containing at least one protocol item matching the specified search term, ordered
     ''' by relevance (best match first). Only finalized experiments are returned, whether searching locally or
     ''' on the server - unfinalized experiments are considered work in progress.
-    ''' The whole search term is matched as a single literal phrase - e.g. searching "blue water" only finds experiments
-    ''' where those words occur adjacent to each other and in that order, 
+    ''' Each individual phrase is matched literally - e.g. searching "blue water" only finds experiments
+    ''' where those words occur adjacent to each other and in that order,
     ''' not experiments where "blue" and "water" merely occur somewhere independently. The last word
-    ''' of the search term is matched as a prefix, so a still-being-typed or deliberately partial last word (e.g.
+    ''' of a phrase is matched as a prefix, so a still-being-typed or deliberately partial last word (e.g.
     ''' "Allyl") still finds it as part of a longer indexed word (e.g. a reagent named "Allyltrimethylsilane") -
-    ''' every earlier word in a multi-word search still has to match a complete word. Results are capped at
+    ''' every earlier word in a multi-word phrase still has to match a complete word. Results are capped at
     ''' <see cref="MaxDisplayedResults"/>.
+    ''' <para>
+    ''' Multiple phrases can be combined with AND semantics by delimiting them with ";" (e.g. "reagent A; solvent
+    ''' X") - an experiment only matches if every phrase is found somewhere in it, not necessarily within the same
+    ''' protocol item. See <see cref="SplitIntoPhrases"/>/<see cref="CombinePhraseResults"/>.
+    ''' </para>
     ''' </summary>
-    ''' <param name="searchTerm">Free-text search term, matched as one literal phrase with the last word as a prefix.</param>
+    ''' <param name="searchTerm">Free-text search term: one literal phrase, or several delimited by ";", each
+    ''' matched with its last word as a prefix and AND-combined.</param>
     ''' <param name="searchContext">Database context to query - either the local SQLite database (FTS5 SearchIndex)
     ''' or the MySQL server (native FULLTEXT index on tblSearchIndex); dispatches on <see cref="DbContext.Database"/>'s
     ''' provider.</param>
     '''
     Public Function SearchExperiments(searchTerm As String, searchContext As ElnDbContext) As ExperimentSearchResult
 
-        If String.IsNullOrWhiteSpace(searchTerm) Then
+        Dim phrases = SplitIntoPhrases(searchTerm)
+        If phrases.Count = 0 Then
             Return New ExperimentSearchResult With {.Hits = New List(Of ExperimentSearchHit), .WasTruncated = False}
         End If
 
-        Dim rankedExperiments = If(searchContext.Database.IsSqlite(),
-            GetRankedExperimentIDs(searchTerm),
-            GetRankedExperimentIDsMySql(searchTerm, searchContext))
+        Dim isSqlite = searchContext.Database.IsSqlite()
+        Dim perPhraseResults = phrases.
+            Select(Function(phrase) If(isSqlite, GetRankedExperimentIDs(phrase), GetRankedExperimentIDsMySql(phrase, searchContext))).
+            ToList()
+
+        Dim rankedExperiments = CombinePhraseResults(perPhraseResults)
 
         'cut off the least relevant experiments before even querying tblExperiments for them, rather than
         'truncating the final result list - both cheaper and simpler, since ranking order is already established.
@@ -73,6 +83,82 @@ Public Class FullTextSearch
             }).ToList()
 
         Return New ExperimentSearchResult With {.Hits = hits, .WasTruncated = wasTruncated}
+
+    End Function
+
+
+    ''' <summary>
+    ''' Splits a raw search-box entry into one or more literal phrases delimited by ";", trimming surrounding
+    ''' whitespace from each and discarding any that end up empty (e.g. a leading/trailing/doubled delimiter, or
+    ''' an all-whitespace entry). The common case - no ";" present - yields a single phrase, so
+    ''' <see cref="SearchExperiments"/> behaves exactly as it did before multi-phrase support was added.
+    ''' </summary>
+    '''
+    Private Shared Function SplitIntoPhrases(searchTerm As String) As List(Of String)
+
+        If String.IsNullOrWhiteSpace(searchTerm) Then
+            Return New List(Of String)
+        End If
+
+        Return searchTerm.Split(";"c).Select(Function(phrase) phrase.Trim()).Where(Function(phrase) phrase.Length > 0).ToList()
+
+    End Function
+
+
+    ''' <summary>
+    ''' Separator inserted between each AND-combined phrase's own snippet when building the single combined
+    ''' snippet shown for a multi-phrase search hit (see <see cref="CombinePhraseResults"/>) - visually distinct
+    ''' from the "…" truncation marker each individual snippet may already carry.
+    ''' </summary>
+    '''
+    Private Const PhraseSnippetSeparator As String = "  •  "
+
+
+    ''' <summary>
+    ''' Combines each phrase's independently ranked experiment list into a single AND-combined, re-ranked list:
+    ''' only experiments present in *every* phrase's results survive (a phrase can be satisfied by a different
+    ''' protocol item than the others, so this intersects by ExperimentID rather than requiring a single item to
+    ''' match every phrase), and a surviving experiment's combined relevance is the sum of its per-phrase ranks -
+    ''' consistent with how <see cref="AggregateHitsByExperiment"/> already sums per-item ranks into a per-phrase
+    ''' experiment rank. The combined snippet concatenates every phrase's own representative snippet (each
+    ''' already highlighted independently), so the result explains why the experiment matched each phrase, not
+    ''' just one of them. The single-phrase case (the common one) is returned unchanged - no combining needed.
+    ''' </summary>
+    '''
+    Private Function CombinePhraseResults(perPhraseResults As List(Of List(Of RankedExperiment))) As List(Of RankedExperiment)
+
+        If perPhraseResults.Count = 1 Then
+            Return perPhraseResults(0)
+        End If
+
+        Dim perPhraseByExperiment = perPhraseResults.
+            Select(Function(phraseHits) phraseHits.ToDictionary(Function(hit) hit.ExperimentID)).
+            ToList()
+
+        Dim commonExperimentIDs As IEnumerable(Of String) = perPhraseByExperiment(0).Keys
+        For i = 1 To perPhraseByExperiment.Count - 1
+            commonExperimentIDs = commonExperimentIDs.Intersect(perPhraseByExperiment(i).Keys)
+        Next
+
+        Return commonExperimentIDs.
+            Select(Function(experimentID)
+                       Dim matchesPerPhrase = perPhraseByExperiment.Select(Function(dict) dict(experimentID)).ToList()
+
+                       'the combined snippet already shows one representative excerpt per phrase (see Snippet
+                       'below), not just a single overall excerpt - so only occurrences beyond that one-per-phrase
+                       'already-shown set count as "more": each phrase contributes (its own HitCount - 1) hidden
+                       'occurrences, plus the 1 baseline hit that IS accounted for by the combined snippet.
+                       Dim hiddenHitCount = matchesPerPhrase.Sum(Function(m) m.HitCount - 1) + 1
+
+                       Return New RankedExperiment With {
+                           .ExperimentID = experimentID,
+                           .Rank = matchesPerPhrase.Sum(Function(m) m.Rank),
+                           .Snippet = String.Join(PhraseSnippetSeparator, matchesPerPhrase.Select(Function(m) m.Snippet)),
+                           .HitCount = hiddenHitCount
+                       }
+                   End Function).
+            OrderBy(Function(r) r.Rank).
+            ToList()
 
     End Function
 
@@ -1042,6 +1128,15 @@ Public Class FullTextSearch
         '''
         Public Property HitCount As Integer
 
+        ''' <summary>
+        ''' This experiment's overall relevance - the sum of every matching protocol item's rank (see
+        ''' <see cref="AggregateHitsByExperiment"/>), lower/more negative meaning more relevant. Exposed (rather
+        ''' than kept as a purely local aggregation detail) so <see cref="CombinePhraseResults"/> can re-rank
+        ''' experiments matching several AND-combined phrases by their combined relevance.
+        ''' </summary>
+        '''
+        Public Property Rank As Double
+
     End Class
 
 
@@ -1119,7 +1214,8 @@ Public Class FullTextSearch
             Select(Function(id) New RankedExperiment With {
                 .ExperimentID = id,
                 .Snippet = bestSnippetByExperiment(id),
-                .HitCount = hitCountByExperiment(id)
+                .HitCount = hitCountByExperiment(id),
+                .Rank = totalRankByExperiment(id)
             }).
             ToList()
 

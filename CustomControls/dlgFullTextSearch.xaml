@@ -58,7 +58,11 @@
 
             <Separator Margin="0,8,0,8" Height="0.9"/>
 
-            <TextBlock TextWrapping="Wrap" Margin="0,2,0,2" Foreground="lightgray" Text="Find text within all finalized experiments (local or server):"/>
+            <TextBlock TextWrapping="Wrap" Margin="0,2,0,2" Foreground="lightgray" FontStyle="Italic">
+                <Run Text="Find text within all"/>
+                <Run FontWeight="Bold" Text="finalized "/>
+                <Run Text="experiments. Separate multiple search items with &quot;;&quot; to require the presence of all of them:"/>
+            </TextBlock>
 
             <Grid >
                 <Grid.ColumnDefinitions>
