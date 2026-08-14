@@ -590,17 +590,16 @@ Public Class FullTextSearch
 
     ''' <summary>
     ''' Builds a product's searchable content, e.g. "12.5 g ProductName (97.5% yield; 98.5% purity; 120 mmol/g
-    ''' resin; MW 234.35; EM 234.39; C5H8O2)" - the weighed amount+unit, name, and every other parameter
+    ''' resin; MW 234.35; EM 234.39; C9H12O3)" - the weighed amount+unit, name, and every other parameter
     ''' CustomControls/Protocol Elements/Materials/ProductContent.xaml displays (yield, purity, resin load,
-    ''' molecular weight, exact mass, elemental formula). The raw ElementalFormula string is indexed directly -
-    ''' ElementalFormulaConverter only reformats it for on-screen subscript rendering, the underlying text is the
-    ''' same either way. Doesn't include the "A:"/"B:"/"C:" ProductIndex letter, since that's a positional display
-    ''' label, not searchable content. Yield and MolecularWeight have no nullable "unset" representation (unlike
-    ''' Purity/ExactMass/ResinLoad) but default to 0 before a product is actually worked up, so - unlike the XAML,
-    ''' which always renders them - both are only included once the product has an actual weighed amount (Grams).
+    ''' molecular weight, exact mass, elemental formula). Doesn't include the "A:"/"B:"/"C:" ProductIndex letter,
+    ''' since that's a positional display label, not searchable content. Yield and MolecularWeight have no
+    ''' nullable "unset" representation (unlike Purity/ExactMass/ResinLoad) but default to 0 before a product is
+    ''' actually worked up, so - unlike the XAML, which always renders them - both are only included once the
+    ''' product has an actual weighed amount (Grams).
     ''' </summary>
     '''
-    Private Shared Function BuildProductContent(name As String, grams As Double, yield As Double, molecularWeight As Double,
+    Private Shared Function BuildProductContent(name As String, grams As Double, yield As Double, batchID As String, molecularWeight As Double,
         exactMass As Double?, elementalFormula As String, purity As Double?, resinLoad As Double?) As String
 
         Dim content As New Text.StringBuilder()
@@ -610,6 +609,10 @@ Public Class FullTextSearch
         content.Append(name)
 
         Dim detailParts As New List(Of String)
+
+        If Not String.IsNullOrEmpty(batchID) Then
+            detailParts.Add("batch-ID: " + batchID)
+        End If
 
         If weightScale IsNot Nothing Then
             detailParts.Add(FormatYieldPercent(yield) + " yield")
@@ -632,11 +635,34 @@ Public Class FullTextSearch
         End If
 
         If Not String.IsNullOrEmpty(elementalFormula) Then
-            detailParts.Add(elementalFormula)
+            detailParts.Add(NormalizeElementalFormulaDigits(elementalFormula))
         End If
 
         AppendDetailParts(content, detailParts)
         Return content.ToString()
+
+    End Function
+
+
+    ''' <summary>
+    ''' Converts Unicode subscript digits (₀-₉, U+2080-U+2089) in an elemental formula to plain ASCII digits,
+    ''' e.g. "C₉H₁₂O₃" -> "C9H12O3". SketchArea's structure editor (EFString) always returns the Unicode-subscript
+    ''' form - that's fine for on-screen display (ElementalFormulaConverter's baseline-shift is a no-op on these
+    ''' characters, but the glyphs already look like subscripts either way) - but neither FTS5 nor MySQL FULLTEXT
+    ''' tokenize U+2089 as equivalent to the ASCII digit "9", so an unnormalized index would never match a user
+    ''' typing an ordinary formula on the keyboard. Verified empirically (2026-08-14): tblProducts.ElementalFormula
+    ''' is stored as actual Unicode subscript characters, not plain digits as previously assumed.
+    ''' </summary>
+    Private Shared Function NormalizeElementalFormulaDigits(elementalFormula As String) As String
+
+        Dim chars = elementalFormula.ToCharArray()
+        For i = 0 To chars.Length - 1
+            Dim codePoint = AscW(chars(i))
+            If codePoint >= &H2080 AndAlso codePoint <= &H2089 Then
+                chars(i) = ChrW(codePoint - &H2080 + AscW("0"c))
+            End If
+        Next
+        Return New String(chars)
 
     End Function
 
@@ -716,7 +742,7 @@ Public Class FullTextSearch
             Dim product = DirectCast(entity, tblProducts)
             Return New SearchableRow With {
                 .ProtocolItemID = product.ProtocolItemID,
-                .Content = BuildProductContent(product.Name, product.Grams, product.Yield, product.MolecularWeight,
+                .Content = BuildProductContent(product.Name, product.Grams, product.Yield, product.BatchID, product.MolecularWeight,
                     product.ExactMass, product.ElementalFormula, product.Purity, product.ResinLoad)
             }
         End If
@@ -796,12 +822,12 @@ Public Class FullTextSearch
             }))
 
         allRows.AddRange(searchContext.tblProducts.AsNoTracking().
-            Select(Function(p) New With {p.ProtocolItemID, p.Name, p.Grams, p.Yield, p.MolecularWeight, p.ExactMass, p.ElementalFormula,
+            Select(Function(p) New With {p.ProtocolItemID, p.Name, p.Grams, p.Yield, p.BatchID, p.MolecularWeight, p.ExactMass, p.ElementalFormula,
                 p.Purity, p.ResinLoad}).
             AsEnumerable().
             Select(Function(p) New SearchableRow With {
                 .ProtocolItemID = p.ProtocolItemID,
-                .Content = BuildProductContent(p.Name, p.Grams, p.Yield, p.MolecularWeight, p.ExactMass, p.ElementalFormula, p.Purity, p.ResinLoad)
+                .Content = BuildProductContent(p.Name, p.Grams, p.Yield, p.BatchID, p.MolecularWeight, p.ExactMass, p.ElementalFormula, p.Purity, p.ResinLoad)
             }))
 
         allRows.AddRange(searchContext.tblRefReactants.AsNoTracking().
@@ -825,17 +851,46 @@ Public Class FullTextSearch
             AsEnumerable().
             Select(Function(c) New SearchableRow With {.ProtocolItemID = c.ProtocolItemID, .Content = ExtractPlainText(c.CommentFlowDoc)}))
 
-        'clear any existing rows (relevant for the manual-repair case; a no-op for the common one-time-backfill
-        'case, where tblSearchIndex starts out empty) and replace them with the freshly computed set. A single
-        'SaveChanges call below makes this atomic - no separate manual transaction needed here.
+        'Diff against the existing rows instead of a blanket RemoveRange+AddRange (relevant for the manual-repair
+        'case; the common one-time-backfill case just has an empty existingByID, so every row falls into the
+        '"new" branch below). A blanket delete+recreate previously reused the same ProtocolItemID primary key for
+        'both a tombstone (Deleted) and a fresh Add within the same SaveChanges call - harmless locally, but a real
+        'bug for server sync: ServerSync.SynchronizeAsync gathers all Added/Modified sync items for every table
+        'first, then appends all sync_Tombstone deletes *after* them into one combined list, and SyncToServer
+        'stages every item from that list onto the same ServerContext change tracker before a single SaveChanges
+        'flushes it. So the tombstone delete for a given key is always staged after that key's Add/Update in the
+        'same pass, and - since both operations end up tracking the very same server-side entity once the Add is
+        'recognized as an Update against an already-existing server row - the later Remove() wins, leaving the row
+        'deleted on the server with the new content never persisted. Updating existing rows in place (and only
+        'adding/removing rows whose ProtocolItemID actually appeared/disappeared) avoids ever pairing a tombstone
+        'with an Add for the same key in one sync pass. A single SaveChanges call below still makes the whole
+        'update atomic - no separate manual transaction needed here.
 
-        searchContext.tblSearchIndex.RemoveRange(searchContext.tblSearchIndex)
+        Dim existingByID = searchContext.tblSearchIndex.ToDictionary(Function(r) r.ProtocolItemID)
+        Dim computedIDs As New HashSet(Of String)(allRows.Select(Function(row) row.ProtocolItemID))
 
-        searchContext.tblSearchIndex.AddRange(allRows.Select(Function(row) New tblSearchIndex With {
-            .ProtocolItemID = row.ProtocolItemID,
-            .ExperimentID = experimentIDsByProtocolItem.GetValueOrDefault(row.ProtocolItemID),
-            .Content = row.Content
-        }))
+        For Each row In allRows
+            Dim experimentID = experimentIDsByProtocolItem.GetValueOrDefault(row.ProtocolItemID)
+            Dim existing As tblSearchIndex = Nothing
+            If existingByID.TryGetValue(row.ProtocolItemID, existing) Then
+                If existing.Content <> row.Content OrElse existing.ExperimentID <> experimentID Then
+                    existing.Content = row.Content
+                    existing.ExperimentID = experimentID
+                End If
+            Else
+                searchContext.tblSearchIndex.Add(New tblSearchIndex With {
+                    .ProtocolItemID = row.ProtocolItemID,
+                    .ExperimentID = experimentID,
+                    .Content = row.Content
+                })
+            End If
+        Next
+
+        For Each existingEntry In existingByID
+            If Not computedIDs.Contains(existingEntry.Key) Then
+                searchContext.tblSearchIndex.Remove(existingEntry.Value)
+            End If
+        Next
 
         searchContext.SaveChanges()
 

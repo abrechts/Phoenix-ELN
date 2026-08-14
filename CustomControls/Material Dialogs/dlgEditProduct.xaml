@@ -106,7 +106,7 @@
 
                 <StackPanel >
                     <TextBlock Text="Batch ID:" Margin="0,0,0,2" />
-                    <TextBox x:Name="txtSupplier" Foreground="#FF1C1C1C" MaxLength="40" Width="180" Padding="1,2,0,2" 
+                    <TextBox x:Name="txtBatchID" Foreground="#FF1C1C1C" MaxLength="40" Width="180" Padding="1,2,0,2" 
                        d:Text="Eqx-2312" FontFamily="Comic Sans MS" TabIndex="1" />
                 </StackPanel>
 
