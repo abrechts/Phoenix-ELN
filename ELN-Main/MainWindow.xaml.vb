@@ -1,6 +1,7 @@
 ﻿Imports System.Collections.ObjectModel
 Imports System.ComponentModel
 Imports System.Text.RegularExpressions
+Imports System.Windows.Interop
 Imports System.Windows.Threading
 Imports CustomControls
 Imports ElnBase
@@ -10,6 +11,68 @@ Imports Microsoft.EntityFrameworkCore
 Imports Microsoft.Win32
 
 Class MainWindow
+
+    ''' <summary>
+    ''' Blocks only the native title-bar drag gesture (not general window input) until startup-critical
+    ''' work has finished.
+    ''' </summary>
+    ''' 
+    Private _blockCaptionDrag As Boolean = True
+
+    Private Const WM_NCLBUTTONDOWN As Integer = &HA1
+    Private Const WM_NCLBUTTONDBLCLK As Integer = &HA3
+    Private Const WM_SYSCOMMAND As Integer = &H112
+    Private Const HTCAPTION As Integer = 2
+    Private Const SC_MOVE_MASK As Integer = &HFFF0
+    Private Const SC_MOVE As Integer = &HF010
+
+    Private Sub Me_SourceInitialized() Handles Me.SourceInitialized
+
+        Dim hwndSource = TryCast(PresentationSource.FromVisual(Me), HwndSource)
+        hwndSource?.AddHook(AddressOf BlockCaptionDragHook)
+
+        'safety net: never leave the window permanently un-draggable if some startup path fails to
+        'clear the block (e.g. an unanticipated exception, or a slow/stuck server round-trip)
+        Dim fallbackTimer As New DispatcherTimer With {.Interval = TimeSpan.FromSeconds(5)}
+        AddHandler fallbackTimer.Tick, Sub(sender As Object, e As EventArgs)
+                                           AllowCaptionDrag()
+                                           fallbackTimer.Stop()
+                                       End Sub
+        fallbackTimer.Start()
+
+    End Sub
+
+    Private Function BlockCaptionDragHook(hwnd As IntPtr, msg As Integer, wParam As IntPtr, lParam As IntPtr, ByRef handled As Boolean) As IntPtr
+
+        If _blockCaptionDrag Then
+            Select Case msg
+                Case WM_NCLBUTTONDOWN, WM_NCLBUTTONDBLCLK
+                    If (wParam.ToInt32() And &HFFFF) = HTCAPTION Then
+                        handled = True
+                        Return IntPtr.Zero
+                    End If
+                Case WM_SYSCOMMAND
+                    If (wParam.ToInt32() And SC_MOVE_MASK) = SC_MOVE Then
+                        handled = True
+                        Return IntPtr.Zero
+                    End If
+            End Select
+        End If
+
+        Return IntPtr.Zero
+
+    End Function
+
+    ''' <summary>
+    ''' Re-allows the native title-bar drag gesture once startup-critical work has finished. Safe to call
+    ''' repeatedly/redundantly.
+    ''' </summary>
+    '''
+    Private Sub AllowCaptionDrag()
+
+        _blockCaptionDrag = False
+
+    End Sub
 
     Friend Shared Property DBContext As ElnDbContext
 
@@ -39,6 +102,7 @@ Class MainWindow
         'DynamicResource-bound brushes resolve to the correct skin on the very first paint, instead of
         'briefly rendering the default skin until Me_Loaded's own ApplySkin call (kept there as a safety
         'net for the rare case where a settings version upgrade changes the persisted value) catches up.
+
         CustomControls.DarkModeHelper.ApplySkin(CustomControls.My.MySettings.Default.IsDarkMode)
 
         InitializeComponent()
@@ -254,19 +318,23 @@ Class MainWindow
                         End If
 
                         ServerSync.CreateServerContextAsync(.ServerName, .ServerDbUserName, .ServerDbPassword, .ServerPort,
-                           DBContext.tblDatabaseInfo.First) 'handled by ServerSync_ServerContextCreated (also sets mainStatusInfo)
+                           DBContext.tblDatabaseInfo.First) 'handled by ServerSync_ServerContextCreated (also sets mainStatusInfo, calls AllowCaptionDrag())
 
                     Else
                         'manually disconnected by localUser
                         mainStatusInfo.DisplayServerError = True
+                        AllowCaptionDrag()
                     End If
 
+                Else
+                    AllowCaptionDrag()
                 End If
                 btnAddUser.IsEnabled = True
             Else
                 btnAddUser.IsEnabled = False
                 'demo localUser has no server connection
                 .IsServerSpecified = False 'visibility of server status items is data bound to this setting
+                AllowCaptionDrag()
             End If
 
         End With
@@ -377,76 +445,87 @@ Class MainWindow
     ''' Shared handler for actions after completed server connection.
     ''' </summary>
     ''' 
-    Private Sub ServerSync_ServerContextCreated(serverContext As ElnDbContext)
+    Private Async Sub ServerSync_ServerContextCreated(serverContext As ElnDbContext)
 
-        Me.Cursor = Cursors.Arrow
-        Me.ForceCursor = False
+        Try
 
-        mnuSearch.IsEnabled = True
+            Me.Cursor = Cursors.Arrow
+            Me.ForceCursor = False
 
-        If serverContext IsNot Nothing Then
+            mnuSearch.IsEnabled = True
 
-            '- handle syncID mismatch
+            If serverContext IsNot Nothing Then
 
-            ServerDBContext = serverContext
+                '- handle syncID mismatch
 
-            If ServerSync.HasSyncMismatch Then
+                ServerDBContext = serverContext
 
-                Dim syncMismatchWarningDlg As New dlgServerSyncIssue
-                With syncMismatchWarningDlg
-                    .Owner = Me
-                    .ShowDialog()
-                    RestoreFromServer()  'restarts app when done
-                End With
+                If ServerSync.HasSyncMismatch Then
 
-                mainStatusInfo.DisplayServerError = True
+                    Dim syncMismatchWarningDlg As New dlgServerSyncIssue
+                    With syncMismatchWarningDlg
+                        .Owner = Me
+                        .ShowDialog()
+                        RestoreFromServer()  'restarts app when done
+                    End With
 
-                Exit Sub
+                    mainStatusInfo.DisplayServerError = True
 
-            End If
+                    Exit Sub
 
-            If Not _isRestoring Then
+                End If
 
-                DBContext.ServerSynchronization = New ServerSync(DBContext, ServerDBContext)
-                mainStatusInfo.DisplayServerError = False
+                If Not _isRestoring Then
 
-                If ServerSync.DatabaseGUID <> "" Then
+                    DBContext.ServerSynchronization = New ServerSync(DBContext, ServerDBContext)
+                    mainStatusInfo.DisplayServerError = False
 
-                    '- standard case: sync all pending items at startup
-                    WPFToolbox.WaitForPriority(Threading.DispatcherPriority.Background)
-                    DBContext.ServerSynchronization.SynchronizeAsync()
+                    If ServerSync.DatabaseGUID <> "" Then
+
+                        '- standard case: sync all pending items at startup
+                        WPFToolbox.WaitForPriority(Threading.DispatcherPriority.Background)
+                        Await DBContext.ServerSynchronization.SynchronizeAsync()
+
+                    Else
+
+                        '- connecting current non-demo database for the first time
+
+                        If Not Await FirstTimeConnect() Then
+
+                            'Conflict resolution cancelled or other error: Disconnect from server
+                            dlgServerConnection.NewServerContext = Nothing
+                            ServerDBContext.Dispose()
+                            ServerDBContext = Nothing
+
+                            'server status icon visibilities are data bound to this setting:
+                            CustomControls.My.MySettings.Default.IsServerSpecified = False
+
+                        End If
+
+                    End If
 
                 Else
 
-                    '- connecting current non-demo database for the first time
-
-                    If Not FirstTimeConnect() Then
-
-                        'Conflict resolution cancelled or other error: Disconnect from server
-                        dlgServerConnection.NewServerContext = Nothing
-                        ServerDBContext.Dispose()
-                        ServerDBContext = Nothing
-
-                        'server status icon visibilities are data bound to this setting:
-                        CustomControls.My.MySettings.Default.IsServerSpecified = False
-
-                    End If
+                    _isRestoring = False
 
                 End If
 
             Else
 
-                _isRestoring = False
+                'e.g. server unavailable
+                ServerDBContext = Nothing
+                Protocol_ConnectedChanged(False)
 
             End If
 
-        Else
+        Finally
 
-            'e.g. server unavailable
-            ServerDBContext = Nothing
-            Protocol_ConnectedChanged(False)
+            'startup-critical work involving this handler is done (successfully or not): safe to
+            're-allow the native title-bar drag gesture again
+            AllowCaptionDrag()
 
-        End If
+        End Try
+
     End Sub
 
 
@@ -556,7 +635,7 @@ Class MainWindow
     ''' </summary>
     ''' <returns>True, if operation is successful.</returns>
     ''' 
-    Private Function FirstTimeConnect() As Boolean
+    Private Async Function FirstTimeConnect() As Task(Of Boolean)
 
         If ServerSync.DatabaseGUID Is Nothing Then  'just to make sure (already checked by calling function)
 
@@ -604,7 +683,7 @@ Class MainWindow
 
                 mainStatusInfo.DisplayServerError = False
                 ServerSync.DatabaseGUID = DBContext.tblDatabaseInfo.First.GUID
-                DBContext.ServerSynchronization.SynchronizeAsync()
+                Await DBContext.ServerSynchronization.SynchronizeAsync()
 
                 Return True
 

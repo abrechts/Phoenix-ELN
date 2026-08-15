@@ -199,34 +199,35 @@ Public Class ServerSync
 
             IsSynchronizing = True
 
-            Dim syncItems As New List(Of ServerSyncItem)
-
-            '- Get modified & added entry specs 
-
+            '- Get modified & added entry specs asynchronously
             Dim sqliteConnStr = LocalContext.Database.GetConnectionString
-            Using sqliteConn = New SqliteConnection(sqliteConnStr)
-                sqliteConn.Open()
-                For Each tblInfo In ElnDbContext.TableInfo
+            Dim syncItems = Await Task.Run(Function() As List(Of ServerSyncItem)
+                                               Dim items As New List(Of ServerSyncItem)
+                                               Using sqliteConn = New SqliteConnection(sqliteConnStr)
+                                                   sqliteConn.Open()
+                                                   For Each tblInfo In ElnDbContext.TableInfo
 
-                    Dim queryStr = "SELECT " + tblInfo.PrimaryKeyName + ", SyncState FROM " + tblInfo.TableName + " WHERE SyncState <> 0"
-                    Using syncColCmd = New SqliteCommand(queryStr, sqliteConn)
-                        Using colReader = syncColCmd.ExecuteReader
-                            While colReader.Read
-                                Dim syncItem As New ServerSyncItem
-                                With syncItem
-                                    .KeyValue = colReader.GetValue(0)
-                                    .SyncState = colReader.GetValue(1)
-                                    .TableName = tblInfo.TableName
-                                    .SyncResult = SyncResult.Unprocessed
-                                End With
-                                syncItems.Add(syncItem)
-                            End While
-                        End Using
-                    End Using
+                                                       Dim queryStr = "SELECT " + tblInfo.PrimaryKeyName + ", SyncState FROM " + tblInfo.TableName + " WHERE SyncState <> 0"
+                                                       Using syncColCmd = New SqliteCommand(queryStr, sqliteConn)
+                                                           Using colReader = syncColCmd.ExecuteReader
+                                                               While colReader.Read
+                                                                   Dim syncItem As New ServerSyncItem
+                                                                   With syncItem
+                                                                       .KeyValue = colReader.GetValue(0)
+                                                                       .SyncState = colReader.GetValue(1)
+                                                                       .TableName = tblInfo.TableName
+                                                                       .SyncResult = SyncResult.Unprocessed
+                                                                   End With
+                                                                   items.Add(syncItem)
+                                                               End While
+                                                           End Using
+                                                       End Using
 
-                Next
-                sqliteConn.Close()
-            End Using
+                                                   Next
+                                                   sqliteConn.Close()
+                                               End Using
+                                               Return items
+                                           End Function)
 
             '- Get added and updated entries
             For Each syncItem In syncItems
