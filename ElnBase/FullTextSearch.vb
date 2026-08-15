@@ -1371,6 +1371,16 @@ Public Class FullTextSearch
     ''' searching other users' experiments on the server. Consistent with how other search types (e.g.
     ''' StepExpSelector's server experiment picker) already restrict server-side results to finalized experiments.
     ''' </para>
+    ''' <para>
+    ''' If the FULLTEXT candidate query yields zero verified hits, falls back to <see cref="GetLikeFallbackHits"/> -
+    ''' see that function's doc comment for why (InnoDB's minimum indexed-token length silently drops short/numeric
+    ''' last words from the FULLTEXT index entirely). Checked against verified hits rather than raw candidate rows,
+    ''' since the loosened <c>lastWord*</c> query can return unrelated raw rows elsewhere in the table (any row
+    ''' containing some longer, properly-indexed token that happens to start with the same short prefix, e.g. "52*"
+    ''' matching an unrelated "5200" occurring anywhere in tblSearchIndex) even while the specific row actually
+    ''' containing the too-short token was never returned - a raw-row-count check alone would then skip the
+    ''' fallback for exactly the case it exists to catch.
+    ''' </para>
     ''' </remarks>
     '''
     Private Shared Function GetRankedHitsMySql(searchTerm As String, candidateQuery As String, searchContext As ElnDbContext) As List(Of RankedHit)
@@ -1402,6 +1412,7 @@ Public Class FullTextSearch
                         'actually adjacent/in order) - this is the client-side verification step that gives true
                         'FTS5-parity phrase+prefix matching despite MySQL boolean mode being unable to express
                         '"adjacent phrase, prefix on the last word" in a single query (see MySqlCandidateQuery).
+
                         If match IsNot Nothing AndAlso match.Success Then
                             hits.Add(New RankedHit With {
                                 .ProtocolItemID = reader.GetString(0),
@@ -1416,11 +1427,83 @@ Public Class FullTextSearch
 
             End Using
 
+            If hits.Count = 0 Then
+                hits.AddRange(GetLikeFallbackHits(searchTerm, connection))
+            End If
+
         Finally
             If wasClosed Then
                 connection.Close()
             End If
         End Try
+
+        Return hits
+
+    End Function
+
+
+    ''' <summary>
+    ''' Fallback candidate search used only when the FULLTEXT <c>MATCH...AGAINST</c> candidate query in
+    ''' <see cref="GetRankedHitsMySql"/> yields zero verified hits, for a search term whose last word
+    ''' (<see cref="SplitIntoMySqlWords"/>) is short - most commonly a decimal number like <c>"12.34"</c>, split
+    ''' into <c>"12"</c>/<c>"34"</c>. InnoDB's FULLTEXT index has a minimum indexed-token length
+    ''' (<c>innodb_ft_min_token_size</c>, 3 by default) - a word shorter than that was never written into the
+    ''' index at all, so no <c>MATCH</c> syntax can ever retrieve it; a longer sibling like <c>"12.345"</c> works
+    ''' purely because its last token, <c>"345"</c>, happens to clear that floor. Runs an unindexed
+    ''' <c>LIKE '%word%'</c> substring scan over the full table instead - not restricted to the index's token
+    ''' rules at all - so it also finds the word truncated inside a longer run of digits (e.g. matching "34"
+    ''' inside "134.5"), same as the local SQLite path already can via prefix matching.
+    ''' </summary>
+    ''' <remarks>
+    ''' Deliberately only triggered when the indexed query verified nothing, not on every search - an unindexed
+    ''' <c>LIKE</c> scan reads every row in <c>tblSearchIndex</c> regardless of how many actually match, so it
+    ''' doesn't scale the way <c>MATCH</c> does. Acceptable at this app's scale (a full-table scan over a few
+    ''' thousand rows is cheap) specifically because it only ever runs for the rare zero-verified-hit case, not
+    ''' as this app's general search strategy. Triggered on verified hits rather than raw candidate rows - see
+    ''' <see cref="GetRankedHitsMySql"/>'s remarks for why a raw-row-count check would miss the exact case this
+    ''' fallback exists for. Candidates found here still go through the same <see cref="LocateSearchMatch"/>/
+    ''' <see cref="BuildSnippetFromMatch"/> verification as the indexed path, so a LIKE-matched row is never
+    ''' trusted as an actual phrase match without confirmation. No relevance score exists for an unindexed scan
+    ''' (unlike <c>MATCH...AGAINST</c>'s own score), so every hit here gets a neutral <see cref="RankedHit.Rank"/>
+    ''' of 0 - acceptable since this only ever runs when the indexed path found nothing at all, i.e. there's no
+    ''' MATCH-ranked result set for these to compete against anyway.
+    ''' </remarks>
+    '''
+    Private Shared Function GetLikeFallbackHits(searchTerm As String, connection As MySqlConnection) As List(Of RankedHit)
+
+        Dim hits As New List(Of RankedHit)
+
+        Dim lastWord = SplitIntoMySqlWords(searchTerm).LastOrDefault()
+        If String.IsNullOrEmpty(lastWord) Then
+            Return hits
+        End If
+
+        Using command As New MySqlCommand(
+            "SELECT si.ProtocolItemID, si.ExperimentID, si.Content " +
+            "FROM tblSearchIndex si INNER JOIN tblExperiments exp ON exp.ExperimentID = si.ExperimentID " +
+            "WHERE si.Content LIKE CONCAT('%', @word, '%') AND exp.WorkflowState = 1", connection)
+
+            command.Parameters.AddWithValue("@word", lastWord)
+
+            Using reader = command.ExecuteReader()
+                While reader.Read()
+
+                    Dim content = reader.GetString(2)
+                    Dim match = LocateSearchMatch(content, searchTerm)
+
+                    If match IsNot Nothing AndAlso match.Success Then
+                        hits.Add(New RankedHit With {
+                            .ProtocolItemID = reader.GetString(0),
+                            .ExperimentID = reader.GetString(1),
+                            .Rank = 0,
+                            .Snippet = BuildSnippetFromMatch(content, match)
+                        })
+                    End If
+
+                End While
+            End Using
+
+        End Using
 
         Return hits
 
