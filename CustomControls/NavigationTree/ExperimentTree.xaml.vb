@@ -74,12 +74,12 @@ Public Class ExperimentTree
         ' stays light-colored in dark mode). Reapplying the Style re-evaluates its own DynamicResource
         ' Setter fresh while leaving the trigger free to still override it on hover.
         RefreshButtonStyle(btnCollapseAll)
-        RefreshButtonStyle(btnExpandAll)
         RefreshButtonStyle(btnLocateExperiment)
+        RefreshButtonStyle(btnFocusExperiment)
 
         iconCollapseAll.SetResourceReference(DarkModeHelper.BaseContentProperty, "CollapseAllIcon")
-        iconExpandAll.SetResourceReference(DarkModeHelper.BaseContentProperty, "ExpandAllIcon")
         iconLocateExperiment.SetResourceReference(DarkModeHelper.BaseContentProperty, "LocateExperimentIcon")
+        iconFocusExperiment.SetResourceReference(DarkModeHelper.BaseContentProperty, "FocusExperimentIcon")
 
     End Sub
 
@@ -101,25 +101,18 @@ Public Class ExperimentTree
     End Sub
 
 
-    Private Sub btnCollapseProjects_Click(sender As Object, e As RoutedEventArgs)
-
-        navMenuPopup.IsOpen = False
-        CollapseProjects()
-
-    End Sub
-
-
-    Private Sub btnExpandAll_Click()
-
-        navMenuPopup.IsOpen = False
-        ExpandAll()
-
-    End Sub
-
-
     Private Sub btnLocateExperiment_Click(sender As Object, e As RoutedEventArgs)
 
         navMenuPopup.IsOpen = False
+        RaiseEvent RequestLocateCurrentExperiment(Me)
+
+    End Sub
+
+
+    Private Sub btnFocusExperiment_Click(sender As Object, e As RoutedEventArgs)
+
+        navMenuPopup.IsOpen = False
+        CollapseExperiments()
         RaiseEvent RequestLocateCurrentExperiment(Me)
 
     End Sub
@@ -333,32 +326,6 @@ Public Class ExperimentTree
         For Each proj In currUser.tblProjects
             For Each folder In proj.tblProjFolders
                 folder.IsNodeExpanded = 0
-            Next
-        Next
-
-    End Sub
-
-
-    Public Sub CollapseProjects()
-
-        Dim currUser = CType(Me.DataContext, tblUsers)
-
-        For Each proj In currUser.tblProjects
-            proj.IsNodeExpanded = 0
-        Next
-
-    End Sub
-
-
-
-    Public Sub ExpandAll()
-
-        Dim currUser = CType(Me.DataContext, tblUsers)
-
-        For Each proj In currUser.tblProjects
-            proj.IsNodeExpanded = 1
-            For Each folder In proj.tblProjFolders
-                folder.IsNodeExpanded = 1
             Next
         Next
 
