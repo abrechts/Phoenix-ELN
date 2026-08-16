@@ -104,4 +104,13 @@ Public Class dlgFullTextSearch
     End Sub
 
 
+    Private Sub icoInfo_PreviewMouseUp() Handles icoInfo.PreviewMouseUp
+
+        Dim info As New ProcessStartInfo("https://abrechts.github.io/phoenix-eln-help.github.io/pages/FullText-Search.html") With {
+           .UseShellExecute = True}
+        Process.Start(info)
+
+    End Sub
+
+
 End Class
