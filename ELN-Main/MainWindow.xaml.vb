@@ -117,9 +117,12 @@ Class MainWindow
     End Sub
 
 
-    Private Sub Me_Loaded() Handles Me.Loaded
+    Private Async Sub Me_Loaded() Handles Me.Loaded
 
         Dim isRestoreFromServer As Boolean = False
+
+        'important for displaying the application icon in the taskbar!
+        Await Task.Yield
 
         Dim dbFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\Phoenix ELN Data"
         SQLiteDbPath = dbFolderPath + "\ElnData.db"
