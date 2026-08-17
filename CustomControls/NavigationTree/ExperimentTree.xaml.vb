@@ -51,10 +51,10 @@ Public Class ExperimentTree
     End Sub
 
 
-    Private Sub btnSortAlpha_Click(sender As Object, e As RoutedEventArgs)
+    Private Sub btnSortProjects_Click(sender As Object, e As RoutedEventArgs)
 
         Dim projectConv As ProjectsCollectionViewConverter = FindResource("projectsCollectionViewConv")
-        projectConv.SetSortMode(btnSortAlpha.IsChecked = True)
+        projectConv.SetSortMode(btnSortProjects.IsChecked = True)
 
     End Sub
 

@@ -212,7 +212,7 @@
                         local:DarkModeHelper.HoverOverrideContent="{StaticResource icoNewFolder}"/>
                 </Button>
 
-                <Button x:Name="btnAddFolder" Style="{StaticResource NavToolbarTextButtonStyle}" VerticalAlignment="Center" Padding="3,1,3,3"
+                <Button x:Name="btnAddFolder" Style="{StaticResource NavToolbarTextButtonStyle}" VerticalAlignment="Center" Padding="3,2,3,2"
                 ToolTip="Add a subgroup to the current project.&#x0a;(the default group is ‘All experiments’)"
                 Click="btnAddFolder_Click">
                     <Grid>
@@ -225,8 +225,8 @@
                     </Grid>
                 </Button>
 
-                <ToggleButton x:Name="btnSortAlpha" Style="{StaticResource NavToolbarToggleButtonStyle}" VerticalAlignment="Center" Margin="10,0,0,0" Padding="7,3,8,3"
-                    ToolTip="Sort projects alphabetically by title.&#x0a;Unchecked restores the default order." Click="btnSortAlpha_Click">
+                <ToggleButton x:Name="btnSortProjects" Style="{StaticResource NavToolbarToggleButtonStyle}" VerticalAlignment="Center" Margin="10,0,0,0" Padding="7,3,8,3"
+                    ToolTip="Sort projects alphabetically by title.&#x0a;Unchecked restores the default order." Click="btnSortProjects_Click">
                     <ContentControl Style="{StaticResource IconHoverSwapStyle}" Height="16" Width="16"
                         local:DarkModeHelper.BaseContent="{DynamicResource SortAscendingIcon}"
                         local:DarkModeHelper.HoverOverrideContent="{StaticResource icoSortAscending}"/>

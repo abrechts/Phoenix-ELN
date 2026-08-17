@@ -127,12 +127,16 @@ Public Class ExperimentBase
 
                                 If navProperty.Name <> "tblProducts" Then
 
-                                    Dim navTblCopy = dbContext.Entry(navTable).CurrentValues.ToObject
-                                    With navTblCopy
-                                        .GUID = Guid.NewGuid.ToString("d")
-                                        .ProtocolItem = protocolItemCopy
-                                    End With
-                                    navProperty.SetValue(protocolItemCopy, navTblCopy)
+                                    If navTable.GetType().GetProperty("GUID") IsNot Nothing Then
+
+                                        Dim navTblCopy = dbContext.Entry(navTable).CurrentValues.ToObject
+                                        With navTblCopy
+                                            .GUID = Guid.NewGuid.ToString("d")
+                                            .ProtocolItem = protocolItemCopy
+                                        End With
+                                        navProperty.SetValue(protocolItemCopy, navTblCopy)
+
+                                    End If
 
                                 Else
 
@@ -144,8 +148,6 @@ Public Class ExperimentBase
                                     navProperty.SetValue(protocolItemCopy, Nothing)
 
                                 End If
-
-                                Exit For  'this is a 1:1 relationship, so there's just one table to process
 
                             End If
                         End If
