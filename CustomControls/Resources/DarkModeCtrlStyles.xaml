@@ -412,8 +412,8 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <!-- Content Presenter -->
-            <ScrollContentPresenter Grid.Column="0" Grid.Row="0"/>
+            <!-- Content Presenter. CanContentScroll must be forwarded from the ScrollViewer itself -->
+            <ScrollContentPresenter Grid.Column="0" Grid.Row="0" CanContentScroll="{TemplateBinding CanContentScroll}"/>
 
             <!-- Vertical ScrollBar -->
             <ScrollBar x:Name="PART_VerticalScrollBar"
@@ -456,8 +456,9 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <!-- Content Presenter -->
-            <ScrollContentPresenter Grid.Column="0" Grid.Row="0"/>
+            <!-- Content Presenter. CanContentScroll forwarded for consistency with SkinScrollViewerTemplate,
+                 even though text hosts don't use a virtualizing panel - matches the stock template's default. -->
+            <ScrollContentPresenter Grid.Column="0" Grid.Row="0" CanContentScroll="{TemplateBinding CanContentScroll}"/>
 
             <!-- Vertical ScrollBar -->
             <ScrollBar x:Name="PART_VerticalScrollBar"

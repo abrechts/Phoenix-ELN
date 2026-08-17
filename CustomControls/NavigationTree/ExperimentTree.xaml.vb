@@ -1,5 +1,6 @@
 ﻿Imports System.Windows
 Imports System.Windows.Controls
+Imports System.Windows.Input
 Imports System.Windows.Threading
 Imports ElnCoreModel
 Imports GongSolutions.Wpf.DragDrop
@@ -50,6 +51,14 @@ Public Class ExperimentTree
     End Sub
 
 
+    Private Sub btnSortAlpha_Click(sender As Object, e As RoutedEventArgs)
+
+        Dim projectConv As ProjectsCollectionViewConverter = FindResource("projectsCollectionViewConv")
+        projectConv.SetSortMode(btnSortAlpha.IsChecked = True)
+
+    End Sub
+
+
     Private Sub btnNavMenu_Click(sender As Object, e As RoutedEventArgs)
 
         If Not navMenuPopup.IsOpen Then RefreshNavMenuSkin()
@@ -74,10 +83,12 @@ Public Class ExperimentTree
         ' stays light-colored in dark mode). Reapplying the Style re-evaluates its own DynamicResource
         ' Setter fresh while leaving the trigger free to still override it on hover.
         RefreshButtonStyle(btnCollapseAll)
+        RefreshButtonStyle(btnExpandAll)
         RefreshButtonStyle(btnLocateExperiment)
         RefreshButtonStyle(btnFocusExperiment)
 
         iconCollapseAll.SetResourceReference(DarkModeHelper.BaseContentProperty, "CollapseAllIcon")
+        iconExpandAll.SetResourceReference(DarkModeHelper.BaseContentProperty, "ExpandAllIcon")
         iconLocateExperiment.SetResourceReference(DarkModeHelper.BaseContentProperty, "LocateExperimentIcon")
         iconFocusExperiment.SetResourceReference(DarkModeHelper.BaseContentProperty, "FocusExperimentIcon")
 
@@ -114,6 +125,14 @@ Public Class ExperimentTree
         navMenuPopup.IsOpen = False
         CollapseExperiments()
         RaiseEvent RequestLocateCurrentExperiment(Me)
+
+    End Sub
+
+
+    Private Sub btnExpandAll_Click(sender As Object, e As RoutedEventArgs)
+
+        navMenuPopup.IsOpen = False
+        ExpandExperiments()
 
     End Sub
 
@@ -331,6 +350,19 @@ Public Class ExperimentTree
 
     End Sub
 
+
+    Public Sub ExpandExperiments()
+
+        Dim currUser = CType(Me.DataContext, tblUsers)
+
+        For Each proj In currUser.tblProjects
+            proj.IsNodeExpanded = 1
+            For Each folder In proj.tblProjFolders
+                folder.IsNodeExpanded = 1
+            Next
+        Next
+
+    End Sub
 
     ''' <summary>
     ''' Gets the currently highest project sequence number of the current user.  

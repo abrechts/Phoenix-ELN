@@ -886,6 +886,31 @@
         </Rectangle>
     </Viewbox>
 
+    <Viewbox x:Key="icoSortAscending_Dark" x:Shared="false">
+        <Rectangle Width="16 " Height="16">
+            <Rectangle.Resources>
+                <SolidColorBrush x:Key="canvas" Opacity="0" />
+                <SolidColorBrush x:Key="light-defaultgrey" Color="WhiteSmoke" Opacity="1" />
+                <SolidColorBrush x:Key="light-blue" Color="#FF6FB1FC" Opacity="1" />
+            </Rectangle.Resources>
+            <Rectangle.Fill>
+                <DrawingBrush Stretch="None">
+                    <DrawingBrush.Drawing>
+                        <DrawingGroup>
+                            <DrawingGroup>
+                                <GeometryDrawing Brush="{DynamicResource canvas}" Geometry="F1M16,16H0V0H16Z" />
+                            </DrawingGroup>
+                            <DrawingGroup>
+                                <GeometryDrawing Brush="{DynamicResource light-defaultgrey}" Geometry="F1M14,10l-3.5,3H14v1H9V13l3.5-3H9V9h5ZM12,2H11L9,7h1l.375-1h2.25L13,7h1ZM10.75,5l.75-2,.75,2Z" />
+                                <GeometryDrawing Brush="{DynamicResource light-blue}" Geometry="F1M4.844,14.854H4.137l-2.5-2.5.707-.708L4,13.293V2H5V13.293l1.637-1.647.707.708Z" />
+                            </DrawingGroup>
+                        </DrawingGroup>
+                    </DrawingBrush.Drawing>
+                </DrawingBrush>
+            </Rectangle.Fill>
+        </Rectangle>
+    </Viewbox>
+
     <Viewbox x:Key="icoExport" x:Shared="false">
         <Rectangle Width="16" Height="16">
             <Rectangle.Resources>

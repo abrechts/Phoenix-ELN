@@ -125,18 +125,54 @@
             </Style.Triggers>
         </Style>
 
+        <!-- Toolbar button chrome: icon+text ToggleButton (dark+hover reverts text to Black; checked state
+             gets a highlighted background so the active sort mode stays visible without opening anything) -->
+        <Style x:Key="NavToolbarToggleButtonStyle" TargetType="ToggleButton" BasedOn="{StaticResource {x:Type ToggleButton}}">
+            <Setter Property="Background" Value="{DynamicResource InputBackground}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Foreground" Value="{DynamicResource BodyForeground}"/>
+            <!--Matches Application.xaml's "Global rounded buttons style" trick for Button, applied here to
+                ToggleButton (which that style doesn't cover): the default template's internal Border picks up
+                CornerRadius from the implicit Border style in scope, rounding it the same as the other toolbar buttons.-->
+            <Style.Resources>
+                <Style TargetType="Border">
+                    <Setter Property="CornerRadius" Value="6"/>
+                </Style>
+            </Style.Resources>
+            <Style.Triggers>
+                <Trigger Property="IsChecked" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource CurrentExperimentHighlight}"/>
+                </Trigger>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding Path=(local:DarkModeHelper.IsDarkMode), RelativeSource={RelativeSource Self}}" Value="True"/>
+                        <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource Self}}" Value="True"/>
+                    </MultiDataTrigger.Conditions>
+                    <Setter Property="Foreground" Value="Black"/>
+                </MultiDataTrigger>
+            </Style.Triggers>
+        </Style>
+
         <!-- Toolbar icon hover-swap: base Content comes from the DarkModeHelper.BaseContent
              attached DP (set per-instance to the theme-aware DynamicResource icon). While the ancestor
-             Button is hovered in dark mode, Content reverts to HoverOverrideContent (the fixed light
-             icon) so it stays legible against the button's light hover highlight.
-             Base value must be a Style Setter (not a local attribute) so the trigger can override it. -->
+             ButtonBase (Button or ToggleButton) is hovered - or, for a ToggleButton, while it's checked -
+             in dark mode, Content reverts to HoverOverrideContent (the fixed light icon) so it stays legible
+             against the button's light hover/checked highlight (both use the same light background).
+             Base value must be a Style Setter (not a local attribute) so the triggers can override it. -->
         <Style x:Key="IconHoverSwapStyle" TargetType="ContentControl">
             <Setter Property="Content" Value="{Binding Path=(local:DarkModeHelper.BaseContent), RelativeSource={RelativeSource Self}}"/>
             <Style.Triggers>
                 <MultiDataTrigger>
                     <MultiDataTrigger.Conditions>
                         <Condition Binding="{Binding Path=(local:DarkModeHelper.IsDarkMode), RelativeSource={RelativeSource Self}}" Value="True"/>
-                        <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=Button}}" Value="True"/>
+                        <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=ButtonBase}}" Value="True"/>
+                    </MultiDataTrigger.Conditions>
+                    <Setter Property="Content" Value="{Binding Path=(local:DarkModeHelper.HoverOverrideContent), RelativeSource={RelativeSource Self}}"/>
+                </MultiDataTrigger>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding Path=(local:DarkModeHelper.IsDarkMode), RelativeSource={RelativeSource Self}}" Value="True"/>
+                        <Condition Binding="{Binding IsChecked, RelativeSource={RelativeSource AncestorType=ToggleButton}}" Value="True"/>
                     </MultiDataTrigger.Conditions>
                     <Setter Property="Content" Value="{Binding Path=(local:DarkModeHelper.HoverOverrideContent), RelativeSource={RelativeSource Self}}"/>
                 </MultiDataTrigger>
@@ -154,7 +190,7 @@
 
     <DockPanel>
 
-        <DockPanel DockPanel.Dock="top" Margin="2,0,2,6" HorizontalAlignment="Left">
+        <DockPanel DockPanel.Dock="top" Margin="2,0,2,6">
 
             <local:ThemedComboBox x:Name="cboUsers" x:FieldModifier="public" CornerRadius="6" BorderThickness="1" Margin="1,0,6,0" VerticalAlignment="Center"
                     MinWidth="94" FontSize="11.5" FontFamily="Verdana"
@@ -166,21 +202,19 @@
                     BorderBrushDark="#FF6D6D6D"
                     BackgroundDark="#FF333333"
                     SelectionChanged="cboUsers_SelectionChanged"/>
+        
+            <StackPanel x:Name="pnlToolbar" DockPanel.Dock="Right" Orientation="Horizontal">
 
-            <Button x:Name="btnAddProject" Style="{StaticResource NavToolbarTextButtonStyle}" VerticalAlignment="Center"
+                <Button x:Name="btnAddProject" Style="{StaticResource NavToolbarTextButtonStyle}" VerticalAlignment="Center"
                 ToolTip="Add a new project" Margin="0,0,4,0" Padding="3,1,5,4" Click="btnAddProject_Click">
-                <StackPanel Orientation="Horizontal">
                     <ContentControl Style="{StaticResource IconHoverSwapStyle}" Height="16" Margin="3,1,4,0"
                         local:DarkModeHelper.BaseContent="{DynamicResource NewFolderIcon}"
                         local:DarkModeHelper.HoverOverrideContent="{StaticResource icoNewFolder}"/>
-                    <!--<TextBlock Text="Add" Margin="0,0,2,-2" VerticalAlignment="Center" FontFamily="Verdana" FontSize="11.5"/>-->
-                </StackPanel>
-            </Button>
+                </Button>
 
-            <Button x:Name="btnAddFolder" Style="{StaticResource NavToolbarTextButtonStyle}" VerticalAlignment="Center" Padding="3,1,3,3"
-                ToolTip="Add an experiment group to the current project.&#x0a;----------------------------------------------------&#x0a;Experiment groups let you organize your project experiments into user-defined &#x0a;categories such as ‘Preliminary Experiments’, ‘Optimized Synthesis’, ‘Step 1’, etc.  &#x0a;&#x0a;Initially, all project experiments are in the default group ‘All experiments’.&#x0a;"
+                <Button x:Name="btnAddFolder" Style="{StaticResource NavToolbarTextButtonStyle}" VerticalAlignment="Center" Padding="3,1,3,3"
+                ToolTip="Add a subgroup to the current project.&#x0a;(the default group is ‘All experiments’)"
                 Click="btnAddFolder_Click">
-                <StackPanel Orientation="Horizontal">
                     <Grid>
                         <ContentControl Style="{StaticResource IconHoverSwapStyle}" Height="16" HorizontalAlignment="Left" Margin="6,2,0,0"
                             local:DarkModeHelper.BaseContent="{DynamicResource GrayDotIcon}"
@@ -189,20 +223,27 @@
                             local:DarkModeHelper.BaseContent="{DynamicResource NewIcon}"
                             local:DarkModeHelper.HoverOverrideContent="{StaticResource icoNew}"/>
                     </Grid>
-                    <!--<TextBlock Text="Add" Margin="0,0,4,0" VerticalAlignment="Center" FontFamily="Verdana" FontSize="11.5"/>-->
-                </StackPanel>
-            </Button>
+                </Button>
 
-            <Button x:Name="btnNavMenu" Style="{StaticResource NavToolbarTextButtonStyle}" VerticalAlignment="Center" Margin="5,0,0,0" Padding="5,2,3,2"
-                ToolTip="Navigation Actions" Click="btnNavMenu_Click">
-                <StackPanel Orientation="Horizontal">
-                    <ContentControl Style="{StaticResource IconHoverSwapStyle}" Height="16" Width="16" Margin="0,0,0,0"
-                        local:DarkModeHelper.BaseContent="{DynamicResource TreeViewOptionsIcon}"
-                        local:DarkModeHelper.HoverOverrideContent="{StaticResource icoTreeViewOptions}"/>
-                    <!--<TextBlock Text="View" VerticalAlignment="Center" FontFamily="Verdana" FontSize="11.5" Margin="2,0,0,0"/>-->
-                    <TextBlock Text="&#x25BE;" FontSize="14" Margin="2,0,0,0" VerticalAlignment="Center"/>
-                </StackPanel>
-            </Button>
+                <ToggleButton x:Name="btnSortAlpha" Style="{StaticResource NavToolbarToggleButtonStyle}" VerticalAlignment="Center" Margin="10,0,0,0" Padding="7,3,8,3"
+                    ToolTip="Sort projects alphabetically by title.&#x0a;Unchecked restores the default order." Click="btnSortAlpha_Click">
+                    <ContentControl Style="{StaticResource IconHoverSwapStyle}" Height="16" Width="16"
+                        local:DarkModeHelper.BaseContent="{DynamicResource SortAscendingIcon}"
+                        local:DarkModeHelper.HoverOverrideContent="{StaticResource icoSortAscending}"/>
+                </ToggleButton>
+
+                <Button x:Name="btnNavMenu" Style="{StaticResource NavToolbarTextButtonStyle}" VerticalAlignment="Center" Margin="4,0,0,0" Padding="5,2,3,2"
+                    ToolTip="Navigation Actions" Click="btnNavMenu_Click">
+                    <StackPanel Orientation="Horizontal">
+                        <ContentControl Style="{StaticResource IconHoverSwapStyle}" Height="16" Width="16" Margin="0,0,0,0"
+                            local:DarkModeHelper.BaseContent="{DynamicResource TreeViewOptionsIcon}"
+                            local:DarkModeHelper.HoverOverrideContent="{StaticResource icoTreeViewOptions}"/>
+                        <!--<TextBlock Text="View" VerticalAlignment="Center" FontFamily="Verdana" FontSize="11.5" Margin="2,0,0,0"/>-->
+                        <TextBlock Text="&#x25BE;" FontSize="14" Margin="2,0,0,0" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+
+            </StackPanel>
 
             <!--DynamicResource values inside a Popup go stale after an app skin swap (Popup content is
                 logically disconnected from the resource-change invalidation walk, so it never hears about
@@ -223,14 +264,16 @@
 
 
                         <Button x:Name="btnCollapseAll" Style="{StaticResource NavToolbarTextButtonStyle}" HorizontalContentAlignment="Left"
-                            HorizontalAlignment="Stretch" Padding="5,4,12,4" Click="btnCollapseAll_Click">
+                            HorizontalAlignment="Stretch" Padding="5,4,12,4" Click="btnCollapseAll_Click" ToolTip="Hides all experiments">
                             <StackPanel Orientation="Horizontal">
                                 <ContentControl x:Name="iconCollapseAll" Style="{StaticResource IconHoverSwapStyle}" Height="16" Width="14" Margin="1,1,6,0"
                                     local:DarkModeHelper.BaseContent="{DynamicResource CollapseAllIcon}"
                                     local:DarkModeHelper.HoverOverrideContent="{StaticResource icoCollapseAll}"/>
-                                <TextBlock Text="Hide Experiments" VerticalAlignment="Center" FontFamily="Verdana" FontSize="11.5"/>
+                                <TextBlock Text="Overview" VerticalAlignment="Center" FontFamily="Verdana" FontSize="11.5"/>
                             </StackPanel>
                         </Button>
+
+                        <Separator/>
 
                         <Button x:Name="btnLocateExperiment" Style="{StaticResource NavToolbarTextButtonStyle}" HorizontalContentAlignment="Left"
                             HorizontalAlignment="Stretch" Padding="5,4,12,4" Click="btnLocateExperiment_Click" ToolTip="Scrolls to the current experiment.">
@@ -252,9 +295,17 @@
                             </StackPanel>
                         </Button>
 
-                        
+                        <Separator/>
 
-                      
+                        <Button x:Name="btnExpandAll" Style="{StaticResource NavToolbarTextButtonStyle}" HorizontalContentAlignment="Left"
+                           HorizontalAlignment="Stretch" Padding="5,4,12,4" Click="btnExpandAll_Click" ToolTip="Expands all experiments.">
+                            <StackPanel Orientation="Horizontal">
+                                <ContentControl x:Name="iconExpandAll" Style="{StaticResource IconHoverSwapStyle}" Height="16" Width="16" Margin="1,1,6,0"
+                                    local:DarkModeHelper.BaseContent="{DynamicResource ExpandAllIcon}"
+                                    local:DarkModeHelper.HoverOverrideContent="{StaticResource icoExpandAll}"/>
+                                <TextBlock Text="Expand All" VerticalAlignment="Center" FontFamily="Verdana" FontSize="11.5"/>
+                            </StackPanel>
+                        </Button>
 
                     </StackPanel>
                 </Border>
@@ -274,6 +325,8 @@
             ItemsSource="{Binding tblProjects, Converter={StaticResource projectsCollectionViewConv}}"
             TreeViewItem.Selected="TreeViewItem_Selected" TreeViewItem.Unselected="TreeViewItem_Unselected" Padding="2,2,2,8" BorderThickness="0"
             VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"
+            VirtualizingPanel.ScrollUnit="Item"
+            ScrollViewer.CanContentScroll="True"
             dd:DragDrop.IsDragSource="True"
             dd:DragDrop.IsDropTarget="True"
             dd:DragDrop.UseDefaultDragAdorner="false"

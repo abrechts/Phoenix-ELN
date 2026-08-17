@@ -57,5 +57,6 @@
     <ContentControl x:Key="LocateExperimentIcon" x:Shared="false" Content="{StaticResource icoLocateExperiment_Dark}"/>
     <ContentControl x:Key="FocusExperimentIcon" x:Shared="false" Content="{StaticResource icoFocusExperiment_Dark}"/>
     <ContentControl x:Key="TreeViewOptionsIcon" x:Shared="false" Content="{StaticResource icoTreeViewOptions_Dark}"/>
+    <ContentControl x:Key="SortAscendingIcon" x:Shared="false" Content="{StaticResource icoSortAscending_Dark}"/>
 
 </ResourceDictionary>
