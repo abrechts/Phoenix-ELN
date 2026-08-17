@@ -104,8 +104,7 @@
 
                     </StackPanel>
 
-                    <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="1" TextBlock.FontWeight="Normal" 
-                    >
+                    <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="1" TextBlock.FontWeight="Normal">
                         <TextBlock Text="[" Margin="0,0,1,0"/>
                         <TextBlock Text="MW:" Margin="0,0,2,0"/>
                         <TextBlock d:Text="234.35" Text="{Binding MolecularWeight,StringFormat=0.00}"/>

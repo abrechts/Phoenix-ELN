@@ -10,23 +10,53 @@ Imports ElnCoreModel
 
 
 ''' <summary>
-''' Sorts navigation tree projects in descending SequenceNr order. This converter type generally provides otherwise 
+''' Sorts navigation tree projects in descending SequenceNr order. This converter type generally provides otherwise
 ''' unavailable support for sorting Enums within HierarchicalDataTemplates.
 ''' </summary>
-''' 
+'''
 Public Class ProjectsCollectionViewConverter
 
     Implements IValueConverter
 
     Public Property View As ListCollectionView
 
+    ' Set by ExperimentTree's alphabetical-sort toolbar toggle. Kept on the converter (not the View) so it
+    ' survives Convert re-running when tblProjects rebinds (e.g. switching the current user via cboUsers).
+    Public Property SortAlphabetically As Boolean = False
+
+    ' CustomSort with a typed comparer instead of SortDescriptions: SortDescriptions resolves "SequenceNr" via
+    ' PropertyDescriptor reflection on every comparison, which since this Convert runs the first time any
+    ' project's ItemsPresenter binds, is not gated by virtualization.
+
+    Private Shared ReadOnly Comparer As IComparer = System.Collections.Generic.Comparer(Of tblProjects).Create(
+        Function(a, b) System.Collections.Generic.Comparer(Of Short?).Default.Compare(b.SequenceNr, a.SequenceNr))
+
+    Private Shared ReadOnly AlphaComparer As IComparer = System.Collections.Generic.Comparer(Of tblProjects).Create(
+        Function(a, b) String.Compare(a.Title, b.Title, StringComparison.CurrentCultureIgnoreCase))
+
     Private Function Convert(value As Object, targetType As Type, parameter As Object, culture As CultureInfo) As Object Implements IValueConverter.Convert
 
         View = New ListCollectionView(CType(value, IList))
-        View.SortDescriptions.Add(New SortDescription("SequenceNr", ListSortDirection.Descending))
+        View.CustomSort = If(SortAlphabetically, AlphaComparer, Comparer)
         Return View
 
     End Function
+
+
+    ''' <summary>
+    ''' Switches the project sort between alphabetical (by Title, ascending) and the default SequenceNr order.
+    ''' </summary>
+    '''
+    Public Sub SetSortMode(alphabetical As Boolean)
+
+        SortAlphabetically = alphabetical
+
+        If View IsNot Nothing Then
+            View.CustomSort = If(alphabetical, AlphaComparer, Comparer)
+            View.Refresh()
+        End If
+
+    End Sub
 
     Private Function ConvertBack(value As Object, targetType As Type, parameter As Object, culture As CultureInfo) As Object Implements IValueConverter.ConvertBack
 
@@ -44,10 +74,14 @@ Public Class ProjectFoldersCollectionViewConverter
 
     Public Property View As ListCollectionView
 
+    ' See ProjectsCollectionViewConverter's Comparer field for why this avoids SortDescriptions.
+    Private Shared ReadOnly Comparer As IComparer = System.Collections.Generic.Comparer(Of tblProjFolders).Create(
+        Function(a, b) System.Collections.Generic.Comparer(Of Short?).Default.Compare(b.SequenceNr, a.SequenceNr))
+
     Private Function Convert(value As Object, targetType As Type, parameter As Object, culture As CultureInfo) As Object Implements IValueConverter.Convert
 
         View = New ListCollectionView(CType(value, IList))
-        View.SortDescriptions.Add(New SortDescription("SequenceNr", ListSortDirection.Descending))
+        View.CustomSort = Comparer
         Return View
 
     End Function
@@ -74,10 +108,16 @@ Public Class ExperimentsCollectionViewConverter
 
     Public Property View As ListCollectionView
 
+    ' See ProjectsCollectionViewConverter's Comparer field for why this avoids SortDescriptions - it's the sort
+    ' that pays for every experiment in a folder, so it can dominate cost on a large project group.
+
+    Private Shared ReadOnly Comparer As IComparer = System.Collections.Generic.Comparer(Of tblExperiments).Create(
+        Function(a, b) System.Collections.Generic.Comparer(Of String).Default.Compare(b.ExperimentID, a.ExperimentID))
+
     Private Function Convert(value As Object, targetType As Type, parameter As Object, culture As CultureInfo) As Object Implements IValueConverter.Convert
 
         View = New ListCollectionView(CType(value, IList))
-        View.SortDescriptions.Add(New SortDescription("ExperimentID", ListSortDirection.Descending))
+        View.CustomSort = Comparer
         Return View
 
     End Function
