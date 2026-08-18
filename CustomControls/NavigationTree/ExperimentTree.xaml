@@ -159,6 +159,7 @@
              in dark mode, Content reverts to HoverOverrideContent (the fixed light icon) so it stays legible
              against the button's light hover/checked highlight (both use the same light background).
              Base value must be a Style Setter (not a local attribute) so the triggers can override it. -->
+        
         <Style x:Key="IconHoverSwapStyle" TargetType="ContentControl">
             <Setter Property="Content" Value="{Binding Path=(local:DarkModeHelper.BaseContent), RelativeSource={RelativeSource Self}}"/>
             <Style.Triggers>

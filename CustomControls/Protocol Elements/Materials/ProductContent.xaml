@@ -15,6 +15,7 @@
         <local:YieldConverter x:Key="yieldConv"/>
         <local:WeightUnitConverter x:Key="amountUnitConv"/>
         <local:NothingToVisibilityConverter x:Key="nothingToVisConv"/>
+        <local:StringToVisibilityConverter x:Key="stringToVisConv"/>
         <local:ProductIndexConverter x:Key="prodIndexConv"/>
         <local:ElementalFormulaConverter x:Key="efConverter"/>
         <local:PlaceholderInfoConverter x:Key="placeholderInfoConv"/>
@@ -87,7 +88,7 @@
                         <TextBlock d:Text=" @ 98.5% purity" Text="{Binding Purity,StringFormat={} @ 0.0\\% purity}"
                             Visibility="{Binding Purity,Converter={StaticResource nothingToVisConv}}" FontWeight="Regular" />
 
-                        <StackPanel Orientation="Horizontal" Visibility="{Binding BatchID,Converter={StaticResource nothingToVisConv}}" 
+                        <StackPanel Orientation="Horizontal" Visibility="{Binding BatchID,Converter={StaticResource stringToVisConv}}" 
                           TextBlock.FontWeight="Regular">
                             <TextBlock Text="; batch-ID:" Margin="1,0,0,0"/>
                             <TextBlock Text="{Binding BatchID}" d:Text="23453-34/2" Margin="2,0,0,0"/>

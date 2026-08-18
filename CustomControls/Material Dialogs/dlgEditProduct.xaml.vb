@@ -192,7 +192,7 @@ Public Class dlgEditProduct
             numPurity.Focus()
             Return False
 
-        ElseIf numResinLoad.IsVisible AndAlso val(numResinLoad.Text) = 0 Then
+        ElseIf numResinLoad.IsVisible AndAlso Val(numResinLoad.Text) = 0 Then
             cbMsgBox.Display("Please specify a resin load.", MsgBoxStyle.OkOnly + MsgBoxStyle.Exclamation, "Data Validation")
             numResinLoad.Focus()
             Return False
@@ -209,7 +209,7 @@ Public Class dlgEditProduct
         With ProductEntry
             .Grams = ConvertToGrams(numMatAmount.Value, ToWeightUnit(cboMatUnit.Text))
             .Name = txtMatName.Text
-            .BatchID = txtBatchID.Text
+            .BatchID = Trim(txtBatchID.Text)
             .Purity = numPurity.Value
             .MolecularWeight = SketchInfo.Products(.ProductIndex).Molweight
             .ExactMass = SketchInfo.Products(.ProductIndex).ExactMass
