@@ -72,7 +72,13 @@ Public Class ProjectFoldersCollectionViewConverter
 
     Implements IValueConverter
 
-    Public Property View As ListCollectionView
+    ' Unlike ProjectsCollectionViewConverter (one tblProjects collection per user, so a single View property is
+    ' fine), this converter's Convert runs once per PROJECT (each has its own tblProjFolders collection), all
+    ' sharing this one converter instance as a StaticResource. A single View property would just get overwritten
+    ' by whichever project was bound last, so drag-drop reorder code has no reliable way to refresh the correct
+    ' project's view afterward (SequenceNr changes don't auto-resort a CustomSort ListCollectionView). Keyed by
+    ' source collection instead, so RefreshView can find the right one.
+    Private ReadOnly _viewsBySource As New Dictionary(Of IList, ListCollectionView)
 
     ' See ProjectsCollectionViewConverter's Comparer field for why this avoids SortDescriptions.
     Private Shared ReadOnly Comparer As IComparer = System.Collections.Generic.Comparer(Of tblProjFolders).Create(
@@ -80,11 +86,28 @@ Public Class ProjectFoldersCollectionViewConverter
 
     Private Function Convert(value As Object, targetType As Type, parameter As Object, culture As CultureInfo) As Object Implements IValueConverter.Convert
 
-        View = New ListCollectionView(CType(value, IList))
-        View.CustomSort = Comparer
-        Return View
+        Dim sourceList = CType(value, IList)
+        Dim view As New ListCollectionView(sourceList)
+        view.CustomSort = Comparer
+        _viewsBySource(sourceList) = view
+        Return view
 
     End Function
+
+    ''' <summary>
+    ''' Re-sorts the already-realized view for the given project's folder collection, if one exists. Needed
+    ''' after drag-drop reorder code changes SequenceNr directly on existing entities, since a CustomSort
+    ''' ListCollectionView doesn't automatically notice property changes on its items.
+    ''' </summary>
+    '''
+    Public Sub RefreshView(folders As IList)
+
+        Dim view As ListCollectionView = Nothing
+        If _viewsBySource.TryGetValue(folders, view) Then
+            view.Refresh()
+        End If
+
+    End Sub
 
     Private Function ConvertBack(value As Object, targetType As Type, parameter As Object, culture As CultureInfo) As Object Implements IValueConverter.ConvertBack
 

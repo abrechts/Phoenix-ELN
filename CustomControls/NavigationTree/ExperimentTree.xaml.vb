@@ -763,10 +763,18 @@ Public Class NavTreeDropHandler
                         Exit Sub
                     End If
 
-                    ''prevent inserting below itself
-                    'If targetFolder.SequenceNr = srcFolder.SequenceNr - 1 Then
-                    '    Exit Sub
-                    'End If
+                    'prevent inserting below itself: dropping right before its current successor is exactly
+                    'where it already is, so the sort order wouldn't actually change. Found by actual sort
+                    'order rather than assuming SequenceNr is gap-free, since deleted/archived folders can
+                    'leave non-consecutive values even though the remaining folders still render adjacently.
+
+                    Dim nextFolder = (From f In srcFolder.Project.tblProjFolders
+                                      Where f.SequenceNr < srcFolder.SequenceNr
+                                      Order By f.SequenceNr Descending).FirstOrDefault()
+
+                    If targetFolder Is nextFolder AndAlso .InsertPosition = RelativeInsertPosition.BeforeTargetItem Then
+                        Exit Sub
+                    End If
 
                     If (.InsertPosition = RelativeInsertPosition.BeforeTargetItem AndAlso (targetFolder.IsNodeExpanded = 1 _
                       OrElse targetFolder.SequenceNr = folderCount - 1)) Then
@@ -783,11 +791,23 @@ Public Class NavTreeDropHandler
 
                     'drag over last experiment node of last project folder (i.e. for append)
 
+                    Dim srcFolder = CType(.Data, tblProjFolders)
                     Dim targetExp = CType(dropInfo.TargetItem, tblExperiments)
                     Dim lastFolderExp = (From exp In targetExp.ProjFolder.tblExperiments Order By exp.ExperimentID Descending).Last
 
                     'prevent inserting into another project
                     If targetExp.Project IsNot .Data.Project Then
+                        Exit Sub
+                    End If
+
+                    ' this branch is an append-to-bottom proxy and only makes sense when the hovered experiment's
+                    ' own folder genuinely is the bottom-most folder - otherwise (e.g. hovering the dragged
+                    ' folder's own last experiment, since its expanded contents render right up against
+                    ' whichever folder comes next) this would send it straight to the very bottom instead of
+                    ' leaving it where it is
+
+                    Dim lastProjFolder = (From f In srcFolder.Project.tblProjFolders Order By f.SequenceNr Ascending).First
+                    If targetExp.ProjFolder IsNot lastProjFolder Then
                         Exit Sub
                     End If
 
@@ -822,9 +842,31 @@ Public Class NavTreeDropHandler
 
                 If TypeOf .TargetItem Is tblProjects AndAlso .TargetItem IsNot .Data Then
 
+                    ''prevent inserting below itself
+                    'If .InsertIndex = .DragInfo.SourceIndex + 1 Then
+                    '    .DropTargetAdorner = Nothing
+                    '    Exit Sub
+                    'End If
+
                     If .InsertPosition = RelativeInsertPosition.BeforeTargetItem Then
                         .DropTargetAdorner = DropTargetAdorners.Insert
                         .Effects = DragDropEffects.Move
+
+                    ElseIf .InsertPosition = RelativeInsertPosition.AfterTargetItem Then
+
+                        ' dragging past the end of the last (bottom-most) project when it's collapsed - there's
+                        ' no folder/experiment rendered below it to serve as an append proxy (unlike the expanded
+                        ' case, handled by the tblProjFolders/tblExperiments branches below), so this is the only
+                        ' way to reach "insert after the last project" for that case
+
+                        Dim targetProject = CType(.TargetItem, tblProjects)
+                        Dim lastProject = (From p In dragProject.User.tblProjects Order By p.SequenceNr Ascending).First
+
+                        If targetProject Is lastProject Then
+                            .DropTargetAdorner = DropTargetAdorners.Insert
+                            .Effects = DragDropEffects.Move
+                        End If
+
                     End If
 
                 ElseIf TypeOf .TargetItem Is tblProjFolders Then
@@ -960,6 +1002,13 @@ Public Class NavTreeDropHandler
                 dragFolder.SequenceNr = 0 ' bottom position
 
             End If
+
+            ' navTree.Items.Refresh() only re-sorts the top-level tblProjects view - the folder-level
+            ' ListCollectionView (one per project, from ProjectFoldersCollectionViewConverter) doesn't
+            ' auto-resort just because SequenceNr changed on its items, so it needs an explicit nudge too
+
+            Dim folderConv As ProjectFoldersCollectionViewConverter = navTree.FindResource("projectFoldersCollectionViewConv")
+            folderConv.RefreshView(dragFolder.Project.tblProjFolders)
 
             navTree.Items.Refresh()
 
