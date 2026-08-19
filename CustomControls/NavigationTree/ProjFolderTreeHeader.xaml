@@ -17,11 +17,11 @@
     </UserControl.Resources>
     
     <UserControl.ContextMenu>
-        <ContextMenu SnapsToDevicePixels="True">
+        <ContextMenu SnapsToDevicePixels="True" MinWidth="110">
             <Separator>
                 <Separator.Template>
                     <ControlTemplate TargetType="Separator">
-                        <TextBlock Text="Experiment Group " Background="DimGray" Foreground="white" Padding="6,2,4,3"/>
+                        <TextBlock Text="Project Group" Background="DimGray" Foreground="white" Padding="6,2,4,3"/>
                     </ControlTemplate>
                 </Separator.Template>
             </Separator>

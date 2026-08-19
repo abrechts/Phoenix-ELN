@@ -1,6 +1,6 @@
 ﻿Imports System.Windows
 Imports System.Windows.Controls
-Imports System.Windows.Input
+Imports System.Windows.Media
 Imports System.Windows.Threading
 Imports ElnCoreModel
 Imports GongSolutions.Wpf.DragDrop
@@ -55,6 +55,18 @@ Public Class ExperimentTree
 
         Dim projectConv As ProjectsCollectionViewConverter = FindResource("projectsCollectionViewConv")
         projectConv.SetSortMode(btnSortProjects.IsChecked = True)
+
+    End Sub
+
+
+    ''' <summary>
+    ''' Called by NavTreeDropHandler when a project drag is blocked because alphabetical sort is active
+    ''' (SequenceNr reordering would otherwise happen invisibly under the alphabetical view).
+    ''' </summary>
+    '''
+    Public Sub ShowSortDragHint()
+
+        infoToast.Show("Turn off alphabetical sorting to reorder projects.", "⚠ ", Brushes.Orange)
 
     End Sub
 
@@ -647,6 +659,59 @@ Public Class ExperimentTree
 End Class
 
 
+''' <summary>
+''' Drop-target highlight for dragging a tblExperiments node: the hovered row (DropInfo.VisualTargetItem)
+''' can be either the target project folder's own row or one of its experiment children - since the
+''' experiment can't be inserted at a specific position within a folder (the list is sorted), both cases
+''' should draw the same "whole folder" selection rectangle rather than limiting it to whichever single
+''' row is currently under the mouse.
+''' </summary>
+''' 
+Public Class NavTreeFolderHighlightAdorner
+    Inherits DropTargetHighlightAdorner
+
+    Public Sub New(adornedElement As UIElement, dropInfo As IDropInfo)
+        MyBase.New(adornedElement, dropInfo)
+    End Sub
+
+    Protected Overrides Sub OnRender(drawingContext As DrawingContext)
+
+        ' AdornedElement is NOT the hovered row - gong-wpf-dragdrop always anchors this adorner to the
+        ' TreeView's own ItemsPresenter (a fixed coordinate frame for the whole list) and reuses the same
+        ' adorner instance across DragOver ticks as long as the adorner type doesn't change, refreshing
+        ' only Me.DropInfo each time. The currently-hovered item therefore has to come from
+        ' Me.DropInfo.VisualTargetItem (live), not from Me.AdornedElement (fixed at first creation).
+
+        Dim hoveredItem = TryCast(Me.DropInfo.VisualTargetItem, FrameworkElement)
+
+        If hoveredItem Is Nothing Then
+            MyBase.OnRender(drawingContext)
+            Return
+        End If
+
+        Dim folderItem = WPFToolbox.FindVisualParent(Of TreeViewItem)(hoveredItem)
+
+        If folderItem Is Nothing OrElse Not TypeOf folderItem.DataContext Is tblProjFolders Then
+            'hovering the folder's own row directly - reuse the library's own rendering (it already
+            'accounts for virtualization/scroll-clipping when computing the header row's bounds)
+            MyBase.OnRender(drawingContext)
+            Return
+        End If
+
+        'hovering an experiment child - highlight its parent folder row instead. Me.Pen/Me.Background are
+        'inherited from the base adorner classes and already populated by gong-wpf-dragdrop's DragDrop engine
+        '(from the TreeView's DropTargetAdornerBrush/HighlightBrush), so reuse them here.
+
+        Dim topLeft = folderItem.TranslatePoint(New Point(0, 0), Me.AdornedElement)
+        Dim rect = New Rect(topLeft, New Size(folderItem.ActualWidth, folderItem.ActualHeight))
+
+        drawingContext.DrawRoundedRectangle(Me.Background, Me.Pen, rect, 2, 2)
+
+    End Sub
+
+End Class
+
+
 Public Class NavTreeDropHandler
 
     '-------------------------------------------------------------------------
@@ -667,9 +732,17 @@ Public Class NavTreeDropHandler
 
                 Dim expFolder = CType(.Data, tblExperiments).ProjFolder
 
-                If .TargetItem IsNot expFolder AndAlso TypeOf .TargetItem Is tblProjFolders Then
+                Dim targetFolder As tblProjFolders = Nothing
+                If TypeOf .TargetItem Is tblProjFolders Then
+                    targetFolder = CType(.TargetItem, tblProjFolders)
+                ElseIf TypeOf .TargetItem Is tblExperiments Then
+                    ' dragging exp over a child exp of a project group highlights the complete target group
+                    targetFolder = CType(.TargetItem, tblExperiments).ProjFolder
+                End If
+
+                If targetFolder IsNot Nothing AndAlso targetFolder IsNot expFolder Then
                     .Effects = DragDropEffects.Move
-                    .DropTargetAdorner = DropTargetAdorners.Highlight
+                    .DropTargetAdorner = GetType(NavTreeFolderHighlightAdorner)
                 End If
 
             ElseIf TypeOf .Data Is tblProjFolders Then
@@ -734,15 +807,20 @@ Public Class NavTreeDropHandler
                 ' drag project node
                 '-------------------
 
+                Dim navTree = TryCast(.VisualTarget, TreeView)
+                Dim projectConv = TryCast(navTree?.FindResource("projectsCollectionViewConv"), ProjectsCollectionViewConverter)
+
+                If projectConv IsNot Nothing AndAlso projectConv.SortAlphabetically Then
+
+                    ' Reordering projects by SequenceNr would silently have no visible effect while the view is sorted by title
+                    WPFToolbox.FindVisualParent(Of ExperimentTree)(navTree)?.ShowSortDragHint()
+                    Exit Sub
+
+                End If
+
                 Dim dragProject = CType(.Data, tblProjects)
 
                 If TypeOf .TargetItem Is tblProjects AndAlso .TargetItem IsNot .Data Then
-
-                    ''prevent inserting below itself
-                    'If .InsertIndex = .DragInfo.SourceIndex + 1 Then
-                    '    .DropTargetAdorner = Nothing
-                    '    Exit Sub
-                    'End If
 
                     If .InsertPosition = RelativeInsertPosition.BeforeTargetItem Then
                         .DropTargetAdorner = DropTargetAdorners.Insert
@@ -808,7 +886,14 @@ Public Class NavTreeDropHandler
             '---------------------------------------
 
             Dim dragExperiment = CType(dropInfo.Data, tblExperiments)
-            Dim targetFolder = CType(dropInfo.TargetItem, tblProjFolders)
+            Dim targetFolder As tblProjFolders
+
+            If TypeOf dropInfo.TargetItem Is tblProjFolders Then
+                targetFolder = CType(dropInfo.TargetItem, tblProjFolders)
+            Else
+                ' dropped on an experiment child rather than the folder row itself
+                targetFolder = CType(dropInfo.TargetItem, tblExperiments).ProjFolder
+            End If
 
             dragExperiment.ProjFolder.tblExperiments.Remove(dragExperiment)
             targetFolder.tblExperiments.Add(dragExperiment)
@@ -817,7 +902,7 @@ Public Class NavTreeDropHandler
 
             navTree.Items.Refresh()
 
-            'scroll the dropped experiment into view at its new location - under virtualization it's easy to
+            'Scroll the dropped experiment into view at its new location - under virtualization it's easy to
             'drop something into a folder that's currently nowhere near the scroll position it was dragged from
             WPFToolbox.FindVisualParent(Of ExperimentTree)(navTree)?.ScrollExperimentIntoView(dragExperiment)
 
@@ -885,6 +970,13 @@ Public Class NavTreeDropHandler
 
             'drop project
             '------------
+
+            Dim sortCheckConv As ProjectsCollectionViewConverter = navTree.FindResource("projectsCollectionViewConv")
+            If sortCheckConv.SortAlphabetically Then
+                'DragOver already withholds Move/blocks this while alphabetical sort is active - guarded
+                'here too in case a drop somehow still lands (e.g. a stale Effects value on the final tick)
+                Exit Sub
+            End If
 
             Dim dragProject = CType(dropInfo.Data, tblProjects)
             Dim origPos = dragProject.SequenceNr

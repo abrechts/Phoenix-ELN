@@ -53,12 +53,15 @@ Public Class InfoToast
 
 
     ''' <summary>
-    ''' Display the specified message
+    ''' Display the specified message. Icon/iconColor default to the usual green checkmark for
+    ''' success/confirmation toasts - pass e.g. "⚠ " with an amber/gray color for non-success hints.
     ''' </summary>
-    ''' 
-    Public Sub Show(message As String)
+    '''
+    Public Sub Show(message As String, Optional icon As String = "✔ ", Optional iconColor As Brush = Nothing)
 
         blkToastMessage.Text = message
+        blkToastIcon.Text = icon
+        blkToastIcon.Foreground = If(iconColor, CType(New BrushConverter().ConvertFromString("#FF89FCA6"), Brush))
         Me.Opacity = 1
         Me.Visibility = Visibility.Visible
         Me.BeginAnimation(OpacityProperty, Nothing)   'cancel any running fade

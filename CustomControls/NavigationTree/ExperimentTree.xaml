@@ -317,11 +317,13 @@
     <Border CornerRadius="6" BorderThickness="1" Padding="4"
         Background="{DynamicResource InnerPanelBackground}" BorderBrush="{DynamicResource TreePanelBorder}">
 
+        <Grid>
+
         <!--Virtualized: selecting/scrolling to an experiment node currently scrolled out of view still works,
             since ExperimentTree's container-lookup helpers walk the known Project -> ProjFolder -> Experiment
             path, realizing each ancestor container in turn via VirtualizingPanel.BringIndexIntoViewPublic
             instead of requiring the whole tree pre-realized.-->
-        
+
         <TreeView x:Name="navTree" Background="Transparent"
             ItemsSource="{Binding tblProjects, Converter={StaticResource projectsCollectionViewConv}}"
             TreeViewItem.Selected="TreeViewItem_Selected" TreeViewItem.Unselected="TreeViewItem_Unselected" Padding="2,2,2,8" BorderThickness="0"
@@ -389,6 +391,12 @@
             </TreeView.ItemContainerStyle>
 
         </TreeView>
+
+        <!-- Info toast - floats centered over the tree, auto-dismissed from code-behind -->
+        <local:InfoToast x:Name="infoToast" Panel.ZIndex="99"
+                         IsHitTestVisible="False" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+
+        </Grid>
     </Border>
 
     </DockPanel>
