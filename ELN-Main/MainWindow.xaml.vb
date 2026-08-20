@@ -1849,9 +1849,21 @@ Class MainWindow
 
         Dim searchDlg As New dlgFullTextSearch With {
             .LocalDBContext = DBContext,
-            .ServerDBContext = ServerDBContext,
-            .Owner = Me
+            .ServerDBContext = ServerDBContext
         }
+
+        With searchDlg
+            Dim settings = CustomControls.My.MySettings.Default
+            If settings.dlgFullTextSize.Width > -1 Then
+                .WindowStartupLocation = WindowStartupLocation.Manual
+                .Left = settings.dlgFullTextPosition.X
+                .Top = settings.dlgFullTextPosition.Y
+                .Width = settings.dlgFullTextSize.Width
+                .Height = settings.dlgFullTextSize.Height
+            Else
+                .Owner = Me
+            End If
+        End With
 
         searchDlg.ShowDialog()
 

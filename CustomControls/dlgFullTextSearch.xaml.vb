@@ -40,6 +40,14 @@ Public Class dlgFullTextSearch
     End Sub
 
 
+    Private Sub Me_Closing() Handles Me.Closing
+
+        My.Settings.dlgFullTextPosition = New System.Drawing.Point(Left, Top)
+        My.Settings.dlgFullTextSize = New System.Drawing.Size(ActualWidth, ActualHeight)
+
+    End Sub
+
+
     Private Sub btnRunSearch_Click() Handles btnRunSearch.Click
 
         RunSearch()
