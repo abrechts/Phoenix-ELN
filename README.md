@@ -54,10 +54,15 @@ And here's a second available, structure-based graph:
 
 ## Reaction Substructure Searches
 
-*Phoenix ELN* is able to perform reaction substructure searches (RSS) using an integrated substructure search engine, which does not depend on any server or online functionality to work. You can either query your own local experiments, or the finalized experiments of all users within your organization, if connected to the (optional) in-house ELN experiments server (see below). 
+*Phoenix ELN* lets you perform reaction substructure searches (RSS) using an integrated substructure search engine, which does not depend on any server or online functionality to work. You can either query your own local experiments, or the finalized experiments of all users within your organization, if connected to the (optional) in-house ELN experiments server (see below). 
 
 <img src="GitHub_Assets/RSS_Search.png" alt="drawing" width=550/>
 
+## Full-Text Searches
+
+*Phoenix ELN* features full-text search capabilities across experiment protocols, either on the local database, or across all users on the optional server database.
+
+<img src="GitHub_Assets/FullText_Search.png" alt="drawing" width=350/>
 
 ## ELN Server Integration (optional)
 
