@@ -3,7 +3,7 @@
 This script creates a new Phoenix ELN server database for MariaDB or MySQL.
 -------------------------------------------------------------------------------------------
 
-Version 1.3
+Version 1.4
 -----------
 
 Create a login User
