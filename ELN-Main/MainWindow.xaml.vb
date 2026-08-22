@@ -111,7 +111,7 @@ Class MainWindow
         If (Process.GetProcessesByName(Process.GetCurrentProcess().ProcessName).Length > 1) Then
             Me.Hide()
             cbMsgBox.Display("Phoenix ELN is already running! ", MsgBoxStyle.Information, "Phoenix ELN")
-            Application.Current.Shutdown()
+            Process.GetCurrentProcess().Kill()
         End If
 
     End Sub

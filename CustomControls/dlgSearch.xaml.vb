@@ -1,4 +1,5 @@
-﻿Imports System.Globalization
+﻿Imports System.ComponentModel
+Imports System.Globalization
 Imports System.Windows
 Imports System.Windows.Controls
 Imports System.Windows.Data
@@ -102,12 +103,14 @@ Public Class dlgSearch
 
         btnSaveQuery.IsEnabled = False
 
-        ' check for identical query reactant and product structures
-        If skInfo.Reactants.First.InChIKey = skInfo.Products.First.InChIKey Then
-            cbMsgBox.Display("Sorry, can't search for identical reactant and product!",
-                    MsgBoxStyle.OkOnly + MsgBoxStyle.Exclamation, "Query structure error")
-            lstRssHitGroups.DataContext = Nothing
-            Exit Sub
+        'RSS query: check for identical query reactant and product structures
+        If skInfo.Reactants.Count > 0 AndAlso skInfo.Products.Count > 0 Then
+            If skInfo.Reactants.First.InChIKey = skInfo.Products.First.InChIKey Then
+                cbMsgBox.Display("Sorry, can't search for identical reactant and product!",
+                MsgBoxStyle.OkOnly + MsgBoxStyle.Exclamation, "Query structure error")
+                lstRssHitGroups.DataContext = Nothing
+                Exit Sub
+            End If
         End If
 
         btnSaveQuery.IsEnabled = True

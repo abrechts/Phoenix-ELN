@@ -125,7 +125,7 @@ Public Class FullTextSearch
     ''' just one of them. The single-phrase case (the common one) is returned unchanged - no combining needed.
     ''' </summary>
     '''
-    Private Function CombinePhraseResults(perPhraseResults As List(Of List(Of RankedExperiment))) As List(Of RankedExperiment)
+    Private Shared Function CombinePhraseResults(perPhraseResults As List(Of List(Of RankedExperiment))) As List(Of RankedExperiment)
 
         If perPhraseResults.Count = 1 Then
             Return perPhraseResults(0)
@@ -851,20 +851,11 @@ Public Class FullTextSearch
             AsEnumerable().
             Select(Function(c) New SearchableRow With {.ProtocolItemID = c.ProtocolItemID, .Content = ExtractPlainText(c.CommentFlowDoc)}))
 
-        'Diff against the existing rows instead of a blanket RemoveRange+AddRange (relevant for the manual-repair
-        'case; the common one-time-backfill case just has an empty existingByID, so every row falls into the
-        '"new" branch below). A blanket delete+recreate previously reused the same ProtocolItemID primary key for
-        'both a tombstone (Deleted) and a fresh Add within the same SaveChanges call - harmless locally, but a real
-        'bug for server sync: ServerSync.SynchronizeAsync gathers all Added/Modified sync items for every table
-        'first, then appends all sync_Tombstone deletes *after* them into one combined list, and SyncToServer
-        'stages every item from that list onto the same ServerContext change tracker before a single SaveChanges
-        'flushes it. So the tombstone delete for a given key is always staged after that key's Add/Update in the
-        'same pass, and - since both operations end up tracking the very same server-side entity once the Add is
-        'recognized as an Update against an already-existing server row - the later Remove() wins, leaving the row
-        'deleted on the server with the new content never persisted. Updating existing rows in place (and only
-        'adding/removing rows whose ProtocolItemID actually appeared/disappeared) avoids ever pairing a tombstone
-        'with an Add for the same key in one sync pass. A single SaveChanges call below still makes the whole
-        'update atomic - no separate manual transaction needed here.
+        'ServerSync.SynchronizeAsync: The tombstone delete for a given key is always staged after that key's Add/Update in the
+        'same pass, and the later Remove() wins, leaving the row deleted on the server with the new content
+        'never persisted. - Updating existing rows in place (and only adding/removing rows whose ProtocolItemID actually
+        'appeared/disappeared) avoids ever pairing a tombstone with an Add for the same key in one sync pass. A single
+        'SaveChanges call below still makes the whole update atomic - no separate manual transaction needed here.
 
         Dim existingByID = searchContext.tblSearchIndex.ToDictionary(Function(r) r.ProtocolItemID)
         Dim computedIDs As New HashSet(Of String)(allRows.Select(Function(row) row.ProtocolItemID))
