@@ -11,7 +11,14 @@ Public Class DbUpgradeLocal
     ''' 
     Public Shared Function Upgrade(sqlitePath As String) As Boolean
 
-        'apply changes sequentially from initial ones to most recent ones
+        'Strategy:
+        '---------
+
+        '1) Apply changes sequentially from initial ones to most recent ones.c
+
+        '2) Integrate new columns or tables into FullTextSearch.vb functionalities for custom addition to tblSearchIndex,
+        '   if they need to be accessible to full-text search. Best use AI support, since this can be complex.
+        '   No need to perform RebuildSearchIndex on user DB's, since the new search term(s) did not exist before the db upgrade.
 
         Using sqliteConn = New SqliteConnection("DataSource = " + sqlitePath + "; foreign keys=FALSE")
 
