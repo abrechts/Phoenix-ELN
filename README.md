@@ -1,6 +1,6 @@
 # Phoenix ELN
 
-*Phoenix ELN* is an electronic lab notebook, supporting organic, organometallic, peptide, resin and polymer chemistry. It runs on Windows 10/11 and later.
+*Phoenix ELN* is an electronic lab notebook, supporting organic, organometallic, peptide, resin and polymer chemistry. The target platform is Windows.
 
 <img src="GitHub_Assets/PhoenixELN_Full.png" alt="drawing" width=950/> 
 
