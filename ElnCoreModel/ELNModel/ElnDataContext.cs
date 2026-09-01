@@ -25,6 +25,8 @@ public partial class ElnDataContext : DbContext
 
     public virtual DbSet<tblExperiments> tblExperiments { get; set; }
 
+    public virtual DbSet<tblExperimentTags> tblExperimentTags { get; set; }
+
     public virtual DbSet<tblMaterials> tblMaterials { get; set; }
 
     public virtual DbSet<tblProducts> tblProducts { get; set; }
@@ -44,6 +46,8 @@ public partial class ElnDataContext : DbContext
     public virtual DbSet<tblSeparators> tblSeparators { get; set; }
 
     public virtual DbSet<tblSolvents> tblSolvents { get; set; }
+
+    public virtual DbSet<tblTags> tblTags { get; set; }
 
     public virtual DbSet<tblUsers> tblUsers { get; set; }
 
@@ -198,6 +202,30 @@ public partial class ElnDataContext : DbContext
             entity.HasOne(d => d.Project).WithMany(p => p.tblExperiments).HasForeignKey(d => d.ProjectID);
 
             entity.HasOne(d => d.User).WithMany(p => p.tblExperiments).HasForeignKey(d => d.UserID);
+        });
+
+        modelBuilder.Entity<tblExperimentTags>(entity =>
+        {
+            entity.HasKey(e => e.GUID);
+
+            entity.HasIndex(e => e.TagID, "idx_tblExperimentTags_TagID");
+
+            entity.HasIndex(e => new { e.ExperimentID, e.TagID }, "unq_tblExperimentTags").IsUnique();
+
+            entity.Property(e => e.GUID).HasColumnType("VARCHAR(36)");
+            entity.Property(e => e.ExperimentID).HasColumnType("VARCHAR(25)");
+            entity.Property(e => e.TagID).HasColumnType("VARCHAR(36)");
+            entity.Property(e => e.SyncState)
+                .HasDefaultValue((byte)0)
+                .HasColumnType("TINYINT");
+
+            entity.HasOne(d => d.Experiment).WithMany(p => p.tblExperimentTags)
+                .HasForeignKey(d => d.ExperimentID)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(d => d.Tag).WithMany(p => p.tblExperimentTags)
+                .HasForeignKey(d => d.TagID)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<tblMaterials>(entity =>
@@ -389,6 +417,22 @@ public partial class ElnDataContext : DbContext
                 .HasColumnType("TINYINT");
 
             entity.HasOne(d => d.ProtocolItem).WithOne(p => p.tblSolvents).HasForeignKey<tblSolvents>(d => d.ProtocolItemID);
+        });
+
+        modelBuilder.Entity<tblTags>(entity =>
+        {
+            entity.HasKey(e => e.GUID);
+
+            entity.HasIndex(e => new { e.DatabaseID, e.TagName }, "unq_tblTags_DatabaseID_TagName").IsUnique();
+
+            entity.Property(e => e.GUID).HasColumnType("VARCHAR(36)");
+            entity.Property(e => e.DatabaseID).HasColumnType("VARCHAR(36)");
+            entity.Property(e => e.TagName).HasColumnType("VARCHAR(50)");
+            entity.Property(e => e.SyncState)
+                .HasDefaultValue((byte)0)
+                .HasColumnType("TINYINT");
+
+            entity.HasOne(d => d.Database).WithMany(p => p.tblTags).HasForeignKey(d => d.DatabaseID);
         });
 
         modelBuilder.Entity<tblUsers>(entity =>

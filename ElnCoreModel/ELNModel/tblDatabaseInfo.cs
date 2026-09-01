@@ -21,5 +21,7 @@ public partial class tblDatabaseInfo
 
     public virtual ICollection<tblMaterials> tblMaterials { get; set; } = new List<tblMaterials>();
 
+    public virtual ICollection<tblTags> tblTags { get; set; } = new List<tblTags>();
+
     public virtual ICollection<tblUsers> tblUsers { get; set; } = new List<tblUsers>();
 }

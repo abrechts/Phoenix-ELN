@@ -66,3 +66,11 @@ public partial class tblSeparators : INotifyPropertyChanged
 public partial class tblDbMaterialFiles: INotifyPropertyChanged
 {
 }
+
+public partial class tblTags : INotifyPropertyChanged
+{
+}
+
+public partial class tblExperimentTags : INotifyPropertyChanged
+{
+}

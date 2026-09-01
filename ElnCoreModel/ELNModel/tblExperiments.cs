@@ -63,5 +63,7 @@ public partial class tblExperiments
 
     public virtual tblUsers User { get; set; } = null!;
 
+    public virtual ICollection<tblExperimentTags> tblExperimentTags { get; set; } = new List<tblExperimentTags>();
+
     public virtual ICollection<tblProtocolItems> tblProtocolItems { get; set; } = new List<tblProtocolItems>();
 }

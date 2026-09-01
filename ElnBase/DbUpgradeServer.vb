@@ -99,9 +99,32 @@ Public Class DbUpgradeServer
 
             DbExecuteCmd(tblSearchIndexStr, serverConn)
 
+            ' --> introduced in version 5.2.0 (custom experiment tags)
+
+            Dim tblTagsStr =
+               "CREATE TABLE IF NOT EXISTS tblTags (
+                GUID VARCHAR(36) PRIMARY KEY NOT NULL,
+                DatabaseID VARCHAR(36) NOT NULL REFERENCES tblDatabaseInfo(GUID) ON DELETE CASCADE,
+                TagName VARCHAR(50) NOT NULL,
+                SyncState TINYINT DEFAULT 0,
+                UNIQUE KEY unq_tblTags_DatabaseID_TagName (DatabaseID, TagName));"
+
+            DbExecuteCmd(tblTagsStr, serverConn)
+
+            Dim tblExperimentTagsStr =
+               "CREATE TABLE IF NOT EXISTS tblExperimentTags (
+                GUID VARCHAR(36) PRIMARY KEY NOT NULL,
+                ExperimentID VARCHAR(25) NOT NULL REFERENCES tblExperiments(ExperimentID) ON DELETE CASCADE,
+                TagID VARCHAR(36) NOT NULL REFERENCES tblTags(GUID) ON DELETE CASCADE,
+                SyncState TINYINT DEFAULT 0,
+                KEY idx_tblExperimentTags_TagID (TagID),
+                UNIQUE KEY unq_tblExperimentTags (ExperimentID, TagID));"
+
+            DbExecuteCmd(tblExperimentTagsStr, serverConn)
+
             ' --->
             'Important: If a DEFAULT VALUE for an SQLite column is specified, ALWAYS also assign it to the
-            'server column to be added (could otherwise also lead to failed restore from server operation 
+            'server column to be added (could otherwise also lead to failed restore from server operation
             'for a non-nullable SQLite field!).
             ' --->
 
