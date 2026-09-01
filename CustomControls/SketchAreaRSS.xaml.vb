@@ -16,13 +16,6 @@ Public Class SketchAreaRSS
 
 
     ''' <summary>
-    ''' Sets or gets the threshold for shrinking the reaction sketch in case the sketch height is smaller than the threshold.
-    ''' </summary>
-    ''' <returns></returns>
-    Public Property ShrinkThreshold As Double = 650
-
-
-    ''' <summary>
     ''' Sets or gets the currently displayed reaction sketch XML.
     ''' </summary>
     ''' 
@@ -59,6 +52,12 @@ Public Class SketchAreaRSS
 
     End Sub
 
+
+    ''' <summary>
+    ''' Sets or gets the threshold for shrinking the reaction sketch in case the sketch height is smaller than the threshold.
+    ''' </summary>
+    ''' <returns></returns>
+    Public Property ShrinkThreshold As Double = 650
 
     ''' <summary>
     ''' Sets or gets the ChemBytes Draw SketchResults info associated with the current 
@@ -99,8 +98,8 @@ Public Class SketchAreaRSS
                 .DialogSize = New Size(My.Settings.CbDrawDialogSize.Width, My.Settings.CbDrawDialogSize.Height)
                 .LastOpenFilePath = My.Settings.CbDrawLastOpenPathRSS
                 .LastSaveFilePath = My.Settings.CbDrawLastSavePathRSS
-                'set to RSS query mode (one reactant, one product)
-                .SketchValidation = EditorOptions.SketchConditions.RssQuery
+                'set to RSS query mode (one reactant & one product, or component & arrow)
+                .SketchValidation = EditorOptions.SketchConditions.RssQueryPlus
             End With
 
             'CORE

@@ -1,5 +1,4 @@
 ﻿Imports Microsoft.Data.Sqlite
-Imports Microsoft.EntityFrameworkCore
 
 Public Class DbUpgradeLocal
 
@@ -18,7 +17,7 @@ Public Class DbUpgradeLocal
 
         '2) Integrate new columns or tables into FullTextSearch.vb functionalities for custom addition to tblSearchIndex,
         '   if they need to be accessible to full-text search. Best use AI support, since this can be complex.
-        '   No need to perform RebuildSearchIndex on user DB's, since the new search term(s) did not exist before the db upgrade.
+        '   No need to RebuildSearchIndex of users, since the new search term(s) did not exist before the db upgrade.
 
         Using sqliteConn = New SqliteConnection("DataSource = " + sqlitePath + "; foreign keys=FALSE")
 

@@ -61,8 +61,17 @@ Public Class RxnSubstructure
             Return rssResult
         End If
 
-        Dim reactQueryFrag As IndigoObject = queryRxnObj.iterateReactants(0)
-        Dim prodQueryFrag As IndigoObject = queryRxnObj.iterateProducts(0)
+        Dim reactQueryFrag As IndigoObject = If(queryRxnObj.countReactants > 0, queryRxnObj.iterateReactants(0), Nothing)
+        Dim prodQueryFrag As IndigoObject = If(queryRxnObj.countProducts > 0, queryRxnObj.iterateProducts(0), Nothing)
+
+        If reactQueryFrag Is Nothing AndAlso prodQueryFrag Is Nothing Then
+            'query reaction must contain at least a reactant or a product
+            With rssResult
+                .ExperimentHits = Nothing
+                .ErrorType = RssErrorType.QueryStructureError
+            End With
+            Return rssResult
+        End If
 
         Dim queryFp = queryRxnObj.fingerprint("sub")
 
@@ -211,13 +220,21 @@ Public Class RxnSubstructure
 
         '240 ms for 1000 hits
 
-        If sourceIndigoRxnObj Is Nothing OrElse reactQueryFrag Is Nothing OrElse prodQueryFrag Is Nothing Then
+        If sourceIndigoRxnObj Is Nothing OrElse (reactQueryFrag Is Nothing AndAlso prodQueryFrag Is Nothing) Then
             Return Nothing
         End If
 
         'get source reactant and products
         Dim srcRefReact = sourceIndigoRxnObj.iterateReactants(0)
         Dim srcRefProd = sourceIndigoRxnObj.iterateProducts(0)
+
+        'reactant-only or product-only query: no counterpart side to test a transformation against,
+        'so match if the fragment is simply present on the specified side
+        If reactQueryFrag Is Nothing Then
+            Return UniqueMatchCount(srcRefProd, prodQueryFrag) > 0
+        ElseIf prodQueryFrag Is Nothing Then
+            Return UniqueMatchCount(srcRefReact, reactQueryFrag) > 0
+        End If
 
         'get unique match counts
         Dim rrCount = UniqueMatchCount(srcRefReact, reactQueryFrag) 'reactFrags in reactant
@@ -332,7 +349,7 @@ Public Class RxnSubstructure
     ''' 
     Private Function RemoveExcessReactants(srcReaction As IndigoObject, isQueryRxn As Boolean) As IndigoObject
 
-        If srcReaction.countReactants = 1 Then
+        If srcReaction.countReactants <= 1 Then
             Return srcReaction
         End If
 

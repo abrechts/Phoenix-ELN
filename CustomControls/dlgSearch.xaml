@@ -8,7 +8,7 @@
         xmlns:scm ="clr-namespace:System.ComponentModel;assembly=WindowsBase"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
-        Title="Reaction Substructure Search" TextOptions.TextFormattingMode="Display" WindowStartupLocation="CenterOwner" ShowInTaskbar="False"
+        Title="Substructure Search" TextOptions.TextFormattingMode="Display" WindowStartupLocation="CenterOwner" ShowInTaskbar="False"
         Height="750" MinHeight="600" Width="800" MinWidth="700" Background="#FF303036" >
 
     <Window.Resources>
@@ -87,10 +87,10 @@
 
                 <StackPanel  Orientation="Horizontal" Margin="24,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center">
 
-                    <TextBlock Text="Find Reactions" FontWeight="Bold" HorizontalAlignment="Center" FontStyle="Italic" 
-                        FontSize="13.5" Foreground="LightBlue"/>
+                    <TextBlock Text="Find Substructures" FontWeight="Bold" HorizontalAlignment="Center" FontStyle="Italic" 
+                        FontSize="14" Foreground="LightBlue"/>
 
-                    <ContentControl x:Name="icoInfo" Content="{StaticResource icoInfo}" Cursor="Hand" Height="14" Margin="6,1,0,0"
+                    <ContentControl x:Name="icoInfo" Content="{StaticResource icoInfo}" Cursor="Hand" Height="14" Margin="8,1,0,0"
                         Opacity="0.9"/>
 
                 </StackPanel>
@@ -172,7 +172,7 @@
                     </Grid.ColumnDefinitions>
 
                     <StackPanel Orientation="Vertical" Grid.Row="1" Grid.Column="0" Margin="6,8,4,0" VerticalAlignment="Center" >
-
+                          
                         <!-- users ComboBox -->
 
                         <ComboBox x:Name="cboUsers" Style="{StaticResource DarkCombo}" Margin="0,0,0,5" MaxHeight="300" BorderBrush="#FF9B9B9B"
@@ -257,12 +257,23 @@
 
                     </StackPanel>
 
-                    <Border Grid.Column="2" Grid.Row="1" CornerRadius="6" BorderBrush="#FF54A2D1" BorderThickness="1" Padding="3"  
-                        VerticalAlignment="Top" Margin="0,6,0,6" Width="420" Height="150">
+                    <StackPanel Grid.Column="2" Grid.Row="1">
 
-                        <local:SketchAreaRSS x:Name="pnlQuerySketch" ReactionSketch="{Binding}" ShrinkThreshold="650"/>
+                        <TextBlock Foreground="lightblue" Margin="-2,4,0,0" HorizontalAlignment="Center" FontSize="12" FontStyle="Italic">
+                            <!--<Run Text="Substructure query: " FontStyle="Italic" />-->
+                            <Run Text="A 🠦 B" FontWeight="bold" Foreground="lightblue"/>
+                            <Run Text="(reaction); " />
+                            <Run Text="A 🠦" FontWeight="bold" Foreground="lightblue"/>
+                            <Run Text="(reactant); "/>
+                            <Run Text="🠦 B" FontWeight="bold" Foreground="lightblue"/>
+                            <Run Text="(product)"/>
+                        </TextBlock>
 
-                    </Border>
+                        <Border  CornerRadius="6" BorderBrush="#FF54A2D1" BorderThickness="1" Padding="3"  
+                            VerticalAlignment="Top" Margin="0,3,0,6" Width="420" Height="150">
+                            <local:SketchAreaRSS x:Name="pnlQuerySketch" ReactionSketch="{Binding}" ShrinkThreshold="650"/>
+                        </Border>
+                    </StackPanel>
 
                     <StackPanel Grid.Column="3" Grid.Row="1" Margin="6,0,6,0" VerticalAlignment="Center" HorizontalAlignment="center">
 
