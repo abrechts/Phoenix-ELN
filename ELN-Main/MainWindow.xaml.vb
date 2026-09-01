@@ -1845,6 +1845,16 @@ Class MainWindow
     End Sub
 
 
+    Private Sub mnuManageTags_Click() Handles mnuManageTags.MouseUp
+
+        Dim tagsDlg As New dlgTags(DBContext) With {
+            .Owner = Me
+        }
+        tagsDlg.ShowDialog()
+
+    End Sub
+
+
     Private Sub mnuFullTextSearch_Click() Handles mnuSearchFullText.MouseUp
 
         Dim searchDlg As New dlgFullTextSearch With {

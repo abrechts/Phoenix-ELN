@@ -8,6 +8,15 @@ Imports ElnBase
 Imports ElnCoreModel
 
 
+''' <summary>
+''' Sentinel appended as the last item of StepSummary's tag chip ItemsControl, so its DataTemplate
+''' (the "+" button) is laid out by the same WrapPanel as the chips and wraps along with them.
+''' </summary>
+'''
+Friend Class AddTagMarker
+End Class
+
+
 Public Class StepSummary
 
     Public Shared Event RequestOpenExperiment(sender As Object, expEntry As tblExperiments, isFromServer As Boolean)
@@ -23,6 +32,7 @@ Public Class StepSummary
         AddHandler SketchArea.SketchSourceChanged, AddressOf SketchArea_SketchSourceChanged
         AddHandler ServerSync.ServerContextCreated, AddressOf ServerSync_ServerContextCreated
         AddHandler dlgServerConnection.ServerContextCreated, AddressOf ServerSync_ServerContextCreated
+        AddHandler ExperimentContent.ExperimentContextChanged, AddressOf ExperimentContent_ExperimentContextChanged
 
     End Sub
 
@@ -37,6 +47,8 @@ Public Class StepSummary
     Private Property CurrUserID As String
 
     Private Property cvsStepExperiments As CollectionViewSource
+
+    Private Property CurrExperiment As tblExperiments
 
 
     Private Sub Me_DataContextChanged() Handles Me.DataContextChanged
@@ -211,6 +223,78 @@ Public Class StepSummary
             .DataContext = ExperimentContent.TabExperimentsPresenter.DataContext
             .ShowDialog()
         End With
+
+    End Sub
+
+
+    Private Sub ExperimentContent_ExperimentContextChanged(sender As Object, newExpEntry As tblExperiments) 'shared event
+
+        CurrExperiment = newExpEntry
+        RefreshTagChips()
+
+    End Sub
+
+
+    ''' <summary>
+    ''' Rebuilds the tag chip row. An AddTagMarker sentinel is always appended last, so the "+" button
+    ''' is laid out as part of the same WrapPanel as the chips (see AddTagMarker's XAML DataTemplate).
+    ''' </summary>
+    '''
+    Private Sub RefreshTagChips()
+
+        Dim items As New List(Of Object)
+
+        If CurrExperiment IsNot Nothing Then
+            items.AddRange(CurrExperiment.tblExperimentTags.OrderBy(Function(et) et.Tag.TagName, StringComparer.OrdinalIgnoreCase))
+        End If
+
+        items.Add(New AddTagMarker)
+
+        icTagChips.ItemsSource = items
+
+    End Sub
+
+
+    ''' <summary>
+    ''' Opens the tag dialog for the current experiment: checkboxes let the user assign/unassign any
+    ''' existing tag, and the same Add box also creates a brand-new tag in place - no separate "quick
+    ''' assign" popup, so this is the one place tags get picked, created, renamed, or deleted from.
+    ''' </summary>
+    '''
+    Private Sub btnAddTagChip_Click(sender As Object, e As RoutedEventArgs)
+
+        If CurrExperiment Is Nothing Then Exit Sub
+
+        Dim dlg As New dlgTags(ExperimentContent.DbContext, CurrExperiment) With {
+            .Owner = WPFToolbox.FindVisualParent(Of Window)(Me)
+        }
+
+        AddHandler dlg.TagsChanged, AddressOf dlgTags_TagsChanged
+        dlg.ShowDialog()
+        RemoveHandler dlg.TagsChanged, AddressOf dlgTags_TagsChanged
+
+        RefreshTagChips()
+
+    End Sub
+
+
+    Private Sub btnRemoveTagChip_Click(sender As Object, e As RoutedEventArgs)
+
+        Dim link = TryCast(CType(sender, Button).DataContext, tblExperimentTags)
+        If link Is Nothing Then Exit Sub
+
+        Dim dbContext = ExperimentContent.DbContext
+        dbContext.tblExperimentTags.Remove(link)
+        dbContext.SaveChanges()
+
+        RefreshTagChips()
+
+    End Sub
+
+
+    Private Sub dlgTags_TagsChanged(sender As Object, e As EventArgs)
+
+        RefreshTagChips()
 
     End Sub
 

@@ -142,7 +142,11 @@
 
                                 <TextBlock x:Name="mnuSearchRSS" Text="Substructures ..." Margin="0,2,0,0"/>
                                 <TextBlock x:Name="mnuSearchFullText" Text="Full Text ..."/>
-                               
+
+                                <Separator/>
+
+                                <TextBlock x:Name="mnuManageTags" Text="Manage Tags ..."/>
+
                             </MenuItem>
                         </Menu>
 
