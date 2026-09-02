@@ -50,9 +50,21 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <CheckBox Grid.Column="0" IsChecked="{Binding IsAssigned}" VerticalAlignment="Center" Margin="0,0,6,0"
+                            <CheckBox Grid.Column="0" IsChecked="{Binding IsAssigned}" IsEnabled="{Binding CanToggle}" VerticalAlignment="Center" Margin="0,0,6,0"
                                 Visibility="{Binding ShowCheckbox, Converter={StaticResource boolToVisConv}}"
-                                Checked="chkAssignTag_Checked" Unchecked="chkAssignTag_Unchecked" ToolTip="Assign to the current experiment"/>
+                                ToolTipService.ShowOnDisabled="True"
+                                Checked="chkAssignTag_Checked" Unchecked="chkAssignTag_Unchecked">
+                                <CheckBox.Style>
+                                    <Style TargetType="CheckBox">
+                                        <Setter Property="ToolTip" Value="Assign to the current experiment"/>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsEnabled" Value="False">
+                                                <Setter Property="ToolTip" Value="Maximum of 6 tags per experiment reached - remove one first"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </CheckBox.Style>
+                            </CheckBox>
 
                             <!--Same pill styling as the chips in StepSummary's Exp. Info panel.-->
                             <Border Grid.Column="1" Background="#334D84D7" BorderBrush="#FF4D84D7" BorderThickness="1" CornerRadius="9"

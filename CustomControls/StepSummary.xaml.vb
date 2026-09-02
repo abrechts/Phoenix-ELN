@@ -14,6 +14,7 @@ Imports ElnCoreModel
 ''' </summary>
 '''
 Friend Class AddTagMarker
+    Public Property CanAdd As Boolean = True
 End Class
 
 
@@ -248,7 +249,9 @@ Public Class StepSummary
             items.AddRange(CurrExperiment.tblExperimentTags.OrderBy(Function(et) et.Tag.TagName, StringComparer.OrdinalIgnoreCase))
         End If
 
-        items.Add(New AddTagMarker)
+        items.Add(New AddTagMarker With {
+            .CanAdd = (CurrExperiment Is Nothing OrElse CurrExperiment.tblExperimentTags.Count < dlgTags.MaxTagsPerExperiment)
+        })
 
         icTagChips.ItemsSource = items
 

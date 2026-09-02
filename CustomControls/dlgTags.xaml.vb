@@ -14,7 +14,16 @@ Public Class dlgTags
         Public Property Tag As tblTags
         Public Property IsAssigned As Boolean
         Public Property ShowCheckbox As Boolean
+        Public Property CanToggle As Boolean
     End Class
+
+
+    ''' <summary>
+    ''' Maximum number of tags a single experiment can have assigned at once. Public so StepSummary can
+    ''' also disable its "+" button once an experiment already has this many tags.
+    ''' </summary>
+    '''
+    Public Const MaxTagsPerExperiment As Integer = 6
 
 
     ''' <summary>
@@ -53,17 +62,22 @@ Public Class dlgTags
     Private Sub RefreshTagList()
 
         Dim selectedTagGUID = EditingTag?.GUID
+        Dim atLimit = (currExperiment IsNot Nothing AndAlso currExperiment.tblExperimentTags.Count >= MaxTagsPerExperiment)
 
         lstTags.ItemsSource = localContext.tblTags.
             Where(Function(t) t.DatabaseID = databaseID).
             ToList().
             OrderBy(Function(t) t.TagName, StringComparer.OrdinalIgnoreCase).
-            Select(Function(t) New TagAssignmentRow With {
-                .Tag = t,
-                .ShowCheckbox = (currExperiment IsNot Nothing),
-                .IsAssigned = (currExperiment IsNot Nothing AndAlso
+            Select(Function(t)
+                Dim isAssigned = (currExperiment IsNot Nothing AndAlso
                     currExperiment.tblExperimentTags.Any(Function(et) et.TagID = t.GUID))
-            }).
+                Return New TagAssignmentRow With {
+                    .Tag = t,
+                    .ShowCheckbox = (currExperiment IsNot Nothing),
+                    .IsAssigned = isAssigned,
+                    .CanToggle = (isAssigned OrElse Not atLimit)
+                }
+            End Function).
             ToList()
 
         If selectedTagGUID IsNot Nothing Then
@@ -173,6 +187,13 @@ Public Class dlgTags
 
         Dim tag = CType(CType(sender, CheckBox).DataContext, TagAssignmentRow).Tag
         If currExperiment.tblExperimentTags.Any(Function(et) et.TagID = tag.GUID) Then Exit Sub
+
+        If currExperiment.tblExperimentTags.Count >= MaxTagsPerExperiment Then
+            CType(sender, CheckBox).IsChecked = False
+            cbMsgBox.Display("An experiment can have at most " & MaxTagsPerExperiment & " tags assigned." & vbCrLf &
+                "Remove another tag first.", MsgBoxStyle.Exclamation, "Tag Limit Reached")
+            Exit Sub
+        End If
 
         Dim newLink As New tblExperimentTags
         With newLink
