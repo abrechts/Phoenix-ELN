@@ -27,12 +27,15 @@ Public Class dlgTags
 
 
     ''' <summary>
-    ''' Raised after a tag was added, renamed, deleted, or its assignment to the current experiment
-    ''' toggled, so an owner window showing tag chips (e.g. StepSummary) can refresh live while this
-    ''' dialog is still open, instead of only on close.
+    ''' Raised after a tag was added, renamed, deleted, or its assignment to an experiment toggled, so
+    ''' every open StepSummary can refresh its tag chips live - regardless of which dlgTags instance made
+    ''' the change. Shared (not per-instance) because tags are edited from two different entry points -
+    ''' StepSummary's own gear button (with a currExperiment) and the Search menu's "Manage Tags ..."
+    ''' (pure tag-set management, no currExperiment) - and a tag deleted from the latter can still affect
+    ''' tags assigned to whichever experiment(s) are currently displayed elsewhere in the app.
     ''' </summary>
     '''
-    Public Event TagsChanged As EventHandler
+    Public Shared Event TagsChanged As EventHandler
 
     Private ReadOnly localContext As ElnDbContext
     Private ReadOnly databaseID As String

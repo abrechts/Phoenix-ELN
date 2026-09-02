@@ -34,6 +34,7 @@ Public Class StepSummary
         AddHandler ServerSync.ServerContextCreated, AddressOf ServerSync_ServerContextCreated
         AddHandler dlgServerConnection.ServerContextCreated, AddressOf ServerSync_ServerContextCreated
         AddHandler ExperimentContent.ExperimentContextChanged, AddressOf ExperimentContent_ExperimentContextChanged
+        AddHandler dlgTags.TagsChanged, AddressOf dlgTags_TagsChanged
 
     End Sub
 
@@ -272,11 +273,7 @@ Public Class StepSummary
             .Owner = WPFToolbox.FindVisualParent(Of Window)(Me)
         }
 
-        AddHandler dlg.TagsChanged, AddressOf dlgTags_TagsChanged
         dlg.ShowDialog()
-        RemoveHandler dlg.TagsChanged, AddressOf dlgTags_TagsChanged
-
-        RefreshTagChips()
 
     End Sub
 
