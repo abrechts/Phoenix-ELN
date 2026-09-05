@@ -7,6 +7,7 @@ Imports System.Threading
 Imports System.Windows
 Imports System.Windows.Controls
 Imports System.Windows.Input
+Imports System.Windows.Media
 Imports ElnBase.ELNEnumerations
 Imports ElnCoreModel
 Imports Microsoft.Win32
@@ -215,6 +216,11 @@ Public Class ExperimentPrint
             .Width = 680,     'current UI display width of this data template
             .DataContext = expEntry
         }
+
+        'force the reaction sketch to draw immediately: since printExpContent is never attached to a
+        'PresentationSource (it's only ever serialized to XPS/PDF, never shown), the ReactionSketch
+        'binding's target update never fires, so sketchViewbox.Child would still be Nothing below.
+        printExpContent.SketchPanel.ReactionSketch = expEntry.RxnSketch
 
         WPFToolbox.WaitForPriority(Threading.DispatcherPriority.ContextIdle)
 

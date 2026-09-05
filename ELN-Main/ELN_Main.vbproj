@@ -13,7 +13,7 @@
     <PackageId>$(AssemblyName)</PackageId>
     <AssemblyName>PhoenixELN</AssemblyName>
     <ApplicationIcon>Resources\Application.ico</ApplicationIcon>
-    <Version>5.1.0.0</Version>
+    <Version>5.1.1.0</Version>
     <Copyright>(c) Stefan Abrecht, ChemBytes</Copyright>
     <PackageProjectUrl></PackageProjectUrl>
     <StartupObject>Sub Main</StartupObject>
@@ -21,6 +21,18 @@
 
   <ItemGroup>
     <Page Remove="App.xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- TEMPORARY Microsoft-provided workaround for the WPF XPS font-subsetting FileFormatException
+         thrown on the current variable-font build of CALIBRI.TTF (and similar) when exporting/
+         printing to PDF. See PaginatorToPdfDoc in ExperimentPrint.vb.
+         This switch disables an overflow-protection check in WPF's TrueType cmap/sbit table
+         parser (added as a security hardening mitigation), so it trades away some defense-in-
+         depth against malformed/malicious font files in exchange for the fix. Microsoft's own
+         guidance frames this as a stopgap pending a proper fix in a future WPF/.NET servicing
+         update - once available, remove this switch and re-test PDF export. -->
+    <RuntimeHostConfigurationOption Include="Switch.MS.Internal.TtfDelta.DisableCmapAndSbitOverflowProtection" Value="true" />
   </ItemGroup>
 
   <ItemGroup>
