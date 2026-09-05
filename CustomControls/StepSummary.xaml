@@ -9,7 +9,7 @@
              xmlns:base="clr-namespace:ElnCoreModel;assembly=ElnCoreModel"      
              d:DataContext="{d:DesignInstance Type=base:tblUsers}"
              mc:Ignorable="d" 
-            d:DesignWidth="250" d:FontSize="12">
+            d:DesignWidth="250" d:FontSize="12" SnapsToDevicePixels="true">
 
     <UserControl.Resources>
 
@@ -149,12 +149,80 @@
 
                 <StackPanel Margin="0,0,0,0" Background="Transparent">
 
-                    <StackPanel Orientation="Horizontal" Margin="6,5,0,6" >
-                        <TextBlock Text="Materials:" Width="70" FontWeight="DemiBold" VerticalAlignment="Center" Margin="0,-2,0,0"/>
-                        <Button x:Name="btnMatTotals" Content="Required Materials" Padding="8,0,8,1" Margin="0,4"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,5,0,4" HorizontalAlignment="left" >
+                        <!--<TextBlock Text="Materials:" Width="70" FontWeight="DemiBold" VerticalAlignment="Center" Margin="0,-2,0,0"/>-->
+                        <Button x:Name="btnMatTotals" Content="Required Materials" Padding="8,0,8,1" Margin="6,4,0,4"/>
                     </StackPanel>
 
-                    <Separator Margin="0,0,0,0" DockPanel.Dock="top" Background="#FF4D84D7"/>
+                    <StackPanel Margin="6,0,6,6">
+
+                        <!--<Separator Margin="0,0,0,0" DockPanel.Dock="top" Background="#FF4D84D7"/>-->
+
+                        <TextBlock Text="Search Tags" FontWeight="Bold" Margin="72,2,0,3"  Foreground="{DynamicResource TitleForeground}" FontStyle="Italic"/>
+
+                        <Separator Margin="0,0,0,4" Background="#FF4D84D7"/>
+
+                        <ItemsControl x:Name="icTagChips" Focusable="False" HorizontalAlignment="Center">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel Orientation="Horizontal"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.Resources>
+                                <DataTemplate DataType="{x:Type base:tblExperimentTags}">
+                                    <Border Background="#334D84D7" BorderBrush="#FF4D84D7" BorderThickness="1" CornerRadius="9"
+                                        Margin="0,2,4,2" Padding="6,1,3,1">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding Tag.TagName}" VerticalAlignment="Center"/>
+                                            <Button Width="14" Height="14" Padding="0" Margin="3,0,0,0" Background="Transparent" BorderThickness="0"
+                                                Click="btnRemoveTagChip_Click" ToolTip="Remove this tag">
+                                                <TextBlock Text="&#xD7;" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource BodyForeground}"
+                                                    HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,-1,0,0"/>
+                                            </Button>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                                <DataTemplate DataType="{x:Type local:AddTagMarker}">
+                                    <Button Width="24" Height="20" Padding="0" Margin="0,2,2,2" VerticalAlignment="Center"
+                                        IsEnabled="{Binding CanAdd}" ToolTipService.ShowOnDisabled="True" Click="btnAddTagChip_Click">
+                                        <Button.Style>
+                                            <Style TargetType="Button">
+                                                <Setter Property="ToolTip" Value="Assign or create tags..."/>
+                                                <!--Same pill styling as the tag chips themselves, so "+" reads as one more chip in the row.-->
+                                                <Setter Property="Template">
+                                                    <Setter.Value>
+                                                        <ControlTemplate TargetType="Button">
+                                                            <Border x:Name="border" Background="#334D84D7" BorderBrush="#FF4D84D7"
+                                                                BorderThickness="1" CornerRadius="9">
+                                                                <TextBlock Text="+" FontWeight="Bold" Foreground="{DynamicResource BodyForeground}"
+                                                                    HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,-1,0,0"/>
+                                                            </Border>
+                                                            <ControlTemplate.Triggers>
+                                                                <Trigger Property="IsMouseOver" Value="True">
+                                                                    <Setter TargetName="border" Property="Background" Value="#4D5FA0D7"/>
+                                                                </Trigger>
+                                                                <Trigger Property="IsEnabled" Value="False">
+                                                                    <Setter TargetName="border" Property="Opacity" Value="0.4"/>
+                                                                </Trigger>
+                                                            </ControlTemplate.Triggers>
+                                                        </ControlTemplate>
+                                                    </Setter.Value>
+                                                </Setter>
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsEnabled" Value="False">
+                                                        <Setter Property="ToolTip" Value="Maximum of 6 tags per experiment reached - remove one first"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.Resources>
+                        </ItemsControl>
+
+                    </StackPanel>
+
+                    <Separator Margin="6,2,6,0" DockPanel.Dock="top" Background="#FF4D84D7"/>
 
                 </StackPanel>
 

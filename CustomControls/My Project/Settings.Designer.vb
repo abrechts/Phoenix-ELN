@@ -617,6 +617,30 @@ Namespace My
                 Me("dlgFullTextSize") = value
             End Set
         End Property
+
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("-1, -1")>  _
+        Public Property dlgTagSearchPosition() As Global.System.Drawing.Point
+            Get
+                Return CType(Me("dlgTagSearchPosition"),Global.System.Drawing.Point)
+            End Get
+            Set
+                Me("dlgTagSearchPosition") = value
+            End Set
+        End Property
+
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("-1, -1")>  _
+        Public Property dlgTagSearchSize() As Global.System.Drawing.Size
+            Get
+                Return CType(Me("dlgTagSearchSize"),Global.System.Drawing.Size)
+            End Get
+            Set
+                Me("dlgTagSearchSize") = value
+            End Set
+        End Property
     End Class
 End Namespace
 

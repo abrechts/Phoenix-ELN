@@ -142,7 +142,12 @@
 
                                 <TextBlock x:Name="mnuSearchRSS" Text="Substructures ..." Margin="0,2,0,0"/>
                                 <TextBlock x:Name="mnuSearchFullText" Text="Full Text ..."/>
-                               
+                                <TextBlock x:Name="mnuSearchTags" Text="Experiment Tags ..."/>
+
+                                <Separator Style="{StaticResource DarkMenuNoIconsSeparatorStyle}"/>
+
+                                <TextBlock x:Name="mnuManageTags" Text="Manage Tags ..."/>
+
                             </MenuItem>
                         </Menu>
 

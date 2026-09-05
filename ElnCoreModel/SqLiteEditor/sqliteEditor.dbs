@@ -130,6 +130,30 @@
 				<fk_column name="ProtocolItemID" pk="GUID" />
 			</fk>
 		</table>
+		<table name="tblExperimentTags" spec="" >
+			<column name="GUID" type="TEXT" length="36" mandatory="y" />
+			<column name="ExperimentID" type="TEXT" length="25" mandatory="y" />
+			<column name="TagID" type="TEXT" length="36" mandatory="y" />
+			<column name="SyncState" type="INTEGER" >
+				<defo><![CDATA[0]]></defo>
+			</column>
+			<index name="pk_tblExperimentTags" unique="PRIMARY_KEY" >
+				<column name="GUID" />
+			</index>
+			<index name="unq_tblExperimentTags" unique="UNIQUE_INDEX" >
+				<column name="ExperimentID" />
+				<column name="TagID" />
+			</index>
+			<index name="idx_tblExperimentTags_TagID" unique="NORMAL" >
+				<column name="TagID" />
+			</index>
+			<fk name="FK_tblExperimentTags_tblExperiments" to_schema="Default" to_table="tblExperiments" delete_action="cascade" >
+				<fk_column name="ExperimentID" pk="ExperimentID" />
+			</fk>
+			<fk name="FK_tblExperimentTags_tblTags" to_schema="Default" to_table="tblTags" delete_action="cascade" >
+				<fk_column name="TagID" pk="GUID" />
+			</fk>
+		</table>
 		<table name="tblExperiments" spec="" >
 			<column name="ExperimentID" type="TEXT" length="25" mandatory="y" />
 			<column name="UserID" type="TEXT" length="25" mandatory="y" />
@@ -474,6 +498,24 @@
 				<fk_column name="ProtocolItemID" pk="GUID" />
 			</fk>
 		</table>
+		<table name="tblTags" spec="" >
+			<column name="GUID" type="TEXT" length="36" mandatory="y" />
+			<column name="DatabaseID" type="TEXT" length="36" mandatory="y" />
+			<column name="TagName" type="TEXT" length="50" mandatory="y" />
+			<column name="SyncState" type="INTEGER" >
+				<defo><![CDATA[0]]></defo>
+			</column>
+			<index name="pk_tblTags" unique="PRIMARY_KEY" >
+				<column name="GUID" />
+			</index>
+			<index name="unq_tblTags_DatabaseID_TagName" unique="UNIQUE_INDEX" >
+				<column name="DatabaseID" />
+				<column name="TagName" />
+			</index>
+			<fk name="FK_tblTags_tblDatabaseInfo" to_schema="Default" to_table="tblDatabaseInfo" delete_action="cascade" >
+				<fk_column name="DatabaseID" pk="GUID" />
+			</fk>
+		</table>
 		<table name="tblUsers" spec="" >
 			<column name="UserID" type="TEXT" length="25" mandatory="y" />
 			<column name="DatabaseID" type="TEXT" length="36" mandatory="y" />
@@ -518,6 +560,8 @@
 		<entity schema="Default" name="tblProtocolItems" color="3986C1" x="1292" y="304" />
 		<entity schema="Default" name="tblExperiments" color="3986C1" x="969" y="57" />
 		<entity schema="Default" name="tblSearchIndex" color="3986C1" x="1292" y="76" />
+		<entity schema="Default" name="tblTags" color="3986C1" x="76" y="608" />
+		<entity schema="Default" name="tblExperimentTags" color="3986C1" x="969" y="304" />
 	</layout>
 	<layout name="Protocol Elements" id="Layout-16d" show_column_type="y" show_relation="cascade" >
 		<entity schema="Default" name="tblProducts" color="3986C1" x="855" y="342" />

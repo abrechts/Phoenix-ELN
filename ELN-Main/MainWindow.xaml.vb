@@ -279,6 +279,7 @@ Class MainWindow
         AddHandler RssItemGroup.RequestOpenExperiment, AddressOf RssItemGroup_RequestOpenExperiment
         AddHandler StepExpSelector.RequestOpenExperiment, AddressOf StepExpSelector_RequestOpenExperiment
         AddHandler dlgFullTextSearch.RequestOpenExperiment, AddressOf FullTextSearch_RequestOpenExperiment
+        AddHandler dlgTagSearch.RequestOpenExperiment, AddressOf TagSearch_RequestOpenExperiment
         AddHandler RssItemGroup.RequestStepConnections, AddressOf ExperimentContent_RequestSequencesDialog
         AddHandler ExperimentContent.RequestConnectionGraph, AddressOf ExperimentContent_RequestSequencesDialog
         AddHandler ExperimentContent.RequestStructureGraph, AddressOf ExperimentContent_RequestStructureGraph
@@ -1349,6 +1350,11 @@ Class MainWindow
     End Sub
 
 
+    Private Sub TagSearch_RequestOpenExperiment(sender As Object, targetExp As tblExperiments, isFromServer As Boolean, args As StepExpOpenArgs)
+        args.WasOpened = TryOpenExperiment(targetExp, isFromServer)
+    End Sub
+
+
     Private Function TryOpenExperiment(targetExp As tblExperiments, isFromServer As Boolean) As Boolean
 
         If targetExp Is Nothing Then
@@ -1841,6 +1847,40 @@ Class MainWindow
             .ShowDialog()
 
         End With
+
+    End Sub
+
+
+    Private Sub mnuManageTags_Click() Handles mnuManageTags.MouseUp
+
+        Dim tagsDlg As New dlgTags(DBContext) With {
+            .Owner = Me
+        }
+        tagsDlg.ShowDialog()
+
+    End Sub
+
+
+    Private Sub mnuSearchTags_Click() Handles mnuSearchTags.MouseUp
+
+        Dim tagSearchDlg As New dlgTagSearch With {
+            .LocalDBContext = DBContext
+        }
+
+        With tagSearchDlg
+            Dim settings = CustomControls.My.MySettings.Default
+            If settings.dlgTagSearchSize.Width > -1 Then
+                .WindowStartupLocation = WindowStartupLocation.Manual
+                .Left = settings.dlgTagSearchPosition.X
+                .Top = settings.dlgTagSearchPosition.Y
+                .Width = settings.dlgTagSearchSize.Width
+                .Height = settings.dlgTagSearchSize.Height
+            Else
+                .Owner = Me
+            End If
+        End With
+
+        tagSearchDlg.ShowDialog()
 
     End Sub
 

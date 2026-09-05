@@ -101,6 +101,27 @@ Public Class DbUpgradeLocal
             DbExecuteCmd(FullTextSearch.TblSearchIndexTableDDL, sqliteConn)
             DbExecuteCmd(FullTextSearch.TblSearchIndexIndexDDL, sqliteConn)
 
+            ' --> introduced in version 5.2.0 (custom experiment tags)
+
+            Dim tblTagsStr =
+               "CREATE TABLE IF NOT EXISTS tblTags (
+                GUID VARCHAR(36) PRIMARY KEY NOT NULL,
+                DatabaseID VARCHAR(36) NOT NULL REFERENCES tblDatabaseInfo(GUID) ON DELETE CASCADE,
+                TagName VARCHAR(50) NOT NULL,
+                SyncState TINYINT DEFAULT 0);
+
+                CREATE UNIQUE INDEX IF NOT EXISTS unq_tblTags_DatabaseID_TagName ON tblTags(DatabaseID, TagName);
+
+                CREATE TABLE IF NOT EXISTS tblExperimentTags (
+                GUID VARCHAR(36) PRIMARY KEY NOT NULL,
+                ExperimentID VARCHAR(25) NOT NULL REFERENCES tblExperiments(ExperimentID) ON DELETE CASCADE,
+                TagID VARCHAR(36) NOT NULL REFERENCES tblTags(GUID) ON DELETE CASCADE,
+                SyncState TINYINT DEFAULT 0);
+
+                CREATE INDEX IF NOT EXISTS idx_tblExperimentTags_TagID ON tblExperimentTags(TagID);
+                CREATE UNIQUE INDEX IF NOT EXISTS unq_tblExperimentTags ON tblExperimentTags(ExperimentID, TagID);"
+
+            DbExecuteCmd(tblTagsStr, sqliteConn)
 
         End Using
 
