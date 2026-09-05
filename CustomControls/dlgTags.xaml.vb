@@ -138,6 +138,29 @@ Public Class dlgTags
             localContext.tblTags.Add(newTag)
             localContext.SaveChanges()
 
+            ' A freshly created tag reads as more natural already assigned to the experiment this dialog
+            ' was opened for, rather than requiring a separate checkbox click right after - so auto-assign
+            ' it here, same as ticking its checkbox would (respecting the same per-experiment tag limit).
+            If currExperiment IsNot Nothing Then
+
+                If currExperiment.tblExperimentTags.Count < MaxTagsPerExperiment Then
+
+                    Dim newLink As New tblExperimentTags
+                    With newLink
+                        .GUID = Guid.NewGuid.ToString("d")
+                        .ExperimentID = currExperiment.ExperimentID
+                        .TagID = newTag.GUID
+                    End With
+                    currExperiment.tblExperimentTags.Add(newLink)
+                    localContext.SaveChanges()
+
+                Else
+                    cbMsgBox.Display("An experiment can have at most " & MaxTagsPerExperiment & " tags assigned." & vbCrLf &
+                        "The new tag was created but not assigned - remove another tag first.", MsgBoxStyle.Exclamation, "Tag Limit Reached")
+                End If
+
+            End If
+
         End If
 
         lstTags.SelectedItem = Nothing
