@@ -94,11 +94,13 @@ Public Class StepSummary
             Exit Sub
         End If
 
+        'Materialize immediately (.ToList()) rather than leave as a deferred IQueryable to prevent EF concurrency issues.
+
         Dim localExperiments = CType(Me.DataContext, tblUsers).tblExperiments.
             Where(Function(exp) exp.ReactantInChIKey = RefReactInChIKey _
                 AndAlso exp.ProductInChIKey = RefProductInChIKey _
                 AndAlso exp.IsRacemicReactant = Convert.ToByte(RefReactantIsRacemate) _
-                AndAlso exp.IsRacemicProduct = Convert.ToByte(RefProductIsRacemate))
+                AndAlso exp.IsRacemicProduct = Convert.ToByte(RefProductIsRacemate)).ToList()
 
         If ServerContext IsNot Nothing AndAlso chkIncludeServer.IsChecked Then
 
@@ -108,7 +110,7 @@ Public Class StepSummary
                         AndAlso exp.IsRacemicReactant = Convert.ToByte(RefReactantIsRacemate) _
                         AndAlso exp.IsRacemicProduct = Convert.ToByte(RefProductIsRacemate) _
                         AndAlso exp.UserID <> CurrUserID _
-                        AndAlso exp.WorkflowState = ELNEnumerations.WorkflowStatus.Finalized)
+                        AndAlso exp.WorkflowState = ELNEnumerations.WorkflowStatus.Finalized).ToList()
 
             cvsStepExperiments.Source = localExperiments.Concat(serverExperiments)
 

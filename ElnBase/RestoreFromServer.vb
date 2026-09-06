@@ -86,10 +86,12 @@ Public Class RestoreFromServer
             coll.Load()
             Dim childTableName = coll.Metadata.Name
 
-            'prevent double tblExperiments references in the presence of multiple foreign keys
-            Dim isBlockedRelation = (parentTableName = "tblUsers" AndAlso childTableName = "tblExperiments")
+            'Prevent double tblExperiments references in the presence of multiple foreign keys.
+            Dim isBlockedRelation = (parentTableName = "tblUsers" AndAlso childTableName = "tblExperiments") OrElse
+                (parentTableName = "tblTags" AndAlso childTableName = "tblExperimentTags")
+
             If tblFoldersDataPresent Then
-                'do this only for non-legacy data to prevent broken relations to tblExperiments 
+                'do this only for non-legacy data to prevent broken relations to tblExperiments
                 isBlockedRelation = isBlockedRelation OrElse (parentTableName = "tblProjects" AndAlso childTableName = "tblExperiments")
             End If
 
@@ -137,21 +139,6 @@ Public Class RestoreFromServer
 
 
     Private Shared Sub AddEntity(serverEntity As Object)
-
-        'With TmpLocalContext
-
-        '    Try
-
-        '        Dim cpType = serverEntity.GetType().BaseType
-        '        Dim localEntity = Activator.CreateInstance(cpType) 'creates an empty new object
-        '        .Entry(localEntity).CurrentValues.SetValues(serverEntity)
-        '        .Add(localEntity)
-
-        '    Catch ex As Exception
-        '        'do nothing
-        '    End Try
-
-        'End With
 
         With TmpLocalContext
 

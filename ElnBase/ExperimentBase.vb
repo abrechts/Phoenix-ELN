@@ -2,6 +2,7 @@
 Imports System.Text.Json
 Imports System.Text.Json.Nodes
 Imports System.Text.Json.Serialization
+Imports System.Text.Json.Serialization.Metadata
 Imports ElnBase.ELNEnumerations
 Imports ElnCoreModel
 Imports Microsoft.EntityFrameworkCore
@@ -92,6 +93,25 @@ Public Class ExperimentBase
         dbContext.tblExperiments.Add(expCopy)
 
 
+        'Clone the source experiment's tags. Restricted to clone types that carry over the actual protocol
+        'content (FullExperiment, FromImport)
+        '-------------------------------------------------------------------------------------------------------
+
+        If cloneMethod = CloneType.FullExperiment OrElse cloneMethod = CloneType.FromImport Then
+
+            For Each srcExpTag In expEntry.tblExperimentTags
+
+                expCopy.tblExperimentTags.Add(New tblExperimentTags With {
+                    .GUID = Guid.NewGuid.ToString("d"),
+                    .Experiment = expCopy,
+                    .Tag = srcExpTag.Tag
+                })
+
+            Next
+
+        End If
+
+
         'Clone protocol items also (full experiment clone only)
         '-----------------------------------------------------
 
@@ -173,8 +193,37 @@ Public Class ExperimentBase
 
         Try
             Dim jsonStr = File.ReadAllText(importPath)
-            Dim importExp = ExperimentFromJsonString(jsonStr, currAppVersion)
+            Dim tagNames As List(Of String) = Nothing
+            Dim importExp = ExperimentFromJsonString(jsonStr, currAppVersion, tagNames)
             If importExp IsNot Nothing Then
+
+                'Resolve each imported tag name against the destination database's own tag set, creating it
+                'if not already present there - tags are scoped per local database, so a tag exported from a
+                'different database can't be reattached by GUID, only matched or recreated by name.
+                Dim databaseID = dbContext.tblDatabaseInfo.First.GUID
+                Dim existingTags = dbContext.tblTags.Where(Function(t) t.DatabaseID = databaseID).ToList()
+
+                For Each tagName In tagNames
+
+                    Dim destTag = existingTags.FirstOrDefault(Function(t) t.TagName.Equals(tagName, StringComparison.OrdinalIgnoreCase))
+                    If destTag Is Nothing Then
+                        destTag = New tblTags With {
+                            .GUID = Guid.NewGuid.ToString("d"),
+                            .DatabaseID = databaseID,
+                            .TagName = tagName
+                        }
+                        dbContext.tblTags.Add(destTag)
+                        existingTags.Add(destTag)
+                    End If
+
+                    importExp.tblExperimentTags.Add(New tblExperimentTags With {
+                        .GUID = Guid.NewGuid.ToString("d"),
+                        .Experiment = importExp,
+                        .Tag = destTag
+                    })
+
+                Next
+
                 Dim newExp = CloneExperiment(dbContext, importExp, dstProject, dstProjFolder, CloneType.FullExperiment, removeEmbedded:=False)
                 Return newExp
             Else
@@ -231,6 +280,24 @@ Public Class ExperimentBase
         jsonOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles
         jsonOptions.WriteIndented = True
 
+        ' tblTags has a many-to-many relationship. TypeResolver prevents the indirect cyclic JSON reference tblExperimentTags -> 
+        ' Tag -> Database -> tblTags (every tag in the DB) -> tblExperimentTags (every OTHER experiment using each tag) -> 
+        Dim typeResolver As New DefaultJsonTypeInfoResolver
+        typeResolver.Modifiers.Add(
+            Sub(typeInfo As JsonTypeInfo)
+                If typeInfo.Type Is GetType(tblExperiments) Then
+                    Dim tagsProperty = typeInfo.Properties.FirstOrDefault(Function(p) p.Name = "tblExperimentTags")
+                    If tagsProperty IsNot Nothing Then
+                        typeInfo.Properties.Remove(tagsProperty)
+                    End If
+                End If
+            End Sub)
+        jsonOptions.TypeInfoResolver = typeResolver
+
+        ' Collect tag names before detaching the graph below.These are resolved or recreated by name in
+        ' the destination database on import instead (see ExperimentFromJsonString).
+        Dim tagNames = expEntry.tblExperimentTags.Select(Function(et) et.Tag.TagName).ToList()
+
         ' clone current expEntry for subsequent changes
         Dim expCopy = CType(dbContext.Entry(expEntry).CurrentValues.ToObject, tblExperiments)
 
@@ -243,9 +310,10 @@ Public Class ExperimentBase
 
         Dim jsonStr = JsonSerializer.Serialize(expCopy, jsonOptions)
 
-        'append app version property to ensure compatible import version
+        'append app version and tag name properties (tag names needed to reattach tags on import)
         Dim jsonObject As JsonObject = JsonSerializer.Deserialize(Of JsonObject)(jsonStr)
         jsonObject.Add("AppVersion", appVersion)
+        jsonObject.Add("TagNames", JsonSerializer.SerializeToNode(tagNames))
         jsonStr = JsonSerializer.Serialize(jsonObject)
 
         Return jsonStr
@@ -256,8 +324,13 @@ Public Class ExperimentBase
     ''' <summary>
     ''' Gets an experiment entry from a json string; returns nothing in case of an error.
     ''' </summary>
-    ''' 
-    Public Shared Function ExperimentFromJsonString(jsonString As String, currAppVersion As String) As tblExperiments
+    ''' <param name="tagNames">Receives the source experiment's tag names (empty for an export from a
+    ''' version predating tags, or if it had none). See ExperimentToJsonString for why tags travel as
+    ''' plain names rather than serialized entities.</param>
+    '''
+    Public Shared Function ExperimentFromJsonString(jsonString As String, currAppVersion As String, ByRef tagNames As List(Of String)) As tblExperiments
+
+        tagNames = New List(Of String)
 
         Try
 
@@ -266,9 +339,11 @@ Public Class ExperimentBase
             jsonObj.TryGetPropertyValue("AppVersion", exportAppVersion)
             jsonObj.Remove("AppVersion")
 
-            'Debug only:
-            'currAppVersion = "1.1.3"
-            ' exportAppVersion = "1.1.4"
+            Dim tagNamesNode As JsonNode = Nothing
+            If jsonObj.TryGetPropertyValue("TagNames", tagNamesNode) AndAlso tagNamesNode IsNot Nothing Then
+                tagNames = JsonSerializer.Deserialize(Of List(Of String))(tagNamesNode.ToJsonString())
+            End If
+            jsonObj.Remove("TagNames")
 
             Dim currVersion = New Version(currAppVersion)
             Dim exportVersion = New Version(exportAppVersion)
