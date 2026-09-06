@@ -15,6 +15,16 @@
         <local:SignificantDigitsConverter x:Key="sigDigConv"/>
     </UserControl.Resources>
 
+    <!--Custom template so a Background set on this control renders as a rounded/pill shape
+        (e.g. the Reactant highlight in dlgExperimentInfo) instead of UserControl's default flat rectangle.-->
+    <UserControl.Template>
+        <ControlTemplate TargetType="UserControl">
+            <Border Background="{TemplateBinding Background}" CornerRadius="6" Padding="6,1">
+                <ContentPresenter/>
+            </Border>
+        </ControlTemplate>
+    </UserControl.Template>
+
     <Grid Margin="-1,0,0,0">
 
         <Grid.Style>

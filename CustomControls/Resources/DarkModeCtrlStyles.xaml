@@ -402,7 +402,7 @@
     </Style>
 
     <ControlTemplate x:Key="SkinScrollViewerTemplate" TargetType="{x:Type ScrollViewer}">
-        <Grid>
+        <Grid Margin="{TemplateBinding Padding}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
                 <ColumnDefinition Width="Auto"/>

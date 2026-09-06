@@ -1,6 +1,5 @@
 ﻿Imports System.Collections.ObjectModel
 Imports System.ComponentModel
-Imports System.Text.RegularExpressions
 Imports System.Windows.Interop
 Imports System.Windows.Threading
 Imports CustomControls
@@ -347,20 +346,20 @@ Class MainWindow
         'This allows the UI to become visible immediately instead of blocking on UpdateLayout().
         Dim currExp = (From exp In currUser.tblExperiments Where exp.IsCurrent).FirstOrDefault
         If currExp IsNot Nothing Then
-            Dispatcher.BeginInvoke(Sub()
-                                       Try
-                                           Me.UpdateLayout()
-                                           expNavTree.ScrollExperimentIntoView(currExp)
-                                           Dim thisTab As TabItem = tabExperiments.ItemContainerGenerator.ContainerFromItem(currExp)
-                                           If thisTab IsNot Nothing Then
-                                               thisTab.IsSelected = True
-                                           End If
-                                       Catch ex As Exception
-                                           'in case of any error, e.g. due to missing content, just ignore and continue with unselected tab
-                                           cbMsgBox.Display("Your last used experiment seems to have a technical issue. Please check its content.",
+            Dim ignored = Dispatcher.BeginInvoke(Sub()
+                                                     Try
+                                                         Me.UpdateLayout()
+                                                         expNavTree.ScrollExperimentIntoView(currExp)
+                                                         Dim thisTab As TabItem = tabExperiments.ItemContainerGenerator.ContainerFromItem(currExp)
+                                                         If thisTab IsNot Nothing Then
+                                                             thisTab.IsSelected = True
+                                                         End If
+                                                     Catch ex As Exception
+                                                         'in case of any error, e.g. due to missing content, just ignore and continue with unselected tab
+                                                         cbMsgBox.Display("Your last used experiment seems to have a technical issue. Please check its content.",
                       MsgBoxStyle.Exclamation, "Startup Issue")
-                                       End Try
-                                   End Sub, System.Windows.Threading.DispatcherPriority.ApplicationIdle)
+                                                     End Try
+                                                 End Sub, DispatcherPriority.ApplicationIdle)
         End If
 
         'start the periodic cleanup process for embedded document editing resources (currently set to every hour)
