@@ -9,7 +9,7 @@
              xmlns:base="clr-namespace:ElnCoreModel;assembly=ElnCoreModel"      
              d:DataContext="{d:DesignInstance Type=base:tblUsers}"
              mc:Ignorable="d" 
-            d:DesignWidth="250" d:FontSize="12" SnapsToDevicePixels="true">
+            d:DesignWidth="250" d:FontSize="12" SnapsToDevicePixels="true" UseLayoutRounding="True">
 
     <UserControl.Resources>
 
@@ -140,25 +140,25 @@
 
             <StackPanel DockPanel.Dock="Top">
 
-                <TextBlock Text="Exp. Info" DockPanel.Dock="top" VerticalAlignment="Center"
-                Foreground="{DynamicResource TitleForeground}"
-                Background="transparent" FontStyle="Italic" FontWeight="Bold" Padding="1,0" Margin="76,6,0,2"
-                FontSize="12.5" HorizontalAlignment="left" Opacity="0.9"/>
+                <TextBlock Text="Summaries" DockPanel.Dock="top" VerticalAlignment="Center" FontWeight="Bold" Padding="1,0" Margin="76,6,0,2"
+                    Foreground="{DynamicResource TitleForeground}" Background="transparent" FontStyle="Italic" 
+                    FontSize="12.5" HorizontalAlignment="left" Opacity="0.9"/>
 
                 <Separator Margin="0,0,0,2" Background="#FF4D84D7"/>
 
                 <StackPanel Margin="0,0,0,0" Background="Transparent">
 
-                    <StackPanel Orientation="Horizontal" Margin="0,5,0,4" HorizontalAlignment="left" >
-                        <!--<TextBlock Text="Materials:" Width="70" FontWeight="DemiBold" VerticalAlignment="Center" Margin="0,-2,0,0"/>-->
-                        <Button x:Name="btnMatTotals" Content="Required Materials" Padding="8,0,8,1" Margin="6,4,0,4"/>
+                    <StackPanel Orientation="Horizontal" Margin="6,1,0,5" HorizontalAlignment="left" >
+                        <TextBlock Text="Materials:" Width="70" FontWeight="DemiBold" VerticalAlignment="Center" Margin="0,0,0,0"/>
+                        <TextBlock x:Name="lnkMatTotals" Text="Material Totals" TextDecorations="Underline" Cursor="Hand" Margin="0,0,4,0"
+                            Foreground="{DynamicResource LinkForeground}"/>
                     </StackPanel>
 
-                    <StackPanel Margin="6,0,6,6">
+                    <Separator Margin="0,0,0,2" Background="#FF4D84D7"/>
 
-                        <!--<Separator Margin="0,0,0,0" DockPanel.Dock="top" Background="#FF4D84D7"/>-->
+                    <StackPanel Margin="0,0,0,6">
 
-                        <TextBlock Text="Search Tags" FontWeight="Bold" Margin="72,2,0,3"  Foreground="{DynamicResource TitleForeground}" FontStyle="Italic"/>
+                        <TextBlock Text="Search Tags" FontWeight="Bold" Margin="76,4,0,3"  Foreground="{DynamicResource TitleForeground}" FontStyle="Italic"/>
 
                         <Separator Margin="0,0,0,4" Background="#FF4D84D7"/>
 
@@ -222,7 +222,7 @@
 
                     </StackPanel>
 
-                    <Separator Margin="6,2,6,0" DockPanel.Dock="top" Background="#FF4D84D7"/>
+                    <Separator Margin="0,2,0,0" DockPanel.Dock="top" Background="#FF4D84D7"/>
 
                 </StackPanel>
 

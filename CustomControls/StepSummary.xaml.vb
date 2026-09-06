@@ -169,7 +169,7 @@ Public Class StepSummary
                 blkProdEM.Text = Format(.ExactMass, "0.00")
             End With
 
-            btnMatTotals.IsEnabled = True
+            lnkMatTotals.IsEnabled = True
 
         Else
 
@@ -192,7 +192,7 @@ Public Class StepSummary
             blkProdMw.Text = " --- "
             blkProdEM.Text = " --- "
 
-            btnMatTotals.IsEnabled = False
+            lnkMatTotals.IsEnabled = False
 
         End If
 
@@ -218,7 +218,7 @@ Public Class StepSummary
     End Sub
 
 
-    Private Sub btnMatTotals_PreviewMouseUp() Handles btnMatTotals.PreviewMouseUp
+    Private Sub btnMatTotals_PreviewMouseUp() Handles lnkMatTotals.PreviewMouseUp
 
         Dim mainWdw = WPFToolbox.FindVisualParent(Of Window)(Me)
         Dim totalsDlg As New dlgExperimentInfo
