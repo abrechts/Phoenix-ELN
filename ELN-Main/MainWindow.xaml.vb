@@ -106,6 +106,22 @@ Class MainWindow
 
         InitializeComponent()
 
+        'Apply persisted window position/size (or center on screen for a fresh install) here, before
+        'Show() is called by Application.xaml.vb - WPF resolves WindowStartupLocation at SourceInitialized
+        'time (which happens during Show(), ahead of Loaded), so setting it from Me_Loaded is too late to
+        'have any effect on CenterScreen positioning (unlike Left/Top, which reposition live whenever set).
+        With CustomControls.My.MySettings.Default
+            If .StartupSize.Width > -1 Then
+                WindowStartupLocation = WindowStartupLocation.Manual
+                Left = .StartupPosition.X
+                Top = .StartupPosition.Y
+                Width = .StartupSize.Width
+                Height = .StartupSize.Height
+            Else
+                WindowStartupLocation = WindowStartupLocation.CenterScreen
+            End If
+        End With
+
         'Prevent another instance of the application to be run
         If (Process.GetProcessesByName(Process.GetCurrentProcess().ProcessName).Length > 1) Then
             Me.Hide()
@@ -163,17 +179,6 @@ Class MainWindow
                 .RestoreFromServer = False
                 .Save()
                 DbUpgradeLocal.Upgrade(SQLiteDbPath)        'since the transfer package db could contain an earlier version db
-            End If
-
-            'Apply application window settings
-            If .StartupSize.Width > -1 Then
-                WindowStartupLocation = WindowStartupLocation.Manual
-                Left = .StartupPosition.X
-                Top = .StartupPosition.Y
-                Width = .StartupSize.Width
-                Height = .StartupSize.Height
-            Else
-                WindowStartupLocation = WindowStartupLocation.CenterScreen
             End If
 
             'Check for pending restore
