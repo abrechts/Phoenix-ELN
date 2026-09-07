@@ -165,6 +165,23 @@ Public Class ExperimentContent
 
 
     ''' <summary>
+    ''' Gets the Protocol control of the currently displayed experiment tab, or Nothing if no experiment
+    ''' is currently open. Since a data bound TabControl only ever realizes one ContentPresenter for all
+    ''' its TabItems, this is also Nothing-safe for callers (e.g. tag management) that are not necessarily
+    ''' hosted within an ExperimentContent themselves but still need to route a change through AutoSave.
+    ''' </summary>
+    '''
+    Public Shared Function ActiveProtocol() As Protocol
+
+        If TabExperimentsPresenter Is Nothing Then Return Nothing
+
+        Dim activeContent = WPFToolbox.FindVisualChild(Of ExperimentContent)(TabExperimentsPresenter)
+        Return activeContent?.ExpProtocol()
+
+    End Function
+
+
+    ''' <summary>
     ''' Gets the experiment sketch panel
     ''' </summary>
     ''' 

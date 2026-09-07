@@ -285,11 +285,31 @@ Public Class StepSummary
         Dim link = TryCast(CType(sender, Button).DataContext, tblExperimentTags)
         If link Is Nothing Then Exit Sub
 
-        Dim dbContext = ExperimentContent.DbContext
-        dbContext.tblExperimentTags.Remove(link)
-        dbContext.SaveChanges()
+        ExperimentContent.DbContext.tblExperimentTags.Remove(link)
+        SaveTagChange()
 
         RefreshTagChips()
+
+    End Sub
+
+
+    ''' <summary>
+    ''' Persists a tag assignment change. Routed through the current experiment's AutoSave (rather than a
+    ''' plain SaveChanges) so tag changes get the same continuous local/server synchronization as protocol
+    ''' content edits; noUndoPoint is set since tag assignments fall outside the Undo/Redo pipeline, which
+    ''' only covers direct experiment protocol content operations. Falls back to a plain SaveChanges if no
+    ''' experiment tab happens to be open (no Protocol instance to route through).
+    ''' </summary>
+    '''
+    Private Sub SaveTagChange()
+
+        Dim protocol = ExperimentContent.ActiveProtocol()
+
+        If protocol IsNot Nothing Then
+            protocol.AutoSave(allowFinalized:=True, noUndoPoint:=True)
+        Else
+            ExperimentContent.DbContext.SaveChanges()
+        End If
 
     End Sub
 

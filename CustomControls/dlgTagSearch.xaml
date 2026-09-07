@@ -78,9 +78,9 @@
 
             <Separator Margin="0,8,0,8" Height="0.9"/>
 
-            <TextBlock TextWrapping="Wrap" Margin="0,2,0,8" Foreground="lightgray" FontStyle="Italic">
+            <TextBlock TextWrapping="Wrap" Margin="0,2,0,8" Foreground="lightgray" FontStyle="Italic" HorizontalAlignment="Center">
                 <Run Text="Select one or more tags to find experiments having"/>
-                <Run FontWeight="Bold" Text=" all "/>
+                <Run FontWeight="Bold" Text="all"/>
                 <Run Text="of the selected tags:"/>
             </TextBlock>
 

@@ -125,7 +125,7 @@ Public Class dlgTags
         If EditingTag IsNot Nothing Then
 
             EditingTag.TagName = newName
-            localContext.SaveChanges()
+            SaveTagChange()
 
         Else
 
@@ -136,7 +136,7 @@ Public Class dlgTags
                 .TagName = newName
             End With
             localContext.tblTags.Add(newTag)
-            localContext.SaveChanges()
+            SaveTagChange()
 
             ' A freshly created tag reads as more natural already assigned to the experiment this dialog
             ' was opened for, rather than requiring a separate checkbox click right after - so auto-assign
@@ -152,7 +152,7 @@ Public Class dlgTags
                         .TagID = newTag.GUID
                     End With
                     currExperiment.tblExperimentTags.Add(newLink)
-                    localContext.SaveChanges()
+                    SaveTagChange()
 
                 Else
                     cbMsgBox.Display("An experiment can have at most " & MaxTagsPerExperiment & " tags assigned." & vbCrLf &
@@ -186,7 +186,7 @@ Public Class dlgTags
         End If
 
         localContext.tblTags.Remove(tagEntry)
-        localContext.SaveChanges()
+        SaveTagChange()
 
         If EditingTag Is tagEntry Then
             EditingTag = Nothing
@@ -229,7 +229,7 @@ Public Class dlgTags
         End With
 
         currExperiment.tblExperimentTags.Add(newLink)
-        localContext.SaveChanges()
+        SaveTagChange()
 
         RefreshTagList()
         RaiseEvent TagsChanged(Me, EventArgs.Empty)
@@ -246,10 +246,33 @@ Public Class dlgTags
         If link Is Nothing Then Exit Sub
 
         localContext.tblExperimentTags.Remove(link)
-        localContext.SaveChanges()
+        SaveTagChange()
 
         RefreshTagList()
         RaiseEvent TagsChanged(Me, EventArgs.Empty)
+
+    End Sub
+
+
+    ''' <summary>
+    ''' Persists a tag change (assignment, add, rename, or delete). Routed through the active experiment's
+    ''' AutoSave (rather than a plain SaveChanges) so tag changes get the same continuous local/server
+    ''' synchronization as protocol content edits; allowFinalized is set since tag management is unrelated
+    ''' to an experiment's workflow state, and noUndoPoint is set since tag changes fall outside the
+    ''' Undo/Redo pipeline, which only covers direct experiment protocol content operations. Falls back to
+    ''' a plain SaveChanges if no experiment tab happens to be open (no Protocol instance to route through) -
+    ''' e.g. when this dialog is opened for pure tag-set management from the Search menu.
+    ''' </summary>
+    '''
+    Private Sub SaveTagChange()
+
+        Dim protocol = ExperimentContent.ActiveProtocol()
+
+        If protocol IsNot Nothing Then
+            protocol.AutoSave(allowFinalized:=True, noUndoPoint:=True)
+        Else
+            localContext.SaveChanges()
+        End If
 
     End Sub
 

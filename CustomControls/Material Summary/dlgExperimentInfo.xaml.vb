@@ -22,6 +22,8 @@ Public Class dlgExperimentInfo
         tvSolventsSummary.ItemsSource = MaterialsSummary.GetSolventGroups(Me.DataContext)
         tvAuxiliariesSummary.ItemsSource = MaterialsSummary.GetAuxiliariesGroups(Me.DataContext)
 
+        Me.Title = CType(Me.DataContext, tblExperiments).ExperimentID
+
     End Sub
 
 

@@ -42,10 +42,10 @@
             </DockPanel>
         </StackPanel>
 
-        <TextBlock Text="Summary of required experiment materials." TextWrapping="Wrap" Margin="6,0,0,8" HorizontalAlignment="Center" 
-            Foreground="#FFD8D8D8" FontSize="11.5" FontStyle="Italic"/>
+        <!--<TextBlock Text="Summary of required experiment materials." TextWrapping="Wrap" Margin="6,0,0,8" HorizontalAlignment="Center" 
+            Foreground="#FFD8D8D8" FontSize="11.5" FontStyle="Italic"/>-->
 
-        <ScrollViewer Padding="6,0,12,0" VerticalScrollBarVisibility="Auto">
+        <ScrollViewer Padding="6,2,12,0" VerticalScrollBarVisibility="Auto">
 
             <StackPanel Grid.IsSharedSizeScope="True">
 
