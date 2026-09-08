@@ -13,7 +13,7 @@
     <!--Panels-->
     <SolidColorBrush x:Key="NavPanelBackground" Color="#FF474747"/>
     <SolidColorBrush x:Key="InfoPanelBackground" Color="#FF474747"/>
-    <SolidColorBrush x:Key="InnerPanelBackground" Color="#FF343434"/>
+    <SolidColorBrush x:Key="InnerPanelBackground" Color="#FF383838"/>
     <SolidColorBrush x:Key="PanelBorder" Color="#FF7F7F7F"/>
     <SolidColorBrush x:Key="TreePanelBorder" Color="#FF7F7F7F"/>
 
