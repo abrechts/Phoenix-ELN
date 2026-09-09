@@ -99,15 +99,29 @@ Public Class ExperimentBase
 
         If cloneMethod = CloneType.FullExperiment OrElse cloneMethod = CloneType.FromImport Then
 
-            For Each srcExpTag In expEntry.tblExperimentTags
+            Dim srcExpTags = expEntry.tblExperimentTags.ToList()
 
-                expCopy.tblExperimentTags.Add(New tblExperimentTags With {
-                    .GUID = Guid.NewGuid.ToString("d"),
-                    .Experiment = expCopy,
-                    .Tag = srcExpTag.Tag
-                })
+            'Tags are scoped per local database (tblTags.DatabaseID) and can't be reattached across databases
+            Dim localDatabaseID = dbContext.tblDatabaseInfo.First.GUID
+            Dim tagsFromForeignDb = srcExpTags.Any(Function(t) t.Tag.DatabaseID <> localDatabaseID)
 
-            Next
+            If Not tagsFromForeignDb Then
+
+                For Each srcExpTag In srcExpTags
+
+                    expCopy.tblExperimentTags.Add(New tblExperimentTags With {
+                        .GUID = Guid.NewGuid.ToString("d"),
+                        .Experiment = expCopy,
+                        .Tag = srcExpTag.Tag
+                    })
+
+                Next
+
+            ElseIf srcExpTags.Count > 0 Then
+
+                MsgBox("User-specific experiment tags of another user" + vbCrLf +
+                       "were not imported.", MsgBoxStyle.Information, "Cloning Notice")
+            End If
 
         End If
 
@@ -194,35 +208,50 @@ Public Class ExperimentBase
         Try
             Dim jsonStr = File.ReadAllText(importPath)
             Dim tagNames As List(Of String) = Nothing
-            Dim importExp = ExperimentFromJsonString(jsonStr, currAppVersion, tagNames)
+            Dim sourceDatabaseID As String = Nothing
+            Dim importExp = ExperimentFromJsonString(jsonStr, currAppVersion, tagNames, sourceDatabaseID)
             If importExp IsNot Nothing Then
 
-                'Resolve each imported tag name against the destination database's own tag set, creating it
-                'if not already present there - tags are scoped per local database, so a tag exported from a
-                'different database can't be reattached by GUID, only matched or recreated by name.
-                Dim databaseID = dbContext.tblDatabaseInfo.First.GUID
-                Dim existingTags = dbContext.tblTags.Where(Function(t) t.DatabaseID = databaseID).ToList()
+                If tagNames IsNot Nothing AndAlso tagNames.Count > 0 Then
 
-                For Each tagName In tagNames
+                    Dim localDatabaseID = dbContext.tblDatabaseInfo.First.GUID
 
-                    Dim destTag = existingTags.FirstOrDefault(Function(t) t.TagName.Equals(tagName, StringComparison.OrdinalIgnoreCase))
-                    If destTag Is Nothing Then
-                        destTag = New tblTags With {
-                            .GUID = Guid.NewGuid.ToString("d"),
-                            .DatabaseID = databaseID,
-                            .TagName = tagName
-                        }
-                        dbContext.tblTags.Add(destTag)
-                        existingTags.Add(destTag)
+                    If sourceDatabaseID = localDatabaseID Then
+
+                        'Only allow the re-import of tags of an experiment exported from this same database 
+
+                        Dim existingTags = dbContext.tblTags.Where(Function(t) t.DatabaseID = localDatabaseID).ToList()
+
+                        For Each tagName In tagNames
+
+                            Dim destTag = existingTags.FirstOrDefault(Function(t) t.TagName.Equals(tagName, StringComparison.OrdinalIgnoreCase))
+                            If destTag Is Nothing Then
+                                destTag = New tblTags With {
+                                    .GUID = Guid.NewGuid.ToString("d"),
+                                    .DatabaseID = localDatabaseID,
+                                    .TagName = tagName
+                                }
+                                dbContext.tblTags.Add(destTag)
+                                existingTags.Add(destTag)
+                            End If
+
+                            importExp.tblExperimentTags.Add(New tblExperimentTags With {
+                                .GUID = Guid.NewGuid.ToString("d"),
+                                .Experiment = importExp,
+                                .Tag = destTag
+                            })
+
+                        Next
+
+                    Else
+
+                        'Tags are scoped per local database (tblTags.DatabaseID) and can't be reattached across databases:
+                        MsgBox("User-specific experiment tags of another user" + vbCrLf +
+                       "were not imported.", MsgBoxStyle.Information, "Import Notice")
+
                     End If
 
-                    importExp.tblExperimentTags.Add(New tblExperimentTags With {
-                        .GUID = Guid.NewGuid.ToString("d"),
-                        .Experiment = importExp,
-                        .Tag = destTag
-                    })
-
-                Next
+                End If
 
                 Dim newExp = CloneExperiment(dbContext, importExp, dstProject, dstProjFolder, CloneType.FullExperiment, removeEmbedded:=False)
                 Return newExp
@@ -310,9 +339,12 @@ Public Class ExperimentBase
 
         Dim jsonStr = JsonSerializer.Serialize(expCopy, jsonOptions)
 
-        'append app version and tag name properties (tag names needed to reattach tags on import)
+        'append app version, source database id and tag name properties (DatabaseID lets ImportExperiment
+        'tell a re-import into the same database - where tag names are safe to reattach - apart from an
+        'import from a genuinely different database - see ExperimentFromJsonString)
         Dim jsonObject As JsonObject = JsonSerializer.Deserialize(Of JsonObject)(jsonStr)
         jsonObject.Add("AppVersion", appVersion)
+        jsonObject.Add("DatabaseID", dbContext.tblDatabaseInfo.First.GUID)
         jsonObject.Add("TagNames", JsonSerializer.SerializeToNode(tagNames))
         jsonStr = JsonSerializer.Serialize(jsonObject)
 
@@ -327,10 +359,15 @@ Public Class ExperimentBase
     ''' <param name="tagNames">Receives the source experiment's tag names (empty for an export from a
     ''' version predating tags, or if it had none). See ExperimentToJsonString for why tags travel as
     ''' plain names rather than serialized entities.</param>
+    ''' <param name="sourceDatabaseID">Receives the exporting database's own tblDatabaseInfo.GUID (empty
+    ''' for an export from a version predating this field). Lets the caller tell a re-import into the same
+    ''' database apart from an import from a genuinely different one.</param>
     '''
-    Public Shared Function ExperimentFromJsonString(jsonString As String, currAppVersion As String, ByRef tagNames As List(Of String)) As tblExperiments
+    Public Shared Function ExperimentFromJsonString(jsonString As String, currAppVersion As String,
+      ByRef tagNames As List(Of String), ByRef sourceDatabaseID As String) As tblExperiments
 
         tagNames = New List(Of String)
+        sourceDatabaseID = String.Empty
 
         Try
 
@@ -338,6 +375,12 @@ Public Class ExperimentBase
             Dim exportAppVersion As String = ""
             jsonObj.TryGetPropertyValue("AppVersion", exportAppVersion)
             jsonObj.Remove("AppVersion")
+
+            Dim databaseIDNode As JsonNode = Nothing
+            If jsonObj.TryGetPropertyValue("DatabaseID", databaseIDNode) AndAlso databaseIDNode IsNot Nothing Then
+                sourceDatabaseID = databaseIDNode.GetValue(Of String)
+            End If
+            jsonObj.Remove("DatabaseID")
 
             Dim tagNamesNode As JsonNode = Nothing
             If jsonObj.TryGetPropertyValue("TagNames", tagNamesNode) AndAlso tagNamesNode IsNot Nothing Then
