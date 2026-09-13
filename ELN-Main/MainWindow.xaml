@@ -256,8 +256,9 @@
                                         <ContentControl Content="{StaticResource icoInfo}" Height="16"/>
                                     </MenuItem.Icon>
                                 </MenuItem>
-                                <MenuItem x:Name="mnuAbout" Header="About Phoenix ELN ..." Margin="0,1"/>
                                 <MenuItem x:Name="mnuCheckForUpdates" Header="Check for updates ..." Margin="0,1" />
+                                <Separator/>
+                                <MenuItem x:Name="mnuAbout" Header="About Phoenix ELN ..." Margin="0,1"/>
                             </MenuItem>
 
                         </Menu>
