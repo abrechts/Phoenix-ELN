@@ -257,7 +257,7 @@
                                     </MenuItem.Icon>
                                 </MenuItem>
                                 <MenuItem x:Name="mnuCheckForUpdates" Header="Check for updates ..." Margin="0,1" />
-                                <Separator/>
+                                <Separator Margin="-22,2,6,2"/>
                                 <MenuItem x:Name="mnuAbout" Header="About Phoenix ELN ..." Margin="0,1"/>
                             </MenuItem>
 
