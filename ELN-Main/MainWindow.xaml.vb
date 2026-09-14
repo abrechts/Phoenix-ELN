@@ -244,7 +244,7 @@ Class MainWindow
         End If
 
         'Backfill the persisted tblSearchIndex table if it's empty, e.g. right after it was first created by
-        'DbUpgradeLocal, or after running with the seed database, or a restore that brought in an older/emptied database. Must run AFTER the
+        'DbUpgradeLocal,or a restore that brought in an older/emptied database. Must run AFTER the
         'isRestoreFromServer block above, not before to preserve the sync flags for tblSearchIndex.
 
         If FullTextSearch.IsSearchIndexEmpty(DBContext) Then
@@ -342,6 +342,7 @@ Class MainWindow
                 btnAddUser.IsEnabled = False
                 'demo localUser has no server connection
                 .IsServerSpecified = False 'visibility of server status items is data bound to this setting
+                .UseServerSequences = False 'avoid stale server preference from a prior non-demo database
                 AllowCaptionDrag()
             End If
 
@@ -1964,12 +1965,12 @@ Class MainWindow
             Exit Sub
         End If
 
-        Dim useServer = isServerExp OrElse CustomControls.My.MySettings.Default.UseServerSequences
-
-        If useServer AndAlso ServerDBContext Is Nothing Then
+        If isServerExp AndAlso ServerDBContext Is Nothing Then
             cbMsgBox.Display("The current experiment originates from the server, but the server currently is unavailable!", MsgBoxStyle.OkOnly)
             Exit Sub
         End If
+
+        Dim useServer = ServerDBContext IsNot Nothing AndAlso (isServerExp OrElse CustomControls.My.MySettings.Default.UseServerSequences)
 
         Dim queryExperiments = If(useServer, ServerDBContext.tblExperiments, DBContext.tblExperiments)
 
