@@ -1,4 +1,4 @@
-
+﻿
 Imports System.ComponentModel
 Imports System.Text
 Imports System.Windows
@@ -132,27 +132,19 @@ Partial Public Class SequenceGraph
 
     Private Shared ReadOnly SelectedBorderBrush As New SolidColorBrush(Colors.Yellow)
 
+    ' Shared by every edge / arrowhead, so they are created once and frozen instead of once per drawn element.
+    Private Shared ReadOnly EdgeStrokeBrush As SolidColorBrush = CreateFrozenBrush(Color.FromArgb(130, 136, 176, 250))
+    Private Shared ReadOnly ArrowFillBrush As SolidColorBrush = CreateFrozenBrush(Color.FromArgb(175, 156, 206, 255))
+
     Public Event SequenceCardClicked(seq As SequenceNode)
 
 
-    '═══════════════════════════════════════════════════════════════════════════
-    ' Color helpers  (avoid CByte noise everywhere)
-    '═══════════════════════════════════════════════════════════════════════════
+    Private Shared Function CreateFrozenBrush(c As Color) As SolidColorBrush
 
-    Private Shared Function GetColor(r As Integer, g As Integer, b As Integer) As Color
-        Return Color.FromRgb(CByte(r), CByte(g), CByte(b))
-    End Function
+        Dim b As New SolidColorBrush(c)
+        b.Freeze()
+        Return b
 
-    Private Shared Function GetColor(a As Integer, r As Integer, g As Integer, b As Integer) As Color
-        Return Color.FromArgb(CByte(a), CByte(r), CByte(g), CByte(b))
-    End Function
-
-    Private Shared Function GetBrush(r As Integer, g As Integer, b As Integer) As SolidColorBrush
-        Return New SolidColorBrush(GetColor(r, g, b))
-    End Function
-
-    Private Shared Function GetBrush(a As Integer, r As Integer, g As Integer, b As Integer) As SolidColorBrush
-        Return New SolidColorBrush(GetColor(a, r, g, b))
     End Function
 
 
@@ -932,8 +924,6 @@ Partial Public Class SequenceGraph
 
     Private Sub DrawJunctionBundle(b As JunctionBundle)
 
-        Dim stroke = GetBrush(130, 136, 176, 250)
-
         ' Source → junction (no arrowhead)
 
         For Each src In b.Sources
@@ -949,7 +939,7 @@ Partial Public Class SequenceGraph
             geo.Figures.Add(fig)
             GraphCanvas.Children.Add(New Path With {
                 .Data = geo,
-                .Stroke = stroke,
+                .Stroke = EdgeStrokeBrush,
                 .StrokeThickness = 1.8
             })
         Next
@@ -974,7 +964,7 @@ Partial Public Class SequenceGraph
             geo.Figures.Add(fig)
             GraphCanvas.Children.Add(New Path With {
                 .Data = geo,
-                .Stroke = stroke,
+                .Stroke = EdgeStrokeBrush,
                 .StrokeThickness = 1.8
             })
             DrawArrowHead(x2, y2, 0.0)
@@ -986,7 +976,7 @@ Partial Public Class SequenceGraph
         Dim jDot As New Ellipse With {
             .Width = DOT_DIAM,
             .Height = DOT_DIAM,
-            .Fill = GetBrush(80, 120, 195),
+            .Fill = New SolidColorBrush(Color.FromRgb(80, 120, 195)),
             .Stroke = New SolidColorBrush(Colors.WhiteSmoke),
             .StrokeThickness = 1.5,
             .ToolTip = "Common Intermediate"
@@ -1024,7 +1014,7 @@ Partial Public Class SequenceGraph
 
         GraphCanvas.Children.Add(New Path With {
             .Data = geometry,
-            .Stroke = GetBrush(130, 136, 176, 250),
+            .Stroke = EdgeStrokeBrush,
             .StrokeThickness = 1.8
         })
 
@@ -1054,7 +1044,7 @@ Partial Public Class SequenceGraph
 
         GraphCanvas.Children.Add(New Path With {
             .Data = geom,
-            .Fill = GetBrush(175, 156, 206, 255)
+            .Fill = ArrowFillBrush
         })
 
     End Sub
@@ -1069,38 +1059,38 @@ Partial Public Class SequenceGraph
         Dim gradTop, gradBot, rim, hdrClr As Color
 
         If seq.ContainsSeed Then
-            gradTop = GetColor(&HA4, &H84, &H10)
-            gradBot = GetColor(&H60, &H4A, &H8)
-            rim = GetColor(&HF4, &HD0, &H18)
-            hdrClr = GetColor(88, &HF4, &HD0, &H18)
+            gradTop = Color.FromRgb(&HA4, &H84, &H10)
+            gradBot = Color.FromRgb(&H60, &H4A, &H8)
+            rim = Color.FromRgb(&HF4, &HD0, &H18)
+            hdrClr = Color.FromArgb(88, &HF4, &HD0, &H18)
             seq.SequenceType = "Start"
 
         ElseIf seq.IsParallel Then
-            gradTop = GetColor(&H11, &H63, &H77)
-            gradBot = GetColor(&H8, &H35, &H43)
-            rim = GetColor(&H18, &HA8, &HC8)
-            hdrClr = GetColor(88, &H18, &HA8, &HC8)
+            gradTop = Color.FromRgb(&H11, &H63, &H77)
+            gradBot = Color.FromRgb(&H8, &H35, &H43)
+            rim = Color.FromRgb(&H18, &HA8, &HC8)
+            hdrClr = Color.FromArgb(88, &H18, &HA8, &HC8)
             seq.SequenceType = "Alternative"
 
         ElseIf (seq.Incoming.Count > 1 AndAlso seq.Outgoing.Count > 1) Then
-            gradTop = GetColor(&H5A, &H28, &H9B)
-            gradBot = GetColor(&H3A, &H1C, &H5A)
-            rim = GetColor(&HA0, &H50, &HE0)
-            hdrClr = GetColor(88, &HA0, &H50, &HE0)
+            gradTop = Color.FromRgb(&H5A, &H28, &H9B)
+            gradBot = Color.FromRgb(&H3A, &H1C, &H5A)
+            rim = Color.FromRgb(&HA0, &H50, &HE0)
+            hdrClr = Color.FromArgb(88, &HA0, &H50, &HE0)
             seq.SequenceType = "Hub"
 
         ElseIf seq.IsTerminal Then
-            gradTop = GetColor(&H9A, &H4E, &H14)
-            gradBot = GetColor(&H5C, &H2D, &H8)
-            rim = GetColor(&HDA, &H8E, &H2C)
-            hdrClr = GetColor(88, &HDA, &H8E, &H2C)
+            gradTop = Color.FromRgb(&H9A, &H4E, &H14)
+            gradBot = Color.FromRgb(&H5C, &H2D, &H8)
+            rim = Color.FromRgb(&HDA, &H8E, &H2C)
+            hdrClr = Color.FromArgb(88, &HDA, &H8E, &H2C)
             seq.SequenceType = "Terminal"
 
         Else
-            gradTop = GetColor(&H2D, &H5C, &HC4)
-            gradBot = GetColor(&H16, &H1F, &H78)
-            rim = GetColor(&H52, &H84, &HE4)
-            hdrClr = GetColor(88, &H52, &H84, &HE4)
+            gradTop = Color.FromRgb(&H2D, &H5C, &HC4)
+            gradBot = Color.FromRgb(&H16, &H1F, &H78)
+            rim = Color.FromRgb(&H52, &H84, &HE4)
+            hdrClr = Color.FromArgb(88, &H52, &H84, &HE4)
             seq.SequenceType = "Linear"
 
         End If
@@ -1177,7 +1167,7 @@ Partial Public Class SequenceGraph
             .Text = If(seq.Members.Count = 1, " Step", " Steps"),
             .FontSize = 11,
             .Margin = New Thickness(2, 0, 0, -1.5),
-            .Foreground = GetBrush(180, 255, 255, 255),
+            .Foreground = New SolidColorBrush(Color.FromArgb(180, 255, 255, 255)),
             .VerticalAlignment = VerticalAlignment.Center
         })
 
@@ -1270,15 +1260,13 @@ Partial Public Class SequenceGraph
         sb.Append($"In: {seq.Incoming.Count} - Out: {seq.Outgoing.Count}")
 
         Return New ToolTip With {
-            .Background = GetBrush(12, 12, 30),
-            .BorderBrush = GetBrush(52, 52, 100),
             .BorderThickness = New Thickness(1),
             .Padding = New Thickness(12, 9, 12, 9),
             .Content = New TextBlock With {
                 .Text = sb.ToString(),
                 .FontFamily = New FontFamily("Consolas"),
                 .FontSize = 11,
-                .Foreground = Brushes.White' GetBrush(120, 185, 185)
+                .Foreground = Brushes.White
             }
         }
     End Function

@@ -21,7 +21,27 @@
         <Style TargetType="MenuItem">
             <Setter Property="Template" Value="{StaticResource ContextMenuItem}"/>
         </Style>
-        
+
+        <!--Reaction sketch tooltip (assigned in code-behind): overrides the global dark ToolTip template, which adds
+            an 8,6 content margin and a white border. Always in light mode (in both skins). -->
+        <Style x:Key="sketchToolTipStyle" TargetType="ToolTip">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToolTip">
+                        <!--The transparent outer margin gives the drop shadow room to render (the shadow is drawn by the
+                            effect below, not by the ToolTip's built-in HasDropShadow chrome, which this template replaces).-->
+                        <Border Background="WhiteSmoke" BorderBrush="#FF8C8C8C" BorderThickness="1" CornerRadius="4" Padding="2"
+                                Margin="0,0,10,10">
+                            <Border.Effect>
+                                <DropShadowEffect ShadowDepth="4" BlurRadius="10" Direction="315" Opacity="0.4"/>
+                            </Border.Effect>
+                            <ContentPresenter/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
     </UserControl.Resources>
 
     <UserControl.ContextMenu>
@@ -55,7 +75,7 @@
                 </TextBlock.Style>
             </TextBlock>
 
-            <Border CornerRadius="6" Padding="2,0,2,0"  >
+            <Border x:Name="headerContent" CornerRadius="6" Padding="2,0,2,0"  >
                 
                 <Border.Style>
                     <Style TargetType="Border">

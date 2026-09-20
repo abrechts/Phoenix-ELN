@@ -307,6 +307,19 @@
                             </StackPanel>
                         </Button>
 
+                        <Separator/>
+
+                        <!--On/off item: the check mark (txtStructureTipsCheck, toggled from code-behind) shows the current state.-->
+                        <Button x:Name="btnStructureTips" Style="{StaticResource NavToolbarTextButtonStyle}" HorizontalContentAlignment="Left"
+                           HorizontalAlignment="Stretch" Padding="5,4,12,4" Click="btnStructureTips_Click"
+                           ToolTip="Toggle the reaction sketch tooltip when &#x0a;the mouse is over an experiment entry.">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#x232C;" FontFamily="Segoe UI Symbol" FontSize="16" Width="16" Margin="1,0,6,0" VerticalAlignment="Center" TextAlignment="Center"/>
+                                <TextBlock Text="Show Reactions" VerticalAlignment="Center" FontFamily="Verdana" FontSize="11.5"/>
+                                <TextBlock x:Name="txtStructureTipsCheck" Text="&#x2713;" FontWeight="Bold" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+
                     </StackPanel>
                 </Border>
             </Popup>
@@ -325,8 +338,7 @@
 
         <TreeView x:Name="navTree" Background="Transparent"
             ItemsSource="{Binding tblProjects, Converter={StaticResource projectsCollectionViewConv}}"
-            TreeViewItem.Selected="TreeViewItem_Selected" TreeViewItem.Unselected="TreeViewItem_Unselected" Padding="2,2,2,8" BorderThickness="0"
-            VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"
+            TreeViewItem.Selected="TreeViewItem_Selected" TreeViewItem.Unselected="TreeViewItem_Unselected" Padding="2,2,2,8" BorderThickness="0"            VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"
             VirtualizingPanel.ScrollUnit="Item"
             ScrollViewer.CanContentScroll="True"
             dd:DragDrop.IsDragSource="True"

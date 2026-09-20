@@ -17,7 +17,7 @@
             </ResourceDictionary.MergedDictionaries>
 
             <DataTemplate x:Key="hitGroupItem">
-                <local:ExpTreeHeader SuppressContextMenu="true" Margin="0,-1" FontSize="11"/>
+                <local:ExpTreeHeader SuppressContextMenu="true" SuppressSketchToolTip="true" Margin="0,-1" FontSize="11"/>
             </DataTemplate>
 
         </ResourceDictionary>

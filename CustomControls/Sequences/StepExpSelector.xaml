@@ -14,7 +14,7 @@
         <local:ExpEntryEnabledConverter x:Key="expEntryEnabledConv"/>
 
         <DataTemplate x:Key="expTreeItem">
-            <local:ExpTreeHeader Margin="0,-1" IsTabIndicatorVisible="false" IsEnabled="{Binding Converter={StaticResource expEntryEnabledConv}}"/>
+            <local:ExpTreeHeader Margin="0,-1" IsTabIndicatorVisible="false" SuppressSketchToolTip="true" IsEnabled="{Binding Converter={StaticResource expEntryEnabledConv}}"/>
         </DataTemplate>
 
     </UserControl.Resources>

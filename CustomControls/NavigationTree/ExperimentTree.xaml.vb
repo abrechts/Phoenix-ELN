@@ -34,6 +34,29 @@ Public Class ExperimentTree
         ' This call is required by the designer.
         InitializeComponent()
 
+        SetStructureTipsEnabled(My.Settings.NavTreeStructureTips)
+
+    End Sub
+
+
+    Private Sub btnStructureTips_Click(sender As Object, e As RoutedEventArgs)
+
+        navMenuPopup.IsOpen = False
+        SetStructureTipsEnabled(Not ExpTreeHeader.GetSketchToolTipsEnabled(navTree))
+        My.Settings.NavTreeStructureTips = ExpTreeHeader.GetSketchToolTipsEnabled(navTree)
+        My.Settings.Save()
+
+    End Sub
+
+
+    ' The inherited ExpTreeHeader.SketchToolTipsEnabled property on the tree is the single source of truth for
+    ' every header in it; the menu item's check mark just mirrors it.
+
+    Private Sub SetStructureTipsEnabled(isEnabled As Boolean)
+
+        ExpTreeHeader.SetSketchToolTipsEnabled(navTree, isEnabled)
+        txtStructureTipsCheck.Visibility = If(isEnabled, Visibility.Visible, Visibility.Hidden)
+
     End Sub
 
 
@@ -98,6 +121,7 @@ Public Class ExperimentTree
         RefreshButtonStyle(btnExpandAll)
         RefreshButtonStyle(btnLocateExperiment)
         RefreshButtonStyle(btnFocusExperiment)
+        RefreshButtonStyle(btnStructureTips)
 
         iconCollapseAll.SetResourceReference(DarkModeHelper.BaseContentProperty, "CollapseAllIcon")
         iconExpandAll.SetResourceReference(DarkModeHelper.BaseContentProperty, "ExpandAllIcon")
