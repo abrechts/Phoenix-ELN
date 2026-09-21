@@ -6,8 +6,8 @@
         xmlns:local="clr-namespace:CustomControls"
         mc:Ignorable="d"      
         d:Width="300"  ShowInTaskbar="False" WindowStartupLocation="CenterOwner" FontFamily="Arial" SizeToContent="WidthAndHeight"
-        ResizeMode="NoResize" Title="Material Totals" MinWidth="300" MaxWidth="450" MaxHeight="450" WindowStyle="ThreeDBorderWindow"
-        Background="{DynamicResource WindowBackground}" Foreground="{DynamicResource BodyForeground}" >
+        ResizeMode="CanResize"  Title="Material Totals" MinWidth="300" MaxWidth="450" MaxHeight="450" WindowStyle="ThreeDBorderWindow"
+        Background="{StaticResource DarkPanelBackground2}" Foreground="{DynamicResource BodyForeground}" >
 
     <Window.Resources>
         <ResourceDictionary>
@@ -21,57 +21,43 @@
 
         </ResourceDictionary>
     </Window.Resources>
-    
-    <StackPanel Margin="10,4,10,12">
 
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="center">
+    <Grid Margin="10,4,10,12">
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+        
+        <DockPanel Grid.Row="0" LastChildFill="True">
+
+            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" HorizontalAlignment="center">
             
-            <DockPanel  Margin="0,8,0,2">
-                <TextBlock Text="Materials Summary" FontWeight="Bold" HorizontalAlignment="Center" FontSize="13.5" Foreground="LightBlue"/>
-                <ContentControl Content="{StaticResource icoInfo}" Height="14" HorizontalAlignment="Right" ToolTipService.InitialShowDelay="250" Margin="6,0,0,0">
-                    <ContentControl.ToolTip>
-                        <StackPanel TextBlock.Foreground="white">
-                            <TextBlock Text="Summary Materials:" FontWeight="DemiBold"/>
-                            <TextBlock Text="● Reagents as Weights" FontSize="10.5"/>
-                            <TextBlock Text="● Reagent Solutions as Volumes  " FontSize="10.5"/>
-                            <TextBlock Text="● Solvents as Volumes" FontSize="10.5"/>
-                            <TextBlock Text="● Auxiliaries as Weights" FontSize="10.5"/>
-                        </StackPanel>
-                    </ContentControl.ToolTip>
-                </ContentControl>
-            </DockPanel>
-        </StackPanel>
+                <DockPanel  Margin="0,8,0,6">
+                    <TextBlock Text="Required Materials" FontWeight="Bold" HorizontalAlignment="Center" FontSize="13" Foreground="LightBlue"/>
+                    <ContentControl Content="{StaticResource icoInfo}" Height="14" HorizontalAlignment="Right" ToolTipService.InitialShowDelay="250" Margin="8,0,0,0">
+                        <ContentControl.ToolTip>
+                            <StackPanel TextBlock.Foreground="white">
+                                <TextBlock Text="Summary Materials:" FontWeight="DemiBold"/>
+                                <TextBlock Text="● Reagents as Weights" FontSize="10.5"/>
+                                <TextBlock Text="● Reagent Solutions as Volumes  " FontSize="10.5"/>
+                                <TextBlock Text="● Solvents as Volumes" FontSize="10.5"/>
+                                <TextBlock Text="● Auxiliaries as Weights" FontSize="10.5"/>
+                            </StackPanel>
+                        </ContentControl.ToolTip>
+                    </ContentControl>
+                </DockPanel>
+            </StackPanel>
 
-        <!--<TextBlock Text="Summary of required experiment materials." TextWrapping="Wrap" Margin="6,0,0,8" HorizontalAlignment="Center" 
-            Foreground="#FFD8D8D8" FontSize="11.5" FontStyle="Italic"/>-->
+            <ScrollViewer Padding="6,2,12,0" VerticalScrollBarVisibility="Auto">
 
-        <ScrollViewer Padding="6,2,12,0" VerticalScrollBarVisibility="Auto">
+                <StackPanel Grid.IsSharedSizeScope="True">
 
-            <StackPanel Grid.IsSharedSizeScope="True">
+                    <TextBlock Text="Reactant" FontWeight="DemiBold" VerticalAlignment="Center" Margin="0,0,0,2"/>
 
-                <TextBlock Text="Reactant" FontWeight="DemiBold" VerticalAlignment="Center" Margin="0,0,0,2"/>
-                   
-                <TreeView x:Name="tvReactantSummary" Background="Transparent" BorderThickness="0,1,0,0" Padding="0,4,0,0">
-                    <TreeView.Resources>
-                        <HierarchicalDataTemplate DataType="{x:Type local:MaterialTotal}" ItemsSource="{Binding MaterialEntries}">
-                            <local:MatSummaryTotal Background="#FFF9F9C3" TextBlock.Foreground="Black" HorizontalAlignment="Center"/>
-                        </HierarchicalDataTemplate>
-                        <DataTemplate DataType="{x:Type local:MaterialEntry}">
-                            <local:MatSummaryDetail FontStyle="Italic" TextBlock.Foreground="{DynamicResource BodyForeground}"/>
-                        </DataTemplate>
-                    </TreeView.Resources>
-                </TreeView>
-
-
-                <StackPanel d:Visibility="visible" Visibility="{Binding ElementName=tvReagentsSummary,Path=HasItems,
-                  Converter={StaticResource boolToVisConv}}">
-
-                    <TextBlock Text="Reagents" FontWeight="DemiBold" Margin="0,6,0,2" />
-                  
-                    <TreeView x:Name="tvReagentsSummary" Background="Transparent" BorderThickness="0,1,0,0" Padding="0,4,0,0">
+                    <TreeView x:Name="tvReactantSummary" Background="Transparent" BorderThickness="0,1,0,0" Padding="0,4,0,0">
                         <TreeView.Resources>
                             <HierarchicalDataTemplate DataType="{x:Type local:MaterialTotal}" ItemsSource="{Binding MaterialEntries}">
-                                <local:MatSummaryTotal TextBlock.Foreground="{DynamicResource BodyForeground}"/>
+                                <local:MatSummaryTotal Background="#FFF9F9C3" TextBlock.Foreground="Black" HorizontalAlignment="Center"/>
                             </HierarchicalDataTemplate>
                             <DataTemplate DataType="{x:Type local:MaterialEntry}">
                                 <local:MatSummaryDetail FontStyle="Italic" TextBlock.Foreground="{DynamicResource BodyForeground}"/>
@@ -79,54 +65,78 @@
                         </TreeView.Resources>
                     </TreeView>
 
+
+                    <StackPanel d:Visibility="visible" Visibility="Visible">
+
+                        <TextBlock Text="Reagents" FontWeight="DemiBold" Margin="0,8,0,2" />
+
+                        <TextBlock Text=" ---" d:Visibility="Visible" Foreground="gray" Margin="30,-4,0,3"
+                           Visibility="{Binding ElementName=tvReagentsSummary,Path=HasItems,Converter={StaticResource boolToVisConv},ConverterParameter=invert}"/>
+
+                        <TreeView x:Name="tvReagentsSummary" Background="Transparent" BorderThickness="0,1,0,0" Padding="0,4,0,0">
+                            <TreeView.Resources>
+                                <HierarchicalDataTemplate DataType="{x:Type local:MaterialTotal}" ItemsSource="{Binding MaterialEntries}">
+                                    <local:MatSummaryTotal TextBlock.Foreground="{DynamicResource BodyForeground}"/>
+                                </HierarchicalDataTemplate>
+                                <DataTemplate DataType="{x:Type local:MaterialEntry}">
+                                    <local:MatSummaryDetail FontStyle="Italic" TextBlock.Foreground="{DynamicResource BodyForeground}"/>
+                                </DataTemplate>
+                            </TreeView.Resources>
+                        </TreeView>
+
+                    </StackPanel>
+
+
+                    <StackPanel d:Visibility="visible" Visibility="Visible">
+
+                        <TextBlock Text="Solvents" FontWeight="DemiBold" Margin="0,6,0,2" Foreground="{DynamicResource LinkForeground}"/>
+
+                        <TextBlock Text="---" d:Visibility="Visible" Foreground="gray" Margin="30,-4,0,3" 
+                            Visibility="{Binding ElementName=tvSolventsSummary,Path=HasItems,Converter={StaticResource boolToVisConv},ConverterParameter=invert}"/>
+
+                        <TreeView x:Name="tvSolventsSummary" Background="Transparent" BorderThickness="0,1,0,0" Padding="0,4,0,0">
+                            <TreeView.Resources>
+                                <HierarchicalDataTemplate DataType="{x:Type local:MaterialTotal}" ItemsSource="{Binding MaterialEntries}">
+                                    <local:MatSummaryTotal TextBlock.Foreground="{DynamicResource LinkForeground}"/>
+                                </HierarchicalDataTemplate>
+                                <DataTemplate DataType="{x:Type local:MaterialEntry}">
+                                    <local:MatSummaryDetail FontStyle="Italic" TextBlock.Foreground="{DynamicResource LinkForeground}"/>
+                                </DataTemplate>
+                            </TreeView.Resources>
+                        </TreeView>
+
+                    </StackPanel>
+
+
+                    <StackPanel d:Visibility="visible" Visibility="visible">
+
+                        <TextBlock Text="Auxiliaries" FontWeight="DemiBold" Margin="0,6,0,2" Foreground="#FFE38686"/>
+
+                        <TextBlock Text="---" d:Visibility="Visible" Foreground="gray" Margin="30,-4,0,3"
+                            Visibility="{Binding ElementName=tvAuxiliariesSummary,Path=HasItems,Converter={StaticResource boolToVisConv},ConverterParameter=invert}"/>
+
+                        <TreeView x:Name="tvAuxiliariesSummary" Background="Transparent" Padding="0,4,0,0" BorderThickness="0,1,0,0">
+                            <TreeView.Resources>
+                                <HierarchicalDataTemplate DataType="{x:Type local:MaterialTotal}" ItemsSource="{Binding MaterialEntries}">
+                                    <local:MatSummaryTotal TextBlock.Foreground="#FFE38686"/>
+                                </HierarchicalDataTemplate>
+                                <DataTemplate DataType="{x:Type local:MaterialEntry}">
+                                    <local:MatSummaryDetail FontStyle="Italic" TextBlock.Foreground="#FFE38686"/>
+                                </DataTemplate>
+                            </TreeView.Resources>
+                        </TreeView>
+
+                    </StackPanel>
+
                 </StackPanel>
 
+            </ScrollViewer>
 
-                <StackPanel d:Visibility="visible" Visibility="{Binding ElementName=tvSolventsSummary,Path=HasItems,
-                   Converter={StaticResource boolToVisConv}}">
+        </DockPanel>
 
-                    <TextBlock Text="Solvents" FontWeight="DemiBold" Margin="0,6,0,2" Foreground="{DynamicResource LinkForeground}"/>
+            <Button Grid.Row="1" Content="Close" IsCancel="True" HorizontalAlignment="Center" Padding="16,3" Background="whitesmoke" 
+               Foreground="Black" FontSize="11" Margin="0,12,0,0" />
+       
+    </Grid>
 
-                    <TreeView x:Name="tvSolventsSummary" Background="Transparent" BorderThickness="0,1,0,0" Padding="0,4,0,0">
-                        <TreeView.Resources>
-                            <HierarchicalDataTemplate DataType="{x:Type local:MaterialTotal}" ItemsSource="{Binding MaterialEntries}">
-                                <local:MatSummaryTotal TextBlock.Foreground="{DynamicResource LinkForeground}"/>
-                            </HierarchicalDataTemplate>
-                            <DataTemplate DataType="{x:Type local:MaterialEntry}">
-                                <local:MatSummaryDetail FontStyle="Italic" TextBlock.Foreground="{DynamicResource LinkForeground}"/>
-                            </DataTemplate>
-                        </TreeView.Resources>
-                    </TreeView>
-
-                </StackPanel>
-
-
-                <StackPanel d:Visibility="visible" Visibility="{Binding ElementName=tvAuxiliariesSummary,Path=HasItems,Converter={StaticResource boolToVisConv}}">
-
-                    <TextBlock Text="Auxiliaries" FontWeight="DemiBold" Margin="0,6,0,2" Foreground="#FFE38686"/>
-
-                    <TreeView x:Name="tvAuxiliariesSummary" Background="Transparent" Padding="0,4,0,0" BorderThickness="0,1,0,0">
-                        <TreeView.Resources>
-                            <HierarchicalDataTemplate DataType="{x:Type local:MaterialTotal}" ItemsSource="{Binding MaterialEntries}">
-                                <local:MatSummaryTotal TextBlock.Foreground="#FFE38686"/>
-                            </HierarchicalDataTemplate>
-                            <DataTemplate DataType="{x:Type local:MaterialEntry}">
-                                <local:MatSummaryDetail FontStyle="Italic" TextBlock.Foreground="#FFE38686"/>
-                            </DataTemplate>
-                        </TreeView.Resources>
-                    </TreeView>
-
-                </StackPanel>
-
-            </StackPanel>
-
-        </ScrollViewer>
-
-        <StackPanel>
-            <Separator Margin="6,12,12,10" />
-            <Button Content="Close" IsCancel="True" HorizontalAlignment="Center" Padding="16,3" Background="whitesmoke" Foreground="Black" FontSize="11" />
-        </StackPanel>
-
-    </StackPanel>
-    
 </Window>
