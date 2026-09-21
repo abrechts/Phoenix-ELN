@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Title="Experiment Tags" TextOptions.TextFormattingMode="Display" WindowStartupLocation="CenterOwner" ShowInTaskbar="False"
         UseLayoutRounding="True"
-        Height="580" MinHeight="420" Width="520" MinWidth="460" Background="#FF303036">
+        Height="580" MinHeight="420" Width="520" MinWidth="460" Background="{StaticResource DarkPanelBackground2}">
 
     <Window.Resources>
         <ResourceDictionary>

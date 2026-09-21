@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Title="Full-Text Search" TextOptions.TextFormattingMode="Display" WindowStartupLocation="CenterOwner" ShowInTaskbar="False"
         UseLayoutRounding="True"
-        Height="550" MinHeight="350" Width="490" MinWidth="450" MaxWidth="500" Background="#FF303036">
+        Height="550" MinHeight="350" Width="490" MinWidth="450" MaxWidth="500" Background="{StaticResource DarkPanelBackground2}">
 
     <Window.Resources>
         <ResourceDictionary>

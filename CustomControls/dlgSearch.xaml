@@ -9,7 +9,7 @@
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
         Title="Substructure Search" TextOptions.TextFormattingMode="Display" WindowStartupLocation="CenterOwner" ShowInTaskbar="False"
-        Height="750" MinHeight="600" Width="800" MinWidth="700" Background="#FF303036" >
+        Height="750" MinHeight="600" Width="800" MinWidth="700" Background="{StaticResource DarkPanelBackground2}" >
 
     <Window.Resources>
         <ResourceDictionary>
