@@ -314,8 +314,9 @@
                            HorizontalAlignment="Stretch" Padding="5,4,12,4" Click="btnStructureTips_Click"
                            ToolTip="Toggle the reaction sketch tooltip when &#x0a;the mouse is over an experiment entry.">
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="&#x232C;" FontFamily="Segoe UI Symbol" FontSize="16" Width="16" Margin="1,0,6,0" VerticalAlignment="Center" TextAlignment="Center"/>
-                                <TextBlock Text="Show Reactions" VerticalAlignment="Center" FontFamily="Verdana" FontSize="11.5"/>
+                                <TextBlock x:Name="iconStructureTips" Text="&#x232C;" FontFamily="Segoe UI Symbol" FontSize="16" Width="16" Margin="1,0,6,0"
+                                    VerticalAlignment="Center" TextAlignment="Center" Foreground="{DynamicResource BlueGlyphForeground}"/>
+                                <TextBlock Text="Reaction Tooltips" VerticalAlignment="Center" FontFamily="Verdana" FontSize="11.5"/>
                                 <TextBlock x:Name="txtStructureTipsCheck" Text="&#x2713;" FontWeight="Bold" Margin="10,0,0,0" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button>

@@ -127,6 +127,7 @@ Public Class ExperimentTree
         iconExpandAll.SetResourceReference(DarkModeHelper.BaseContentProperty, "ExpandAllIcon")
         iconLocateExperiment.SetResourceReference(DarkModeHelper.BaseContentProperty, "LocateExperimentIcon")
         iconFocusExperiment.SetResourceReference(DarkModeHelper.BaseContentProperty, "FocusExperimentIcon")
+        iconStructureTips.SetResourceReference(TextBlock.ForegroundProperty, "BlueGlyphForeground")
 
     End Sub
 

@@ -33,6 +33,7 @@
     <SolidColorBrush x:Key="TreeItemBackground" Color="White"/>
     <SolidColorBrush x:Key="TreeExpanderGlyph" Color="#FF444444"/>
     <SolidColorBrush x:Key="PinGlyphForeground" Color="#FF424242"/>
+    <SolidColorBrush x:Key="BlueGlyphForeground" Color="#FF0861D7"/>
     <SolidColorBrush x:Key="CurrentExperimentHighlight" Color="#FFC4FAFF"/>
     <SolidColorBrush x:Key="WorkflowInProgressFill" Color="#FFE0584C"/>
     <SolidColorBrush x:Key="WorkflowFinalizedFill" Color="#FF396ED7"/>

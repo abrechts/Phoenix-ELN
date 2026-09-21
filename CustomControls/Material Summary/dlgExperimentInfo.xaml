@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:CustomControls"
         mc:Ignorable="d"      
         d:Width="300"  ShowInTaskbar="False" WindowStartupLocation="CenterOwner" FontFamily="Arial" SizeToContent="WidthAndHeight"
-        ResizeMode="CanResize"  Title="Material Totals" MinWidth="300" MaxWidth="450" MaxHeight="450" WindowStyle="ThreeDBorderWindow"
+        ResizeMode="NoResize" Title="Material Totals" MinWidth="300" MaxWidth="450" MaxHeight="450" WindowStyle="ThreeDBorderWindow"
         Background="{StaticResource DarkPanelBackground2}" Foreground="{DynamicResource BodyForeground}" >
 
     <Window.Resources>
@@ -65,8 +65,7 @@
                         </TreeView.Resources>
                     </TreeView>
 
-
-                    <StackPanel d:Visibility="visible" Visibility="Visible">
+                    <StackPanel>
 
                         <TextBlock Text="Reagents" FontWeight="DemiBold" Margin="0,8,0,2" />
 
@@ -86,8 +85,7 @@
 
                     </StackPanel>
 
-
-                    <StackPanel d:Visibility="visible" Visibility="Visible">
+                    <StackPanel>
 
                         <TextBlock Text="Solvents" FontWeight="DemiBold" Margin="0,6,0,2" Foreground="{DynamicResource LinkForeground}"/>
 
@@ -107,8 +105,7 @@
 
                     </StackPanel>
 
-
-                    <StackPanel d:Visibility="visible" Visibility="visible">
+                    <StackPanel>
 
                         <TextBlock Text="Auxiliaries" FontWeight="DemiBold" Margin="0,6,0,2" Foreground="#FFE38686"/>
 
@@ -125,6 +122,9 @@
                                 </DataTemplate>
                             </TreeView.Resources>
                         </TreeView>
+
+                        <Separator d:Visibility="Visible" Visibility="{Binding ElementName=tvAuxiliariesSummary,Path=HasItems,Converter={StaticResource boolToVisConv}}" 
+                           Margin="0,4,0,6" BorderBrush="#FF828790"/>
 
                     </StackPanel>
 
