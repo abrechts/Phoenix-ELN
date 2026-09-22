@@ -280,6 +280,23 @@ Public Class StepSummary
     End Sub
 
 
+    ''' <summary>
+    ''' Opens the tag dialog from the "Search Tags" title gear button, always in pure tag-set management
+    ''' mode (no currExperiment) - same as the Search menu's "Manage Tags ...". Unlike btnAddTagChip_Click,
+    ''' this is not about assigning tags to the current experiment, so no checkboxes are shown here.
+    ''' </summary>
+    '''
+    Private Sub btnManageTags_Click(sender As Object, e As RoutedEventArgs)
+
+        Dim dlg As New dlgTags(ExperimentContent.DbContext) With {
+            .Owner = WPFToolbox.FindVisualParent(Of Window)(Me)
+        }
+
+        dlg.ShowDialog()
+
+    End Sub
+
+
     Private Sub btnRemoveTagChip_Click(sender As Object, e As RoutedEventArgs)
 
         Dim link = TryCast(CType(sender, Button).DataContext, tblExperimentTags)

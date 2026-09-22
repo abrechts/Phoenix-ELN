@@ -158,7 +158,31 @@
 
                     <StackPanel Margin="0,0,0,6">
 
-                        <TextBlock Text="Search Tags" FontWeight="Bold" Margin="76,4,0,3"  Foreground="{DynamicResource TitleForeground}" FontStyle="Italic"/>
+                        <Grid Margin="0,4,0,3">
+                            <TextBlock Text="Search Tags" FontWeight="Bold" VerticalAlignment="Center" Margin="76,0,0,0"
+                                Foreground="{DynamicResource TitleForeground}" FontStyle="Italic"/>
+                            <Button x:Name="btnManageTags" Width="14" Height="14" Padding="0" Margin="0,0,8,0"
+                                HorizontalAlignment="Right" VerticalAlignment="Center"
+                                Background="Transparent" BorderThickness="0" Click="btnManageTags_Click" ToolTip="Manage tags...">
+                                <TextBlock Text="&#xE713;" FontFamily="Segoe MDL2 Assets" FontSize="12"
+                                    HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Foreground" Value="{DynamicResource BlueGlyphForeground}"/>
+                                            <Style.Triggers>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding Path=(local:DarkModeHelper.IsDarkMode), RelativeSource={RelativeSource Self}}" Value="True"/>
+                                                        <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=Button}}" Value="True"/>
+                                                    </MultiDataTrigger.Conditions>
+                                                    <Setter Property="Foreground" Value="Black"/>
+                                                </MultiDataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </Button>
+                        </Grid>
 
                         <Separator Margin="0,0,0,4" Background="#FF4D84D7"/>
 

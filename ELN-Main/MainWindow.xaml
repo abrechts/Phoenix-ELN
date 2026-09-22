@@ -164,7 +164,7 @@
 
                                 <MenuItem.Icon>
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="center">
-                                        <TextBlock Text="⚙" FontSize="13" Foreground="lightskyblue"/>
+                                        <TextBlock Text="&#xE713;" FontFamily="Segoe MDL2 Assets" FontSize="13" Foreground="lightskyblue" Margin="0,1,0,0"/>
                                     </StackPanel>
                                 </MenuItem.Icon>
 
