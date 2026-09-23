@@ -104,24 +104,32 @@ Public Class ExperimentTree
 
     ' Popup content is logically disconnected from the tree that ApplySkin's resource-dictionary
     ' swap invalidates, so every DynamicResource binding inside navMenuPopup freezes at whichever
-    ' skin was active when the popup was first realized. Re-applying SetResourceReference forces
-    ' each one to look up the currently active skin fresh. Add new menu items' brushes/icons here too.
+    ' skin was active when the popup was first realized. Re-applying SetResourceReference (or, for
+    ' the dark/light branch below, re-assigning the brush/Style outright) forces each one to reflect
+    ' the currently active skin fresh. Add new menu items' brushes/icons here too.
 
     Private Sub RefreshNavMenuSkin()
 
-        navMenuBorder.SetResourceReference(Border.BackgroundProperty, "InnerPanelBackground")
-        navMenuBorder.SetResourceReference(Border.BorderBrushProperty, "TreePanelBorder")
+        ' In dark mode, navMenuBorder and its buttons switch to the same fixed dark popup color the
+        ' main toolbar menus use (NavMenuPopupDarkBackground/Border + NavMenuPopupButtonStyle's white
+        ' text) instead of following the skin - only in light mode does the panel keep its original
+        ' skin-following look (InnerPanelBackground/TreePanelBorder + NavToolbarTextButtonStyle).
+        Dim isDark = DarkModeHelper.GetIsDarkMode(Me)
 
-        ' Foreground is refreshed by reapplying the Style rather than SetResourceReference: a local
-        ' value permanently outranks Style triggers, which would silence NavToolbarTextButtonStyle's
-        ' dark+hover MultiDataTrigger (Foreground -> Black, needed since the hover highlight itself
-        ' stays light-colored in dark mode). Reapplying the Style re-evaluates its own DynamicResource
-        ' Setter fresh while leaving the trigger free to still override it on hover.
-        RefreshButtonStyle(btnCollapseAll)
-        RefreshButtonStyle(btnExpandAll)
-        RefreshButtonStyle(btnLocateExperiment)
-        RefreshButtonStyle(btnFocusExperiment)
-        RefreshButtonStyle(btnStructureTips)
+        If isDark Then
+            navMenuBorder.SetResourceReference(Border.BackgroundProperty, "NavMenuPopupDarkBackground")
+            navMenuBorder.SetResourceReference(Border.BorderBrushProperty, "NavMenuPopupDarkBorder")
+        Else
+            navMenuBorder.SetResourceReference(Border.BackgroundProperty, "InnerPanelBackground")
+            navMenuBorder.SetResourceReference(Border.BorderBrushProperty, "TreePanelBorder")
+        End If
+
+        Dim popupButtonStyleKey = If(isDark, "NavMenuPopupButtonStyle", "NavToolbarTextButtonStyle")
+        RefreshButtonStyle(btnCollapseAll, popupButtonStyleKey)
+        RefreshButtonStyle(btnExpandAll, popupButtonStyleKey)
+        RefreshButtonStyle(btnLocateExperiment, popupButtonStyleKey)
+        RefreshButtonStyle(btnFocusExperiment, popupButtonStyleKey)
+        RefreshButtonStyle(btnStructureTips, popupButtonStyleKey)
 
         iconCollapseAll.SetResourceReference(DarkModeHelper.BaseContentProperty, "CollapseAllIcon")
         iconExpandAll.SetResourceReference(DarkModeHelper.BaseContentProperty, "ExpandAllIcon")
@@ -132,11 +140,11 @@ Public Class ExperimentTree
     End Sub
 
 
-    Private Sub RefreshButtonStyle(btn As Button)
+    Private Sub RefreshButtonStyle(btn As Button, styleKey As String)
 
-        Dim navTextButtonStyle = TryCast(Me.TryFindResource("NavToolbarTextButtonStyle"), Style)
+        Dim style = TryCast(Me.TryFindResource(styleKey), Style)
         btn.Style = Nothing
-        btn.Style = navTextButtonStyle
+        btn.Style = style
 
     End Sub
 

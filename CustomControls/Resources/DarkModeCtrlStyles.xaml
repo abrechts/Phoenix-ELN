@@ -90,7 +90,7 @@
                                 <Border Background="#FF4F4F4F"
                                     BorderBrush="#FF6F6F6F"
                                     BorderThickness="1"
-                                    Padding="4,2,4,4"
+                                    Padding="8,4,8,5"
                                     Margin="0,0,8,8">
                                     <Border.Effect>
                                         <DropShadowEffect ShadowDepth="5" BlurRadius="7" Color="Black" Opacity="0.45" />
