@@ -140,7 +140,7 @@
                                     </StackPanel>
                                 </MenuItem.Icon>
 
-                                <TextBlock x:Name="mnuSearchRSS" Text="Substructures ..." Margin="0,2,0,0"/>
+                                <TextBlock x:Name="mnuSearchRSS" Text="Substructures ..." />
                                 <TextBlock x:Name="mnuSearchFullText" Text="Full Text ..."/>
                                 <TextBlock x:Name="mnuSearchTags" Text="Experiment Tags ... "/>
 
@@ -168,19 +168,19 @@
                                     </StackPanel>
                                 </MenuItem.Icon>
 
-                                <MenuItem x:Name="btnEditUser" Header="User Properties ..." Icon="{StaticResource icoEditUser_Dark}" Margin="0,3,0,0"/>
-                                <MenuItem x:Name="btnAddUser" Header="Add a User ..." Icon="{StaticResource icoAddUser2_Dark}" Margin="0,0,0,2"/>
+                                <MenuItem x:Name="btnEditUser" Header="User Properties ..." Icon="{StaticResource icoEditUser_Dark}" />
+                                <MenuItem x:Name="btnAddUser" Header="Add a User ..." Icon="{StaticResource icoAddUser2_Dark}"/>
 
-                                <Separator/>
+                                <Separator Margin="0,2,0,2"/>
 
-                                <MenuItem x:Name="btnConnect" Header="Server Connection ..." Margin="0,2,0,-1" 
+                                <MenuItem x:Name="btnConnect" Header="Server Connection ..." 
                                     IsEnabled="{Binding ElementName=tabExperiments, Path=SelectedContent.UserID, Converter={StaticResource demoToBoolConv},
-                                ConverterParameter=invert}"/>
-                                <MenuItem x:Name="btnRestore" Header="Restore from Server ..." Margin="0,0,0,2"/>
+                                    ConverterParameter=invert}"/>
+                                <MenuItem x:Name="btnRestore" Header="Restore from Server ..."/>
 
-                                <Separator/>
+                                <Separator Margin="0,2,0,2"/>
 
-                                <MenuItem Header="ELN Data Migration" Margin="0,2,0,0">
+                                <MenuItem Header="ELN Data Migration">
                                     <MenuItem x:Name="mnuCreatePackage" Header="Create Transfer Pack ..."/>
                                     <MenuItem x:Name="mnuImportPackage" Header="Import Transfer Pack ..." />
                                 </MenuItem>

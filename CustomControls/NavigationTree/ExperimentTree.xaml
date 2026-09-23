@@ -125,6 +125,27 @@
             </Style.Triggers>
         </Style>
 
+        <!-- Dark-skin-only alternative for navMenuBorder/its buttons, matching the main toolbar menus'
+             popup color (see RefreshNavMenuSkin, which switches to these instead of
+             InnerPanelBackground/TreePanelBorder/NavToolbarTextButtonStyle only while in dark mode -
+             light mode keeps the original skin-following look). -->
+        <SolidColorBrush x:Key="NavMenuPopupDarkBackground" Color="#FF4F4F4F"/>
+        <SolidColorBrush x:Key="NavMenuPopupDarkBorder" Color="#FF6F6F6F"/>
+
+        <!-- Buttons inside navMenuPopup sit on NavMenuPopupDarkBackground while in dark mode, which -
+             unlike NavToolbarTextButtonStyle above - needs white text unconditionally, flipping to
+             black on hover since the default Button hover chrome is always light-colored regardless
+             of skin. -->
+        <Style x:Key="NavMenuPopupButtonStyle" TargetType="Button" BasedOn="{StaticResource NavToolbarTextButtonStyle}">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Foreground" Value="Black"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
         <!-- Toolbar button chrome: icon+text ToggleButton (dark+hover reverts text to Black; checked state
              gets a highlighted background so the active sort mode stays visible without opening anything) -->
         <Style x:Key="NavToolbarToggleButtonStyle" TargetType="ToggleButton" BasedOn="{StaticResource {x:Type ToggleButton}}">
@@ -339,7 +360,9 @@
 
         <TreeView x:Name="navTree" Background="Transparent"
             ItemsSource="{Binding tblProjects, Converter={StaticResource projectsCollectionViewConv}}"
-            TreeViewItem.Selected="TreeViewItem_Selected" TreeViewItem.Unselected="TreeViewItem_Unselected" Padding="2,2,2,8" BorderThickness="0"            VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"
+            TreeViewItem.Selected="TreeViewItem_Selected" TreeViewItem.Unselected="TreeViewItem_Unselected" Padding="2,2,2,8" BorderThickness="0" 
+            VirtualizingPanel.IsVirtualizing="True" 
+            VirtualizingPanel.VirtualizationMode="Recycling"
             VirtualizingPanel.ScrollUnit="Item"
             ScrollViewer.CanContentScroll="True"
             dd:DragDrop.IsDragSource="True"
