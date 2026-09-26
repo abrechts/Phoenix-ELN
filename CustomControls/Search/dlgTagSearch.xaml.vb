@@ -96,14 +96,19 @@ Public Class dlgTagSearch
             Select(Function(g) g.Key).
             ToList()
 
-        Dim matches = LocalDBContext.tblExperiments.
+        Dim sortedMatches = LocalDBContext.tblExperiments.
             Where(Function(exp) matchingExpIDs.Contains(exp.ExperimentID)).
             ToList().
             OrderByDescending(Function(exp) exp.ExperimentID).
             ToList()
 
+        'cap displayed hits like SearchBase.MaxDisplayedResults - a widely-used tag could otherwise
+        'flood the results list, same rationale as material/full-text search
+        Dim wasTruncated = sortedMatches.Count > SearchBase.MaxDisplayedResults
+        Dim matches = If(wasTruncated, sortedMatches.Take(SearchBase.MaxDisplayedResults).ToList(), sortedMatches)
+
         lstResults.ItemsSource = matches
-        blkHitInfo.Text = $"{matches.Count} experiment(s) found"
+        blkHitInfo.Text = SearchBase.BuildHitCountText(matches.Count, wasTruncated)
         blkPlaceholder.Text = "---  no matching experiments  ---"
 
     End Sub

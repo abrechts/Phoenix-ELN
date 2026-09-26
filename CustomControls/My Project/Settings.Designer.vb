@@ -653,6 +653,54 @@ Namespace My
                 Me("NavTreeStructureTips") = value
             End Set
         End Property
+
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("-1, -1")>  _
+        Public Property dlgMaterialSearchPosition() As Global.System.Drawing.Point
+            Get
+                Return CType(Me("dlgMaterialSearchPosition"),Global.System.Drawing.Point)
+            End Get
+            Set
+                Me("dlgMaterialSearchPosition") = value
+            End Set
+        End Property
+
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("-1, -1")>  _
+        Public Property dlgMaterialSearchSize() As Global.System.Drawing.Size
+            Get
+                Return CType(Me("dlgMaterialSearchSize"),Global.System.Drawing.Size)
+            End Get
+            Set
+                Me("dlgMaterialSearchSize") = value
+            End Set
+        End Property
+
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("False")>  _
+        Public Property dlgMaterialSearchPartialSearch() As Boolean
+            Get
+                Return CType(Me("dlgMaterialSearchPartialSearch"),Boolean)
+            End Get
+            Set
+                Me("dlgMaterialSearchPartialSearch") = value
+            End Set
+        End Property
+
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("True")>  _
+        Public Property dlgMaterialSearchSortByYield() As Boolean
+            Get
+                Return CType(Me("dlgMaterialSearchSortByYield"),Boolean)
+            End Get
+            Set
+                Me("dlgMaterialSearchSortByYield") = value
+            End Set
+        End Property
     End Class
 End Namespace
 

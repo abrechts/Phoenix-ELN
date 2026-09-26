@@ -140,13 +140,31 @@
                                     </StackPanel>
                                 </MenuItem.Icon>
 
-                                <TextBlock x:Name="mnuSearchRSS" Text="Substructures ..." />
-                                <TextBlock x:Name="mnuSearchFullText" Text="Full Text ..."/>
-                                <TextBlock x:Name="mnuSearchTags" Text="Experiment Tags ... "/>
+                                <StackPanel x:Name="mnuSearchRSS" Orientation="Horizontal">
+                                    <TextBlock Text="⌬" FontSize="17" Width="20" Margin="0,0,5,-2" TextAlignment="Center" VerticalAlignment="Center" 
+                                       Foreground="lightblue"/>
+                                    <TextBlock Text="Substructures ..." VerticalAlignment="Center"/>
+                                </StackPanel>
+
+                                <StackPanel x:Name="mnuSearchMaterials" Orientation="Horizontal">
+                                    <TextBlock Text="🧪" Width="20" Margin="0,0,5,0" TextAlignment="Center" VerticalAlignment="Center" Foreground="lightblue"/>
+                                    <TextBlock Text="Materials ..." VerticalAlignment="Center"/>
+                                </StackPanel>
+
+                                <StackPanel x:Name="mnuSearchFullText" Orientation="Horizontal">
+                                    <TextBlock Text="📄" Width="20" Margin="0,0,5,0" TextAlignment="Center" VerticalAlignment="Center" Foreground="lightblue"/>
+                                    <TextBlock Text="Full Text ..." VerticalAlignment="Center"/>
+                                </StackPanel>
+
+                                <StackPanel x:Name="mnuSearchTags" Orientation="Horizontal">
+                                    <TextBlock Text="#" Width="20" Margin="0,0,5,0" TextAlignment="Center" VerticalAlignment="Center" 
+                                       Foreground="lightblue" FontWeight="DemiBold"/>
+                                    <TextBlock Text="Experiment Tags ..." VerticalAlignment="Center"/>
+                                </StackPanel>
 
                                 <Separator Style="{StaticResource DarkMenuNoIconsSeparatorStyle}"/>
 
-                                <TextBlock x:Name="mnuManageTags" Text="Manage Tags ..."/>
+                                <TextBlock x:Name="mnuManageTags" Text="Manage Tags ..." Margin="26,0,0,0"/>
 
                             </MenuItem>
                         </Menu>

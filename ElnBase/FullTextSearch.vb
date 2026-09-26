@@ -16,16 +16,6 @@ Imports MySqlConnector
 Public Class FullTextSearch
 
     ''' <summary>
-    ''' Upper bound on the number of experiments returned by <see cref="SearchExperiments"/>, so an overly
-    ''' broad search term (e.g. a common word like "and" or "the") can't return every experiment in the
-    ''' database. Once more experiments than this match, the lowest-relevance ones are cut off and
-    ''' <see cref="ExperimentSearchResult.WasTruncated"/> is set so the caller can inform the user.
-    ''' </summary>
-    '''
-    Public Shared ReadOnly MaxDisplayedResults As Integer = 200
-
-
-    ''' <summary>
     ''' Gets all experiments containing at least one protocol item matching the specified search term, ordered
     ''' by relevance (best match first). Only finalized experiments are returned, whether searching locally or
     ''' on the server - unfinalized experiments are considered work in progress.
@@ -35,7 +25,7 @@ Public Class FullTextSearch
     ''' of a phrase is matched as a prefix, so a still-being-typed or deliberately partial last word (e.g.
     ''' "Allyl") still finds it as part of a longer indexed word (e.g. a reagent named "Allyltrimethylsilane") -
     ''' every earlier word in a multi-word phrase still has to match a complete word. Results are capped at
-    ''' <see cref="MaxDisplayedResults"/>.
+    ''' <see cref="SearchBase.MaxDisplayedResults"/>.
     ''' <para>
     ''' Multiple phrases can be combined with AND semantics by delimiting them with ";" (e.g. "reagent A; solvent
     ''' X") - an experiment only matches if every phrase is found somewhere in it, not necessarily within the same
@@ -64,9 +54,9 @@ Public Class FullTextSearch
 
         'cut off the least relevant experiments before even querying tblExperiments for them, rather than
         'truncating the final result list - both cheaper and simpler, since ranking order is already established.
-        Dim wasTruncated = rankedExperiments.Count > MaxDisplayedResults
+        Dim wasTruncated = rankedExperiments.Count > SearchBase.MaxDisplayedResults
         If wasTruncated Then
-            rankedExperiments = rankedExperiments.Take(MaxDisplayedResults).ToList()
+            rankedExperiments = rankedExperiments.Take(SearchBase.MaxDisplayedResults).ToList()
         End If
 
         Dim experimentsByID = searchContext.tblExperiments.
@@ -1839,7 +1829,7 @@ End Class
 
 ''' <summary>
 ''' The outcome of a <see cref="FullTextSearch.SearchExperiments"/> call: the (possibly capped) list of
-''' matching experiments, and whether more matches existed than <see cref="FullTextSearch.MaxDisplayedResults"/>
+''' matching experiments, and whether more matches existed than <see cref="SearchBase.MaxDisplayedResults"/>
 ''' and were cut off, e.g. because the search term was too broad (a common word like "and" or "the").
 ''' </summary>
 '''

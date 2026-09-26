@@ -20,8 +20,12 @@
 
             <local:IntegerToVisibilityConverter x:Key="intToVisibilityConv"/>
 
+            <!--ExpTreeHeader (shared with the NavTree elsewhere) carries its own inherent line-height/icon
+                whitespace that isn't reachable via the ListBoxItem's own Padding/Margin - a small negative
+                margin here compresses that, scoped to just this result list's own template (same as
+                dlgMaterialSearch's expResultItem).-->
             <DataTemplate x:Key="expResultItem">
-                <StackPanel HorizontalAlignment="Stretch">
+                <StackPanel HorizontalAlignment="Stretch" Margin="0,-1,10,-1">
                     <local:ExpTreeHeader DataContext="{Binding}"/>
                 </StackPanel>
             </DataTemplate>
@@ -30,8 +34,9 @@
                 since expResultItem's content (a single ExpTreeHeader row) is short enough that the default
                 padding read as excessive vertical spacing between results.-->
             <Style x:Key="CompactResultItemStyle" TargetType="ListBoxItem">
-                <Setter Property="Padding" Value="2,1"/>
+                <Setter Property="Padding" Value="2,0"/>
                 <Setter Property="Margin" Value="0"/>
+                <Setter Property="MinHeight" Value="0"/>
             </Style>
 
             <!--Same pill styling as the tag chips in StepSummary's Exp. Info panel / dlgTags, made toggleable:

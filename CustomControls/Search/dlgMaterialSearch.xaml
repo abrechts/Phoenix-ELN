@@ -1,0 +1,197 @@
+<Window x:Class="dlgMaterialSearch"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CustomControls"
+        mc:Ignorable="d"
+        Title="Search by Materials" TextOptions.TextFormattingMode="Display" WindowStartupLocation="CenterOwner" ShowInTaskbar="False"
+        UseLayoutRounding="True"
+        Height="740" MinHeight="600" Width="560" MinWidth="480" Background="{StaticResource DarkPanelBackground2}">
+
+    <Window.Resources>
+        <ResourceDictionary>
+
+            <ResourceDictionary.MergedDictionaries>
+                <!--This window is always dark regardless of the active app skin (same convention as
+                    dlgSearch/dlgFullTextSearch/dlgTagSearch).-->
+                <ResourceDictionary Source="/CustomControls;component/Resources/SkinDark.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
+            <local:IntegerToVisibilityConverter x:Key="intToVisibilityConv"/>
+
+            <!--ExpTreeHeader (shared with the NavTree elsewhere) carries its own inherent line-height/icon
+                whitespace that isn't reachable via the ListBoxItem's own Padding/Margin - a small negative
+                margin here compresses that, scoped to just this result list's own template.-->
+            <DataTemplate x:Key="expResultItem">
+                <StackPanel HorizontalAlignment="Stretch" Margin="0,-1,10,-1">
+                    <local:ExpTreeHeader DataContext="{Binding}"/>
+                </StackPanel>
+            </DataTemplate>
+
+            <!--Default ListBoxItem chrome adds its own padding on top of the DataTemplate - tightened here
+                since expResultItem's content (a single ExpTreeHeader row) is short enough that the default
+                padding read as excessive vertical spacing between results.-->
+            <Style x:Key="CompactResultItemStyle" TargetType="ListBoxItem">
+                <Setter Property="Padding" Value="2,0"/>
+                <Setter Property="Margin" Value="0"/>
+                <Setter Property="MinHeight" Value="0"/>
+            </Style>
+
+            <!--Segmented-control style category switcher, same pill chrome as dlgTagSearch's tag filter pills.
+                Applied to RadioButtons (a ToggleButton subclass) so only one category picker shows at a time.-->
+            <Style x:Key="CategoryPillStyle" TargetType="ToggleButton">
+                <Setter Property="Margin" Value="0,0,6,0"/>
+                <Setter Property="Padding" Value="10,3,10,4"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="ToggleButton">
+                            <Border x:Name="border" Background="#334D84D7" BorderBrush="#FF4D84D7" BorderThickness="1" CornerRadius="10"
+                                Padding="{TemplateBinding Padding}">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="border" Property="Background" Value="#4D5FA0D7"/>
+                                </Trigger>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter TargetName="border" Property="Background" Value="#FF4D84D7"/>
+                                    <Setter TargetName="border" Property="BorderBrush" Value="#FF9BCBFF"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!--Borderless "x" remove button for a filter chip - default Button chrome is dropped so only the
+                Foreground color change on hover (light gray to black) signals interactivity.-->
+            <Style x:Key="RemoveChipButtonStyle" TargetType="Button">
+                <Setter Property="Foreground" Value="#FFD9D9D9"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="border" Background="Transparent" CornerRadius="8" Padding="4,0">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="border" Property="Background" Value="#FFE4F6FF"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Foreground" Value="Black"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
+            <!--Material search chip-->
+            <DataTemplate x:Key="filterChipTemplate">
+                <Border Background="{Binding ChipBackground}" BorderBrush="{Binding ChipBorderBrush}" BorderThickness="1" CornerRadius="10"
+                   Margin="0,3,6,3" Padding="0,2,4,3">
+                    
+                    <StackPanel Orientation="Horizontal">
+                        <Border Padding="10,0,4,0" Background="Transparent" Cursor="Hand" PreviewMouseUp="ChipBody_PreviewMouseUp"
+                          ToolTip="Click to edit the search equivalents">
+                            <TextBlock Text="{Binding DisplayText}" Foreground="White" VerticalAlignment="Center"/>
+                        </Border>
+                        <Button Content="X" Click="RemoveFilterChip_Click" Tag="{Binding}" Style="{StaticResource RemoveChipButtonStyle}"
+                            FontSize="11" Margin="4,0,0,0" VerticalAlignment="Center" Cursor="Hand" ToolTip="Remove this filter"/>
+                    </StackPanel>
+                    
+                </Border>
+            </DataTemplate>
+
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Margin="20,14,20,8">
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0">
+
+            <Grid>
+
+                <TextBlock Text="Search by Materials" FontWeight="Bold" HorizontalAlignment="Center" FontSize="14" Foreground="LightBlue"/>
+
+                <CheckBox x:Name="chkServerSearch" Content="Server Search" Foreground="White" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+
+            </Grid>
+
+            <Separator Margin="0,8,0,8" Height="0.9"/>
+
+            <TextBlock TextWrapping="Wrap" Margin="0,2,0,10" Foreground="lightgray" FontStyle="Italic" HorizontalAlignment="Center" TextAlignment="Center"
+                Width="360"><Run Text="Find all "/><Run Text="finalized"/><Run Text=" experiments containing the combination of the selected reagents, solvents and auxiliaries."/></TextBlock>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,8">
+                <RadioButton x:Name="rbReagents" GroupName="MaterialCategory" IsChecked="True" Style="{StaticResource CategoryPillStyle}">
+                    <TextBlock Text="Reagents" Foreground="White"/>
+                </RadioButton>
+                <RadioButton x:Name="rbSolvents" GroupName="MaterialCategory" Style="{StaticResource CategoryPillStyle}">
+                    <TextBlock Text="Solvents" Foreground="White"/>
+                </RadioButton>
+                <RadioButton x:Name="rbAuxiliaries" GroupName="MaterialCategory" Style="{StaticResource CategoryPillStyle}">
+                    <TextBlock Text="Auxiliaries" Foreground="White"/>
+                </RadioButton>
+            </StackPanel>
+
+            <local:MaterialNamePicker x:Name="picker"/>
+
+            <Separator Margin="0,10,0,4" Height="0.9"/>
+
+            <ItemsControl x:Name="icFilters" Focusable="False" ItemTemplate="{StaticResource filterChipTemplate}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <local:CenteredWrapPanel/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl>
+
+            <TextBlock Text="- no materials added yet -" HorizontalAlignment="Center" FontStyle="Italic" FontSize="11.5"
+                Foreground="{DynamicResource MutedForeground}" Margin="0,2,0,0"
+                Visibility="{Binding ElementName=icFilters, Path=Items.Count, Converter={StaticResource intToVisibilityConv}, ConverterParameter=invert}"/>
+
+            <Separator Margin="0,10,0,6" Height="0.9"/>
+
+        </StackPanel>
+
+        <Grid Grid.Row="1">
+
+            <ListBox x:Name="lstResults" Background="Transparent" BorderThickness="0" local:DarkModeHelper.IsDarkMode="True"
+                HorizontalContentAlignment="Stretch" ItemContainerStyle="{StaticResource CompactResultItemStyle}"
+                ScrollViewer.HorizontalScrollBarVisibility="Disabled" VirtualizingStackPanel.IsVirtualizing="False"
+                ItemTemplate="{StaticResource expResultItem}" Padding="0,6,0,4" HorizontalAlignment="left"/>
+
+            <!--Declared after lstResults so it renders on top - lstResults's Background="Transparent" is
+                still hit-testable across its whole bounds and would otherwise swallow clicks meant for
+                this combo, since later siblings in a Grid cell render (and hit-test) above earlier ones.-->
+            <ComboBox x:Name="cboSorting" Style="{StaticResource DarkCombo}" SelectedIndex="0" HorizontalAlignment="Right"
+                VerticalAlignment="Top" Padding="6,1,6,4" Margin="0,0,2,0" FontSize="11.5" BorderThickness="0"
+                Background="transparent">
+                <ComboBoxItem Content="sort by yield"/>
+                <ComboBoxItem Content="sort by scale"/>
+            </ComboBox>
+
+            <TextBlock x:Name="blkPlaceholder" Text="---  add filters to search  ---" Foreground="#FFFDCE79" HorizontalAlignment="Center"
+                VerticalAlignment="Top" Margin="0,42,0,0" FontStyle="Italic" FontSize="11.5" Opacity="0.95"
+                Visibility="{Binding ElementName=lstResults, Path=Items.Count, Converter={StaticResource intToVisibilityConv}, ConverterParameter=invert}"/>
+
+        </Grid>
+
+        <StackPanel Grid.Row="2">
+            <Separator Margin="0,4,0,4" Height="0.9"/>
+            <TextBlock x:Name="blkHitInfo" HorizontalAlignment="Center" Foreground="lightblue"/>
+        </StackPanel>
+
+    </Grid>
+
+</Window>

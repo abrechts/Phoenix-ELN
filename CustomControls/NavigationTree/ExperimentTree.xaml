@@ -128,8 +128,9 @@
         <!-- Dark-skin-only alternative for navMenuBorder/its buttons, matching the main toolbar menus'
              popup color (see RefreshNavMenuSkin, which switches to these instead of
              InnerPanelBackground/TreePanelBorder/NavToolbarTextButtonStyle only while in dark mode -
-             light mode keeps the original skin-following look). -->
-        <SolidColorBrush x:Key="NavMenuPopupDarkBackground" Color="#FF4F4F4F"/>
+             light mode keeps the original skin-following look). The background itself now just reuses
+             DarkModeCtrlStyles.xaml's shared "mnuDarkBackground" brush (merged at the Application level)
+             instead of a separate fixed color, so editing that one brush re-themes this popup too. -->
         <SolidColorBrush x:Key="NavMenuPopupDarkBorder" Color="#FF6F6F6F"/>
 
         <!-- Buttons inside navMenuPopup sit on NavMenuPopupDarkBackground while in dark mode, which -

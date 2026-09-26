@@ -58,7 +58,7 @@
 
             <Separator Margin="0,8,0,8" Height="0.9"/>
 
-            <TextBlock TextWrapping="Wrap" Margin="0,2,0,2" Foreground="lightgray" FontStyle="Italic">
+            <TextBlock TextWrapping="Wrap" Margin="0,2,0,4" Foreground="lightgray" FontStyle="Italic" TextAlignment="Center" Width="400">
                 <Run Text="Find text within all"/>
                 <Run FontWeight="Bold" Text="finalized "/>
                 <Run Text="experiments. Separate multiple search items with &quot;;&quot; to require the presence of all of them:"/>
