@@ -16,7 +16,7 @@
             </Grid.ColumnDefinitions>
 
             <TextBox x:Name="txtLocate" Grid.Column="0" VerticalContentAlignment="Center" Padding="4,2"
-                CaretBrush="White" Foreground="White" Background="{StaticResource DarkPanelBackground}" BorderBrush="LightGray" BorderThickness="1"/>
+                CaretBrush="White" Foreground="White" Background="transparent" BorderBrush="LightGray" BorderThickness="1"/>
 
             <CheckBox x:Name="chkSubstring" Grid.Column="1" Content="Substring" Foreground="White" VerticalAlignment="Center"
                 Margin="6,0,0,0" ToolTip="Check to also locate the search text anywhere within a material name (not just at the start)."

@@ -477,10 +477,10 @@ Public Class MaterialFilterRow
     Private Shared ReadOnly ReagentChipBrush As Brush = FrozenBrush(90, 90, 90)
     Private Shared ReadOnly ReagentChipBorderBrush As Brush = FrozenBrush(175, 175, 175)
 
-    Private Shared ReadOnly SolventChipBrush As Brush = FrozenBrush(47, 95, 204)
+    Private Shared ReadOnly SolventChipBrush As Brush = FrozenBrush(74, 99, 203)
     Private Shared ReadOnly SolventChipBorderBrush As Brush = FrozenBrush(127, 168, 255)
 
-    Private Shared ReadOnly AuxiliaryChipBrush As Brush = FrozenBrush(110, 66, 34)
+    Private Shared ReadOnly AuxiliaryChipBrush As Brush = FrozenBrush(182, 101, 42)
     Private Shared ReadOnly AuxiliaryChipBorderBrush As Brush = FrozenBrush(196, 148, 100)
 
     Private Shared Function FrozenBrush(r As Byte, g As Byte, b As Byte) As Brush
