@@ -16,7 +16,7 @@
             </Grid.ColumnDefinitions>
 
             <TextBox x:Name="txtLocate" Grid.Column="0" VerticalContentAlignment="Center" Padding="4,2"
-                CaretBrush="White" Foreground="White" Background="Transparent" BorderBrush="LightGray" BorderThickness="1"/>
+                CaretBrush="White" Foreground="White" Background="{StaticResource DarkPanelBackground}" BorderBrush="LightGray" BorderThickness="1"/>
 
             <CheckBox x:Name="chkSubstring" Grid.Column="1" Content="Substring" Foreground="White" VerticalAlignment="Center"
                 Margin="6,0,0,0" ToolTip="Check to also locate the search text anywhere within a material name (not just at the start)."
@@ -24,14 +24,14 @@
 
         </Grid>
 
-        <Border BorderBrush="#FF9B9B9B" BorderThickness="1" CornerRadius="4" Height="140">
-            <ListBox x:Name="lstNames" Background="Transparent" BorderThickness="0" Foreground="White"
+        <TextBlock Text="Select a material... " Foreground="LightGray" Margin="4,0,0,2" HorizontalAlignment="Center" FontStyle="Italic"
+             ToolTip="Ctrl-click to skip equivalents dialog."/>
+
+        <Border BorderBrush="#FF9B9B9B" Background="{StaticResource DarkPanelBackground}" BorderThickness="1" CornerRadius="4" Height="140" Padding="2">
+            <ListBox x:Name="lstNames" Background="transparent" BorderThickness="0" Foreground="White"
                 ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto"/>
         </Border>
 
-        <Grid Margin="0,6,0,0">
-            <Button x:Name="btnAdd" Content="Add Filter" Padding="8,2" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-        </Grid>
 
     </StackPanel>
 

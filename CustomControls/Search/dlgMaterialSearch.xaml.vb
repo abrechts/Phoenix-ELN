@@ -246,7 +246,7 @@ Public Class dlgMaterialSearch
         If _filterRows.Count = 0 Then
             lstResults.ItemsSource = Nothing
             blkHitInfo.Text = ""
-            blkPlaceholder.Text = "---  add filters to search  ---"
+            blkPlaceholder.Text = "---  no materials added yet  ---"
             Exit Sub
         End If
 

@@ -132,16 +132,16 @@ Public Class MaterialNamePicker
     End Sub
 
 
-    Private Sub btnAdd_Click() Handles btnAdd.Click
+    ''' <summary>
+    ''' Adds a material as soon as the user clicks its row - no double-click needed. Reading SelectedItem
+    ''' here is safe (unlike a double-click handler) because a ListBoxItem's selection updates on MouseDown,
+    ''' before this MouseUp handler runs, so the clicked item is already SelectedItem by this point.
+    ''' </summary>
+    '''
+    Private Sub lstNames_MouseUp(sender As Object, e As MouseButtonEventArgs) Handles lstNames.MouseUp
 
-        RequestAddFilter()
-
-    End Sub
-
-
-    Private Sub lstNames_MouseDoubleClick(sender As Object, e As MouseButtonEventArgs) Handles lstNames.MouseDoubleClick
-
-        RequestAddFilter()
+        Dim matName = TryCast(lstNames.SelectedItem, String)
+        RequestAddFilter(matName)
 
     End Sub
 
@@ -149,13 +149,18 @@ Public Class MaterialNamePicker
     ''' <summary>
     ''' Opens dlgEquivalentsFilter (starting at "any") to let the user specify the equivalents range as
     ''' part of adding the selected material - only raises AddFilterRequested if they confirm with OK.
+    ''' Held while clicking a material row, Ctrl instead skips the dialog and adds the filter directly with
+    ''' the default "any" equivalents range, for quick successive adds.
     ''' </summary>
     '''
-    Private Sub RequestAddFilter()
-
-        Dim selName = TryCast(lstNames.SelectedItem, String)
+    Private Sub RequestAddFilter(Optional selName As String = Nothing)
 
         If String.IsNullOrEmpty(selName) Then
+            Exit Sub
+        End If
+
+        If Keyboard.Modifiers = ModifierKeys.Control Then
+            RaiseEvent AddFilterRequested(Me, Category, selName, EquivMatchMode.Any, Nothing, Nothing)
             Exit Sub
         End If
 

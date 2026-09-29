@@ -130,9 +130,9 @@
             <Separator Margin="0,8,0,8" Height="0.9"/>
 
             <TextBlock TextWrapping="Wrap" Margin="0,2,0,10" Foreground="lightgray" FontStyle="Italic" HorizontalAlignment="Center" TextAlignment="Center"
-                Width="360"><Run Text="Find all "/><Run Text="finalized"/><Run Text=" experiments containing the combination of the selected reagents, solvents and auxiliaries."/></TextBlock>
+                Width="360"><Run Text="Find all "/><Run Text="finalized"/><Run Text=" experiments containing the combination of all specified reagents, solvents and auxiliaries."/></TextBlock>
 
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,8">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
                 <RadioButton x:Name="rbReagents" GroupName="MaterialCategory" IsChecked="True" Style="{StaticResource CategoryPillStyle}">
                     <TextBlock Text="Reagents" Foreground="White"/>
                 </RadioButton>
@@ -146,7 +146,7 @@
 
             <local:MaterialNamePicker x:Name="picker"/>
 
-            <Separator Margin="0,10,0,4" Height="0.9"/>
+            <Separator Margin="0,10,0,8" Height="0.9"/>
 
             <ItemsControl x:Name="icFilters" Focusable="False" ItemTemplate="{StaticResource filterChipTemplate}">
                 <ItemsControl.ItemsPanel>
@@ -156,11 +156,8 @@
                 </ItemsControl.ItemsPanel>
             </ItemsControl>
 
-            <TextBlock Text="- no materials added yet -" HorizontalAlignment="Center" FontStyle="Italic" FontSize="11.5"
-                Foreground="{DynamicResource MutedForeground}" Margin="0,2,0,0"
-                Visibility="{Binding ElementName=icFilters, Path=Items.Count, Converter={StaticResource intToVisibilityConv}, ConverterParameter=invert}"/>
-
-            <Separator Margin="0,10,0,6" Height="0.9"/>
+            <Separator x:Name="sepChipsPanel" Margin="0,8,0,6" Height="0.9" d:Visibility="visible" 
+                Visibility="{Binding ElementName=icFilters, Path=Items.Count, Converter={StaticResource intToVisibilityConv}}"/>
 
         </StackPanel>
 
@@ -176,7 +173,7 @@
                 this combo, since later siblings in a Grid cell render (and hit-test) above earlier ones.-->
             <ComboBox x:Name="cboSorting" Style="{StaticResource DarkCombo}" SelectedIndex="0" HorizontalAlignment="Right"
                 VerticalAlignment="Top" Padding="6,1,6,4" Margin="0,0,2,0" FontSize="11.5" BorderThickness="0"
-                Background="transparent">
+                Visibility="{Binding ElementName=sepChipsPanel, Path=Visibility}" Background="transparent">
                 <ComboBoxItem Content="sort by yield"/>
                 <ComboBoxItem Content="sort by scale"/>
             </ComboBox>
