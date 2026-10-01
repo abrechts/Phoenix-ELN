@@ -204,14 +204,9 @@ Public Class dlgMaterialSearch
     End Sub
 
 
-    ''' <summary>
-    ''' Opens dlgEquivalentsFilter, pre-filled with this chip's current equivalents range, so the user can
-    ''' adjust it - applies the result back to the row (and re-runs the search) only if they confirm with OK.
-    ''' </summary>
-    '''
-    Private Sub ChipBody_PreviewMouseUp(sender As Object, e As MouseButtonEventArgs)
+    Private Sub EditFilterChip_Click(sender As Object, e As RoutedEventArgs)
 
-        Dim row = TryCast(CType(sender, FrameworkElement).DataContext, MaterialFilterRow)
+        Dim row = TryCast(CType(sender, Button).Tag, MaterialFilterRow)
 
         If row Is Nothing Then
             Exit Sub
@@ -233,6 +228,37 @@ Public Class dlgMaterialSearch
         End If
 
     End Sub
+
+
+    '''' <summary>
+    '''' Opens dlgEquivalentsFilter, pre-filled with this chip's current equivalents range, so the user can
+    '''' adjust it - applies the result back to the row (and re-runs the search) only if they confirm with OK.
+    '''' </summary>
+    ''''
+    'Private Sub ChipBody_PreviewMouseUp(sender As Object, e As MouseButtonEventArgs)
+
+    '    Dim row = TryCast(CType(sender, FrameworkElement).DataContext, MaterialFilterRow)
+
+    '    If row Is Nothing Then
+    '        Exit Sub
+    '    End If
+
+    '    Dim editDlg As New dlgEquivalentsFilter With {
+    '        .Owner = Me,
+    '        .Category = row.Category,
+    '        .Mode = row.Mode,
+    '        .Value = row.Value,
+    '        .ValueTo = row.ValueTo
+    '    }
+
+    '    If editDlg.ShowDialog() = True Then
+    '        row.Mode = editDlg.Mode
+    '        row.Value = editDlg.Value
+    '        row.ValueTo = editDlg.ValueTo
+    '        UpdateResults()
+    '    End If
+
+    'End Sub
 
 
     ''' <summary>
@@ -368,6 +394,15 @@ Public Class dlgMaterialSearch
         If e.Key = Key.Escape Then
             Me.Close()
         End If
+
+    End Sub
+
+
+    Private Sub icoInfo_PreviewMouseUp() Handles icoInfo.PreviewMouseUp
+
+        Dim info As New ProcessStartInfo("https://abrechts.github.io/phoenix-eln-help.github.io/pages/MaterialsSearch.html") With {
+           .UseShellExecute = True}
+        Process.Start(info)
 
     End Sub
 

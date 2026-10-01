@@ -159,19 +159,21 @@ Public Class MaterialNamePicker
             Exit Sub
         End If
 
-        If Keyboard.Modifiers = ModifierKeys.Control Then
-            RaiseEvent AddFilterRequested(Me, Category, selName, EquivMatchMode.Any, Nothing, Nothing)
-            Exit Sub
-        End If
+        RaiseEvent AddFilterRequested(Me, Category, selName, EquivMatchMode.Any, Nothing, Nothing)
 
-        Dim editDlg As New dlgEquivalentsFilter With {
-            .Owner = Window.GetWindow(Me),
-            .Category = Category
-        }
+        'If Keyboard.Modifiers = ModifierKeys.Control Then
+        '    RaiseEvent AddFilterRequested(Me, Category, selName, EquivMatchMode.Any, Nothing, Nothing)
+        '    Exit Sub
+        'End If
 
-        If editDlg.ShowDialog() = True Then
-            RaiseEvent AddFilterRequested(Me, Category, selName, editDlg.Mode, editDlg.Value, editDlg.ValueTo)
-        End If
+        'Dim editDlg As New dlgEquivalentsFilter With {
+        '    .Owner = Window.GetWindow(Me),
+        '    .Category = Category
+        '}
+
+        'If editDlg.ShowDialog() = True Then
+        '    RaiseEvent AddFilterRequested(Me, Category, selName, editDlg.Mode, editDlg.Value, editDlg.ValueTo)
+        'End If
 
     End Sub
 
