@@ -106,6 +106,7 @@ Public Class dlgMaterialSearch
         Return namesQuery.
             Distinct().
             ToList().
+            Select(Function(n) n.Trim()).   'reagent/solvent/auxiliary names are free text, so stray leading/trailing spaces may occur
             GroupBy(Function(n) n.ToUpperInvariant()).
             Select(Function(g) g.First()).
             OrderBy(Function(n) n, StringComparer.OrdinalIgnoreCase).
@@ -320,13 +321,14 @@ Public Class dlgMaterialSearch
     '''
     Private Function GetMatchingExpIds(row As MaterialFilterRow) As HashSet(Of String)
 
-        Dim upperName = row.MaterialName.ToUpperInvariant()
+        'trimmed on both sides, since a stored name may carry stray spaces (see DistinctNames)
+        Dim upperName = row.MaterialName.Trim().ToUpperInvariant()
 
         Select Case row.Category
 
             Case MaterialCategory.Reagent
 
-                Dim query = SearchContext.tblReagents.Where(Function(r) r.Name.ToUpper() = upperName)
+                Dim query = SearchContext.tblReagents.Where(Function(r) r.Name.Trim().ToUpper() = upperName)
                 Select Case row.Mode
                     Case EquivMatchMode.EqualTo
                         If row.Value.HasValue Then query = query.Where(Function(r) r.Equivalents = row.Value.Value)
@@ -342,7 +344,7 @@ Public Class dlgMaterialSearch
 
             Case MaterialCategory.Solvent
 
-                Dim query = SearchContext.tblSolvents.Where(Function(s) s.Name.ToUpper() = upperName)
+                Dim query = SearchContext.tblSolvents.Where(Function(s) s.Name.Trim().ToUpper() = upperName)
                 Select Case row.Mode
                     Case EquivMatchMode.EqualTo
                         If row.Value.HasValue Then query = query.Where(Function(s) s.Equivalents = row.Value.Value)
@@ -358,7 +360,7 @@ Public Class dlgMaterialSearch
 
             Case Else   ' MaterialCategory.Auxiliary
 
-                Dim query = SearchContext.tblAuxiliaries.Where(Function(a) a.Name.ToUpper() = upperName)
+                Dim query = SearchContext.tblAuxiliaries.Where(Function(a) a.Name.Trim().ToUpper() = upperName)
                 Select Case row.Mode
                     Case EquivMatchMode.EqualTo
                         If row.Value.HasValue Then query = query.Where(Function(a) a.Equivalents = row.Value.Value)
