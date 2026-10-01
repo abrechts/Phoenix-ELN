@@ -88,23 +88,41 @@
                 </Style.Triggers>
             </Style>
 
-            <!--Material search chip-->
             <DataTemplate x:Key="filterChipTemplate">
-                <Border Background="{Binding ChipBackground}" BorderBrush="{Binding ChipBorderBrush}" BorderThickness="1" CornerRadius="10"
-                   Margin="0,3,6,3" Padding="0,2,4,3">
+                
+                <Border BorderThickness="1" CornerRadius="10" Margin="0,3,6,3" Padding="0,2,4,3">
+
+                    <!--Background/BorderBrush must stay Style setters: as local attributes on the Border they
+                        would outrank the hover trigger below, which then silently has no effect.-->
+                   
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Background" Value="{Binding ChipBackground}"/>
+                            <Setter Property="BorderBrush" Value="{Binding ChipBorderBrush}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ElementName=chipLabel, Path=IsMouseOver}" Value="True">
+                                    <Setter Property="Background" Value="{Binding ChipHoverBackground}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
 
                     <StackPanel Orientation="Horizontal">
-                        <Border Padding="8,0,2,0" Background="Transparent" Cursor="Hand">
-                            <TextBlock Text="{Binding DisplayText}" Foreground="White" VerticalAlignment="Center"/>
-                        </Border>
-                        <Button Click="EditFilterChip_Click" Tag="{Binding}" Style="{StaticResource RemoveChipButtonStyle}" Margin="0,0,-3,0">
-                            <TextBlock Text="✎" FontSize="11" ToolTip="Edit equivalents" Margin="-1,0"/>
-                        </Button>
+
+                        <!--Padding (not Margin) plus a transparent Background, so the spacing around the text
+                            is part of the label's own hit area -->
+                        
+                        <TextBlock x:Name="chipLabel" Text="{Binding DisplayText}" Foreground="White" VerticalAlignment="Center"
+                            Background="Transparent" Padding="8,0,2,0" Cursor="Hand" ToolTip="Click to edit equivalents"
+                            PreviewMouseUp="chipBody_PreviewMouseUp"/>
+
                         <Button Content="X" Click="RemoveFilterChip_Click" Padding="0,0,1,0" Tag="{Binding}" Style="{StaticResource RemoveChipButtonStyle}"
-                            FontSize="11" VerticalAlignment="Center" Cursor="Hand" ToolTip="Remove this filter"/>
+                            Margin="0,1,0,0" FontSize="11" VerticalAlignment="Center" Cursor="Hand" ToolTip="Remove this filter"/>
+                        
                     </StackPanel>
 
                 </Border>
+                
             </DataTemplate>
 
         </ResourceDictionary>
@@ -134,7 +152,7 @@
             <Separator Margin="0,8,0,8" Height="0.9"/>
 
             <TextBlock TextWrapping="Wrap" Margin="0,2,0,10" Foreground="lightgray" FontStyle="Italic" HorizontalAlignment="Center" TextAlignment="Center"
-                Width="360" Text="Locate finalized experiments by specifying any combination of reagents, solvents, and auxiliaries used."></TextBlock>
+                Width="360" Text="Locate finalized experiments containing any combination of reagents, solvents and auxiliaries."></TextBlock>
 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
                 <RadioButton x:Name="rbReagents" GroupName="MaterialCategory" IsChecked="True" Style="{StaticResource CategoryPillStyle}">

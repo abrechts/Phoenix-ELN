@@ -205,9 +205,24 @@ Public Class dlgMaterialSearch
     End Sub
 
 
-    Private Sub EditFilterChip_Click(sender As Object, e As RoutedEventArgs)
+    ''' <summary>
+    ''' Clicking the chip label edits its equivalents - a bigger, more convenient target for this frequent
+    ''' action than the small edit button it replaces (the chip's hover highlight advertises it).
+    ''' </summary>
+    '''
+    Private Sub ChipBody_PreviewMouseUp(sender As Object, e As MouseButtonEventArgs)
 
-        Dim row = TryCast(CType(sender, Button).Tag, MaterialFilterRow)
+        EditEquivalents(TryCast(CType(sender, FrameworkElement).DataContext, MaterialFilterRow))
+
+    End Sub
+
+
+    ''' <summary>
+    ''' Opens dlgEquivalentsFilter, pre-filled with the given chip's current equivalents range, so the user
+    ''' can adjust it - applies the result back to the row (and re-runs the search) only if confirmed with OK.
+    ''' </summary>
+    '''
+    Private Sub EditEquivalents(row As MaterialFilterRow)
 
         If row Is Nothing Then
             Exit Sub
@@ -229,37 +244,6 @@ Public Class dlgMaterialSearch
         End If
 
     End Sub
-
-
-    '''' <summary>
-    '''' Opens dlgEquivalentsFilter, pre-filled with this chip's current equivalents range, so the user can
-    '''' adjust it - applies the result back to the row (and re-runs the search) only if they confirm with OK.
-    '''' </summary>
-    ''''
-    'Private Sub ChipBody_PreviewMouseUp(sender As Object, e As MouseButtonEventArgs)
-
-    '    Dim row = TryCast(CType(sender, FrameworkElement).DataContext, MaterialFilterRow)
-
-    '    If row Is Nothing Then
-    '        Exit Sub
-    '    End If
-
-    '    Dim editDlg As New dlgEquivalentsFilter With {
-    '        .Owner = Me,
-    '        .Category = row.Category,
-    '        .Mode = row.Mode,
-    '        .Value = row.Value,
-    '        .ValueTo = row.ValueTo
-    '    }
-
-    '    If editDlg.ShowDialog() = True Then
-    '        row.Mode = editDlg.Mode
-    '        row.Value = editDlg.Value
-    '        row.ValueTo = editDlg.ValueTo
-    '        UpdateResults()
-    '    End If
-
-    'End Sub
 
 
     ''' <summary>
@@ -511,19 +495,58 @@ Public Class MaterialFilterRow
         End Get
     End Property
 
+
+    ''' <summary>
+    ''' Brightened ChipBackground, shown while the pointer is over the chip label - the only hint that
+    ''' clicking the label opens the equivalents dialog (see dlgMaterialSearch.ChipBody_PreviewMouseUp).
+    ''' </summary>
+    '''
+    Public ReadOnly Property ChipHoverBackground As Brush
+        Get
+            Select Case Category
+                Case MaterialCategory.Reagent : Return ReagentChipHoverBrush
+                Case MaterialCategory.Solvent : Return SolventChipHoverBrush
+                Case Else : Return AuxiliaryChipHoverBrush
+            End Select
+        End Get
+    End Property
+
     Private Shared ReadOnly ReagentChipBrush As Brush = FrozenBrush(90, 90, 90)
     Private Shared ReadOnly ReagentChipBorderBrush As Brush = FrozenBrush(175, 175, 175)
 
-    Private Shared ReadOnly SolventChipBrush As Brush = FrozenBrush(74, 99, 203)
+    Private Shared ReadOnly SolventChipBrush As Brush = FrozenBrush(70, 90, 195)
     Private Shared ReadOnly SolventChipBorderBrush As Brush = FrozenBrush(127, 168, 255)
 
     Private Shared ReadOnly AuxiliaryChipBrush As Brush = FrozenBrush(182, 101, 42)
     Private Shared ReadOnly AuxiliaryChipBorderBrush As Brush = FrozenBrush(196, 148, 100)
 
+    Private Shared ReadOnly ReagentChipHoverBrush As Brush = HoverBrush(ReagentChipBrush)
+    Private Shared ReadOnly SolventChipHoverBrush As Brush = HoverBrush(SolventChipBrush)
+    Private Shared ReadOnly AuxiliaryChipHoverBrush As Brush = HoverBrush(AuxiliaryChipBrush)
+
     Private Shared Function FrozenBrush(r As Byte, g As Byte, b As Byte) As Brush
         Dim brush As New SolidColorBrush(Color.FromRgb(r, g, b))
         brush.Freeze()
         Return brush
+    End Function
+
+
+    ''' <summary>
+    ''' Lightens each channel by a fixed step, so every category keeps its own hue on hover instead of
+    ''' all three converging on one highlight color.
+    ''' </summary>
+    '''
+    Private Shared Function HoverBrush(baseBrush As Brush) As Brush
+
+        Dim baseColor = CType(baseBrush, SolidColorBrush).Color
+
+        Return FrozenBrush(Lighten(baseColor.R), Lighten(baseColor.G), Lighten(baseColor.B))
+
+    End Function
+
+
+    Private Shared Function Lighten(channel As Byte) As Byte
+        Return CByte(Math.Min(255, CInt(channel) + 34))
     End Function
 
 

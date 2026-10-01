@@ -24,8 +24,7 @@
 
         </Grid>
 
-        <TextBlock Text="Select a material... " Foreground="LightGray" Margin="4,0,0,2" HorizontalAlignment="Center" FontStyle="Italic"
-             ToolTip="Ctrl-click to skip equivalents dialog."/>
+        <TextBlock Text="Select a material... " Foreground="LightGray" Margin="4,0,0,2" HorizontalAlignment="Center" FontStyle="Italic"/>
 
         <Border BorderBrush="#FF9B9B9B" Background="{StaticResource DarkPanelBackground}" BorderThickness="1" CornerRadius="4" Height="140" Padding="2">
             <ListBox x:Name="lstNames" Background="transparent" BorderThickness="0" Foreground="White"
