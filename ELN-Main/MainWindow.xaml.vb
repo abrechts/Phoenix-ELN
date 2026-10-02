@@ -284,6 +284,7 @@ Class MainWindow
         AddHandler StepExpSelector.RequestOpenExperiment, AddressOf StepExpSelector_RequestOpenExperiment
         AddHandler dlgFullTextSearch.RequestOpenExperiment, AddressOf FullTextSearch_RequestOpenExperiment
         AddHandler dlgTagSearch.RequestOpenExperiment, AddressOf TagSearch_RequestOpenExperiment
+        AddHandler dlgMaterialSearch.RequestOpenExperiment, AddressOf MaterialSearch_RequestOpenExperiment
         AddHandler RssItemGroup.RequestStepConnections, AddressOf ExperimentContent_RequestSequencesDialog
         AddHandler ExperimentContent.RequestConnectionGraph, AddressOf ExperimentContent_RequestSequencesDialog
         AddHandler ExperimentContent.RequestStructureGraph, AddressOf ExperimentContent_RequestStructureGraph
@@ -1360,6 +1361,11 @@ Class MainWindow
     End Sub
 
 
+    Private Sub MaterialSearch_RequestOpenExperiment(sender As Object, targetExp As tblExperiments, isFromServer As Boolean, args As StepExpOpenArgs)
+        args.WasOpened = TryOpenExperiment(targetExp, isFromServer)
+    End Sub
+
+
     Private Function TryOpenExperiment(targetExp As tblExperiments, isFromServer As Boolean) As Boolean
 
         If targetExp Is Nothing Then
@@ -1830,7 +1836,7 @@ Class MainWindow
     End Sub
 
 
-    Private Sub mnuSearchRSS_Click() Handles mnuSearchRSS.MouseUp
+    Private Sub mnuSearchRSS_Click() Handles mnuSearchRSS.Click
 
         Dim searchDlg As New dlgSearch
         With searchDlg
@@ -1856,7 +1862,7 @@ Class MainWindow
     End Sub
 
 
-    Private Sub mnuManageTags_Click() Handles mnuManageTags.MouseUp
+    Private Sub mnuManageTags_Click() Handles mnuManageTags.Click
 
         Dim tagsDlg As New dlgTags(DBContext) With {
             .Owner = Me
@@ -1866,7 +1872,7 @@ Class MainWindow
     End Sub
 
 
-    Private Sub mnuSearchTags_Click() Handles mnuSearchTags.MouseUp
+    Private Sub mnuSearchTags_Click() Handles mnuSearchTags.Click
 
         Dim tagSearchDlg As New dlgTagSearch With {
             .LocalDBContext = DBContext
@@ -1890,7 +1896,32 @@ Class MainWindow
     End Sub
 
 
-    Private Sub mnuFullTextSearch_Click() Handles mnuSearchFullText.MouseUp
+    Private Sub mnuSearchMaterials_Click() Handles mnuSearchMaterials.Click
+
+        Dim materialSearchDlg As New dlgMaterialSearch With {
+            .LocalDBContext = DBContext,
+            .ServerDBContext = ServerDBContext
+        }
+
+        With materialSearchDlg
+            Dim settings = CustomControls.My.MySettings.Default
+            If settings.dlgMaterialSearchSize.Width > -1 Then
+                .WindowStartupLocation = WindowStartupLocation.Manual
+                .Left = settings.dlgMaterialSearchPosition.X
+                .Top = settings.dlgMaterialSearchPosition.Y
+                .Width = settings.dlgMaterialSearchSize.Width
+                .Height = settings.dlgMaterialSearchSize.Height
+            Else
+                .Owner = Me
+            End If
+        End With
+
+        materialSearchDlg.ShowDialog()
+
+    End Sub
+
+
+    Private Sub mnuFullTextSearch_Click() Handles mnuSearchFullText.Click
 
         Dim searchDlg As New dlgFullTextSearch With {
             .LocalDBContext = DBContext,

@@ -366,8 +366,8 @@ Public Class dlgEditReagent
 
         With ReagentEntry
 
-            .Name = cboSearch.Text
-            .Source = txtSupplier.Text
+            .Name = cboSearch.Text.Trim()
+            .Source = txtSupplier.Text.Trim()
             .Density = numDensity.Value
             .IsDisplayAsVolume = chkConvertVolWeight.IsChecked
             .Purity = numPurity.Value

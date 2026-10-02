@@ -238,8 +238,8 @@ Public Class dlgEditSolvent
 
         With SolventEntry
 
-            .Name = cboSearch.Text
-            .Source = txtSupplier.Text
+            .Name = cboSearch.Text.Trim()
+            .Source = txtSupplier.Text.Trim()
             .Density = numDensity.Value
             .IsDisplayAsWeight = chkConvertVolWeight.IsChecked
             .SpecifiedUnitType = GetMaterialUnitType(cboMatUnit.Text)

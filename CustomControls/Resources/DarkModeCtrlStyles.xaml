@@ -8,7 +8,7 @@
 
 
     <!--common dark mode background-->
-    <SolidColorBrush x:Key="mnuDarkBackground" Color="#FF4F4F4F"/>
+    <SolidColorBrush x:Key="mnuDarkBackground" Color="#FF4C4B4B"/>
 
     <!--Dark mode panel colors (edit these to retheme all dark mode panels at once)-->
     <SolidColorBrush x:Key="DarkPanelBackground" Color="#FF474747"/>
@@ -22,7 +22,9 @@
         
         <Setter Property="Foreground" Value="White"/>
         <Setter Property="BorderThickness" Value="1"/>
+        <!--set to transparent for hit-testing-->
         <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="Background" Value="Transparent"/>
 
         <Setter Property="Template">
             <Setter.Value>
@@ -58,7 +60,7 @@
                                     ContentSource="Header"
                                     ContentTemplate="{TemplateBinding HeaderTemplate}"
                                     ContentStringFormat="{TemplateBinding HeaderStringFormat}"
-                                    Margin="6,3,6,3"
+                                    Margin="4,3,4,3"
                                     RecognizesAccessKey="True"
                                     VerticalAlignment="Center"/>
 
@@ -87,10 +89,10 @@
                                 PopupAnimation="{DynamicResource {x:Static SystemParameters.MenuPopupAnimationKey}}"
                                 IsOpen="{Binding IsSubmenuOpen, RelativeSource={RelativeSource TemplatedParent}}">
 
-                                <Border Background="#FF4F4F4F"
+                                <Border Background="{StaticResource mnuDarkBackground}"
                                     BorderBrush="#FF6F6F6F"
                                     BorderThickness="1"
-                                    Padding="8,4,8,5"
+                                    Padding="6,4,8,5"
                                     Margin="0,0,8,8">
                                     <Border.Effect>
                                         <DropShadowEffect ShadowDepth="5" BlurRadius="7" Color="Black" Opacity="0.45" />
@@ -227,7 +229,7 @@
       it never swallows the click meant for the ToggleButton.         -->
     
     <ControlTemplate x:Key="DarkComboTemplate" TargetType="ComboBox">
-        
+
         <Grid>
             <!-- Full-area toggle that opens / closes the dropdown -->
             <ToggleButton Focusable="False"
@@ -244,7 +246,7 @@
                              Background="{TemplateBinding Background}"
                              BorderBrush="{TemplateBinding BorderBrush}"
                              BorderThickness="{TemplateBinding BorderThickness}"
-                             CornerRadius="5">
+                             CornerRadius="6">
                             <!-- Arrow chevron aligned to the right -->
                             <TextBlock Text="▾"
                                     Foreground="{TemplateBinding Foreground}" FontSize="14"
@@ -281,18 +283,26 @@
                            IsHitTestVisible="False"
                            Visibility="Collapsed"/>
 
-            <!-- Dropdown list -->
+            <!-- Dropdown list - styled like the app's other dark popup menus (btnNavMenu's nav dropdown,
+                 DarkModeMenuStyle's MenuItem submenu): a floating rounded card with a drop shadow, using
+                 the same grayscale palette (mnuDarkBackground/#FF6F6F6F), rather than the flat navy flap
+                 this used to be fused directly under the combo box. Always dark, regardless of skin. -->
             <Popup x:Name="PART_Popup"
                 IsOpen="{TemplateBinding IsDropDownOpen}"
                 AllowsTransparency="True"
                 Placement="Bottom"
                 StaysOpen="False">
-                <Border Background="#141430"
-                     BorderBrush="#2E2E58"
+                <Border Background="{StaticResource mnuDarkBackground}"
+                     BorderBrush="#FF6F6F6F"
                      BorderThickness="1"
-                     CornerRadius="0,0,5,5"
+                     CornerRadius="6"
+                     Padding="2"
+                     Margin="0,2,8,8"
                      MinWidth="{Binding ActualWidth,
                                 RelativeSource={RelativeSource AncestorType=ComboBox}}">
+                    <Border.Effect>
+                        <DropShadowEffect ShadowDepth="5" BlurRadius="7" Color="Black" Opacity="0.45"/>
+                    </Border.Effect>
                     <ScrollViewer MaxHeight="240"
                                VerticalScrollBarVisibility="Auto">
                         <ItemsPresenter/>
@@ -319,16 +329,32 @@
         <Setter Property="Template"      Value="{StaticResource DarkComboTemplate}"/>
         <Setter Property="ItemContainerStyle">
             <Setter.Value>
+                <!--Item rows reuse the same highlight recipe as DarkModeMenuStyle's MenuItem
+                    (gray fill + light sky blue border) so combo dropdowns and app menus read as
+                    one consistent "flat dark popup" visual language.-->
                 <Style TargetType="ComboBoxItem">
-                    <Setter Property="Foreground"  Value="#B0C4E8"/>
+                    <Setter Property="Foreground"  Value="White"/>
                     <Setter Property="Background"  Value="Transparent"/>
-                    <Setter Property="Padding"     Value="4,5"/>
+                    <Setter Property="BorderBrush" Value="Transparent"/>
+                    <Setter Property="Padding"     Value="10,5"/>
                     <Setter Property="FontSize"    Value="12"/>
-                    <Style.Triggers>
-                        <Trigger Property="IsHighlighted" Value="True">
-                            <Setter Property="Background" Value="#1E2050"/>
-                        </Trigger>
-                    </Style.Triggers>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="ComboBoxItem">
+                                <Border x:Name="itemBorder" Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1" CornerRadius="4"
+                                    Padding="{TemplateBinding Padding}" Margin="1">
+                                    <ContentPresenter/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsHighlighted" Value="True">
+                                        <Setter TargetName="itemBorder" Property="Background" Value="#FF5F5F5F"/>
+                                        <Setter TargetName="itemBorder" Property="BorderBrush" Value="LightSkyBlue"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
                 </Style>
             </Setter.Value>
         </Setter>

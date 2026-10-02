@@ -111,13 +111,13 @@ Public Class ExperimentTree
     Private Sub RefreshNavMenuSkin()
 
         ' In dark mode, navMenuBorder and its buttons switch to the same fixed dark popup color the
-        ' main toolbar menus use (NavMenuPopupDarkBackground/Border + NavMenuPopupButtonStyle's white
-        ' text) instead of following the skin - only in light mode does the panel keep its original
-        ' skin-following look (InnerPanelBackground/TreePanelBorder + NavToolbarTextButtonStyle).
+        ' main toolbar menus use (mnuDarkBackground/NavMenuPopupDarkBorder + NavMenuPopupButtonStyle's
+        ' white text) instead of following the skin - only in light mode does the panel keep its
+        ' original skin-following look (InnerPanelBackground/TreePanelBorder + NavToolbarTextButtonStyle).
         Dim isDark = DarkModeHelper.GetIsDarkMode(Me)
 
         If isDark Then
-            navMenuBorder.SetResourceReference(Border.BackgroundProperty, "NavMenuPopupDarkBackground")
+            navMenuBorder.SetResourceReference(Border.BackgroundProperty, "mnuDarkBackground")
             navMenuBorder.SetResourceReference(Border.BorderBrushProperty, "NavMenuPopupDarkBorder")
         Else
             navMenuBorder.SetResourceReference(Border.BackgroundProperty, "InnerPanelBackground")

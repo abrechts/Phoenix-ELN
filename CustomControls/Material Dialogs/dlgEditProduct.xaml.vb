@@ -208,7 +208,7 @@ Public Class dlgEditProduct
 
         With ProductEntry
             .Grams = ConvertToGrams(numMatAmount.Value, ToWeightUnit(cboMatUnit.Text))
-            .Name = txtMatName.Text
+            .Name = Trim(txtMatName.Text)
             .BatchID = Trim(txtBatchID.Text)
             .Purity = numPurity.Value
             .MolecularWeight = SketchInfo.Products(.ProductIndex).Molweight

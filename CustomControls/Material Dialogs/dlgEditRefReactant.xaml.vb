@@ -193,8 +193,8 @@ Public Class dlgEditRefReactant
             Dim prevPurity = .Purity
             Dim prevResinLoad = .ResinLoad
 
-            .Name = txtMatName.Text
-            .Source = txtSupplier.Text
+            .Name = Trim(txtMatName.Text)
+            .Source = Trim(txtSupplier.Text)
             .IsDisplayAsVolume = chkConvertVolWeight.IsChecked
             .Density = numDensity.Value
             .Purity = numPurity.Value
