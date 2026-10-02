@@ -139,32 +139,52 @@
                                         <ContentControl Content="{StaticResource icoSearch_Dark}" Height="16" Margin="0,1,4,0"/>
                                     </StackPanel>
                                 </MenuItem.Icon>
+                   
+                                <MenuItem x:Name="mnuSearchRSS">
+                                    <MenuItem.Header>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="⌬" FontSize="17" Width="20" Margin="0,0,5,-2" TextAlignment="Center" VerticalAlignment="Center"
+                                               Foreground="lightblue"/>
+                                            <TextBlock Text="Substructures ..." VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </MenuItem.Header>
+                                </MenuItem>
 
-                                <StackPanel x:Name="mnuSearchRSS" Orientation="Horizontal">
-                                    <TextBlock Text="⌬" FontSize="17" Width="20" Margin="0,0,5,-2" TextAlignment="Center" VerticalAlignment="Center" 
-                                       Foreground="lightblue"/>
-                                    <TextBlock Text="Substructures ..." VerticalAlignment="Center"/>
-                                </StackPanel>
+                                <MenuItem x:Name="mnuSearchMaterials">
+                                    <MenuItem.Header>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="🧪" Width="20" Margin="0,0,5,0" TextAlignment="Center" VerticalAlignment="Center" Foreground="lightblue"/>
+                                            <TextBlock Text="Materials ..." VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </MenuItem.Header>
+                                </MenuItem>
 
-                                <StackPanel x:Name="mnuSearchMaterials" Orientation="Horizontal">
-                                    <TextBlock Text="🧪" Width="20" Margin="0,0,5,0" TextAlignment="Center" VerticalAlignment="Center" Foreground="lightblue"/>
-                                    <TextBlock Text="Materials ..." VerticalAlignment="Center"/>
-                                </StackPanel>
+                                <MenuItem x:Name="mnuSearchFullText">
+                                    <MenuItem.Header>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="📄" Width="20" Margin="0,0,5,0" TextAlignment="Center" VerticalAlignment="Center" Foreground="lightblue"/>
+                                            <TextBlock Text="Full Text ..." VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </MenuItem.Header>
+                                </MenuItem>
 
-                                <StackPanel x:Name="mnuSearchFullText" Orientation="Horizontal">
-                                    <TextBlock Text="📄" Width="20" Margin="0,0,5,0" TextAlignment="Center" VerticalAlignment="Center" Foreground="lightblue"/>
-                                    <TextBlock Text="Full Text ..." VerticalAlignment="Center"/>
-                                </StackPanel>
-
-                                <StackPanel x:Name="mnuSearchTags" Orientation="Horizontal">
-                                    <TextBlock Text="#" Width="20" Margin="0,0,5,0" TextAlignment="Center" VerticalAlignment="Center" 
-                                       Foreground="lightblue" FontWeight="DemiBold"/>
-                                    <TextBlock Text="Experiment Tags ..." VerticalAlignment="Center"/>
-                                </StackPanel>
+                                <MenuItem x:Name="mnuSearchTags">
+                                    <MenuItem.Header>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="#" Width="20" Margin="0,0,5,0" TextAlignment="Center" VerticalAlignment="Center"
+                                               Foreground="lightblue" FontWeight="DemiBold"/>
+                                            <TextBlock Text="Experiment Tags ..." VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </MenuItem.Header>
+                                </MenuItem>
 
                                 <Separator Style="{StaticResource DarkMenuNoIconsSeparatorStyle}"/>
 
-                                <TextBlock x:Name="mnuManageTags" Text="Manage Tags ..." Margin="26,0,0,0"/>
+                                <MenuItem x:Name="mnuManageTags">
+                                    <MenuItem.Header>
+                                        <TextBlock Text="Manage Tags ..." Margin="26,0,0,0"/>
+                                    </MenuItem.Header>
+                                </MenuItem>
 
                             </MenuItem>
                         </Menu>

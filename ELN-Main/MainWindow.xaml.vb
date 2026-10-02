@@ -1836,7 +1836,7 @@ Class MainWindow
     End Sub
 
 
-    Private Sub mnuSearchRSS_Click() Handles mnuSearchRSS.MouseUp
+    Private Sub mnuSearchRSS_Click() Handles mnuSearchRSS.Click
 
         Dim searchDlg As New dlgSearch
         With searchDlg
@@ -1862,7 +1862,7 @@ Class MainWindow
     End Sub
 
 
-    Private Sub mnuManageTags_Click() Handles mnuManageTags.MouseUp
+    Private Sub mnuManageTags_Click() Handles mnuManageTags.Click
 
         Dim tagsDlg As New dlgTags(DBContext) With {
             .Owner = Me
@@ -1872,7 +1872,7 @@ Class MainWindow
     End Sub
 
 
-    Private Sub mnuSearchTags_Click() Handles mnuSearchTags.MouseUp
+    Private Sub mnuSearchTags_Click() Handles mnuSearchTags.Click
 
         Dim tagSearchDlg As New dlgTagSearch With {
             .LocalDBContext = DBContext
@@ -1896,7 +1896,7 @@ Class MainWindow
     End Sub
 
 
-    Private Sub mnuSearchMaterials_Click() Handles mnuSearchMaterials.MouseUp
+    Private Sub mnuSearchMaterials_Click() Handles mnuSearchMaterials.Click
 
         Dim materialSearchDlg As New dlgMaterialSearch With {
             .LocalDBContext = DBContext,
@@ -1921,7 +1921,7 @@ Class MainWindow
     End Sub
 
 
-    Private Sub mnuFullTextSearch_Click() Handles mnuSearchFullText.MouseUp
+    Private Sub mnuFullTextSearch_Click() Handles mnuSearchFullText.Click
 
         Dim searchDlg As New dlgFullTextSearch With {
             .LocalDBContext = DBContext,
