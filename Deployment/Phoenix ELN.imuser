@@ -8,7 +8,7 @@ Version=9114
 Default=1033
 
 [Configs]
-Phoenix-ELN=00000453|134338388953207208|Build succeeded|Phoenix ELN\Phoenix-ELN\Phoenix ELN-5.2.0-Setup.exe|5.2.0|27537888
+Phoenix-ELN=00000453|134354775862726619|Build succeeded|Phoenix ELN\Phoenix-ELN\Phoenix ELN-5.3.0-Setup.exe|5.3.0|27537920
 
 [Settings]
 MRUFilesDir=F:\Benutzer\Stefan\Documents\WPF_Projekte\Phoenix ELN\ELN-Main\bin\Release\Publish
