@@ -224,9 +224,7 @@ Public Class ExperimentContent
 
         Dim expEntry = CType(Me.DataContext, tblExperiments)
 
-        Dim refProdEntries = From protItem In expEntry.tblProtocolItems Where protItem.ElementType = ProtocolElementType.Product
         Dim isRefReactAttached = pnlSketch.SketchInfo.Reactants.First.IsAttachedToResin
-        Dim isRefProdAttached = pnlSketch.SketchInfo.Products.First.IsAttachedToResin
 
         If pnlSketch.SketchInfo IsNot Nothing Then
 

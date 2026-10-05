@@ -41,7 +41,7 @@ Public Class StatusInfoPanel
 
     Private Sub lnkVersionInfo_Click() Handles lnkVersionInfo.PreviewMouseUp
 
-        Dim info As New ProcessStartInfo("https://github.com/abrechts/Phoenix-ELN/releases") 'TODO: Add actual link target
+        Dim info As New ProcessStartInfo("https://github.com/abrechts/Phoenix-ELN/releases")
         info.UseShellExecute = True
         Process.Start(info)
 

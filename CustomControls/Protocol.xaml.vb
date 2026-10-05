@@ -1606,8 +1606,6 @@ Public Class Protocol
     ''' 
     Public Sub UpdateProductsResinInfo(expEntry As tblExperiments)
 
-        'TODO: Consider multiple refProduct portions AND multiple *additional* (i.e. non-ref.) products!
-
         Dim prodItems = From protItem In expEntry.tblProtocolItems Where protItem.ElementType = ProtocolElementType.Product
         If prodItems.Any Then
 
