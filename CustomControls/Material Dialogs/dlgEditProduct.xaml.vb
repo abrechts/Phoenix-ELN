@@ -106,7 +106,7 @@ Public Class dlgEditProduct
             ProductEntry.ProductIndex = 0
             pnlResinLoad.Visibility = If(SketchInfo.Products(0).IsAttachedToResin, Visibility.Visible, Visibility.Collapsed)
             blkMW.Text = SketchInfo.Products(0).Molweight.ToString("0.00")
-            txtMatName.Text = If(ProductEntry.Name, "Product")
+            txtMatName.Text = If(ProductEntry.Name, If(GetSiblingPortionName(0), "Product"))
             txtBatchID.Text = ProductEntry.BatchID
             SetTheoreticAmount()
 
@@ -119,7 +119,7 @@ Public Class dlgEditProduct
         ProductEntry.ProductIndex = 1
         pnlResinLoad.Visibility = If(SketchInfo.Products(1).IsAttachedToResin, Visibility.Visible, Visibility.Collapsed)
         blkMW.Text = SketchInfo.Products(1).Molweight.ToString("0.00")
-        txtMatName.Text = If(ProductEntry.Name, "Side Prod 1")
+        txtMatName.Text = If(ProductEntry.Name, If(GetSiblingPortionName(1), "Side Prod 1"))
         txtBatchID.Text = ProductEntry.BatchID
         SetTheoreticAmount()
 
@@ -130,11 +130,34 @@ Public Class dlgEditProduct
         ProductEntry.ProductIndex = 2
         pnlResinLoad.Visibility = If(SketchInfo.Products(2).IsAttachedToResin, Visibility.Visible, Visibility.Collapsed)
         blkMW.Text = SketchInfo.Products(2).Molweight.ToString("0.00")
-        txtMatName.Text = If(ProductEntry.Name, "Side Prod 2")
+        txtMatName.Text = If(ProductEntry.Name, If(GetSiblingPortionName(2), "Side Prod 2"))
         txtBatchID.Text = ProductEntry.BatchID
         SetTheoreticAmount()
 
     End Sub
+
+
+    ''' <summary>
+    ''' Gets the name of the most recently added portion of the specified sketch product already present
+    ''' in the protocol. Proposed as default when adding a further portion, since these usually are batches
+    ''' of one preparation (e.g. successive crystallization crops) sharing a common name.
+    ''' </summary>
+    ''' <param name="prodIndex">The sketch product index of the portion about to be added.</param>
+    ''' <returns>The sibling portion name, or nothing if no other portion is present yet.</returns>
+    '''
+    Private Function GetSiblingPortionName(prodIndex As Integer) As String
+
+        'the entry being added is not part of the protocol yet, but exclude it to be on the safe side
+        Dim siblingNames = From prot In ProductEntry.ProtocolItem.Experiment.tblProtocolItems
+                           Where prot.tblProducts IsNot Nothing AndAlso
+                                 prot.tblProducts IsNot ProductEntry AndAlso
+                                 prot.tblProducts.ProductIndex = prodIndex
+                           Order By prot.SequenceNr Descending
+                           Select prot.tblProducts.Name
+
+        Return siblingNames.FirstOrDefault
+
+    End Function
 
 
     Private Sub PopulateData()

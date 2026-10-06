@@ -325,7 +325,7 @@ Public Class SketchArea
 
 
     ''' <summary>
-    ''' Populates the ReferenceProduct entry with sketch data.
+    ''' Populates the specified product entry with sketch data.
     ''' </summary>
     ''' <param name="prodIndex">The index of the product structure in left to right sequence in the sketch.</param>
     ''' 

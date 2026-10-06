@@ -1626,7 +1626,7 @@ Public Class Protocol
 
                         If prodEntry.ResinLoad Is Nothing Then
 
-                            'display edit refReact dialog
+                            'resin was attached -> request the resin load of its first portion
                             Dim addProductDlg As New dlgEditProduct
                             With addProductDlg
                                 SetExpContentCenterStartupPos(addProductDlg)
@@ -1641,8 +1641,16 @@ Public Class Protocol
                             End With
                         End If
 
+                        'The resin attachment is a property of the sketch product and therefore concerns all of its
+                        'portions. Removing it has to clear the resin load throughout. Attaching it would strictly
+                        'require querying every portion, since product portions are separate batches carrying their
+                        'own loading. Here it is asked once and applied to all as a deliberate shortcut: getting here
+                        'means the resin was attached to the sketch only after the experiment was run and its product
+                        'booked, which the yield of the first portion would have exposed already. Together with
+                        'multiple crops of a resin bound product being rare, the case is too remote to query for.
+
                         For Each prodItem In prodEntries
-                            prodItem.tblProducts.ResinLoad = resinLoad  'all portions of the same sketch product are assigned the same resin load
+                            prodItem.tblProducts.ResinLoad = resinLoad
                         Next
 
                     End If
