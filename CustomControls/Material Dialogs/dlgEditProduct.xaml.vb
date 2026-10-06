@@ -78,23 +78,60 @@ Public Class dlgEditProduct
 
 
     ''' <summary>
+    ''' Placeholder shown instead of the theoretical amount while it cannot be calculated yet.
+    ''' </summary>
+    '''
+    Private Const NoTheoryGlyph As String = " ? "
+
+
+    ''' <summary>
     ''' Gets the theoretical amount in grams of the currently selected product or side-product
     ''' </summary>
-    ''' 
+    '''
     Private Sub SetTheoreticAmount()
 
         With ProductEntry
 
             Dim yieldFactor = If(.ProductIndex = 0, .ProtocolItem.Experiment.RefYieldFactor, 1)  'only reference product is affected
             Dim totalRefReactMmols = .ProtocolItem.Experiment.RefReactantMMols * yieldFactor
-            Dim prodGrams = totalRefReactMmols * SketchInfo.Products(.ProductIndex).Molweight / 1000
+
+            Dim prodGrams As Double
+
+            If SketchInfo.Products(.ProductIndex).IsAttachedToResin Then
+
+                'the weight of a resin bound product is defined by the resin load (mmol/g resin), not by its molweight
+                Dim resinLoad = numResinLoad.Value
+                If resinLoad Is Nothing OrElse resinLoad = 0 Then
+                    blkTheory.Text = NoTheoryGlyph
+                    Exit Sub
+                End If
+                prodGrams = totalRefReactMmols / resinLoad
+
+            Else
+                prodGrams = totalRefReactMmols * SketchInfo.Products(.ProductIndex).Molweight / 1000
+
+            End If
+
+            Dim res = ELNCalculations.ScaleWeight(prodGrams)
+            If res Is Nothing Then
+                blkTheory.Text = NoTheoryGlyph
+                Exit Sub
+            End If
 
             Dim sigDigConv As New SignificantDigitsConverter
-            Dim res = ELNCalculations.ScaleWeight(prodGrams)
             blkTheory.Text = sigDigConv.Convert(res.Amount, Nothing, 3, Nothing) + " " + res.Unit
 
-
         End With
+
+    End Sub
+
+
+    Private Sub numResinLoad_TextChanged() Handles numResinLoad.TextChanged
+
+        'the theoretical amount of a resin bound product depends on the resin load
+        If SketchInfo IsNot Nothing Then
+            SetTheoreticAmount()
+        End If
 
     End Sub
 
