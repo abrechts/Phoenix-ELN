@@ -98,7 +98,13 @@ Public Class ExperimentContent
 
             End If
 
-            RaiseEvent ExperimentContextChanged(Me, Me.DataContext)
+            'Only an instance living in the experiment tab control represents what the user is looking at.
+            'A detached instance (printing/PDF export, see above) must not broadcast on this shared event:
+            'subscribers such as StepSummary would repoint themselves at the rendered experiment and keep
+            'showing its data after the render finishes.
+            If expTabCtrl IsNot Nothing Then
+                RaiseEvent ExperimentContextChanged(Me, Me.DataContext)
+            End If
 
         End If
 
@@ -213,6 +219,11 @@ Public Class ExperimentContent
 
 
     Private Sub SketchArea_SketchSourceChanged(sender As Object, skInfo As SketchResults)  'shared event
+
+        'Being shared, this event reaches every ExperimentContent in the process, including the detached
+        'instances built for printing/PDF export. Only the owning instance may act on it, or a rendered
+        'experiment's sketch info would overwrite what the open tabs are showing.
+        If sender IsNot pnlSketch Then Exit Sub
 
         pnlProtocol.SketchInfo = skInfo
 

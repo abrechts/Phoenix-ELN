@@ -563,42 +563,52 @@ required no new machinery is reasonable evidence the design is sound.
 
 What *is* new is pacing, because the initial set is large.
 
-#### Pacing: idle-gated, not timer-gated
+#### Pacing: rendering off the UI thread, publication jittered
 
-A fixed rate ("one per minute") assumes the work can run in the background. It
-cannot. `ExperimentPrint.SetPrintTemplate` instantiates a real
-`ExperimentContent`, assigns `SketchPanel.ReactionSketch`, calls
-`WPFToolbox.WaitForPriority(DispatcherPriority.ContextIdle)`, then
-`Measure`/`Arrange`/`SetComponentLabels`. That is thread-affine WPF visual work
-followed by XPS serialisation: it cannot move to a worker thread, and
-`WaitForPriority` pumps nested dispatcher frames. A timer would therefore
-deliver a multi-second UI stall once a minute, indefinitely, while someone is
-typing a protocol.
+Rendering runs on a **dedicated STA thread** with its own `Dispatcher` and its
+own `DbContext`, and does not involve the UI thread at all. This was built and
+demonstrated rather than assumed: a three-page record renders in about 1.2 s.
 
-Idle-gating fixes both halves at once:
+Two constraints on the render path are worth recording, since neither is
+enforced by the compiler and both are easy to reintroduce:
 
-- Render one record only after ~20–30 s with no keyboard or mouse input.
-- Abandon the item the instant input arrives. It is idempotent, so a discarded
-  render costs nothing and the next pass redoes it.
-- **No rate limit while idle.** A long break drains hundreds of records; active
-  work drains none. The backlog finishes in an unattended hour rather than many
-  hours of application uptime, *and* interferes less.
-- Optionally also gate on mains power, so a laptop on battery defers.
+- A detached visual tree must not broadcast on the `Shared` events that
+  `CustomControls` uses as its intra-UI notification bus. Suppression belongs at
+  the raise site and must be per instance — filtering inside each subscriber
+  breaks whenever a subscriber is added, and a process-wide flag cannot express
+  "this render" and races once rendering has its own thread.
+- The XPS package URI must be unique per render, because `PackageStore` is
+  process-global and releases a registration only on `Close`.
 
-Three interference hazards in the existing export code:
+Pacing survives, but its reason is not UI responsiveness — it is the share.
+Activating archiving across an organisation of fifty clients, or rolling out
+the version that enables it, would otherwise have every client begin its
+backfill in the same second and saturate the share with concurrent writes.
 
-- **`SketchArea.DisableSketchSourceChangedEvent`** is a static flag that
-  `ExperimentsToPdfZip` sets for the duration of its loop. A backlog pass that
-  leaves it set while the user is editing would silently stop sketch property
-  updates. Set it per item and restore it in a `Finally`; it must never survive
-  an abort.
+- **Jitter the start.** Each client delays its first backlog pass by a random
+  interval drawn over hours, so activation spreads instead of synchronising.
+- **Jitter the interval**, rather than publishing at a fixed rate. A fixed rate
+  phase-locks clients that happened to start together; a randomised interval
+  pulls them apart.
+- **Separate the two costs.** Rendering is local CPU; publication is network.
+  They can be paced independently — a client may render a batch and then release
+  records to the share gradually.
+- **Back off on share errors** rather than retrying immediately, so a share
+  under pressure is not pressed harder.
+- **Defer on battery**, so a laptop does not spend its charge on backlog work.
+
+Interference hazards that remain in the existing export code:
+
 - **`New PrintDocument()` and the printer-settings query** must be hoisted out
   of the loop and cached per session, as the bulk path already does. A faulty
   driver made exactly this call cost seconds.
-- **Re-entrancy.** Because `WaitForPriority` pumps the dispatcher, a backlog
-  tick must not start while another render or an interactive print is in flight.
-  One queue, one worker, an in-progress guard. A new finalization takes priority
-  but never runs concurrently.
+- **Re-entrancy.** One queue, one worker, an in-progress guard. A new
+  finalization takes priority but never runs concurrently.
+
+The render path itself raises no dialogs: it reports a `PdfRenderResult`, and
+any user-facing message is the caller's, on the UI thread. That is a
+precondition for background rendering, not a stylistic choice — a modal raised
+from a worker thread would block a render nobody is watching.
 
 #### Scope and order
 
@@ -719,8 +729,8 @@ needs a per-user basis in fact.
 
 Expose the pending count, the last successful publish, and a per-user "complete
 as of \<date\>" that an offboarding checklist can read. Add an **"Archive
-outstanding experiments now"** command — the same queue with idle-gating
-switched off and a progress dialog, reusing the existing `PdfExportProgress` and
+outstanding experiments now"** command — the same queue with pacing switched
+off and a progress dialog, reusing the existing `PdfExportProgress` and
 `PDFExportCompleted` events. The automatic path guarantees eventual completion;
 the manual one serves whoever wants it finished tonight.
 
@@ -1026,7 +1036,7 @@ automation.
 | Queue state as a *mapped* EF property | `CloneSyncEntity` and `AddEntity` copy all mapped properties wholesale, so it would ride both sync and restore; exclusion would depend on discipline rather than structure |
 | Queue state as a boolean `IsArchived` | Cannot express re-finalization, so it needs a reset hooked into `dlgReopen` with no compile-time signal. `ArchivedVersion < FinalizeCount` self-corrects |
 | Overwriting the archive on re-finalization | The only operation that would mutate a published file; breaks backup-once; and silently diverges from a version that may already have been cited. See 3.6 |
-| Fixed-rate backlog throttling | PDF rendering is thread-affine UI work, so a timer guarantees a periodic UI stall. Idle-gating is both gentler and faster (4.4) |
+| Fixed-rate backlog throttling | A fixed rate phase-locks clients that start together, which is the opposite of what is needed when many clients activate at once. Randomised intervals pull them apart (4.4) |
 | Scheduled or manual merge of whole archive files | Transfer cost scales with accumulated rather than new data; reintroduces the human factor |
 | A helper process or service owning the archive file | Solves concurrency correctly, but is the installed, operated component the design exists to avoid |
 | Object storage with versioning and object lock | Genuine WORM semantics and a good fit for write-once records, but adds credentials and a vendor dependency. The file tree can be *copied* to it unchanged, so this stays an option rather than a requirement |
@@ -1054,8 +1064,8 @@ automation.
    `IsSuperseded = 0` filter plus the earlier-versions indicator (section 3.6).
 9. Regeneration pass: the gap diff, including hash-mismatch republication
    (section 7.2).
-10. Backlog drain: idle-gating, the three interference fixes, all local users,
-    newest-first (section 4.4).
+10. Backlog drain: worker-thread rendering, jittered pacing, the remaining
+    interference fixes, all local users, newest-first (section 4.4).
 11. Server queue: the two raw-SQL columns, atomic claim, owner-first with grace
     period, rendering foreign experiments from `ServerDBContext` (section 4.4).
 12. Completeness state and the "archive outstanding experiments now" command

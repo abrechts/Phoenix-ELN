@@ -48,6 +48,20 @@ Public Class dlgZipProgress
         ProgressBar.Value = 100
         btnCancel.Content = "Close"
 
+        'the export itself raises no dialogs, so that it stays usable off the UI thread; anything it
+        'had to leave out is reported here, once, instead of interrupting the run
+        Dim skipped = ExperimentPrint.SkippedExperiments
+        If skipped.Count > 0 Then
+
+            Dim reasonLines = skipped.GroupBy(Function(s) s.Reason).
+                Select(Function(g) "• " + ExperimentPrint.RenderResultText(g.Key) + ": " +
+                       String.Join(", ", g.Select(Function(s) s.ExperimentID)))
+
+            cbMsgBox.Display("These experiments are missing from the archive." + vbCrLf + vbCrLf +
+                   String.Join(vbCrLf, reasonLines), MsgBoxStyle.Exclamation, "PDF Export")
+
+        End If
+
     End Sub
 
 
