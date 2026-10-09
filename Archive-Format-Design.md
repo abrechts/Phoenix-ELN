@@ -3,27 +3,27 @@
 Status: design note, not yet implemented. Covers the archival format, the
 organisation-level aggregation model, and the integrity strategy.
 
-Revision note: an earlier draft made a single shared SQLite file the
-authoritative archive, written to directly over SMB. That is the one decision
-reversed here. The reversal is narrow in cause and wide in consequence: the
-record format, the schema, the payload and the capability claim all survive, but
-the locking, verification, backup-as-integrity-check and recovery apparatus that
-a shared mutable database required is gone, because nothing on the share is
-mutable any more.
+The governing constraint: nothing on the share is mutable. Every consequence
+below follows from it — no locking protocol, no verified backups, no recovery
+apparatus, because there is no shared mutable state to protect. Section 8
+records why a shared SQLite file written over SMB is not viable.
 
 ## 1. Problem
 
-Phoenix ELN has three ways data leaves the application today:
+Phoenix ELN has four ways data leaves the application today:
 
 | Mechanism | Purpose | Limitation |
 |---|---|---|
 | PDF/A-3b export | Human-readable record, print, audit | Terminal and lossy — nothing can read a yield or a reaction back out of it |
 | `TransferPackage` | Move a whole installation to another machine | All-or-nothing, Phoenix→Phoenix, opaque to anything else |
 | Server sync (MySQL) | Backup, sharing, org-wide search | Live working store; presumes a running server and a compatible schema |
+| `.exp` JSON export/import | Move or copy one experiment between Phoenix installations | Serialized EF entity graph, not a documented interchange schema; version-coupled (import only guaranteed when exporter ≤ importer version) |
 
-None of them is machine-readable structured data for third-party consumption,
-and none is a preservation artefact that survives the application. That gap is
-what this design closes.
+Only the `.exp` file is structured data, and it is Phoenix's own entity graph —
+undocumented, coupled to the EF model, and of little use to a third party
+without the source. None of the four is a documented interchange format, and
+none is a preservation artefact that survives the application. That gap is what
+this design closes.
 
 Three separate deliverables are conflated under "export". They are listed here
 in descending order of practical value and ascending order of effort.
@@ -44,15 +44,21 @@ anything in this document.
 
 ### 1.2 Per-experiment structured export
 
-Same granularity as the PDF, but data rather than layout, and round-trippable.
+Same granularity as the PDF, but data rather than layout.
 
 Recommended interchange format: **MDL RDfile**. An RDfile record is literally a
 reaction plus arbitrary named data fields, which is exactly what a Phoenix
 experiment is. `MDLRxnFileString` is already persisted, so generating one is
 mostly string assembly with no new cheminformatics work, and the result is
 readable by Reaxys, Pipeline Pilot, Chemaxon, Indigo and RDKit. A JSON variant
-alongside preserves what the RDfile flattens (protocol ordering, nested
-attachments).
+alongside preserves what the RDfile flattens, chiefly protocol ordering.
+
+That JSON variant is the *same* documented schema as the section 2 payload, not
+a second one, and it is distinct from the existing `.exp` format: `.exp` is
+Phoenix's internal entity graph, serialized for re-import, and stays that way.
+The payload instead carries the key experiment data a third party or an index
+would query. Embedded files appear in neither its content nor its metadata —
+they stay in the PDF (see section 2).
 
 ### 1.3 Programmatic API
 
@@ -64,6 +70,29 @@ question outright.**
 A REST API only makes sense on the optional server package, and only for group
 dashboards, LIMS integration or automated reporting — the institutional
 scenario. Not worth building speculatively.
+
+### 1.4 Archival is not migration
+
+The three deliverables above are interchange and migration features. The archive
+described from section 2 onward is a different thing, and the two are kept
+apart deliberately.
+
+The archive preserves finalized work in a readable form and makes it findable:
+open the document, read the data, search across years, verify the bytes. It does
+**not** promise that an experiment can be rebuilt as live, editable state in
+some future system. That is migration, and it is a different problem with
+different preconditions — it is performed while Phoenix still runs, against the
+local or server database, where the complete current model is available and no
+format negotiation is needed. Three mechanisms already serve it: the `.exp`
+export, `TransferPackage`, and direct SQLite access against a published schema.
+
+The two also operate on different timescales, which is the real reason to
+separate them. Migration happens once, soon, under the supervision of a working
+installation. Archival has to keep working for decades with no installation at
+all. A format that must satisfy both ends up constrained by the harder deadline
+while carrying data the long-term reader never queries.
+
+Migration from live data remains worth building. It is simply not this document.
 
 ## 2. The hybrid PDF/A-3b document
 
@@ -93,6 +122,14 @@ The duplication is deliberate and cheap — kilobytes against a document of
 hundreds of kilobytes to hundreds of megabytes. Archival practice inverts the
 database instinct: **normalise for databases, denormalise for archives.** Store
 one `PayloadSha256` so divergence is detectable rather than silent.
+
+That size ratio holds only because the payload excludes embedded files
+altogether — not their bytes and not their metadata. Base64-inlining them, as
+`.exp` does, would roughly double the artefact and store the same bytes twice,
+since the files are already A-3b attachments in the same PDF. Attachment
+metadata is left out too: it has no query value, and integrity is already
+covered by `PdfSha256` over the whole document, which changes if any attached
+byte does.
 
 ## 3. The archive: two tiers
 
@@ -234,9 +271,16 @@ Six properties worth being explicit about:
   under temporary names, then rename them into place, then write the checksum
   file last. A scanner ignores any record whose checksum file is absent. This is
   what gives a filesystem the atomic coupling of document and metadata that a
-  transaction gives a database — the objection that originally argued against a
-  filesystem tree. A half-published record is invisible rather than corrupt, and
+  transaction gives a database — the usual objection to a filesystem tree. A half-published record is invisible rather than corrupt, and
   the next publish attempt simply completes it.
+
+  The file serves two roles, and only the first needs its contents. Its
+  *existence* commits the record; its *contents* allow a corruption check, so a
+  later reader can tell whether the bytes are still the published ones (6.1).
+  An empty
+  marker would commit just as well, but the record would then be unverifiable
+  for the rest of its life, and the hash costs nothing: the same digest is
+  computed anyway to populate `PdfSha256` in a volume row.
 - **Publication is atomic per file.** Write to `<name>.tmp` in the destination
   directory, flush, then rename. Rename within one volume is atomic on NTFS and
   over SMB, so a reader never observes a partial file under its final name.
@@ -307,10 +351,8 @@ Four deliberate choices:
 - **No document blob.** `PdfRelPath` replaces it. This is what keeps a volume to
   tens of megabytes for a group-year rather than tens of gigabytes — small
   enough that a client copies it locally, or reads it straight off the share.
-  (The earlier draft placed a `PdfDocument` blob column last so that metadata
-  queries would not touch overflow pages. With the blob gone the trick is
-  unnecessary, and the file-size, backup and blast-radius costs it could not
-  address go with it.)
+  Keeping documents out also avoids the file-size, backup and blast-radius costs
+  that no amount of column ordering inside the database can address.
 - **`ExperimentJson` as TEXT, not BLOB.** SQLite's built-in JSON functions make
   `json_extract(ExperimentJson, '$.products[0].batchId')` work with no schema
   change, so future payload additions need no migration.
@@ -374,18 +416,24 @@ non-event, because the whole volume is regenerable.
 
 ### 3.7 Payload contents
 
-`ExperimentJson` holds everything needed to reconstruct the experiment:
+`ExperimentJson` holds the experiment's data as a readable and queryable record.
+It is scoped to what a future reader searches, reads or cites — not to what a
+future application would need in order to rebuild live state (1.4):
 
-- reaction: `MDLRxnFileString`, reaction SMILES, both InChIKeys, racemate flags
-- protocol: `tblProtocolItems` in `SequenceNr` order with `ElementType`, each
-  resolved to its material row — `tblRefReactants` (name, source, MW, grams,
-  mmols, equivalents, density, purity, resin load, InChIKey), `tblReagents`
-  (plus molarity), solvents, auxiliaries, comments
-- products: `tblProducts` — name, grams, MW, yield, exact mass, elemental
+- `reaction`: the MDL rxnfile, reaction SMILES, reactant and product InChIKeys,
+  racemate flags, InChI version
+- `steps`: the protocol in presentation order, one entry per step, each with a
+  `role` of `refReactant`, `reagent`, `solvent`, `auxiliary`, `comment`,
+  `table`, `separator`, `image` or `file`, and the values belonging to that
+  role — name, source, molecular weight, grams, millimoles, equivalents,
+  density, purity, resin load, InChIKey, and molarity for reagents. Comments
+  carry their text. `image` and `file` steps carry no values: they are
+  placeholders that keep the step sequence aligned with the document, and the
+  content they stand for is in the PDF
+- `products`: name, grams, molecular weight, yield, exact mass, elemental
   formula, purity, resin load, batch ID
-- metadata: experiment ID, user, project/folder, creation and finalize dates,
-  workflow state, tags
-- attachments: referenced by name only
+- `metadata`: experiment ID, version, user, project and folder, creation and
+  finalize dates, tags
 - `ArchiveOrigin`: how this record came to exist — `"finalize"`, `"backfill"` or
   `"backfill-from-server"` — plus the publishing user and host, and the date.
   Needed because a backfilled record's `_v1` means "state at backfill time", not
@@ -396,8 +444,28 @@ non-event, because the whole volume is regenerable.
   document was rendered on a machine other than the owner's, which is why
   pagination may differ from what the owner would have produced
 
-Inserted documents are already embedded in the PDF/A-3b, so attachment payloads
-are stored exactly once, inside the document.
+Attachments appear nowhere in the payload, neither as content nor as metadata.
+Inserted documents are already embedded in the PDF/A-3b, so they are stored
+exactly once, inside the document, and `PdfSha256` covers them.
+
+Two properties of this list matter as much as its contents.
+
+**The names are the record's own, not the live schema's.** Field and section
+names are descriptive, so the payload explains itself to a reader with a text
+editor and no knowledge of Phoenix — the second reader path in 3.8. It also
+decouples the archive from schema evolution: renaming a table or a column in
+the live model must not change what published records look like, and
+`ArchiveFormatVer` is then the only thing that governs payload shape.
+
+**Identity and machinery columns are excluded.** Entity `GUID`s, the
+`UserID`/`ProjectID`/`ProjFolderID` foreign keys, `SequenceNr`, `SyncState`,
+`DisplayIndex` and presentation flags such as `IsRotated` carry no archival
+meaning: nobody searches them, they cannot be interpreted without the live
+model, and a future reader could easily mistake them for significant data. This
+exclusion has to be stated because it is not the default — a payload generated
+the way `ExportExperiment` serializes an entity graph would include every one of
+them. Step order is preserved by the order of the `steps` array itself, so
+`SequenceNr` is not needed to represent it.
 
 ### 3.8 Defensible capability claim
 
@@ -407,26 +475,20 @@ What the archive supports with no Phoenix and no chemistry toolkit:
 |---|---|---|
 | Read the documents | Yes | Any PDF/A viewer; files have meaningful names |
 | Read one experiment's data | Yes | Open the `.json` sidecar in a text editor |
-| Verify integrity | Yes | `sha256sum -c` against the `.sha256` files |
+| Detect corruption | Yes | `sha256sum -c` against the `.sha256` files; corruption only, not tampering (6.1) |
 | Query metadata, yields, scales, dates | Yes | Plain SQL against a volume |
 | Full-text search protocols | Yes | FTS5, or `LIKE` on `ProtocolText` |
-| Reconstruct an experiment | Yes | `ExperimentJson` + CTfile |
 | Identify the current version | Yes | Highest `_vN`; `IsSuperseded = 0` in a volume |
 | Exact reaction lookup | Yes | InChIKey equality |
-| **Step connectivity** | Yes | SQL self-join, `ProductInChIKey = ReactantInChIKey` |
+| Trace one step by InChIKey | Yes | SQL self-join, `ProductInChIKey = ReactantInChIKey`; single step only, not a route graph |
 | Rebuild the index from scratch | Yes | Scan the sidecars; no PDF parser needed |
 | Reaction substructure search | No — needs a toolkit | Rebuild fingerprints from `MDLRxnFileString` |
 
-Note the asymmetry between step connectivity and substructure search. Step
-connectivity is durable because it is string equality on a documented standard
-identifier. **It is not the same as a synthetic connection graph**: transitive
-traversal, branching and merging topology, reachability pruning around a seed,
-upstream/downstream orientation, racemate-aware step matching, per-step
-experiment aggregation by yield, and scheme layout are all application logic in
-`SequenceGraph` and `SequenceSchemeView`. No archive format should promise to
-preserve application behaviour.
+Rebuilding an experiment as live, editable state is absent from the table on
+purpose. It is migration, not archival, and it belongs to the running
+application rather than to the preservation record (1.4).
 
-Note also the two independent reader paths, which is the deliberate answer to
+Note the two independent reader paths, which is the deliberate answer to
 "what skills will exist in fifty years". A future reader with SQL skills opens a
 volume. A future reader with none opens a folder of named files and reads JSON
 in a text editor — and can see what the archive contains *before* investing in
@@ -440,10 +502,8 @@ Claim wording that survives scrutiny:
 > an MDL rxnfile and reaction SMILES, the full protocol, and the indexed
 > properties, with SHA-256 checksums. A generated SQLite volume per year
 > provides indexed and full-text search over those records and can be rebuilt
-> from them at any time. Documents, metadata, protocol text, experiment
-> reconstruction and search are accessible with standard tools and no Phoenix
-> installation. Step connectivity is derivable by a SQL self-join on the stored
-> InChIKeys.
+> from them at any time. Documents, metadata, protocol text and search are
+> accessible with standard tools and no Phoenix installation.
 
 Specifically **not**: "an archive you can run reaction substructure searches
 on." Rather: the archive preserves everything needed to rebuild reaction
@@ -473,8 +533,8 @@ difference between derivable and misleading.
 
 ### 4.3 Local pending folder
 
-The client-side staging area is a **transient outbox**, not a permanent copy —
-and now simply a folder, not a database. Records are written there on
+The client-side staging area is a **transient outbox**, not a permanent copy,
+and a plain folder rather than a database. Records are written there on
 finalization and moved to the share on the next successful publish attempt;
 confirmed records are deleted locally.
 
@@ -740,16 +800,16 @@ than merely efficient.
 
 ### 5.4 The trilemma, resolved
 
-The earlier draft framed the choice as any two of:
+Sharing an archive over SMB looks like a choice of any two of:
 
 1. No whole-file transfer (incremental traffic)
 2. No SQLite writes over SMB (no corruption exposure)
 3. No process running on the server/NAS (no extra tools)
 
-All three are now satisfied, because the trilemma was stated over *a shared
-mutable database*. Record publication is incremental (1), writes nothing but
-complete files (2), and needs nothing running anywhere (3). The conflict was a
-property of the container, not of the problem.
+The conflict is a property of a shared *mutable database*, not of the problem
+itself, so publishing write-once records satisfies all three at once: record
+publication is incremental (1), writes nothing but complete files (2), and needs
+nothing running anywhere (3).
 
 ### 5.5 Volume generation and publication
 
@@ -788,11 +848,34 @@ hashes are unaffected.
 
 ## 6. Integrity
 
-### 6.1 Per-record verification
+### 6.1 Per-record corruption check
 
 The `.sha256` file beside each record is the whole mechanism. It covers both the
 document and the payload, it is written once, and it is checkable with standard
 tools.
+
+**What it guarantees, stated precisely.** It is a corruption check: it detects
+*accidental* change — bit rot, a truncated copy over SMB, a backup restored from
+a set that silently dropped bytes, decaying optical media. These are the
+failures an archive actually meets over decades, and a checksum is the only
+thing that catches them.
+
+It is **not** tamper evidence. A checksum is not a signature: anyone with write
+access to the share can modify a record and recompute its hash, and nothing in
+the archive would reveal it. The design deliberately does not claim otherwise.
+Tamper evidence, if it is ever required — a regulatory submission, a patent
+dispute — needs a mechanism this design does not currently include:
+
+- share ACLs that grant modify to nobody once a record is published, making the
+  file tier write-once by permission rather than by convention
+- a copy onto WORM or object-lock storage, which the file tree supports
+  unchanged (section 8)
+- digitally signed PDFs, which Phoenix has no code for today
+- hash chaining across records (5.5), which detects alteration but still proves
+  nothing about *who* altered it
+
+The first of these is cheap and worth doing regardless, since it also prevents
+the accidental overwrite that the write-once model assumes cannot happen.
 
 - **On publish:** read back and compare, before clearing the pending folder
   (5.3).
@@ -806,24 +889,24 @@ Structural database checks — `PRAGMA quick_check`, `integrity_check` — apply
 to volumes, where the answer never matters: a volume that fails any check is
 deleted and regenerated.
 
-### 6.2 What this removes
+### 6.2 Why no verification apparatus is needed
 
-The earlier draft needed a daily first-client-of-the-day pass that took a lock,
-ran `quick_check`, and copied the volume into a rotating known-good backup set,
-precisely so that corruption could not propagate into backups. None of that
-exists any more:
+A shared mutable database on the share would need a daily first-client-of-the-day
+pass that takes a lock, runs `quick_check`, and copies the volume into a rotating
+known-good backup set, precisely so that corruption cannot propagate into
+backups. A write-once share needs none of it:
 
 - Nothing on the share is mutable, so corruption has nothing to propagate
   *through*.
 - Record files are write-once, so a backup set of them is known-good by
   construction rather than by verification.
 - Volumes need no backup at all, because they are regenerable.
-- The `VolumeManifest` regression tripwire, the orphaned-journal check and the
-  stale-lock check all described symptoms of interrupted database writes over a
-  share. There are none.
+- A `VolumeManifest` regression tripwire, an orphaned-journal check and a
+  stale-lock check would each watch for a symptom of interrupted database writes
+  over a share. There are no such writes.
 
 Ordinary filesystem backup of `<ArchiveRoot>` — any tool, incremental, including
-to write-once media — is now the entire backup strategy.
+to write-once media — is the entire backup strategy.
 
 ## 7. Regeneration instead of recovery
 
@@ -873,9 +956,8 @@ in an archive, the one outcome that cannot be tolerated.
 
 ### 7.3 Salvage: documented, not implemented
 
-Kept here only so that a future reader of a damaged file is not left guessing,
-and to record that the earlier draft overstated the dependency. `_ReadMe` should
-carry a short version of this section.
+Kept here only so that a future reader of a damaged file is not left guessing.
+`_ReadMe` should carry a short version of this section.
 
 If a SQLite file ever does need salvaging, three tiers exist:
 
@@ -933,7 +1015,7 @@ automation.
 
 | Option | Why not |
 |---|---|
-| **A shared SQLite file written to over SMB** | The reversal this revision makes. Advisory locking over SMB is unreliable, caching can acknowledge non-durable writes, and WAL is impossible. Containing the risk required a lock protocol, tripwires, verified backups and an automatic recovery sequence — all of which disappear once the share holds only write-once files |
+| **A shared SQLite file written to over SMB** | Advisory locking over SMB is unreliable, caching can acknowledge non-durable writes, and WAL is impossible. Containing the risk required a lock protocol, tripwires, verified backups and an automatic recovery sequence — all of which disappear once the share holds only write-once files |
 | Document blobs inside the queried database | Past SQLite's ~100 KB blob crossover by orders of magnitude; forces full-file backups, unbounded file growth, and container-wide blast radius for no query benefit |
 | MySQL archive table as the archive | A dump presumes a compatible MySQL and a motivated operator. Its weakness is custodial continuity, not reader skills. Retained as an optional second write path only |
 | Payload *only* inside the PDF | Extraction then requires understanding PDF/A-3b embedded-file structure — a genuine specialist step. The plain JSON sidecar exists precisely to remove it |

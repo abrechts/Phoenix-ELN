@@ -296,7 +296,7 @@ Public Class ExperimentBase
 
 
     ''' <summary>
-    ''' Unused (see remarks). Serializes specified experiment and child tables into Json string
+    ''' Serializes specified experiment and child tables into Json string
     ''' </summary>
     ''' <param name="expEntry"></param>
     ''' <remarks>Import/Export only is guaranteed to work if the exporting app major/minor version is not  
