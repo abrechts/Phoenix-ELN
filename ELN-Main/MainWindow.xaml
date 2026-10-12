@@ -67,24 +67,24 @@
 
                         <Button x:Name="btnPrint" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="4,0,0,0">
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="🖶" FontSize="18" Margin="2,-2" Foreground="#FFA8DCFC"  />
-                                <TextBlock Text="Print" Margin="0,1,2,0" VerticalAlignment="Center" />
+                                <TextBlock Text="&#xE749;" FontFamily="Segoe MDL2 Assets" FontSize="13" Margin="2,1,2,0" Foreground="#FFA8DCFC" 
+                                   VerticalAlignment="Center"  />
+                                <TextBlock Text="Print" Margin="2,1,1,0" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
 
                         <Button x:Name="btnPDF" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ToolTip="Save experiment to PDF" >
-                            <ContentControl Height="16" Margin="2,-1,4,-2">
-                                <Border Background="#FF5B5B5B" CornerRadius="3" BorderThickness="1" BorderBrush="LightSkyBlue" >
-                                    <TextBlock Text="PDF" FontSize="10" FontWeight="demiBold" Margin="4,0,3,0" Foreground="White"
-                            FontFamily="Calibri" VerticalAlignment="Center" />
+                            <ContentControl Height="16" Margin="0,-1,1,-2">
+                                <Border CornerRadius="3" BorderThickness="1" BorderBrush="LightSkyBlue" >
+                                    <TextBlock Text="PDF" FontSize="10.5"  Margin="4,0,3,0" Foreground="White"
+                                      FontFamily="Calibri" VerticalAlignment="Center" />
                                 </Border>
                             </ContentControl>
                         </Button>
 
-                        <Button x:Name="btnExport" HorizontalAlignment="Left" VerticalAlignment="Center" 
-                      ToolTip="Export experiment for import by another user">
+                        <Button x:Name="btnExport" HorizontalAlignment="Left" VerticalAlignment="Center" ToolTip="Export experiment for import by another user">
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="⤓" FontSize="18" Margin="0,-2,2,-2" Foreground="lightskyblue" FontWeight="demibold"/>
+                                <TextBlock Text="⭳" FontSize="18" Margin="0,0,2,-2" Foreground="lightskyblue" FontWeight="demibold"/>
                                 <TextBlock Text="Export" Margin="0,0,2,0" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button>
