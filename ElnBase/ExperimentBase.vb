@@ -430,7 +430,9 @@ Public Class ExperimentBase
 
         Dim maxExperiment = GetLatestExperiment(userEntry)
         If maxExperiment IsNot Nothing Then
-            Dim maxVal = CInt(maxExperiment.ExperimentID.Substring(maxExperiment.ExperimentID.Length - 4, 4))
+            'the counter is everything after the final separator; a userID cannot contain "-"
+            Dim sepPos = maxExperiment.ExperimentID.LastIndexOf("-"c)
+            Dim maxVal = CInt(maxExperiment.ExperimentID.Substring(sepPos + 1))
             Return userEntry.UserID + "-" + Format((maxVal + 1), "00000")
         Else
             'no experiment present so far
