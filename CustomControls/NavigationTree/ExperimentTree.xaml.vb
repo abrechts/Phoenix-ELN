@@ -549,6 +549,11 @@ Public Class ExperimentTree
             selTvi.BringIntoView()
             NudgeTowardsViewportCenter(selTvi)
 
+            'Both of the above re-realize containers as they scroll, so the one found before them may
+            'by now be detached or reused for a different row. Re-resolve before selecting: IsSelected
+            'on an orphaned container is silently lost, leaving the node unselected.
+            selTvi = If(TreeViewItemFromData(navTree, expEntry), selTvi)
+
             _suppressTreeSelectedEvent = True
             Try
                 selTvi.IsSelected = True
@@ -583,6 +588,12 @@ Public Class ExperimentTree
         If scroller Is Nothing OrElse scroller.ActualHeight <= 0 Then Exit Sub
 
         navTree.UpdateLayout() 'ensure tvi's position reflects the scroll BringIntoView just performed
+
+        'That layout pass can re-realize the rows the scroll passed over, and under
+        'VirtualizationMode=Recycling tvi's container is then detached and handed to another row -
+        'leaving nothing to measure against. The nudge is cosmetic, so skip it rather than transform
+        'against a visual that is no longer in the tree.
+        If Not tvi.IsDescendantOf(scroller) Then Exit Sub
 
         Dim itemTop = tvi.TransformToAncestor(scroller).Transform(New Point(0, 0)).Y
         Dim itemCenter = itemTop + tvi.ActualHeight / 2
