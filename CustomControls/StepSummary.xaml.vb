@@ -97,28 +97,38 @@ Public Class StepSummary
         'Materialize immediately (.ToList()) rather than leave as a deferred IQueryable to prevent EF concurrency issues.
 
         Dim localExperiments = CType(Me.DataContext, tblUsers).tblExperiments.
-            Where(Function(exp) exp.ReactantInChIKey = RefReactInChIKey _
-                AndAlso exp.ProductInChIKey = RefProductInChIKey _
-                AndAlso exp.IsRacemicReactant = Convert.ToByte(RefReactantIsRacemate) _
-                AndAlso exp.IsRacemicProduct = Convert.ToByte(RefProductIsRacemate)).ToList()
+          Where(Function(exp) exp.ReactantInChIKey = RefReactInChIKey _
+              AndAlso exp.ProductInChIKey = RefProductInChIKey _
+              AndAlso exp.IsRacemicReactant = Convert.ToByte(RefReactantIsRacemate) _
+              AndAlso exp.IsRacemicProduct = Convert.ToByte(RefProductIsRacemate)).ToList()
 
-        If ServerContext IsNot Nothing AndAlso chkIncludeServer.IsChecked Then
+        'The context outlives the connection behind it: a machine returning from standby still holds
+        'the object while the server is gone, so the presence of a context says nothing about
+        'whether it can be queried. The flag catches a loss something has already noticed, and the
+        'Try catches one nothing has yet - a query is the first thing to find out.
+        If ServerContext IsNot Nothing AndAlso chkIncludeServer.IsChecked AndAlso
+         Not ServerSync.IsServerConnectionLost Then
 
-            Dim serverExperiments = ServerContext.tblExperiments.
-                Where(Function(exp) exp.ReactantInChIKey = RefReactInChIKey _
-                        AndAlso exp.ProductInChIKey = RefProductInChIKey _
-                        AndAlso exp.IsRacemicReactant = Convert.ToByte(RefReactantIsRacemate) _
-                        AndAlso exp.IsRacemicProduct = Convert.ToByte(RefProductIsRacemate) _
-                        AndAlso exp.UserID <> CurrUserID _
-                        AndAlso exp.WorkflowState = ELNEnumerations.WorkflowStatus.Finalized).ToList()
+            Try
+                Dim serverExperiments = ServerContext.tblExperiments.
+                  Where(Function(exp) exp.ReactantInChIKey = RefReactInChIKey _
+                          AndAlso exp.ProductInChIKey = RefProductInChIKey _
+                          AndAlso exp.IsRacemicReactant = Convert.ToByte(RefReactantIsRacemate) _
+                          AndAlso exp.IsRacemicProduct = Convert.ToByte(RefProductIsRacemate) _
+                          AndAlso exp.UserID <> CurrUserID _
+                          AndAlso exp.WorkflowState = ELNEnumerations.WorkflowStatus.Finalized).ToList()
 
-            cvsStepExperiments.Source = localExperiments.Concat(serverExperiments)
+                cvsStepExperiments.Source = localExperiments.Concat(serverExperiments)
+                Exit Sub
 
-        Else
-
-            cvsStepExperiments.Source = localExperiments
+            Catch ex As Exception
+                'An unreachable server costs the other users' runs of this step, which is what the
+                'panel shows when the box is unticked anyway. The local ones are still the answer.
+            End Try
 
         End If
+
+        cvsStepExperiments.Source = localExperiments
 
     End Sub
 
