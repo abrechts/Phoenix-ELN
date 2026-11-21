@@ -14,9 +14,9 @@ Public Class SQLiteContext
 
         Dim optionsBuilder As New DbContextOptionsBuilder(Of ElnDataContext)
 
-        'IMPORTANT: Foreign Keys=True is required with the winsqlite3 provider: Unlike e_sqlite3, the Windows
-        'system SQLite is not compiled with SQLITE_DEFAULT_FOREIGN_KEYS, so ON DELETE CASCADE
-        'would otherwise not be enforced!
+        'IMPORTANT: Foreign Keys=True switches on SQLite's per-connection foreign key enforcement, which is
+        'off by default unless the SQLite build in use was compiled with SQLITE_DEFAULT_FOREIGN_KEYS. Without
+        'it, ON DELETE CASCADE is silently ignored.
 
         Dim opts = optionsBuilder.UseSqlite("Data Source = " + sqliteFilePath + ";Foreign Keys=True")
 

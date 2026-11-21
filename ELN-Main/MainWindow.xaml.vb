@@ -256,6 +256,15 @@ Class MainWindow
 
         FullTextSearch.HydrateMemoryIndex()
 
+        'Without an FTS5 module in this system's SQLite there is no index to query, so the search dialog stays
+        'unreachable for this session (see FullTextSearch.IsSearchAvailable).
+
+        If Not FullTextSearch.IsSearchAvailable Then
+            mnuSearchFullText.IsEnabled = False
+            mnuSearchFullText.ToolTip = "Full-text search is not available on this computer."
+            ToolTipService.SetShowOnDisabled(mnuSearchFullText, True)
+        End If
+
         ApplicationVersion = GetType(MainWindow).Assembly.GetName().Version
         DBContext.tblDatabaseInfo.First.CurrAppVersion = ApplicationVersion.ToString
 

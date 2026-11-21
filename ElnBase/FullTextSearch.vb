@@ -166,6 +166,24 @@ Public Class FullTextSearch
 
 
     ''' <summary>
+    ''' Gets if full-text search is operational for this session. False when the in-memory FTS5 SearchIndex
+    ''' table could not be created, which happens if the SQLite build in use provides no FTS5 module. Searching
+    ''' and all in-memory index maintenance are then skipped for the rest of the session and the UI is expected
+    ''' to disable its full-text search entry point. The persisted tblSearchIndex mirror is still maintained as
+    ''' usual, so its content remains available to the server's own full-text index, and full-text search starts
+    ''' working again - without any rebuild - as soon as a session has FTS5 available.
+    ''' </summary>
+    '''
+    Public Shared ReadOnly Property IsSearchAvailable As Boolean
+        Get
+            Return _IsSearchAvailable
+        End Get
+    End Property
+
+    Private Shared _IsSearchAvailable As Boolean
+
+
+    ''' <summary>
     ''' DDL for the full-text SearchIndex FTS5 virtual table, created inside the "mem" schema ATTACHed by
     ''' <see cref="InitializeMemoryIndexConnection"/> - it never exists on disk.
     ''' </summary>
@@ -219,23 +237,44 @@ Public Class FullTextSearch
     ''' uses, with a ':memory:' database ATTACHed as "mem" holding the FTS5 SearchIndex table (freshly created
     ''' and empty - callers still need to populate it via <see cref="HydrateMemoryIndex"/>). Must be called once
     ''' at startup, before any search query or SaveChanges call touches the SearchIndex.
+    ''' <para>
+    ''' Creating the virtual table is also what establishes whether this SQLite build provides the FTS5 module
+    ''' at all: if it doesn't, the connection is dropped again and <see cref="IsSearchAvailable"/> stays False
+    ''' for the rest of the session, which every other member here honors - so an FTS5-less SQLite degrades to
+    ''' "no full-text search" instead of an error.
+    ''' </para>
     ''' </summary>
     ''' <param name="sqliteFilePath">Path to the same local SQLite database file DBContext is opened against.</param>
     '''
     Public Shared Sub InitializeMemoryIndexConnection(sqliteFilePath As String)
 
-        MemoryIndexConnection = New SqliteConnection("Data Source=" + sqliteFilePath)
-        MemoryIndexConnection.Open()
+        Try
 
-        Using command = MemoryIndexConnection.CreateCommand()
-            command.CommandText = "ATTACH DATABASE ':memory:' AS mem;"
-            command.ExecuteNonQuery()
-        End Using
+            MemoryIndexConnection = New SqliteConnection("Data Source=" + sqliteFilePath)
+            MemoryIndexConnection.Open()
 
-        Using command = MemoryIndexConnection.CreateCommand()
-            command.CommandText = SearchIndexTableDDL
-            command.ExecuteNonQuery()
-        End Using
+            Using command = MemoryIndexConnection.CreateCommand()
+                command.CommandText = "ATTACH DATABASE ':memory:' AS mem;"
+                command.ExecuteNonQuery()
+            End Using
+
+            Using command = MemoryIndexConnection.CreateCommand()
+                command.CommandText = SearchIndexTableDDL
+                command.ExecuteNonQuery()
+            End Using
+
+            _IsSearchAvailable = True
+
+        Catch ex As SqliteException
+
+            _IsSearchAvailable = False
+
+            If MemoryIndexConnection IsNot Nothing Then
+                MemoryIndexConnection.Dispose()
+                MemoryIndexConnection = Nothing
+            End If
+
+        End Try
 
     End Sub
 
@@ -251,6 +290,10 @@ Public Class FullTextSearch
     ''' </summary>
     '''
     Public Shared Sub HydrateMemoryIndex()
+
+        If Not IsSearchAvailable Then
+            Exit Sub
+        End If
 
         Using command = MemoryIndexConnection.CreateCommand()
             command.CommandText =
@@ -985,7 +1028,7 @@ Public Class FullTextSearch
     '''
     Friend Shared Sub ApplyMemoryIndexOps(ops As List(Of SearchIndexOp))
 
-        If ops Is Nothing OrElse ops.Count = 0 Then
+        If ops Is Nothing OrElse ops.Count = 0 OrElse Not IsSearchAvailable Then
             Exit Sub
         End If
 
@@ -1287,6 +1330,10 @@ Public Class FullTextSearch
     Private Shared Function GetRankedHits(quotedPhrase As String, searchTerm As String) As List(Of RankedHit)
 
         Dim hits As New List(Of RankedHit)
+
+        If Not IsSearchAvailable Then
+            Return hits
+        End If
 
         Using command = MemoryIndexConnection.CreateCommand()
 
