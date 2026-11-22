@@ -186,6 +186,22 @@
     End Enum
 
 
+    ''' <summary>
+    ''' Outcome of rendering one experiment to a PDF document. Returned instead of displaying a dialog,
+    ''' so that rendering can run on a background thread: any user-facing message is the caller's
+    ''' responsibility, raised on the UI thread.
+    ''' </summary>
+    '''
+    Public Enum PdfRenderResult
+
+        Succeeded
+        SucceededWithoutPdfA        'written, but the PDF/A-3b conversion failed - standard PDF instead
+        PageLimitExceeded           'beyond the Spire.Pdf free 10 page limit
+        DestinationFileLocked       'target file open in another application
+
+    End Enum
+
+
     Public Enum CloneType
 
         EmptyExperiment

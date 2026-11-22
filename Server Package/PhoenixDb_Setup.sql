@@ -9,8 +9,9 @@ Version 1.5
 Create a login User
 '-------------------'
 In your database tool, please manually create a new database user account for Phoenix ELN.
-* The username is REQUIRED to be: EspressoUser
-* The passoword is of your own choice. 
+* The username is of your own choice, e.g.'PhoenixUser'
+* The passoword is of your own choice.
+Username and password are the same for all Phoenix ELN users connecting to the database.
 This user must be granted at least following privileges: SELECT, ALTER, CREATE, INSERT, DELETE, UPDATE, SUPER.
 */
 

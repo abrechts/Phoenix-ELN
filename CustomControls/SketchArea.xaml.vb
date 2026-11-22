@@ -13,10 +13,18 @@ Public Class SketchArea
     Public Shared Event SketchSourceChanged(sender As Object, sketchInfo As SketchResults)
 
     ''' <summary>
-    ''' Sets or gets if the if the SketchSourceChangeEvent should fire.
+    ''' Marks this instance as belonging to a detached visual tree built for rendering (printing, PDF
+    ''' export, archiving) rather than to anything the user is looking at. Such an instance never raises
+    ''' the shared SketchSourceChanged event.
     ''' </summary>
+    ''' <remarks>Instance-scoped on purpose: a process-wide flag cannot express "this render", suppresses
+    ''' the event for the live sketch areas too for as long as it is set, and is a race once a render runs
+    ''' on its own thread. Suppressing at the raise site rather than in each handler also covers
+    ''' subscribers added later - the event currently reaches both ExperimentContent and StepSummary,
+    ''' whose handlers touch DependencyObjects owned by the UI thread.
+    ''' </remarks>
     '''
-    Public Shared Property DisableSketchSourceChangedEvent As Boolean = False
+    Friend Property IsDetachedRender As Boolean = False
 
 
     Public Sub New()
@@ -61,7 +69,7 @@ Public Class SketchArea
                 .blkClickInfo.Visibility = Visibility.Visible
             End If
 
-            If Not DisableSketchSourceChangedEvent Then
+            If Not .IsDetachedRender Then
                 .RaiseSketchSourceChangedEvent()
             End If
 

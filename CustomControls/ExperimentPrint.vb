@@ -7,7 +7,6 @@ Imports System.Threading
 Imports System.Windows
 Imports System.Windows.Controls
 Imports System.Windows.Input
-Imports System.Windows.Media
 Imports ElnBase.ELNEnumerations
 Imports ElnCoreModel
 Imports Microsoft.Win32
@@ -26,6 +25,35 @@ Public Class ExperimentPrint
     ''' </summary>
     ''' 
     Public Shared Property ExportCancelled As Boolean = False
+
+
+    ''' <summary>
+    ''' An experiment the bulk PDF export could not render, with the reason it was left out.
+    ''' </summary>
+    '''
+    Public Class SkippedExperiment
+
+        Public Property ExperimentID As String
+
+        Public Property Reason As PdfRenderResult
+
+    End Class
+
+
+    ''' <summary>
+    ''' The experiments that the last bulk PDF export could not render, and therefore left out of the zip
+    ''' archive. Populated by ExperimentsToPdfZip; the caller reports them once the export has finished,
+    ''' rather than interrupting the run with a dialog per item.
+    ''' </summary>
+    '''
+    Public Shared Property SkippedExperiments As New List(Of SkippedExperiment)
+
+
+    ''' <summary>
+    ''' Maximum number of pages a PDF may have. Imposed by the Spire.Pdf free edition, not by Phoenix.
+    ''' </summary>
+    '''
+    Private Const MaxPdfPageCount As Integer = 10
 
 
     ''' <summary>
@@ -77,13 +105,18 @@ Public Class ExperimentPrint
             Dim printTemplate = SetPrintTemplate(expEntry, paperSize)
 
             ' create and store PDF doc with attachments
-            Dim pdfDoc = PaginatorToPdfDoc(printTemplate.Paginator, printAsPDF)
+            Dim renderResult As PdfRenderResult
+            Dim pdfDoc = PaginatorToPdfDoc(printTemplate.Paginator, printAsPDF, renderResult)
             If pdfDoc IsNot Nothing Then
-                If CompletePDF(pdfDoc, pdfPath, expEntry) Then 'add attachments, convert to PDF/A-3b; also handles file open exception with dialog.
-                    Dim info As New ProcessStartInfo(pdfPath)
-                    info.UseShellExecute = True
-                    Process.Start(info)
-                End If
+                renderResult = CompletePDF(pdfDoc, pdfPath, expEntry)   'add attachments, convert to PDF/A-3b
+            End If
+
+            DisplayRenderResult(renderResult)
+
+            If renderResult = PdfRenderResult.Succeeded OrElse renderResult = PdfRenderResult.SucceededWithoutPdfA Then
+                Dim info As New ProcessStartInfo(pdfPath)
+                info.UseShellExecute = True
+                Process.Start(info)
             End If
 
             appWindow.Cursor = Cursors.Arrow
@@ -132,6 +165,7 @@ Public Class ExperimentPrint
 
         ExperimentsToPdfZip = False
         ExportCancelled = False
+        SkippedExperiments = New List(Of SkippedExperiment)
 
         If expEntries IsNot Nothing Then
 
@@ -152,7 +186,6 @@ Public Class ExperimentPrint
 
             ' create PDFs in temp folder
 
-            SketchArea.DisableSketchSourceChangedEvent = True   'prevents updating side panel properties for each processed item
 
             Dim expCount = expEntries.Count
 
@@ -163,10 +196,20 @@ Public Class ExperimentPrint
                     Dim expPdfPath = tempPdfFolderPath + "\" + expEntry.ExperimentID + ".pdf"
                     Dim printTemplate = SetPrintTemplate(expEntry, paperSize)
 
-                    Dim pdfDoc = PaginatorToPdfDoc(printTemplate.Paginator, True)
-                    If CompletePDF(pdfDoc, expPdfPath, expEntry) Then 'add attachments, convert to PDF/A-3b
+                    Dim renderResult As PdfRenderResult
+                    Dim pdfDoc = PaginatorToPdfDoc(printTemplate.Paginator, True, renderResult)
+                    If pdfDoc IsNot Nothing Then
+                        renderResult = CompletePDF(pdfDoc, expPdfPath, expEntry) 'add attachments, convert to PDF/A-3b
+                    End If
+
+                    If renderResult = PdfRenderResult.Succeeded OrElse renderResult = PdfRenderResult.SucceededWithoutPdfA Then
                         Dim percent As Integer = 100 * (expEntries.IndexOf(expEntry) + 1) / expCount
                         RaiseEvent PdfExportProgress(percent, expEntry.ExperimentID)
+                    Else
+                        'no dialog here: one modal per item would interrupt the run repeatedly, and the
+                        'caller reports the whole list once the export finishes
+                        SkippedExperiments.Add(New SkippedExperiment With {
+                            .ExperimentID = expEntry.ExperimentID, .Reason = renderResult})
                     End If
 
                 Else
@@ -179,7 +222,6 @@ Public Class ExperimentPrint
 
             Next
 
-            SketchArea.DisableSketchSourceChangedEvent = False
 
             ' create zip file
 
@@ -217,6 +259,11 @@ Public Class ExperimentPrint
             .DataContext = expEntry
         }
 
+        'this tree is detached, so its sketch area must not broadcast on the shared SketchSourceChanged
+        'event: the live subscribers would adopt the rendered experiment's sketch info, and off the UI
+        'thread they would touch DependencyObjects they do not own. Must be set before the assignment below.
+        printExpContent.SketchPanel.IsDetachedRender = True
+
         'force the reaction sketch to draw immediately: since printExpContent is never attached to a
         'PresentationSource (it's only ever serialized to XPS/PDF, never shown), the ReactionSketch
         'binding's target update never fires, so sketchViewbox.Child would still be Nothing below.
@@ -250,7 +297,57 @@ Public Class ExperimentPrint
 
 
     ''' <summary>
-    ''' Enriches initial origPDF (as created from XPS doc) with embedded file attachments, and convert it to PDF/A-3b.  
+    ''' Displays the message belonging to an unsuccessful PdfRenderResult, if any. Must be called on the
+    ''' UI thread: the render functions themselves only report outcomes, so that they stay usable from a
+    ''' background render.
+    ''' </summary>
+    '''
+    ''' <summary>
+    ''' Short phrase naming why a render did not succeed, for listing several failures together.
+    ''' Capitalized, since it always starts its own line.
+    ''' </summary>
+    '''
+    Public Shared Function RenderResultText(result As PdfRenderResult) As String
+
+        Select Case result
+
+            Case PdfRenderResult.PageLimitExceeded
+                Return "More than " + MaxPdfPageCount.ToString + " pages"
+
+            Case PdfRenderResult.DestinationFileLocked
+                Return "File already in use"
+
+            Case Else
+                Return result.ToString
+
+        End Select
+
+    End Function
+
+
+    Public Shared Sub DisplayRenderResult(result As PdfRenderResult)
+
+        Select Case result
+
+            Case PdfRenderResult.PageLimitExceeded
+                cbMsgBox.Display("Sorry, can't create PDF documents larger " + vbCrLf +
+                       "than " + MaxPdfPageCount.ToString + " pages.", MsgBoxStyle.Information, "PDF limits reached.")
+
+            Case PdfRenderResult.SucceededWithoutPdfA
+                cbMsgBox.Display("Unable to save your document in PDF/A3b format." + vbCrLf +
+                       "It will be saved as standard PDF instead.", MsgBoxStyle.Information, "PDF Export")
+
+            Case PdfRenderResult.DestinationFileLocked
+                cbMsgBox.Display("Could not write PDF, since a document with the same" + vbCrLf +
+                       "name is currently open in a PDF viewer. ", MsgBoxStyle.Exclamation, "PDF Export")
+
+        End Select
+
+    End Sub
+
+
+    ''' <summary>
+    ''' Enriches initial origPDF (as created from XPS doc) with embedded file attachments, and convert it to PDF/A-3b.
     ''' </summary>
     ''' <remarks> PDF/A-3b conformity: Following online tools can be used to check the resulting document:
     '''    https://www.pdfforge.org/online/de/pdfa-validieren
@@ -259,8 +356,11 @@ Public Class ExperimentPrint
     ''' </remarks>
     ''' <param name="origPDF">The initial PDF document to convert.</param>
     ''' <param name="convPDFPath">The destination path to save it to.</param>
-    ''' 
-    Private Shared Function CompletePDF(origPDF As PdfDocument, convPDFPath As String, expEntry As tblExperiments) As Boolean
+    ''' <returns>The render outcome. Failing the PDF/A-3b conversion still writes the document, as a
+    ''' standard PDF, and is reported as SucceededWithoutPdfA.</returns>
+    '''
+    Private Shared Function CompletePDF(origPDF As PdfDocument, convPDFPath As String,
+      expEntry As tblExperiments) As PdfRenderResult
 
         With origPDF
 
@@ -275,6 +375,7 @@ Public Class ExperimentPrint
             Next
 
             Dim convertedPDF As PdfDocument
+            Dim outcome = PdfRenderResult.Succeeded
             Try
                 'try convert to PDF/A3b
                 '-----------------------
@@ -292,8 +393,7 @@ Public Class ExperimentPrint
 
                 'non-PDF/A-3b version
                 convertedPDF = origPDF
-                cbMsgBox.Display("Unable to save your document in PDF/A3b format." + vbCrLf +
-                       "It will be saved as standard PDF instead.", MsgBoxStyle.Information, "PDF Export")
+                outcome = PdfRenderResult.SucceededWithoutPdfA
             End Try
 
             'define its display settings
@@ -310,12 +410,10 @@ Public Class ExperimentPrint
             Try
                 convertedPDF.SaveToFile(convPDFPath)
             Catch ex As Exception
-                cbMsgBox.Display("Could not write PDF, since a document with the same" + vbCrLf +
-               "name is currently open in a PDF viewer. ", MsgBoxStyle.Exclamation, "PDF Export")
-                Return False
+                Return PdfRenderResult.DestinationFileLocked
             End Try
 
-            Return True
+            Return outcome
 
         End With
 
@@ -343,23 +441,40 @@ Public Class ExperimentPrint
     ''' <param name="docPaginator">The paginator to convert.</param>
     ''' <returns>The resulting Spire.PdfDocument</returns>
     '''
-    Private Shared Function PaginatorToPdfDoc(docPaginator As PrintPageTemplate.VisualPaginator, printAsPDF As Boolean) As PdfDocument
+    ''' <summary>
+    ''' Serializes the paginated visual to XPS and loads it into a PdfDocument.
+    ''' </summary>
+    ''' <param name="enforcePageLimit">Applies the Spire.Pdf free 10 page limit. Not applied when the
+    ''' destination is a printer, where Spire is not involved.</param>
+    ''' <param name="result">Receives the outcome. Nothing is returned unless this is Succeeded.</param>
+    '''
+    Private Shared Function PaginatorToPdfDoc(docPaginator As PrintPageTemplate.VisualPaginator,
+      enforcePageLimit As Boolean, ByRef result As PdfRenderResult) As PdfDocument
 
         Using xpsMemStream = New MemoryStream
 
-            Dim myPackage = Package.Open(xpsMemStream, FileMode.Create, FileAccess.ReadWrite)
-            Dim u = New Uri("pack://TemporaryPackageUri.pdf")
-            Dim pdfXPSDoc = New Xps.Packaging.XpsDocument(myPackage, CompressionOption.NotCompressed, u.AbsoluteUri)
-            Dim paginator2PDFWriter = Xps.Packaging.XpsDocument.CreateXpsDocumentWriter(pdfXPSDoc)
-            paginator2PDFWriter.Write(docPaginator)
+            'The package URI is the key under which WPF registers this package in the process-global
+            'PackageStore, so it must be unique per call: a shared URI collides as soon as two renders
+            'overlap, and because the registration is only released on Close, a render that throws before
+            'closing would otherwise poison every later render in the process.
+            Dim u = New Uri("pack://render" + Guid.NewGuid().ToString("N") + ".pdf")
 
-            pdfXPSDoc.Close()
-            myPackage.Close()
+            Dim myPackage = Package.Open(xpsMemStream, FileMode.Create, FileAccess.ReadWrite)
+            Try
+                Dim pdfXPSDoc = New Xps.Packaging.XpsDocument(myPackage, CompressionOption.NotCompressed, u.AbsoluteUri)
+                Try
+                    Dim paginator2PDFWriter = Xps.Packaging.XpsDocument.CreateXpsDocumentWriter(pdfXPSDoc)
+                    paginator2PDFWriter.Write(docPaginator)
+                Finally
+                    pdfXPSDoc.Close()
+                End Try
+            Finally
+                myPackage.Close()
+            End Try
 
             'check for Spire.Pdf Free 10 page limit
-            If printAsPDF AndAlso docPaginator.PageCount > 10 Then
-                cbMsgBox.Display("Sorry, can't create PDF documents larger " + vbCrLf +
-                       "than 10 pages.", MsgBoxStyle.Information, "PDF limits reached.")
+            If enforcePageLimit AndAlso docPaginator.PageCount > MaxPdfPageCount Then
+                result = PdfRenderResult.PageLimitExceeded
                 Return Nothing
             End If
 
@@ -372,6 +487,7 @@ Public Class ExperimentPrint
 
             Thread.CurrentThread.CurrentCulture = cc
 
+            result = PdfRenderResult.Succeeded
             Return myDoc
 
         End Using
